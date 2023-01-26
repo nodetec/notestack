@@ -30,7 +30,6 @@ const Card: FC<NoteProps> = ({
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("subject", tags);
-  const filetype = getTagValues("filetype", tags);
   const actualTags = getTagValues("tags", tags);
 
   function setupMarkdown(content: string) {
@@ -76,7 +75,6 @@ const Card: FC<NoteProps> = ({
               </div>
             ) : null}
             <DatePosted dateOnly={dateOnly} timestamp={createdAt} />
-            <FileType type={filetype} />
           </div>
           <div>
             {actualTags.length ? (
@@ -155,15 +153,6 @@ export const NoteTags = ({
         </li>
       ))}
     </ul>
-  </InfoContainer>
-);
-
-const FileType = ({ type }: { type: string }) => (
-  <InfoContainer>
-    <span>
-      <BsFillFileEarmarkCodeFill className="w-4 h-4 text-current" />
-    </span>
-    <span>{type}</span>
   </InfoContainer>
 );
 

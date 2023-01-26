@@ -1,12 +1,3 @@
-// import BlogFeed from "./BlogFeed";
-
-// export default function Home() {
-//   return (
-//     <main>
-//       <BlogFeed />
-//     </main>
-//   );
-// }
 "use client";
 import { usePathname } from "next/navigation";
 import { useNostr } from "nostr-react";
