@@ -1,0 +1,36 @@
+{
+  "name": "blogstack",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/font": "13.1.5",
+    "@types/node": "18.11.18",
+    "@types/react": "18.0.27",
+    "@types/react-dom": "18.0.10",
+    "bech32": "^2.0.0",
+    "crypto-js": "^4.1.1",
+    "eslint": "8.32.0",
+    "eslint-config-next": "13.1.5",
+    "lnurl-pay": "^2.1.1",
+    "markdown-it": "^13.0.1",
+    "next": "13.1.5",
+    "nostr-react": "^0.6.1",
+    "nostr-tools": "^1.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.7.1",
+    "typescript": "4.9.4",
+    "webln": "^0.3.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4"
+  }
+}
