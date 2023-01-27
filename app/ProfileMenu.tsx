@@ -13,7 +13,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
   const npub = nip19.npubEncode(pubkey);
   return (
     <Fragment>
-      <div className="flex flex-col rounded-md bg-white shadow-profile-menu absolute z-40 right-0 -bottom-4 translate-y-full">
+      <div className="flex flex-col rounded-md bg-white shadow-profile-menu absolute z-40 right-0 -bottom-4 translate-y-full text-sm min-w-max">
         <GroupMenu>
           <Item
             onClick={() => toggleMenu(false)}
@@ -55,13 +55,14 @@ const Item: React.FC<ItemProps> = ({
   className = "",
   ...props
 }) => (
-  <div
-    className={`flex items-center px-6 py-2 gap-4 cursor-pointer text-sm text-gray hover:text-gray-hover ${className}`}
+  <Link
+    href={href}
+    className={`flex items-center px-6 py-2 gap-4 cursor-pointer text-gray hover:text-gray-hover ${className}`}
     {...props}
   >
     {Icon ? <Icon size="20" /> : null}
-    <Link href={href}>{label}</Link>
-  </div>
+    <span>{label}</span>
+  </Link>
 );
 
 interface GroupMenuProps
@@ -72,10 +73,7 @@ const GroupMenu: React.FC<GroupMenuProps> = ({
   children,
   ...props
 }) => (
-  <div
-    className={`py-4 border-b border-b-light-gray ${className}`}
-    {...props}
-  >
+  <div className={`py-4 border-b border-b-light-gray ${className}`} {...props}>
     {children}
   </div>
 );
