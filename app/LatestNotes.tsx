@@ -35,11 +35,7 @@ export default function LatestNotes({ profilePubkey, name }: any) {
       .filter((event) => {
         if (event.tags) {
           const title = getTagValues("subject", event.tags);
-          if (title) {
-            return true;
-          } else {
-            return false;
-          }
+          return title ? true : false;
         }
       });
   }, [events, currentPage]);
