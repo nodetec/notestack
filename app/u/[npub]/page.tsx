@@ -8,16 +8,16 @@ import { useState } from "react";
 
 export default function ProfilePage() {
   const pathname = usePathname();
+  const [name, setName] = useState();
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
 
     const profilePubkey = nip19.decode(npub).data.valueOf();
 
-    const [name, setName] = useState();
     return (
-      <div className="flex flex-col md:flex-row items-center md:items-start md:gap-10 lg:gap-30 lg:px-20 flex-1 justify-center">
-        <div className="flex justify-end">
+      <div className="grid md:grid-cols-content-porfile items-center md:items-stretch md:gap-10 lg:gap-30 lg:px-20 flex-1 justify-center">
+        <div className="flex justify-end my-8">
           <LatestNotes name={name} profilePubkey={profilePubkey} />
         </div>
         <Profile npub={npub} setName={setName} />

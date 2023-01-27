@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className="font-main">
         <Providers>
           <Header />
-          <div className="container flex flex-col px-4 mx-auto md:max-w-[90%] 2xl:max-w-[80%] min-h-screen">{children}</div>
+          <div className="container relative flex flex-col px-4 mx-auto min-h-screen">{children}</div>
         </Providers>
       </body>
     </html>
