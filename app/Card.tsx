@@ -71,7 +71,7 @@ const Card: FC<NoteProps> = ({
                     alt={data?.name}
                   />
                   <div>
-                    <span className="">{data?.name || shortenHash(npub)!}</span>
+                    <span className="hover:underline">{data?.name || shortenHash(npub)!}</span>
                   </div>
                 </Link>
               </div>
@@ -84,7 +84,7 @@ const Card: FC<NoteProps> = ({
           {/*   ) : null} */}
           {/* </div> */}
           <div className="flex flex-col sm:flex-row gap-5 w-full  max-h-[50vh] overflow-hidden rounded-md">
-            <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
+            <div className="w-full max-w-full p-4">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />
             </div>
             {markdownImageContent?.groups?.filename ? (

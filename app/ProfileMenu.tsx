@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
 import { IconType } from "react-icons";
-import { HiOutlineUser } from "react-icons/hi";
+import { HiOutlineUser, HiBookmark } from "react-icons/hi";
 import { nip19 } from "nostr-tools";
 
 interface ProfileMenuProps {
@@ -20,6 +20,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
           label="Profile"
           href={`/u/` + npub}
           Icon={HiOutlineUser}
+        />
+         <Item
+          onClick={() => toggleMenu(false)}
+          label="Bookmark"
+          href={`/u/` + npub}
+          Icon={HiBookmark}
         />
       </GroupMenu>
     </div>
