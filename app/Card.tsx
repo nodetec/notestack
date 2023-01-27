@@ -21,7 +21,8 @@ const Card: FC<NoteProps> = ({
   dateOnly = false,
   ...props
 }) => {
-  const { tags, content, created_at: createdAt, id: noteId } = event;
+  const { tags, created_at: createdAt, id: noteId } = event;
+  let { content } = event;
 
   const { data } = useProfile({
     pubkey: event.pubkey,
@@ -31,6 +32,8 @@ const Card: FC<NoteProps> = ({
 
   const title = getTagValues("subject", tags);
   // const actualTags = getTagValues("tags", tags);
+  const markdownImagePattern = /!\[.*\]\(.*\)/g;
+  content = content.replace(markdownImagePattern, "");
 
   function setupMarkdown(content: string) {
     var md = require("markdown-it")();
@@ -38,14 +41,12 @@ const Card: FC<NoteProps> = ({
     return result;
   }
 
-  const MAX_LENGTH = 300;
-  const markdownImagePattern = /!\[.*\]\(.*\)/g;
+  const MAX_LENGTH = 200;
 
   let markdown =
     content.length > MAX_LENGTH
-      ? content.slice(0, MAX_LENGTH).concat("...read more")
+      ? setupMarkdown(content.slice(0, MAX_LENGTH).concat("...read more"))
       : setupMarkdown(content.slice(0, MAX_LENGTH));
-  markdown = markdown.replace(markdownImagePattern, "");
   const markdownImageContent =
   /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
 
@@ -62,7 +63,7 @@ const Card: FC<NoteProps> = ({
           <div className="flex gap-5 opacity-70 flex-col md:flex-row flex-wrap">
             {profile ? (
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
+                <Link className="flex items-center gap-2" href={`u/${nip19.npubEncode(event.pubkey!)}`}>
                   <img
                     className="rounded-full w-6 h-6 object-cover"
                     src={data?.picture || DUMMY_PROFILE_API(data?.name || npub)}
@@ -71,7 +72,7 @@ const Card: FC<NoteProps> = ({
                   <div>
                     <span className="">{data?.name || shortenHash(npub)!}</span>
                   </div>
-                </div>
+                </Link>
               </div>
             ) : null}
             <DatePosted dateOnly={dateOnly} timestamp={createdAt} />
