@@ -7,13 +7,18 @@ module.exports = {
   ],
   theme: {
     fontFamily: {
-      "main": ["var(--main-font)", "sans-serif"],
+      main: ["var(--main-font)", "sans-serif"],
     },
     extend: {
       colors: {
         red: "rgb(247, 0, 0)",
         "red-hover": "rgb(210, 19, 7)",
-      }
+        gray: "rgb(117, 117, 117)",
+        "gray-hover": "rgb(41, 41, 41)",
+      },
+      boxShadow: {
+        "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",
+      },
     },
   },
   plugins: [],
