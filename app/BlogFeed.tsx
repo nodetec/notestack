@@ -8,6 +8,7 @@ import { ImSearch } from "react-icons/im";
 import { HiUserAdd } from "react-icons/hi";
 import Button from "./Button";
 import Article from "./Article";
+import Pagination from "./components/util/Pagination";
 
 export default function ArchiveNotes({
   numPages,
@@ -102,7 +103,7 @@ export default function ArchiveNotes({
             return <Article key={event.id} event={event} profile />;
           })}
       </div>
-      {/* {numPages > 1 ? <Pagination numPages={numPages} /> : null} */}
+      {numPages > 1 ? <Pagination numPages={numPages} /> : null}
     </>
   );
 }
