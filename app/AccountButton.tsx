@@ -33,7 +33,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
           />
         </span>
       </Button>
-      {showMenu && <ProfileMenu pubkey={pubkey} />}
+      {showMenu && <ProfileMenu toggleMenu={setShowMenu} pubkey={pubkey} />}
     </div>
   );
 }
