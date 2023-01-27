@@ -30,6 +30,7 @@
     "websocket-polyfill": "^0.0.3"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.9",
     "@types/crypto-js": "^4.1.1",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",

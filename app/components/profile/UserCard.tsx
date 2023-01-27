@@ -347,8 +347,8 @@ export default function UserCard({
             label="Lightning Address or LUD-06 Identifier"
           ></PopupInput>
 
-          <h5 className="text   overflow-x-scroll rounded-md text-center p-4">
-            <div className="cursor-text flex justify-start whitespace-nowrap items-center">
+          <h5 className="text bg-neutral-200 overflow-x-scroll rounded-md text-center p-3 mb-3">
+            <div className="cursor-text  flex justify-start whitespace-nowrap items-center">
               <div className="pr-4">{convertedAddress}</div>
             </div>
           </h5>

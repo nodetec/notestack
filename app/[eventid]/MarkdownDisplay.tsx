@@ -48,7 +48,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
         />
       </div>
       <div
-        className="rounded-md p-4 md:p-8 mx-auto bg-secondary w-full prose prose-xl prose-invert h-full"
+        className="rounded-md p-4 md:p-8 mx-auto bg-secondary w-full prose prose-xl h-full"
         dangerouslySetInnerHTML={{ __html: markdown }}
       />
       <SharePopup
