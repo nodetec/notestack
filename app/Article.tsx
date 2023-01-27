@@ -38,7 +38,7 @@ const Article: FC<NoteProps> = ({
   content = content.replace(markdownImagePattern, "");
 
   return (
-    <article className="py-8 border-b border-b-light-gray" {...props}>
+    <article className="py-8 border-b border-b-light-gray overflow-x-hidden" {...props}>
       <div className="flex items-center gap-2">
         <Link href={`u/${npub}`}>
           <Item className="text-gray-hover">
