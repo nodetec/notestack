@@ -19,9 +19,7 @@ export default function ProfilePage() {
 
     return (
       <Main>
-        <div className="flex justify-end my-8">
-          <LatestNotes name={name} profilePubkey={profilePubkey} />
-        </div>
+        <LatestNotes name={name} profilePubkey={profilePubkey} />
         <Aside>
           <Profile npub={npub} setName={setName} />
         </Aside>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
 import { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
 import { IconType } from "react-icons";
 import { HiOutlineUser, HiOutlineBookmark } from "react-icons/hi";
@@ -41,10 +41,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
   );
 };
 
-interface ItemProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+interface ItemProps extends LinkProps {
   label: string;
   href: string;
+  className?: string;
   Icon?: IconType;
 }
 

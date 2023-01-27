@@ -3,14 +3,11 @@ import { useNostr } from "nostr-react";
 import { useEffect, useContext } from "react";
 import { KeysContext } from "./context/keys-provider";
 import type { Event } from "nostr-tools";
-// import Pagination from "../Pagination";
 import { useSearchParams } from "next/navigation";
-// import Card from "../u/[npub]/Card";
-// import Button from "../Button";
 import { ImSearch } from "react-icons/im";
 import { HiUserAdd } from "react-icons/hi";
 import Button from "./Button";
-import Card from "./Card";
+import Article from "./Article";
 
 export default function ArchiveNotes({
   numPages,
@@ -75,7 +72,7 @@ export default function ArchiveNotes({
 
   return (
     <>
-      <div className="flex gap-2  rounded-md p-2">
+      <div className="flex gap-2 rounded-md p-2">
         <Button
           variant={filter.authors?.length ? "ghost" : "solid"}
           onClick={handleExploreFilter}
@@ -95,16 +92,16 @@ export default function ArchiveNotes({
           following
         </Button>
       </div>
-      <ul className="flex flex-col gap-4">
+      <div className="flex flex-col">
         {events
           .slice(
             currentPage * postPerPage - postPerPage,
             currentPage * postPerPage
           )
           .map((event: Event) => {
-            return <Card key={event.id} event={event} profile />;
+            return <Article key={event.id} event={event} profile />;
           })}
-      </ul>
+      </div>
       {/* {numPages > 1 ? <Pagination numPages={numPages} /> : null} */}
     </>
   );

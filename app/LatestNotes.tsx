@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useNostrEvents } from "nostr-react";
 import { useEffect, useMemo, useState } from "react";
-import Card from "./Card";
+import Article from "./Article";
 import Pagination from "./components/util/Pagination";
 import { getTagValues } from "./lib/utils";
 import Posts from "./Posts";
@@ -48,11 +48,11 @@ export default function LatestNotes({ profilePubkey, name }: any) {
           : `${name ? `${name} has no notes yet` : "No notes yet"}`
       }
     >
-      <ul className="flex flex-col gap-4 text-center md:text-start">
+      <div className="flex flex-col gap-4 md:text-start">
         {slicedEvents.map((event) => (
-          <Card key={event.id} event={event} dateOnly />
+          <Article key={event.id} event={event} dateOnly />
         ))}
-      </ul>
+      </div>
       {numPages > 1 ? <Pagination numPages={numPages} /> : null}
     </Posts>
   );
