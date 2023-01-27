@@ -5,8 +5,8 @@ import { Roboto } from "@next/font/google";
 
 const main = Roboto({
   variable: "--main-font",
-  weight: ['100', '300', '400', '500', '700', '900'],
-  subsets: ['latin'],
+  weight: ["100", "300", "400", "500", "700", "900"],
+  subsets: ["latin"],
 });
 
 export default function RootLayout({
@@ -17,10 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={main.variable}>
       <head />
-      <body className="flex flex-col container p-6 m-auto md:max-w-[90%] 2xl:max-w-[80%] min-h-screen font-main">
+      <body className="font-main">
         <Providers>
           <Header />
-          {children}
+          <div className="container flex flex-col px-4 mx-auto md:max-w-[90%] 2xl:max-w-[80%] min-h-screen">{children}</div>
         </Providers>
       </body>
     </html>

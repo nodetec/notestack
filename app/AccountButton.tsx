@@ -19,9 +19,10 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
     <div className="relative">
       <Button
         color="transparent"
+        size="xs"
         icon={<IoChevronDown />}
         iconAfter
-        className="flex items-center gap-2 text-gray hover:text-gray-hover"
+        className="flex items-center gap-2 text-gray hover:text-gray-hover p-0"
         onClick={() => setShowMenu((currrent) => !currrent)}
       >
         <span className="rounded-full">
