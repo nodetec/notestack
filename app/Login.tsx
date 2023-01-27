@@ -39,7 +39,7 @@ export default function Login() {
     if (shouldReconnect === "true") {
       getConnected(shouldReconnect);
     }
-  }, []);
+  }, [setKeys]);
 
   const loginHandler = async () => {
     // @ts-ignore
@@ -66,7 +66,6 @@ export default function Login() {
         <AccountButton pubkey={keys?.publicKey} />
       ) : (
         <Button
-          
           variant="outline"
           onClick={handleClick}
           size="sm"
@@ -79,9 +78,8 @@ export default function Login() {
         <Button
           className="w-full"
           onClick={loginHandler}
-          
           size="sm"
-          icon={<BsLightningChargeFill size="14" />}
+          icon={<BsLightningChargeFill />}
         >
           {isLightningConnected ? "connected" : "Login with NIP-07 Extension"}
         </Button>

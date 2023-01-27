@@ -10,7 +10,7 @@ interface ProfileMenuProps {
 
 const ProfileMenu:React.FC<ProfileMenuProps> = ({ pubkey }) => {
   const npub = nip19.npubEncode(pubkey);
-  return <div className="flex flex-col rounded-md bg-white shadow-profile-menu absolute z-40 right-0 top-0 translate-y-full">
+  return <div className="flex flex-col rounded-md bg-white shadow-profile-menu absolute z-40 right-0 -bottom-4 translate-y-full">
     <GroupMenu>
       <Item label="Profile" href={`/u/` + npub} Icon={HiOutlineUser} />
     </GroupMenu>

@@ -5,12 +5,14 @@ const sizes = {
   lg: "py-5 px-6 text-lg",
   md: "py-3 px-4 text-base",
   sm: "py-2 px-3 text-xs",
+  xs: "p-0 text-xs",
 };
 
 const iconSized = {
   lg: "p-3",
   md: "p-2",
   sm: "p-1",
+  xs: "p-0",
 };
 
 const colors = {
@@ -64,7 +66,6 @@ const Button: React.FC<Props> = ({
   return (
     <button
       aria-label={children as string}
-      title={children as string}
       className={`rounded-full font-bold text-base flex items-center justify-center cursor-pointer gap-2 self-center transition-colors border border-solid
          ${disabled ? "cursor-not-allowed opacity-40" : ""}
          ${children ? sizes[size] : iconSized[size]}
