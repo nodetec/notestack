@@ -369,7 +369,7 @@ export default function UserCard({
           setIsOpen={setIsTipOpen}
         >
           <h2 className="pt-2 font-bold text-lg ">Amount</h2>
-          <div className="flex items-center w-full py-2 px-4 rounded-md   ring-1 ring-yellow-500">
+          <div className="flex items-center w-full py-2 px-4 rounded-md   ring-1 ring-black-700">
             <input
               type="number"
               value={tipInputValue}
@@ -380,7 +380,7 @@ export default function UserCard({
               min={1}
               className="w-full flex-1 focus:ring-0 border-0 bg-transparent "
             />
-            <span className="text-yellow-400 text-sm font-bold">satoshis</span>
+            <span className="text-black-600 text-sm font-bold">satoshis</span>
           </div>
           <Buttons>
             {presetAmounts.map((amount) => (

@@ -64,7 +64,7 @@ const Card: FC<NoteProps> = ({
           <div className="flex gap-5 opacity-70 flex-col md:flex-row flex-wrap">
             {profile ? (
               <div className="flex flex-col gap-2">
-                <span className="flex items-center gap-2">
+                <Link href={`u/${npub}`} className="flex items-center gap-2">
                   <img
                     className="rounded-full w-6 h-6 object-cover"
                     src={data?.picture || DUMMY_PROFILE_API(npub)}
@@ -73,7 +73,7 @@ const Card: FC<NoteProps> = ({
                   <div>
                     <span className="">{data?.name || shortenHash(npub)!}</span>
                   </div>
-                </span>
+                </Link>
               </div>
             ) : null}
             <DatePosted dateOnly={dateOnly} timestamp={createdAt} />
