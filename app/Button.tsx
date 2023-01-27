@@ -18,18 +18,19 @@ const iconSized = {
 const colors = {
   black: {
     solid: "text-white bg-black hover:bg-neutral-900 border-transparent",
-    outline:
-      "text-black bg-transparent border-current hover:text-neutral-900",
+    outline: "text-black bg-transparent border-current hover:text-neutral-900",
     ghost:
-      "text-black bg-transparent border-transparent hover:border-current",
+      "text-black bg-transparent border-transparent hover:text-neutral-900",
   },
   red: {
-    solid:
-      "text-white bg-red hover:bg-red-hover border-transparent",
-    outline:
-      "text-red bg-transparent  border-current hover:text-red-hover",
-    ghost:
-      "text-red bg-transparent border-transparent hover:border-current",
+    solid: "text-white bg-red hover:bg-red-hover border-transparent",
+    outline: "text-red bg-transparent  border-current hover:text-red-hover",
+    ghost: "text-red bg-transparent border-transparent hover:text-red-hover",
+  },
+  green: {
+    solid: "text-white bg-green hover:bg-gray-hover border-transparent",
+    outline: "text-green bg-transparent border-current hover:text-gray-hover",
+    ghost: "text-green bg-transparent border-transparent hover:text-gray-hover",
   },
   transparent: {
     solid: "text-black bg-transparent border-transparent",

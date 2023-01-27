@@ -268,12 +268,12 @@ export default function UserCard({
         (loggedInPubkey === profilePubkey ? (
           <Buttons>
             <Button
-              color="red"
-              variant="outline"
+              color="green"
+              variant="ghost"
               onClick={handleClick}
-              size="sm"
+              size="xs"
             >
-              edit profile
+              Edit profile
             </Button>
           </Buttons>
         ) : (

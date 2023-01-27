@@ -12,6 +12,7 @@ module.exports = {
       colors: {
         red: "rgb(247, 0, 0)",
         "red-hover": "rgb(210, 19, 7)",
+        "green": "rgb(26, 137, 23)",
         gray: "rgb(117, 117, 117)",
         "gray-hover": "rgb(41, 41, 41)",
         "light-gray": "rgb(225, 225, 225)",
