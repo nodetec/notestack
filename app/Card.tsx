@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
-import { BsFillFileEarmarkCodeFill, BsFillTagFill } from "react-icons/bs";
+import { BsFillTagFill } from "react-icons/bs";
 import { FaCalendarAlt } from "react-icons/fa";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
@@ -42,20 +42,18 @@ const Card: FC<NoteProps> = ({
 
   const markdown =
     content.length > MAX_LENGTH
-      ? setupMarkdown(content.slice(0, MAX_LENGTH)).concat("...read more")
+      ? content.slice(0, MAX_LENGTH).concat("...read more")
       : setupMarkdown(content.slice(0, MAX_LENGTH));
 
   return (
     <li
-      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform hover:shadow-accent bg-secondary text-accent text-left"
+      className="border-b border-gray-300 transition-transform bg-secondary text-left"
       {...props}
     >
       <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
         <div className="flex flex-col gap-3 w-full">
           {title ? (
-            <h3 className="text-2xl font-semibold text-light twolines">
-              {title}
-            </h3>
+            <h3 className="text-2xl font-semibold  twolines">{title}</h3>
           ) : null}
           <div className="flex gap-5 opacity-70 flex-col md:flex-row flex-wrap">
             {profile ? (
@@ -67,9 +65,7 @@ const Card: FC<NoteProps> = ({
                     alt={data?.name}
                   />
                   <div>
-                    <span className="text-light">
-                      {data?.name || shortenHash(npub)!}
-                    </span>
+                    <span className="">{data?.name || shortenHash(npub)!}</span>
                   </div>
                 </div>
               </div>
@@ -81,7 +77,7 @@ const Card: FC<NoteProps> = ({
           {/*     <NoteTags showIcon tags={actualTags.split(",")} /> */}
           {/*   ) : null} */}
           {/* </div> */}
-          <div className="flex flex-col sm:flex-row gap-5 w-full bg-primary max-h-[50vh] overflow-hidden rounded-md">
+          <div className="flex flex-col sm:flex-row gap-5 w-full  max-h-[50vh] overflow-hidden rounded-md">
             <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />
             </div>
@@ -148,7 +144,7 @@ export const NoteTags = ({
     ) : null}
     <ul className="flex items-center gap-2 list-none pl-0 my-0">
       {tags.map((tag: string) => (
-        <li className="bg-primary py-1 px-2 rounded-md" key={tag}>
+        <li className=" py-1 px-2 rounded-md" key={tag}>
           {tag}
         </li>
       ))}
