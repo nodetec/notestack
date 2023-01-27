@@ -23,24 +23,24 @@ const colors = {
   },
   neutralDark: {
     solid:
-      "  hover: border-transparent",
+      "  border-transparent",
     outline:
-      " bg-transparent  border-current hover: hover:",
+      " bg-transparent  border-current hover:",
     ghost:
       " bg-transparent border-transparent hover:border-current",
   },
   zincDark: {
-    solid: "  hover: border-transparent",
+    solid: "  border-transparent",
     outline:
-      " bg-transparent border-current hover: hover:",
+      " bg-transparent border-current hover:",
     ghost:
       " bg-transparent border-transparent hover:border-current",
   },
   neutralLight: {
     solid:
-      "  hover: border-transparent",
+      "  border-transparent",
     outline:
-      " bg-transparent border-current hover: hover:",
+      " bg-transparent border-current hover:",
     ghost:
       " bg-transparent border-transparent hover:border-current",
   },

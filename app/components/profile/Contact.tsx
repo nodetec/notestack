@@ -23,7 +23,7 @@ export default function Contact({ contact }: any) {
   }
 
   return (
-    <li className="hover: transition-colors opacity-70 hover:opacity-100 rounded-full">
+    <li className="transition-colors opacity-70 hover:opacity-100 rounded-full">
       <Link
         href={`/u/${nip19.npubEncode(pubkey)}`}
         className=" text-base flex items-center gap-2 py-2 pl-2 pr-4"

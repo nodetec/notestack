@@ -47,7 +47,7 @@ const Card: FC<NoteProps> = ({
 
   return (
     <li
-      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform hover:   text-left"
+      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform   text-left"
       {...props}
     >
       <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
