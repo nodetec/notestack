@@ -75,7 +75,7 @@ export default function ArchiveNotes({
 
   return (
     <>
-      <div className="flex gap-2 bg-secondary rounded-md p-2">
+      <div className="flex gap-2  rounded-md p-2">
         <Button
           variant={filter.authors?.length ? "ghost" : "solid"}
           onClick={handleExploreFilter}
