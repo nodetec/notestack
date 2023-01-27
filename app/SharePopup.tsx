@@ -70,7 +70,7 @@ const SharePopup: FC<SharePopupProps> = ({ link, ...props }) => {
         ))}
       </div>
       <div className="flex items-center justify-center bg-secondary p-2 px-4 rounded-md">
-        <Truncate content={link} length={20} color="transparent" />
+        <Truncate content={link} length={20} />
       </div>
     </Popup>
   );
