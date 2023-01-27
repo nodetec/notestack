@@ -39,12 +39,13 @@ const Card: FC<NoteProps> = ({
   }
 
   const MAX_LENGTH = 300;
+  const markdownImagePattern = /!\[.*\]\(.*\)/g;
 
-  const markdown =
+  let markdown =
     content.length > MAX_LENGTH
       ? content.slice(0, MAX_LENGTH).concat("...read more")
       : setupMarkdown(content.slice(0, MAX_LENGTH));
-
+  markdown = markdown.replace(markdownImagePattern, "");
   const markdownImageContent =
   /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
 
@@ -86,7 +87,7 @@ const Card: FC<NoteProps> = ({
             </div>
             {markdownImageContent?.groups?.filename ? (
               <img
-              className="rounded-md self-center w-12 h-12 md:w-16 md:h-16 lg:w-32 lg:h-32 object-cover"
+              className="rounded-md self-center w-12 h-12 md:w-16 md:h-16 lg:w-32 lg:h-32 object-contain"
               src={markdownImageContent.groups.filename}
               title={markdownImageContent?.groups?.title}
             />
