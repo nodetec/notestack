@@ -29,6 +29,11 @@ const colors = {
     ghost:
       "text-red bg-transparent border-transparent hover:border-current",
   },
+  transparent: {
+    solid: "text-black bg-transparent border-transparent",
+    outline: "text-black bg-transparent border-current",
+    ghost: "text-black bg-transparent border-transparent",
+  },
 };
 
 export interface Props
