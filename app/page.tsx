@@ -49,7 +49,7 @@ export default function ArchivePage() {
   }, [filter, connectedRelays]);
 
   return (
-    <Posts title="Latest Posts" className="mx-auto mt-16">
+    <Posts title="Latest Posts" className="mx-auto my-16">
       <BlogFeed
         postPerPage={POSTS_PER_PAGE}
         events={events}
