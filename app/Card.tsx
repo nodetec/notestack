@@ -53,7 +53,7 @@ const Card: FC<NoteProps> = ({
       className="border-b border-gray-300 transition-transform bg-secondary text-left"
       {...props}
     >
-      <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
+      <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block md:min-w-[25rem] lg:min-w-[50rem]">
         <div className="flex flex-col gap-3 w-full">
           {title ? (
             <h3 className="text-2xl font-semibold  twolines">{title}</h3>
@@ -84,11 +84,13 @@ const Card: FC<NoteProps> = ({
             <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />
             </div>
-            <img
-            className="rounded-md self-center w-12 h-12 md:w-16 md:h-16 lg:w-32 lg:h-32 object-cover"
-            src={markdownImageContent?.groups?.filename}
-            title={markdownImageContent?.groups?.title}
-          />
+            {markdownImageContent?.groups?.filename ? (
+              <img
+              className="rounded-md self-center w-12 h-12 md:w-16 md:h-16 lg:w-32 lg:h-32 object-cover"
+              src={markdownImageContent.groups.filename}
+              title={markdownImageContent?.groups?.title}
+            />
+            ) : null}
           </div>
         </div>
       </Link>
