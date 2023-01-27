@@ -45,6 +45,9 @@ const Card: FC<NoteProps> = ({
       ? content.slice(0, MAX_LENGTH).concat("...read more")
       : setupMarkdown(content.slice(0, MAX_LENGTH));
 
+  const markdownImageContent =
+  /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
+
   return (
     <li
       className="border-b border-gray-300 transition-transform bg-secondary text-left"
@@ -81,6 +84,11 @@ const Card: FC<NoteProps> = ({
             <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />
             </div>
+            <img
+            className="rounded-md self-center w-12 h-12 md:w-16 md:h-16 lg:w-32 lg:h-32 object-cover"
+            src={markdownImageContent?.groups?.filename}
+            title={markdownImageContent?.groups?.title}
+          />
           </div>
         </div>
       </Link>
