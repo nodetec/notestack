@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DetailedHTMLProps, HTMLAttributes } from "react";
+import { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
 import { IconType } from "react-icons";
 import { HiOutlineUser } from "react-icons/hi";
 import { nip19 } from "nostr-tools";
@@ -12,6 +12,7 @@ interface ProfileMenuProps {
 const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
   const npub = nip19.npubEncode(pubkey);
   return (
+    <Fragment>
     <div className="flex flex-col rounded-md bg-white shadow-profile-menu absolute z-40 right-0 -bottom-4 translate-y-full">
       <GroupMenu>
         <Item
@@ -22,6 +23,8 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
         />
       </GroupMenu>
     </div>
+    <div className="fixed inset-0 z-30" onClick={() => toggleMenu(false)} />
+    </Fragment>
   );
 };
 
