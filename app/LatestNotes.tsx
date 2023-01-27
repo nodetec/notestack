@@ -3,12 +3,12 @@ import { useNostrEvents } from "nostr-react";
 import { useEffect, useMemo, useState } from "react";
 import Card from "./Card";
 import Pagination from "./components/util/Pagination";
+import { getTagValues } from "./lib/utils";
 import Posts from "./Posts";
 
 const POSTS_PER_PAGE = 5;
 
 export default function LatestNotes({ profilePubkey, name }: any) {
-
   const { events } = useNostrEvents({
     filter: {
       kinds: [2222],
@@ -26,10 +26,22 @@ export default function LatestNotes({ profilePubkey, name }: any) {
   }, [events]);
 
   const slicedEvents = useMemo(() => {
-    return events.slice(
-      currentPage * POSTS_PER_PAGE - POSTS_PER_PAGE,
-      currentPage * POSTS_PER_PAGE
-    );
+    return events
+      .slice(
+        currentPage * POSTS_PER_PAGE - POSTS_PER_PAGE,
+        currentPage * POSTS_PER_PAGE
+      )
+      .filter((event) => event.content.length !== 0)
+      .filter((event) => {
+        if (event.tags) {
+          const title = getTagValues("subject", event.tags);
+          if (title) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      });
   }, [events, currentPage]);
 
   return (

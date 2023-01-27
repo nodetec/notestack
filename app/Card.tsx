@@ -2,9 +2,8 @@ import Link from "next/link";
 import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
-import { BsFillFileEarmarkCodeFill, BsFillTagFill } from "react-icons/bs";
+import { BsFillTagFill } from "react-icons/bs";
 import { FaCalendarAlt } from "react-icons/fa";
-import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
@@ -42,12 +41,12 @@ const Card: FC<NoteProps> = ({
 
   const markdown =
     content.length > MAX_LENGTH
-      ? setupMarkdown(content.slice(0, MAX_LENGTH)).concat("...read more")
+      ? content.slice(0, MAX_LENGTH).concat("...read more")
       : setupMarkdown(content.slice(0, MAX_LENGTH));
 
   return (
     <li
-      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform   text-left"
+      className="border-b border-gray-300 transition-transform bg-secondary text-left"
       {...props}
     >
       <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
@@ -61,11 +60,6 @@ const Card: FC<NoteProps> = ({
             {profile ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <img
-                    className="rounded-full w-6 h-6 object-cover"
-                    src={data?.picture || DUMMY_PROFILE_API(data?.name || npub)}
-                    alt={data?.name}
-                  />
                   <div>
                     <span className="">
                       {data?.name || shortenHash(npub)!}
