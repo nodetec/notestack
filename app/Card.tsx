@@ -30,7 +30,7 @@ const Card: FC<NoteProps> = ({
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("subject", tags);
-  const actualTags = getTagValues("tags", tags);
+  // const actualTags = getTagValues("tags", tags);
 
   function setupMarkdown(content: string) {
     var md = require("markdown-it")();
@@ -76,11 +76,11 @@ const Card: FC<NoteProps> = ({
             ) : null}
             <DatePosted dateOnly={dateOnly} timestamp={createdAt} />
           </div>
-          <div>
-            {actualTags.length ? (
-              <NoteTags showIcon tags={actualTags.split(",")} />
-            ) : null}
-          </div>
+          {/* <div> */}
+          {/*   {actualTags.length ? ( */}
+          {/*     <NoteTags showIcon tags={actualTags.split(",")} /> */}
+          {/*   ) : null} */}
+          {/* </div> */}
           <div className="flex flex-col sm:flex-row gap-5 w-full bg-primary max-h-[50vh] overflow-hidden rounded-md">
             <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />

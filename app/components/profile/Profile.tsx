@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
-export default function Profile({ npub }: any) {
+export default function Profile({ npub, setName }: any) {
   const profilePubkey = nip19.decode(npub).data.valueOf();
 
   // @ts-ignore
@@ -44,6 +44,7 @@ export default function Profile({ npub }: any) {
     const content = profileMetadata[0]?.content;
     const contentObj = JSON.parse(content);
     name = contentObj?.name;
+    setName(name);
     nip05 = contentObj?.nip05;
     about = contentObj?.about;
     lud06 = contentObj?.lud06;
@@ -66,24 +67,21 @@ export default function Profile({ npub }: any) {
   const loggedInContactList = loggedInContactEvents[0]?.tags;
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start md:gap-10 lg:gap-30 lg:px-20 flex-1 justify-center">
-      {/* <LatestNotes name={name} profilePubkey={profilePubkey} /> */}
-      <div className="flex flex-col flex-shrink md:sticky top-4 w-auto md:w-[25%] max-w-[22rem]">
-        <UserCard
-          loggedInPubkey={loggedInPubkey}
-          loggedInContactList={loggedInContactList}
-          profileContactList={profileContactList}
-          profilePubkey={profilePubkey}
-          name={name}
-          npub={npub}
-          nip05={nip05}
-          about={about}
-          picture={picture}
-          lud06={lud06}
-          lud16={lud16}
-        />
-        {profileContactList && <Contacts userContacts={profileContactList} />}
-      </div>
+    <div className="flex flex-col flex-shrink md:sticky top-4 w-auto md:w-[25%] max-w-[22rem]">
+      <UserCard
+        loggedInPubkey={loggedInPubkey}
+        loggedInContactList={loggedInContactList}
+        profileContactList={profileContactList}
+        profilePubkey={profilePubkey}
+        name={name}
+        npub={npub}
+        nip05={nip05}
+        about={about}
+        picture={picture}
+        lud06={lud06}
+        lud16={lud16}
+      />
+      {profileContactList && <Contacts userContacts={profileContactList} />}
     </div>
   );
 }
