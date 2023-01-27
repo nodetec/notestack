@@ -23,18 +23,18 @@ export default function Contact({ contact }: any) {
   }
 
   return (
-    <li className="hover:bg-secondary transition-colors opacity-70 hover:opacity-100 rounded-full">
+    <li className="hover: transition-colors opacity-70 hover:opacity-100 rounded-full">
       <Link
         href={`/u/${nip19.npubEncode(pubkey)}`}
-        className="text-accent text-base flex items-center gap-2 py-2 pl-2 pr-4"
+        className=" text-base flex items-center gap-2 py-2 pl-2 pr-4"
       >
         <img
           className="rounded-full w-8 h-8"
           src={contentObj?.picture || DUMMY_PROFILE_API(name || npub)}
           alt={name}
         />
-        <span className="text-zinc-400">{name}</span>
-        <span className="text-zinc-500">{npub}</span>
+        <span className="">{name}</span>
+        <span className="">{npub}</span>
       </Link>
     </li>
   );

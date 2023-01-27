@@ -47,13 +47,13 @@ const Card: FC<NoteProps> = ({
 
   return (
     <li
-      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform hover:shadow-accent bg-secondary text-accent text-left"
+      className="rounded-md hover:shadow-sm hover:scale-101 transition-transform hover:   text-left"
       {...props}
     >
       <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
         <div className="flex flex-col gap-3 w-full">
           {title ? (
-            <h3 className="text-2xl font-semibold text-light twolines">
+            <h3 className="text-2xl font-semibold  twolines">
               {title}
             </h3>
           ) : null}
@@ -67,7 +67,7 @@ const Card: FC<NoteProps> = ({
                     alt={data?.name}
                   />
                   <div>
-                    <span className="text-light">
+                    <span className="">
                       {data?.name || shortenHash(npub)!}
                     </span>
                   </div>
@@ -81,7 +81,7 @@ const Card: FC<NoteProps> = ({
           {/*     <NoteTags showIcon tags={actualTags.split(",")} /> */}
           {/*   ) : null} */}
           {/* </div> */}
-          <div className="flex flex-col sm:flex-row gap-5 w-full bg-primary max-h-[50vh] overflow-hidden rounded-md">
+          <div className="flex flex-col sm:flex-row gap-5 w-full  max-h-[50vh] overflow-hidden rounded-md">
             <div className="w-full max-w-full p-4 prose prose-sm prose-invert prose-img:h-[20vmin] prose-img:w-auto prose-img:object-cover prose-img:mx-auto">
               <div dangerouslySetInnerHTML={{ __html: markdown }} />
             </div>
@@ -148,7 +148,7 @@ export const NoteTags = ({
     ) : null}
     <ul className="flex items-center gap-2 list-none pl-0 my-0">
       {tags.map((tag: string) => (
-        <li className="bg-primary py-1 px-2 rounded-md" key={tag}>
+        <li className=" py-1 px-2 rounded-md" key={tag}>
           {tag}
         </li>
       ))}

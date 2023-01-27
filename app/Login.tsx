@@ -51,7 +51,7 @@ export default function Login() {
       setKeys({ private: "", publicKey: publicKey });
       localStorage.setItem("shouldReconnect", "true");
     }
-    console.log("connected to lightning");
+    console.log("connected ");
     setIsLightningConnected(true);
     setIsOpen(false);
   };

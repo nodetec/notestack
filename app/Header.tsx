@@ -11,10 +11,10 @@ export default function Header() {
       <nav className="flex justify-between flex-row items-stretch pb-12 gap-4">
         <div className="flex items-center justify-between w-full gap-4 flex-col sm:flex-row">
           <div className="flex items-center gap-4">
-            <Link className="text-3xl font-bold text-zinc-900" href="/">
+            <Link className="text-3xl font-bold " href="/">
               <div className="flex flex-row">
-                <FaBlog className="text-zinc-900" size="30" />
-                <span className="text-zinc-900 ml-1">blog</span>
+                <FaBlog className="" size="30" />
+                <span className=" ml-1">blog</span>
                 <span className="text-orange-600">stack</span>
               </div>
             </Link>
