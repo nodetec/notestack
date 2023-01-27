@@ -53,7 +53,7 @@ const Article: FC<NoteProps> = ({
         <DatePosted timestamp={createdAt} />
       </div>
 
-      <Link href={`u/${npub}`}>
+      <Link href={`/${event.id}`}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
