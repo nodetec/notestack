@@ -244,26 +244,26 @@ export default function UserCard({
           alt={name}
         />
       </Link>
-      <p className="text-2xl font-bold ">
+      <div className="text-2xl font-bold ">
         <span className="text-red-500">@</span>
         {name}
         {/* BsPatchCheckFill */}
         {nip05 && (
-          <p className="text-sm ">
+          <div className="text-sm ">
             <div className="flex items-center gap-1">
               <BsPatchCheckFill className="text-blue-500" size="14" />
               <span>{nip05}</span>
             </div>
-          </p>
+          </div>
         )}
         {lud16 && utils.isLightningAddress(lud16) && (
-          <p className="text-sm ">
+          <div className="text-sm ">
             <div className="flex items-center gap-1">
               <span className="whitespace-nowrap">{"⚡ " + lud16}</span>
             </div>
-          </p>
+          </div>
         )}
-      </p>
+      </div>
       <p className="flex items-center gap-1">
         <Truncate content={npub}  />
       </p>
@@ -386,7 +386,6 @@ export default function UserCard({
             {presetAmounts.map((amount) => (
               <Button
                 key={amount.label}
-                
                 variant="outline"
                 iconAfter
                 className="w-full"

@@ -49,7 +49,7 @@ export default function Profile({ npub, setName }: any) {
     about = contentObj?.about;
     lud06 = contentObj?.lud06;
     lud16 = contentObj?.lud16;
-    picture = contentObj?.picture || DUMMY_PROFILE_API(name || npub);
+    picture = contentObj?.picture || DUMMY_PROFILE_API(npub);
   } catch {
     console.log("Error parsing content");
   }

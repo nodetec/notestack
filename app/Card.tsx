@@ -63,16 +63,16 @@ const Card: FC<NoteProps> = ({
           <div className="flex gap-5 opacity-70 flex-col md:flex-row flex-wrap">
             {profile ? (
               <div className="flex flex-col gap-2">
-                <Link className="flex items-center gap-2" href={`u/${nip19.npubEncode(event.pubkey!)}`}>
+                <span className="flex items-center gap-2">
                   <img
                     className="rounded-full w-6 h-6 object-cover"
-                    src={data?.picture || DUMMY_PROFILE_API(data?.name || npub)}
+                    src={data?.picture || DUMMY_PROFILE_API(npub)}
                     alt={data?.name}
                   />
                   <div>
                     <span className="">{data?.name || shortenHash(npub)!}</span>
                   </div>
-                </Link>
+                </span>
               </div>
             ) : null}
             <DatePosted dateOnly={dateOnly} timestamp={createdAt} />

@@ -28,7 +28,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         <span className="rounded-full">
           <img
             className="rounded-full w-8 h-8 object-cover"
-            src={data?.picture || DUMMY_PROFILE_API(data?.name || data?.npub!)}
+            src={data?.picture || DUMMY_PROFILE_API(data?.npub!)}
             alt=""
           />
         </span>
