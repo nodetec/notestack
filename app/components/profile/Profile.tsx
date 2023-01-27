@@ -73,6 +73,7 @@ export default function Profile({ npub, setName }: any) {
         loggedInContactList={loggedInContactList}
         profileContactList={profileContactList}
         profilePubkey={profilePubkey}
+        followersCount={profileContactList?.length}
         name={name}
         npub={npub}
         nip05={nip05}

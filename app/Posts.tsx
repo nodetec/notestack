@@ -19,7 +19,6 @@ const Posts = ({ title, children, className, ...props }: PostsProps) => {
     >
       <div className="flex items-center justify-between gap-4">
         <Button
-          
           variant="ghost"
           icon={<IoChevronBack />}
           onClick={() => router.back()}

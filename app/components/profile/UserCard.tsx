@@ -9,7 +9,6 @@ import { utils } from "lnurl-pay";
 import { bech32 } from "bech32";
 import Link from "next/link";
 import { NostrService } from "@/app/lib/nostr";
-import Truncate from "../util/Truncate";
 import Buttons from "@/app/Buttons";
 import FollowButton from "./FollowButton";
 import PopupInput from "@/app/PopupInput";
@@ -26,6 +25,7 @@ export default function UserCard({
   nip05,
   npub,
   about,
+  followersCount,
   picture,
   profilePubkey,
   loggedInContactList,
@@ -236,45 +236,40 @@ export default function UserCard({
   };
 
   return (
-    <div className="flex flex-col items-center md:items-start gap-4">
+    <div className="flex flex-col">
       <Link href={`/u/${npub}`}>
         <img
-          className="rounded-full mb-4 min-w-[9rem] w-36 h-36 object-cover"
+          className="rounded-full w-24 h-24 object-cover mb-4"
           src={picture}
           alt={name}
         />
+      <span>{name}</span>
       </Link>
-      <div className="text-2xl font-bold ">
-        <span className="text-red-500">@</span>
-        {name}
-        {/* BsPatchCheckFill */}
+      <Link className="text-base text-gray hover:text-gray-hover my-2" href={`/${npub}/followers`}>{followersCount} Followers</Link>
+      <div className="font-semibold">
         {nip05 && (
-          <div className="text-sm ">
+          <div className="text-sm text-gray mb-2">
             <div className="flex items-center gap-1">
-              <BsPatchCheckFill className="text-blue-500" size="14" />
               <span>{nip05}</span>
+              <BsPatchCheckFill className="text-blue-500" size="14" />
             </div>
           </div>
         )}
         {lud16 && utils.isLightningAddress(lud16) && (
-          <div className="text-sm ">
+          <div className="text-sm text-gray mb-2">
             <div className="flex items-center gap-1">
-              <span className="whitespace-nowrap">{"⚡ " + lud16}</span>
+              <span className="whitespace-nowrap">{`${lud16} ⚡`}</span>
             </div>
           </div>
         )}
       </div>
-      <p className="flex items-center gap-1">
-        <Truncate content={npub}  />
-      </p>
-      <p className="text-sm ">{about}</p>
-
+      <p className="text-sm mb-4 text-gray">{about}</p>
       {loggedInPubkey &&
         (loggedInPubkey === profilePubkey ? (
           <Buttons>
             <Button
-              
-              variant="ghost"
+              color="red"
+              variant="outline"
               onClick={handleClick}
               size="sm"
             >
@@ -282,7 +277,7 @@ export default function UserCard({
             </Button>
           </Buttons>
         ) : (
-          <Buttons>
+          <div className="flex items-center gap-2">
             <FollowButton
               loggedInUserPublicKey={loggedInPubkey}
               currentContacts={loggedInContactList}
@@ -291,16 +286,14 @@ export default function UserCard({
             />
             {(lud06 || lud16) && (
               <Button
-                
-                variant="ghost"
+                color="red"
+                variant="solid"
                 onClick={handleTipClick}
-                size="sm"
                 icon={<BsLightningChargeFill size="14" />}
-              >
-                tip
-              </Button>
+                title="tip"
+              />
             )}
-          </Buttons>
+          </div>
         ))}
 
       <Popup

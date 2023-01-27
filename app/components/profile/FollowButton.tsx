@@ -2,7 +2,6 @@
 
 import { NostrService } from "@/app/lib/nostr";
 import { useNostr } from "nostr-react";
-import { HiUserAdd, HiUserRemove } from "react-icons/hi";
 import Button from "../../Button";
 
 export default function FollowButton({
@@ -84,12 +83,12 @@ export default function FollowButton({
 
   return (
     <Button
-      variant={isFollowing ? "ghost" : "outline"}
+      color="red"
+      variant={isFollowing ? "outline" : "solid"}
       size="sm"
-      icon={isFollowing ? <HiUserRemove /> : <HiUserAdd />}
       onClick={handleFollow}
     >
-      {isFollowing ? "Unfollow" : "Follow"}
+      {isFollowing ? "Following" : "Follow"}
     </Button>
   );
 }
