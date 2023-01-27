@@ -265,7 +265,7 @@ export default function UserCard({
         )}
       </p>
       <p className="flex items-center gap-1">
-        <Truncate content={npub} color="transparent" size="sm" />
+        <Truncate content={npub}  />
       </p>
       <p className="text-sm ">{about}</p>
 
@@ -273,7 +273,7 @@ export default function UserCard({
         (loggedInPubkey === profilePubkey ? (
           <Buttons>
             <Button
-              color="blue"
+              
               variant="ghost"
               onClick={handleClick}
               size="sm"
@@ -291,7 +291,7 @@ export default function UserCard({
             />
             {(lud06 || lud16) && (
               <Button
-                color="yellow"
+                
                 variant="ghost"
                 onClick={handleTipClick}
                 size="sm"
@@ -353,7 +353,7 @@ export default function UserCard({
             </div>
           </h5>
           <Button
-            color="blue"
+            
             variant="solid"
             onClick={handleSubmitNewProfile}
             size="sm"
@@ -386,7 +386,7 @@ export default function UserCard({
             {presetAmounts.map((amount) => (
               <Button
                 key={amount.label}
-                color="yellow"
+                
                 variant="outline"
                 iconAfter
                 className="w-full"
@@ -408,7 +408,7 @@ export default function UserCard({
             />
           </div>
           <Button
-            color="yellow"
+            
             variant="solid"
             onClick={handleSendTip}
             size="md"

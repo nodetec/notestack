@@ -25,7 +25,7 @@ export default function Pagination({ numPages }: PaginationProps) {
   return (
     <div className="flex justify-between gap-2 mt-4">
       <Button
-        color="neutralLight"
+        
         variant="outline"
         icon={<IoChevronDown className="rotate-90" />}
         size="sm"
@@ -39,7 +39,7 @@ export default function Pagination({ numPages }: PaginationProps) {
       <div className="flex items-center gap-2">
         {currentPage > 2 && (
           <Button
-            color="neutralLight"
+            
             variant="ghost"
             size="sm"
             onClick={() => navigate(1)}
@@ -58,7 +58,7 @@ export default function Pagination({ numPages }: PaginationProps) {
             return (
               <Button
                 key={i}
-                color="neutralLight"
+                
                 variant={i === currentPage ? "solid" : "ghost"}
                 size="sm"
                 onClick={() => navigate(i)}
@@ -71,7 +71,7 @@ export default function Pagination({ numPages }: PaginationProps) {
         {numPages > currentPage + 2 && <span>...</span>}
         {numPages >= currentPage + 2 && (
           <Button
-            color="neutralLight"
+            
             variant="ghost"
             size="sm"
             onClick={() => navigate(numPages)}
@@ -82,7 +82,7 @@ export default function Pagination({ numPages }: PaginationProps) {
       </div>
 
       <Button
-        color="neutralLight"
+        
         variant="outline"
         icon={<IoChevronDown className="-rotate-90" />}
         title="Next page"
