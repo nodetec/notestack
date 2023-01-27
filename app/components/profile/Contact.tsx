@@ -1,6 +1,8 @@
+import Button from "@/app/Button";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import Link from "next/link";
 import { nip19 } from "nostr-tools";
+import { TbDots } from "react-icons/tb";
 import { shortenHash } from "../../lib/utils";
 
 export default function Contact({ contact }: any) {
@@ -23,19 +25,22 @@ export default function Contact({ contact }: any) {
   }
 
   return (
-    <li className="transition-colors opacity-70 hover:opacity-100 rounded-full">
+    <li className="flex items-center justify-between gap-2">
       <Link
         href={`/u/${nip19.npubEncode(pubkey)}`}
-        className=" text-base flex items-center gap-2 py-2 pl-2 pr-4"
+        className="text-sm flex items-center gap-4 py-1"
       >
         <img
-          className="rounded-full w-8 h-8"
+          className="rounded-full w-5 h-5 object-cover bg-light-gray"
           src={contentObj?.picture || DUMMY_PROFILE_API(npub!)}
-          alt={name}
+          alt=""
         />
-        <span className="">{name}</span>
-        <span className="">{npub}</span>
+        <span className="text-gray hover:text-gray-hover hover:underline">{name || npub}</span>
       </Link>
+      <Button
+        color="transparent"
+        icon={<TbDots />}
+      />
     </li>
   );
 }

@@ -289,7 +289,7 @@ export default function UserCard({
                 color="red"
                 variant="solid"
                 onClick={handleTipClick}
-                icon={<BsLightningChargeFill size="14" />}
+                icon={<BsLightningChargeFill />}
                 title="tip"
               />
             )}

@@ -18,7 +18,7 @@ module.exports = {
         "light-gray": "rgb(225, 225, 225)",
       },
       gridTemplateColumns: {
-        "content-porfile": "2fr 1fr",
+        "content-porfile": "3fr 1fr",
       },
       boxShadow: {
         "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",

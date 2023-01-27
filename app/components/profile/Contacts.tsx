@@ -20,8 +20,8 @@ export default function Contacts({ userContacts }: any) {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <h4 className="text-xl font-bold pt-8">Following</h4>
+    <div className="flex flex-col gap-4 pt-10">
+      <h4 className="text-sm font-bold">Following</h4>
       <ul className="flex flex-col gap-2">
         {uniqueContacts &&
           uniqueContacts
