@@ -2,9 +2,8 @@ import Link from "next/link";
 import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
-import { BsFillFileEarmarkCodeFill, BsFillTagFill } from "react-icons/bs";
+import { BsFillTagFill } from "react-icons/bs";
 import { FaCalendarAlt } from "react-icons/fa";
-import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
@@ -42,7 +41,7 @@ const Card: FC<NoteProps> = ({
 
   const markdown =
     content.length > MAX_LENGTH
-      ? (content.slice(0, MAX_LENGTH)).concat("...read more")
+      ? content.slice(0, MAX_LENGTH).concat("...read more")
       : setupMarkdown(content.slice(0, MAX_LENGTH));
 
   return (
