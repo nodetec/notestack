@@ -14,48 +14,20 @@ const iconSized = {
 };
 
 const colors = {
-  blue: {
-    solid: "text-neutral-900 bg-blue-400 hover:bg-blue-500 border-transparent",
+  black: {
+    solid: "text-white bg-black hover:bg-neutral-900 border-transparent",
     outline:
-      "text-blue-400 bg-transparent border-current hover:bg-blue-500 hover:text-neutral-900",
+      "text-black bg-transparent border-current hover:bg-neutral-900 hover:text-white",
     ghost:
-      "text-blue-400 bg-transparent border-transparent hover:border-current",
+      "text-black bg-transparent border-transparent hover:border-current",
   },
-  neutralDark: {
+  red: {
     solid:
-      "text-neutral-300 bg-neutral-600 hover:bg-neutral-700 border-transparent",
+      "text-white bg-red hover:bg-red-hov border-transparent",
     outline:
-      "text-neutral-600 bg-transparent  border-current hover:bg-neutral-700 hover:text-neutral-300",
+      "text-red bg-transparent  border-current hover:bg-red hover:text-white",
     ghost:
-      "text-neutral-600 bg-transparent border-transparent hover:border-current",
-  },
-  zincDark: {
-    solid: "text-zinc-300 bg-zinc-500 hover:bg-zinc-600 border-transparent",
-    outline:
-      "text-zinc-500 bg-transparent border-current hover:bg-zinc-700 hover:text-zinc-300",
-    ghost:
-      "text-zinc-500 bg-transparent border-transparent hover:border-current",
-  },
-  neutralLight: {
-    solid:
-      "text-neutral-900 bg-neutral-300 hover:bg-neutral-400 border-transparent",
-    outline:
-      "text-neutral-300 bg-transparent border-current hover:bg-neutral-400 hover:text-neutral-900",
-    ghost:
-      "text-neutral-300 bg-transparent border-transparent hover:border-current",
-  },
-  yellow: {
-    solid:
-      "text-neutral-900 bg-yellow-300 hover:bg-yellow-400 border-transparent",
-    outline:
-      "text-yellow-300 bg-transparent border-current hover:bg-yellow-400 hover:text-neutral-900",
-    ghost:
-      "text-yellow-300 bg-transparent border-transparent hover:border-current",
-  },
-  transparent: {
-    solid: "bg-transparent border-transparent",
-    outline: "bg-transparent border-transparent border-current",
-    ghost: "bg-transparent border-transparent",
+      "text-red bg-transparent border-transparent hover:border-current",
   },
 };
 
@@ -75,7 +47,7 @@ export interface Props
 const Button: React.FC<Props> = ({
   children,
   size = "md",
-  color = "blue",
+  color = "black",
   variant = "solid",
   className = "",
   loading = false,
@@ -88,7 +60,7 @@ const Button: React.FC<Props> = ({
     <button
       aria-label={children as string}
       title={children as string}
-      className={`rounded-md font-bold text-base flex items-center justify-center cursor-pointer gap-2 self-center transition-colors border border-solid
+      className={`rounded-full font-bold text-base flex items-center justify-center cursor-pointer gap-2 self-center transition-colors border border-solid
          ${disabled ? "cursor-not-allowed opacity-40" : ""}
          ${children ? sizes[size] : iconSized[size]}
          ${colors[color][variant]}
