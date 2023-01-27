@@ -4,6 +4,7 @@ import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
 import { BsFillTagFill } from "react-icons/bs";
 import { FaCalendarAlt } from "react-icons/fa";
+import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
@@ -52,18 +53,19 @@ const Card: FC<NoteProps> = ({
       <Link href={`/${nip19.noteEncode(noteId!)}`} className="p-5 block">
         <div className="flex flex-col gap-3 w-full">
           {title ? (
-            <h3 className="text-2xl font-semibold  twolines">
-              {title}
-            </h3>
+            <h3 className="text-2xl font-semibold  twolines">{title}</h3>
           ) : null}
           <div className="flex gap-5 opacity-70 flex-col md:flex-row flex-wrap">
             {profile ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
+                  <img
+                    className="rounded-full w-6 h-6 object-cover"
+                    src={data?.picture || DUMMY_PROFILE_API(data?.name || npub)}
+                    alt={data?.name}
+                  />
                   <div>
-                    <span className="">
-                      {data?.name || shortenHash(npub)!}
-                    </span>
+                    <span className="">{data?.name || shortenHash(npub)!}</span>
                   </div>
                 </div>
               </div>
