@@ -53,7 +53,7 @@ const Article: FC<NoteProps> = ({
         <DatePosted timestamp={createdAt} />
       </div>
 
-      <Link href={`/${event.id}`}>
+      <Link href={`/${nip19.noteEncode(noteId!)}`}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
