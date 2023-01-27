@@ -30,7 +30,7 @@ export default function Contact({ contact }: any) {
       >
         <img
           className="rounded-full w-8 h-8"
-          src={contentObj?.picture || DUMMY_PROFILE_API(npub)}
+          src={contentObj?.picture || DUMMY_PROFILE_API(npub!)}
           alt={name}
         />
         <span className="">{name}</span>
