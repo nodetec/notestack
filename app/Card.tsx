@@ -32,6 +32,9 @@ const Card: FC<NoteProps> = ({
 
   const title = getTagValues("subject", tags);
   // const actualTags = getTagValues("tags", tags);
+  const markdownImageContent =
+  /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
+
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
@@ -47,8 +50,6 @@ const Card: FC<NoteProps> = ({
     content.length > MAX_LENGTH
       ? setupMarkdown(content.slice(0, MAX_LENGTH).concat("...read more"))
       : setupMarkdown(content.slice(0, MAX_LENGTH));
-  const markdownImageContent =
-  /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
 
   return (
     <li
