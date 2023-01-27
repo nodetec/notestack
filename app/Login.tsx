@@ -66,7 +66,7 @@ export default function Login() {
         <AccountButton pubkey={keys?.publicKey} />
       ) : (
         <Button
-          color="zincDark"
+          
           variant="outline"
           onClick={handleClick}
           size="sm"
@@ -79,7 +79,7 @@ export default function Login() {
         <Button
           className="w-full"
           onClick={loginHandler}
-          color="blue"
+          
           size="sm"
           icon={<BsLightningChargeFill size="14" />}
         >

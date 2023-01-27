@@ -42,7 +42,7 @@ const Popup = ({
           icon={<IoMdCloseCircleOutline size={24} />}
           className="absolute w-fit right-0 top-0 text-accent opacity-70 hover:opacity-100"
           onClick={() => setIsOpen(false)}
-          color="transparent"
+          
         />
         <div className="bg-primary flex flex-col justify-center items-stretch gap-4 p-10">
           <h3 className="text-xl text-accent text-center pb-4">{title}</h3>
