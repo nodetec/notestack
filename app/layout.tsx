@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className="bg-primary flex flex-col container p-6 m-auto md:max-w-[90%] 2xl:max-w-[80%] min-h-screen">
+      <body className=" flex flex-col container p-6 m-auto md:max-w-[90%] 2xl:max-w-[80%] min-h-screen">
         <Providers>
           <Header />
           {children}
