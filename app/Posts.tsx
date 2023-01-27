@@ -12,7 +12,7 @@ const Posts = ({ title, children, className, ...props }: PostsProps) => {
   const router = useRouter();
   return (
     <div
-      className={`flex flex-col justify-center flex-1 gap-3 max-w-[45rem] justify-self-center py-8 ${
+      className={`flex flex-col justify-center flex-1 gap-3 w-full max-w-[45rem] justify-self-center py-8 ${
         className ? className : ""
       }`}
       {...props}
