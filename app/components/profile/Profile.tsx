@@ -4,7 +4,7 @@ import Contacts from "./Contacts";
 // import LatestNotes from "./LatestNotes";
 import UserCard from "./UserCard";
 
-import { useContext } from "react";
+import { Fragment, useContext } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
@@ -67,23 +67,21 @@ export default function Profile({ npub, setName }: any) {
   const loggedInContactList = loggedInContactEvents[0]?.tags;
 
   return (
-    <div className="flex flex-col md:pl-10 md:border-l md:border-l-light-gray items-stretch h-full">
-      <div className="sticky top-20">
-        <UserCard
-          loggedInPubkey={loggedInPubkey}
-          loggedInContactList={loggedInContactList}
-          profileContactList={profileContactList}
-          profilePubkey={profilePubkey}
-          name={name}
-          npub={npub}
-          nip05={nip05}
-          about={about}
-          picture={picture}
-          lud06={lud06}
-          lud16={lud16}
-        />
-        {profileContactList && <Contacts userContacts={profileContactList} />}
-      </div>
-    </div>
+    <Fragment>
+      <UserCard
+        loggedInPubkey={loggedInPubkey}
+        loggedInContactList={loggedInContactList}
+        profileContactList={profileContactList}
+        profilePubkey={profilePubkey}
+        name={name}
+        npub={npub}
+        nip05={nip05}
+        about={about}
+        picture={picture}
+        lud06={lud06}
+        lud16={lud16}
+      />
+      {profileContactList && <Contacts userContacts={profileContactList} />}
+    </Fragment>
   );
 }
