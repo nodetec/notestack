@@ -34,6 +34,9 @@ module.exports = {
       maxHeight: {
         192: "48rem",
       },
+      clipPath: {
+        "clip-path": "rect(0px, 18px, 14px, -4px)",
+      }
     },
   },
   plugins: [require("@tailwindcss/typography")],
