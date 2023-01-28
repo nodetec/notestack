@@ -41,7 +41,7 @@ export default function LatestNotes({ profilePubkey, name }: any) {
   }, [events, currentPage]);
 
   return (
-    <Posts className="mt-16"
+    <Posts className="my-16"
       title={
         events.length > 0
           ? `${name ? `${name}'s l` : "L"}atest notes`
