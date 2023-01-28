@@ -302,7 +302,7 @@ export default function UserCard({
         setIsOpen={setIsTipSuccessOpen}
       >
         <h4 className="text-lg text-green-500 text-center pb-4">{`You sent ${name} ${tippedAmount} sat(s)!`}</h4>
-        <h5 className="text   overflow-x-scroll rounded-md text-center p-4">
+        <h5 className="text overflow-x-scroll rounded-md text-center p-4">
           <div className="cursor-text flex justify-start whitespace-nowrap items-center">
             <div className="mr-2">{"Payment Hash:"}</div>
             <div className="pr-4">{paymentHash}</div>
@@ -310,7 +310,7 @@ export default function UserCard({
         </h5>
       </Popup>
       {loggedInPubkey === profilePubkey ? (
-        <Popup title="Edit Profile" isOpen={isOpen} setIsOpen={setIsOpen}>
+        <Popup title="Edit Profile" isOpen={isOpen} setIsOpen={setIsOpen} className="h-3/4 max-h-192 inset-0 overflow-auto scroll-smooth">
           <PopupInput
             value={newName}
             onChange={(e) => setNewName(e.target.value)}

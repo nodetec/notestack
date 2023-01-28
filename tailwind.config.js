@@ -23,6 +23,9 @@ module.exports = {
       boxShadow: {
         "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",
       },
+      maxHeight: {
+        '192': '48rem',
+      }
     },
   },
   plugins: [require("@tailwindcss/typography")],

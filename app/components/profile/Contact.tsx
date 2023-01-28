@@ -24,11 +24,16 @@ export default function Contact({ contact }: any) {
     console.log("Error parsing content");
   }
 
+  const scrollToTop = () => {
+    window.scrollTo(0, 0)
+}
+
   return (
     <li className="flex items-center justify-between gap-2">
       <Link
         href={`/u/${nip19.npubEncode(pubkey)}`}
         className="text-sm flex items-center gap-4 py-1"
+        onClick={scrollToTop}
       >
         <img
           className="rounded-full w-5 h-5 object-cover bg-light-gray"
