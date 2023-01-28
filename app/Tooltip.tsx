@@ -48,7 +48,7 @@ const Tooltip: FC<TooltipProps> = ({
         {Component}
       </div>
       <div
-        className={`bg-white absolute mx-auto left-1/2 -translate-x-1/2 p-4 z-20 rounded-md shadow-profile-menu border-light-gray border text-sm
+        className={`bg-white absolute mx-auto left-1/2 -translate-x-1/2 p-4 z-20 rounded-md shadow-profile-menu border-light-gray border text-sm break-all
             before:absolute before:w-4 before:h-4 before:rotate-45 before:bg-white before:left-1/2 before:-translate-x-1/2 ${ArrowBorder[direction]
           }
             ${showOn === "hover" ? "invisible group-hover:visible" : ""}

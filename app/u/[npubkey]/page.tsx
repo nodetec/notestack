@@ -55,6 +55,7 @@ export default function ProfilePage() {
               Component={
                 <Button
                   color="transparent"
+                  variant="ghost"
                   size="sm"
                   icon={<BiDotsHorizontalRounded size="24" />}
                 />
@@ -62,6 +63,7 @@ export default function ProfilePage() {
             >
               <div className="flex flex-col gap-3 w-max">
                 <Button
+                  variant="ghost"
                   color="transparent"
                   size="xs"
                   onClick={() => copyToClipboard(npub)}

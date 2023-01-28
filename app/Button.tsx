@@ -33,7 +33,7 @@ const colors = {
     ghost: "text-green bg-transparent border-transparent hover:text-green-hover",
   },
   transparent: {
-    solid: "text-gray hover:text-black bg-transparent border-transparent",
+    solid: "text-gray hover:text-black hover:bg-light-gray bg-transparent border-transparent rounded-md",
     outline: "text-gray hover:text-black bg-transparent border-current",
     ghost: "text-gray hover:text-black bg-transparent border-transparent",
   },
