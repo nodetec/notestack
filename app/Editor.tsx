@@ -2,22 +2,22 @@
 import dynamic from "next/dynamic";
 import "@uiw/react-textarea-code-editor/dist.css";
 import Button from "./Button";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useContext, useRef, useState } from "react";
 import { AiFillEdit, AiFillEye } from "react-icons/ai";
 import { RiLayoutColumnFill } from "react-icons/ri";
 // import CreatePostButton from "./CreatePostButton";
+import { BlogContext } from "./context/blog-provider";
 
 const CodeEditor = dynamic(
   () => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
   { ssr: true }
 );
 
-const Editor = ({
-  //   text,
-  //   setText,
-  //   title,
-  //   setTitle,
-}: any) => {
+const Editor = ({}: //   text,
+//   setText,
+//   title,
+//   setTitle,
+any) => {
   const [mdPreviewMode, setMdPreviewMode] = useState<
     "off" | "preview" | "split"
   >("off");
@@ -29,6 +29,8 @@ const Editor = ({
   const [textValid, setTextValid] = useState(true);
   const [text, setText] = useState("");
   const [title, setTitle] = useState("");
+  // @ts-ignore
+  const { blog, setBlog } = useContext(BlogContext);
 
   const previewRef = useRef(null);
 
@@ -59,6 +61,18 @@ const Editor = ({
   const onPostSubmit = (validations: { title: boolean; text: boolean }) => {
     setTitleValid(validations.title);
     setTextValid(validations.text);
+  };
+
+  const handleTitleChange = (evn: any) => {
+    setTitle(evn.target.value);
+    setTitleValid(true);
+    setBlog({ ...blog, title: evn.target.value });
+  };
+
+  const handleTextChange = (evn: any) => {
+    setText(evn.target.value);
+    setTextValid(true);
+    setBlog({ ...blog, text: evn.target.value });
   };
 
   return (
@@ -115,10 +129,7 @@ const Editor = ({
                   focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent overflow-hidden"
                   value={title}
                   placeholder="Title..."
-                  onChange={(evn) => {
-                    setTitle(evn.target.value);
-                    setTitleValid(true);
-                  }}
+                  onChange={handleTitleChange}
                   onBlur={handleTitleFocus}
                   /* @ts-ignore */
                   titlefocused={titleFocused.toString()}
@@ -136,10 +147,7 @@ const Editor = ({
                   language="markdown"
                   placeholder="Enter your note..."
                   autoCapitalize="none"
-                  onChange={(evn) => {
-                    setText(evn.target.value);
-                    setTextValid(true);
-                  }}
+                  onChange={handleTextChange}
                   onBlur={handleTextFocus}
                   /* @ts-ignore */
                   textfocused={textFocused.toString()}

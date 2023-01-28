@@ -337,9 +337,9 @@
   "resolved" "https://registry.npmjs.org/@next/font/-/font-13.1.5.tgz"
   "version" "13.1.5"
 
-"@next/swc-darwin-x64@13.1.1":
-  "integrity" "sha512-qWr9qEn5nrnlhB0rtjSdR00RRZEtxg4EGvicIipqZWEyayPxhUu6NwKiG8wZiYZCLfJ5KWr66PGSNeDMGlNaiA=="
-  "resolved" "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-13.1.1.tgz"
+"@next/swc-darwin-arm64@13.1.1":
+  "integrity" "sha512-9zRJSSIwER5tu9ADDkPw5rIZ+Np44HTXpYMr0rkM656IvssowPxmhK0rTreC1gpUCYwFsRbxarUJnJsTWiutPg=="
+  "resolved" "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-13.1.1.tgz"
   "version" "13.1.1"
 
 "@noble/hashes@^0.5.7":
