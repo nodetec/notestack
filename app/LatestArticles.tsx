@@ -8,7 +8,7 @@ import Posts from "./Posts";
 
 const POSTS_PER_PAGE = 5;
 
-export default function LatestNotes({ profilePubkey, name }: any) {
+export default function LatestArticles({ profilePubkey, name }: any) {
   const { events } = useNostrEvents({
     filter: {
       kinds: [2222],
@@ -41,13 +41,7 @@ export default function LatestNotes({ profilePubkey, name }: any) {
   }, [events, currentPage]);
 
   return (
-    <Posts className="my-16"
-      title={
-        events.length > 0
-          ? `${name ? `${name}'s l` : "L"}atest notes`
-          : `${name ? `${name} has no notes yet` : "No notes yet"}`
-      }
-    >
+    <Posts className="my-8">
       <div className="flex flex-col gap-4 md:text-start">
         {slicedEvents.map((event) => (
           <Article key={event.id} event={event} dateOnly />

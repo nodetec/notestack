@@ -1,7 +1,6 @@
 import { useNostrEvents } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import Contacts from "./Contacts";
-// import LatestNotes from "./LatestNotes";
 import UserCard from "./UserCard";
 
 import { Fragment, useContext } from "react";
