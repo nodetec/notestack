@@ -3,6 +3,7 @@
 import Aside from "@/app/Aside";
 import Button from "@/app/Button";
 import Profile from "@/app/components/profile/Profile";
+import Content from "@/app/Content";
 import LatestArticles from "@/app/LatestArticles";
 import { shortenHash } from "@/app/lib/utils";
 import Main from "@/app/Main";
@@ -25,7 +26,7 @@ export default function ProfilePage() {
 
     return (
       <Main>
-        <div>
+        <Content>
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-5xl font-medium my-12">{name || shortenHash(npub)}</h1>
             <Button color="transparent" icon={<TbDots />} />
@@ -36,7 +37,7 @@ export default function ProfilePage() {
           ) : activeTab === "About" ? (
             <p>About</p>
           ) : null}
-        </div>
+        </Content>
         <Aside>
           <Profile npub={npub} setName={setName} />
         </Aside>

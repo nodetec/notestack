@@ -7,7 +7,7 @@ interface PostsProps extends HTMLAttributes<HTMLDivElement> {
 const Posts = ({ title, children, className, ...props }: PostsProps) => {
   return (
     <div
-      className={`flex flex-col justify-center gap-3 w-full max-w-[45rem] justify-self-center ${
+      className={`flex flex-col justify-center gap-3 w-full justify-self-center ${
         className ? className : ""
       }`}
       {...props}

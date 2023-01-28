@@ -5,6 +5,7 @@ import type { Event, Filter } from "nostr-tools";
 import { useEffect, useState } from "react";
 // import Posts from "../Posts";
 import BlogFeed from "./BlogFeed";
+import Content from "./Content";
 import Posts from "./Posts";
 
 export default function ArchivePage() {
@@ -49,14 +50,16 @@ export default function ArchivePage() {
   }, [filter, connectedRelays]);
 
   return (
-    <Posts title="Latest Posts" className="mx-auto my-16">
-      <BlogFeed
-        postPerPage={POSTS_PER_PAGE}
-        events={events}
-        numPages={numPages}
-        filter={filter}
-        setFilter={setFilter}
-      />
-    </Posts>
+    <Content>
+      <Posts title="Latest Posts" className="mx-auto my-16">
+        <BlogFeed
+          postPerPage={POSTS_PER_PAGE}
+          events={events}
+          numPages={numPages}
+          filter={filter}
+          setFilter={setFilter}
+        />
+      </Posts>
+    </Content>
   );
 }

@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
-import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
+import {
+  DetailedHTMLProps,
+  FC,
+  LiHTMLAttributes,
+  ReactNode,
+} from "react";
 import { BsFillTagFill } from "react-icons/bs";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
@@ -38,22 +43,32 @@ const Article: FC<NoteProps> = ({
   content = content.replace(markdownImagePattern, "");
 
   const scrollToTop = () => {
-    window.scrollTo(0, 0)
-}
+    window.scrollTo(0, 0);
+  };
 
   return (
-    <article className="py-8 border-b border-b-light-gray overflow-x-hidden" {...props}>
-      <div className="flex items-center gap-2">
-        <Link className="group" href={`u/${npub}`} onClick={scrollToTop}>
-          <Item className="text-gray-hover">
-            <img
-              className="rounded-full w-6 h-6 object-cover"
-              src={data?.picture || DUMMY_PROFILE_API(npub)}
-              alt={data?.name}
-            />
-            <span className="group-hover:underline">{data?.name || shortenHash(npub)!}</span>
-          </Item>
-        </Link>
+    <article
+      className="py-8 border-b border-b-light-gray overflow-x-hidden"
+      {...props}
+    >
+      <div className="flex items-center gap-2 pb-4">
+        {profile ? (
+          <div className="flex items-center gap-2">
+            <Link className="group" href={`u/${npub}`} onClick={scrollToTop}>
+              <Item className="text-gray-hover">
+                <img
+                  className="rounded-full w-6 h-6 object-cover"
+                  src={data?.picture || DUMMY_PROFILE_API(npub)}
+                  alt={data?.name}
+                />
+                <span className="group-hover:underline">
+                  {data?.name || shortenHash(npub)!}
+                </span>
+              </Item>
+            </Link>
+            <span>·</span>
+          </div>
+        ) : null}
         <DatePosted timestamp={createdAt} />
       </div>
 
@@ -92,7 +107,7 @@ const Item = ({
   className?: string;
   children: ReactNode;
 }) => (
-  <div className={`flex gap-2 items-center pb-4 ${className}`}>{children}</div>
+  <div className={`flex gap-2 items-center ${className}`}>{children}</div>
 );
 
 export const DatePosted = ({ timestamp }: { timestamp: number }) => {
@@ -106,10 +121,7 @@ export const DatePosted = ({ timestamp }: { timestamp: number }) => {
   };
 
   return (
-    <Item className="text-gray">
-      <span>·</span>
-      <span className="text-sm">{timeStampToDate(timestamp)}</span>
-    </Item>
+    <Item className="text-gray text-sm">{timeStampToDate(timestamp)}</Item>
   );
 };
 
