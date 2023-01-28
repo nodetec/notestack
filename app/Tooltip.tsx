@@ -61,7 +61,7 @@ const Tooltip: FC<TooltipProps> = ({
         <div
           className="fixed inset-0 z-10"
           onClick={() => setShowTooltip(false)}
-        ></div>
+        />
       ) : null}
     </div>
   );

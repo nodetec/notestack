@@ -60,13 +60,20 @@ export default function ProfilePage() {
                 />
               }
             >
-              <div className="flex gap-2 w-max">
+              <div className="flex flex-col gap-3 w-max">
                 <Button
                   color="transparent"
                   size="xs"
                   onClick={() => copyToClipboard(npub)}
                 >
                   Copy link to profile
+                </Button>
+                <Button
+                  color="transparent"
+                  size="xs"
+                  onClick={() => setNotifyMessage("click the ⚡ button under the user card")}
+                >
+                  Support this author
                 </Button>
               </div>
             </Tooltip>
