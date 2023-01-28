@@ -5,6 +5,7 @@ import Aside from "@/app/Aside";
 import Button from "@/app/Button";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
+import useCopy from "@/app/hooks/useCopy";
 import LatestArticles from "@/app/LatestArticles";
 import { shortenHash } from "@/app/lib/utils";
 import Main from "@/app/Main";
@@ -13,7 +14,7 @@ import Tooltip from "@/app/Tooltip";
 import { usePathname } from "next/navigation";
 import { nip19 } from "nostr-tools";
 import { useState } from "react";
-import { TbDots } from "react-icons/tb";
+import { BiDotsHorizontalRounded } from "react-icons/bi";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   });
   const TABS = ["Home", "About"];
   const [activeTab, setActiveTab] = useState<typeof TABS[number]>(TABS[0]);
+  const { copyToClipboard }  = useCopy();
   const pathname = usePathname();
 
   if (pathname) {
@@ -39,9 +41,17 @@ export default function ProfilePage() {
             <Tooltip
               direction="bottom"
               showOn="click"
-              Component={<Button color="transparent" icon={<TbDots />} />}
+              Component={<Button color="transparent" size="sm" icon={<BiDotsHorizontalRounded size="24" />} />}
             >
-              <p>hi</p>
+              <div className="flex gap-2 w-max">
+                <Button
+                  color="transparent"
+                  size="xs"
+                  onClick={() => copyToClipboard(npub)}
+                >
+                  Copy link to profile
+                </Button>
+              </div>
             </Tooltip>
           </div>
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />

@@ -5,7 +5,7 @@ const sizes = {
   lg: "py-5 px-6 text-lg",
   md: "py-3 px-4 text-base",
   sm: "py-2 px-4 text-sm",
-  xs: "p-0 text-xs",
+  xs: "p-0",
 };
 
 const iconSized = {
@@ -33,9 +33,9 @@ const colors = {
     ghost: "text-green bg-transparent border-transparent hover:text-green-hover",
   },
   transparent: {
-    solid: "text-black bg-transparent border-transparent",
-    outline: "text-black bg-transparent border-current",
-    ghost: "text-black bg-transparent border-transparent",
+    solid: "text-gray hover:text-black bg-transparent border-transparent",
+    outline: "text-gray hover:text-black bg-transparent border-current",
+    ghost: "text-gray hover:text-black bg-transparent border-transparent",
   },
 };
 
