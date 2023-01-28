@@ -10,7 +10,7 @@ import Button from "./Button";
 import Article from "./Article";
 import Pagination from "./components/util/Pagination";
 
-export default function ArchiveNotes({
+export default function BlogFeed({
   numPages,
   events,
   filter,
