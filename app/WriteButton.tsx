@@ -53,7 +53,7 @@ const WriteButton = () => {
 
       await pub.on("seen", async () => {
         console.log("OUR EVENT WAS SEEN");
-        router.push("/" + nip19.npubEncode(publicKey));
+        router.push("/u/" + nip19.npubEncode(publicKey));
       });
 
       pub.on("failed", (reason: any) => {
