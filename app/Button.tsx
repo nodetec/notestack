@@ -28,9 +28,9 @@ const colors = {
     ghost: "text-red bg-transparent border-transparent hover:text-red-hover",
   },
   green: {
-    solid: "text-white bg-green hover:bg-gray-hover border-transparent",
-    outline: "text-green bg-transparent border-current hover:text-gray-hover",
-    ghost: "text-green bg-transparent border-transparent hover:text-gray-hover",
+    solid: "text-white bg-green hover:bg-green-hover border-transparent",
+    outline: "text-green bg-transparent border-current hover:text-green-hover",
+    ghost: "text-green bg-transparent border-transparent hover:text-green-hover",
   },
   transparent: {
     solid: "text-black bg-transparent border-transparent",

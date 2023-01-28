@@ -44,14 +44,14 @@ const Article: FC<NoteProps> = ({
   return (
     <article className="py-8 border-b border-b-light-gray overflow-x-hidden" {...props}>
       <div className="flex items-center gap-2">
-        <Link href={`u/${npub}`} onClick={scrollToTop}>
+        <Link className="group" href={`u/${npub}`} onClick={scrollToTop}>
           <Item className="text-gray-hover">
             <img
               className="rounded-full w-6 h-6 object-cover"
               src={data?.picture || DUMMY_PROFILE_API(npub)}
               alt={data?.name}
             />
-            <span className="hover:underline">{data?.name || shortenHash(npub)!}</span>
+            <span className="group-hover:underline">{data?.name || shortenHash(npub)!}</span>
           </Item>
         </Link>
         <DatePosted timestamp={createdAt} />

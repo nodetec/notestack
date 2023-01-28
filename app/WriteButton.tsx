@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { NostrService } from "./lib/nostr";
 import { KeysContext } from "./context/keys-provider.jsx";
 import { nip19 } from "nostr-tools";
+import Button from "./Button";
 
 const WriteButton = () => {
   const pathname = usePathname();
@@ -65,15 +66,16 @@ const WriteButton = () => {
   return (
     <>
       {pathname === "/write" ? (
-        <button
-          className="text-sm font-light rounded-full bg-green text-white py-1 px-3"
+        <Button
+          size="sm"
+          color="green"
           onClick={handlePublish}
         >
           Publish
-        </button>
+        </Button>
       ) : (
         <Link
-          className="flex gap-2 text-neutral-500 hover:text-black"
+          className="flex gap-2 text-gray hover:text-gray-hover"
           href="/write"
         >
           <SlNote size="20" />
