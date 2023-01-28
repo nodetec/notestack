@@ -37,23 +37,27 @@ const Article: FC<NoteProps> = ({
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
+  const scrollToTop = () => {
+    window.scrollTo(0, 0)
+}
+
   return (
     <article className="py-8 border-b border-b-light-gray overflow-x-hidden" {...props}>
       <div className="flex items-center gap-2">
-        <Link href={`u/${npub}`}>
+        <Link href={`u/${npub}`} onClick={scrollToTop}>
           <Item className="text-gray-hover">
             <img
               className="rounded-full w-6 h-6 object-cover"
               src={data?.picture || DUMMY_PROFILE_API(npub)}
               alt={data?.name}
             />
-            <span>{data?.name || shortenHash(npub)!}</span>
+            <span className="hover:underline">{data?.name || shortenHash(npub)!}</span>
           </Item>
         </Link>
         <DatePosted timestamp={createdAt} />
       </div>
 
-      <Link href={`/${nip19.noteEncode(noteId!)}`}>
+      <Link href={`/${nip19.noteEncode(noteId!)}`} onClick={scrollToTop}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
@@ -69,7 +73,7 @@ const Article: FC<NoteProps> = ({
           {markdownImageContent ? (
             <div>
               <img
-                className="w-32 h-32 object-cover"
+                className="w-32 h-32 object-contain"
                 src={markdownImageContent.groups?.filename}
                 alt={markdownImageContent.groups?.title}
               />
