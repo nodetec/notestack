@@ -3,11 +3,11 @@ import { nip19 } from "nostr-tools";
 import Contacts from "./Contacts";
 import UserCard from "./UserCard";
 
-import { Fragment, useContext } from "react";
+import { Fragment, memo, useContext } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
-export default function Profile({ npub, setName }: any) {
+const Profile = ({ npub, setProfileInfo }: any) => {
   const profilePubkey = nip19.decode(npub).data.valueOf();
 
   // @ts-ignore
@@ -43,12 +43,12 @@ export default function Profile({ npub, setName }: any) {
     const content = profileMetadata[0]?.content;
     const contentObj = JSON.parse(content);
     name = contentObj?.name;
-    setName(name);
     nip05 = contentObj?.nip05;
     about = contentObj?.about;
     lud06 = contentObj?.lud06;
     lud16 = contentObj?.lud16;
     picture = contentObj?.picture || DUMMY_PROFILE_API(npub);
+    setProfileInfo({name, about, picture});
   } catch {
     console.log("Error parsing content");
   }
@@ -85,3 +85,5 @@ export default function Profile({ npub, setName }: any) {
     </Fragment>
   );
 }
+
+export default memo(Profile);

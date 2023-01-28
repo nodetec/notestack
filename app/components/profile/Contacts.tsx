@@ -31,7 +31,7 @@ export default function Contacts({ userContacts, npub }: any) {
               <Contact key={contact.id} contact={contact} />
             ))}
       </ul>
-      <Link href={`/${npub}/following`} className="text-gray hover:text-gray-hover text-xs">See all ({uniqueContacts.length})</Link> 
+      <Link href={`/${npub}/following`} className="text-gray hover:text-gray-hover text-xs">See all ({userContacts.length})</Link> 
     </div>
   );
 }

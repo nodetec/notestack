@@ -1,5 +1,6 @@
 "use client";
 
+import About from "@/app/About";
 import Aside from "@/app/Aside";
 import Button from "@/app/Button";
 import Profile from "@/app/components/profile/Profile";
@@ -14,32 +15,31 @@ import { useState } from "react";
 import { TbDots } from "react-icons/tb";
 
 export default function ProfilePage() {
-  const [name, setName] = useState();
+  const [profileInfo, setProfileInfo] = useState({name: "", about: "", picture: ""});
   const TABS = ["Home", "About"];
   const [activeTab, setActiveTab] = useState<typeof TABS[number]>(TABS[0]);
   const pathname = usePathname();
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
-
     const profilePubkey = nip19.decode(npub).data.valueOf();
 
     return (
       <Main>
         <Content>
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-5xl font-medium my-12">{name || shortenHash(npub)}</h1>
+            <h1 className="text-5xl font-medium my-12">{profileInfo.name || shortenHash(npub)}</h1>
             <Button color="transparent" icon={<TbDots />} />
           </div>
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "Home" ? (
-            <LatestArticles name={name} profilePubkey={profilePubkey} />
+            <LatestArticles name={profileInfo.name} profilePubkey={profilePubkey} />
           ) : activeTab === "About" ? (
-            <p>About</p>
+            <About about={profileInfo.about} />
           ) : null}
         </Content>
         <Aside>
-          <Profile npub={npub} setName={setName} />
+          <Profile npub={npub} setProfileInfo={setProfileInfo} />
         </Aside>
       </Main>
     );
