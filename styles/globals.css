@@ -11,3 +11,9 @@
   line-height: 1.5;
   max-height: 5ch;
 }
+
+.w-tc-editor {
+  background-color: #fff !important;
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
+}

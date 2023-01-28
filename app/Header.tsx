@@ -10,7 +10,7 @@ const Header = () => {
         <div className="flex items-center justify-between w-full gap-4 flex-col sm:flex-row">
           <Logo />
           <div className="flex gap-4 items-center">
-            <Link className="flex gap-2 text-neutral-500 hover:text-black" href="/new-blog">
+            <Link className="flex gap-2 text-neutral-500 hover:text-black" href="/write">
               <SlNote size="20" />
               <span className="text-sm">Write</span>
             </Link>

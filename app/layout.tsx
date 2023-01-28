@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={main.variable}>
+    <html lang="en" className={main.variable} data-color-mode="light">
       <head />
       <body className="font-main">
         <Providers>
