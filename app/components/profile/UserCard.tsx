@@ -25,7 +25,7 @@ export default function UserCard({
   nip05,
   npub,
   about,
-  followersCount,
+  followingsCount,
   picture,
   profilePubkey,
   loggedInContactList,
@@ -245,7 +245,7 @@ export default function UserCard({
         />
       <span>{name}</span>
       </Link>
-      <Link className="text-base text-gray hover:text-gray-hover my-2" href={`/${npub}/followers`}>{followersCount} Followers</Link>
+      <Link className="text-base text-gray hover:text-gray-hover my-2" href={`/${npub}/following`}>{followingsCount} Followings</Link>
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">

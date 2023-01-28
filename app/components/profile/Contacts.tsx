@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { useNostrEvents } from "nostr-react";
 import Contact from "./Contact";
 
-export default function Contacts({ userContacts }: any) {
+export default function Contacts({ userContacts, npub }: any) {
   const contactPublicKeys = userContacts.map((contact: any) => {
     return contact[1];
   });
@@ -30,6 +31,7 @@ export default function Contacts({ userContacts }: any) {
               <Contact key={contact.id} contact={contact} />
             ))}
       </ul>
+      <Link href={`/${npub}/following`} className="text-gray hover:text-gray-hover text-xs">See all ({uniqueContacts.length})</Link> 
     </div>
   );
 }

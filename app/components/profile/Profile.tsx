@@ -72,7 +72,7 @@ export default function Profile({ npub, setName }: any) {
         loggedInContactList={loggedInContactList}
         profileContactList={profileContactList}
         profilePubkey={profilePubkey}
-        followersCount={profileContactList?.length}
+        followingsCount={profileContactList?.length}
         name={name}
         npub={npub}
         nip05={nip05}
@@ -81,7 +81,7 @@ export default function Profile({ npub, setName }: any) {
         lud06={lud06}
         lud16={lud16}
       />
-      {profileContactList && <Contacts userContacts={profileContactList} />}
+      {profileContactList && <Contacts npub={npub} userContacts={profileContactList} />}
     </Fragment>
   );
 }
