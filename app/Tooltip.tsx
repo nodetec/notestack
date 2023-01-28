@@ -1,3 +1,4 @@
+"use client";
 import { DetailedHTMLProps, FC, HTMLAttributes, useState } from "react";
 
 interface TooltipProps
@@ -56,6 +57,12 @@ const Tooltip: FC<TooltipProps> = ({
       >
         {children}
       </div>
+      {showOn === "click" && showTooltip ? (
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setShowTooltip(false)}
+        ></div>
+      ) : null}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import Providers from "./context/providers.jsx";
 import Header from "./Header";
 import { Roboto } from "@next/font/google";
+import Notification from "@/app/Notification";
 
 const main = Roboto({
   variable: "--main-font",
@@ -20,7 +21,10 @@ export default function RootLayout({
       <body className="font-main">
         <Providers>
           <Header />
-          <div className="container relative flex flex-col px-4 mx-auto min-h-screen">{children}</div>
+          <div className="container relative flex flex-col px-4 mx-auto min-h-screen">
+            {children}
+          </div>
+          <Notification />
         </Providers>
       </body>
     </html>
