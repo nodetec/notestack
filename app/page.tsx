@@ -36,7 +36,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    console.log("something should happen when I click filter")
+    console.log("something should happen when I click filter");
     connectedRelays.forEach((relay) => {
       let sub = relay.sub([filter]);
       let eventArray: Event[] = [];
@@ -126,6 +126,17 @@ export default function HomePage() {
     });
   }
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop < document.documentElement.offsetHeight - 10) return;
+      console.log("it worked")
+      setAddedPosts((prev) => prev + 10);
+    };
+
+    document.addEventListener("scroll", handleScroll);
+    return () => document.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <Content>
       <div className="flex gap-2 rounded-md p-2 mt-16">
@@ -153,12 +164,6 @@ export default function HomePage() {
         {events.slice(0, addedPosts).map((event: Event) => {
           return <Article key={event.id} event={event} profile />;
         })}
-        <button
-          className="bg-blue-400 rounded-lg p-4"
-          onClick={() => setAddedPosts(addedPosts + 10)}
-        >
-          load more
-        </button>
       </Posts>
     </Content>
   );
