@@ -121,12 +121,8 @@ export default function BlogFeed({ profilePubkey, initialFilter, profile }: any)
 
   useEffect(() => {
     const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop <
-        document.documentElement.offsetHeight - 10
-      )
-        return;
-      console.log("it worked");
+      const scrollTop = window.innerHeight + document.documentElement.scrollTop;
+      if (Math.ceil(scrollTop) !== document.documentElement.offsetHeight) return;
       setAddedPosts((prev) => prev + 10);
     };
 
