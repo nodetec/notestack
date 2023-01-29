@@ -10,7 +10,7 @@ export const RELAYS = [
   // "wss://relay.nostr.info",
 ];
 
-export const HOST = "https://notebin.org";
+export const HOST = "https://blogstack.io";
 
 export const DUMMY_PROFILE_API = (seed: string) => {
   const style:

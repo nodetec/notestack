@@ -42,7 +42,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
 
   return (
     <Fragment>
-      <div className="mx-auto w-full mb-4 prose prose-xl text-accent flex items-center justify-between gap-2">
+      <div className="mx-auto w-full prose prose-xl text-accent flex items-center justify-between gap-2">
         <div className="flex items-center gap-4 w-full">
           <Button
             className="mb-auto"
