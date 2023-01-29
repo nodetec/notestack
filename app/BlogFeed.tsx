@@ -1,6 +1,6 @@
 "use client";
 import { useNostr } from "nostr-react";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { KeysContext } from "./context/keys-provider";
 import type { Event } from "nostr-tools";
 import { useSearchParams } from "next/navigation";
@@ -12,7 +12,9 @@ import Pagination from "./components/util/Pagination";
 
 export default function BlogFeed({
   numPages,
+  setNumPages,
   events,
+  setEvents,
   filter,
   setFilter,
   postPerPage,
@@ -20,17 +22,23 @@ export default function BlogFeed({
   // @ts-ignore
   const { keys: loggedInUserKeys } = useContext(KeysContext);
 
+  const { connectedRelays } = useNostr();
+
   const searchParams = useSearchParams();
 
   const pageSearchParam = searchParams.get("page");
 
   const currentPage = pageSearchParam ? parseInt(pageSearchParam) : 1;
 
+  const [localEvents, setLocalEvents] = useState([]);
+
+  useEffect(() => {
+    setLocalEvents(events);
+  }, [connectedRelays, events]);
+
   useEffect(() => {
     console.log("searchParams", searchParams.get("page"));
   }, [searchParams]);
-
-  const { connectedRelays } = useNostr();
 
   function handleFollowFilter(e: any) {
     e.preventDefault();
@@ -63,6 +71,45 @@ export default function BlogFeed({
     });
   }
 
+  useEffect(() => {
+    console.log("NUMPAGES:", numPages);
+    console.log("CURRENTPAGE:", currentPage);
+
+    if (currentPage > numPages * 0.8) {
+      console.log("LOAD MORE");
+
+      if (events && events.slice(-1)) {
+        const lastEvent = events.slice(-1)[0];
+        // console.log("LAST EVENT date:", lastEvent.created_at);
+      }
+
+      connectedRelays.forEach((relay) => {
+        let sub = relay.sub([filter]);
+        let eventArray: Event[] = [];
+        sub.on("event", (event: Event) => {
+          eventArray.push(event);
+        });
+        sub.on("eose", () => {
+          console.log("EOSE");
+          console.log("eventArray", eventArray);
+          // localEvents.concat(eventArray)
+          const newEvents = events.concat(eventArray);
+          setLocalEvents(newEvents);
+          // console.log("CONCAT EVENTS", localEvents.concat(eventArray));
+
+          if (newEvents.length) {
+            const length = Math.ceil(newEvents.length / 10);
+            if (length) {
+              setNumPages(length);
+            }
+          }
+          /* console.log("numPages", numPages); */
+          sub.unsub();
+        });
+      });
+    }
+  }, [numPages, currentPage]);
+
   function handleExploreFilter(e: any) {
     e.preventDefault();
     setFilter({
@@ -94,7 +141,7 @@ export default function BlogFeed({
         </Button>
       </div>
       <div className="flex flex-col">
-        {events
+        {localEvents
           .slice(
             currentPage * postPerPage - postPerPage,
             currentPage * postPerPage

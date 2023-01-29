@@ -16,7 +16,8 @@ const WriteButton = () => {
   const pathname = usePathname();
   const router = useRouter();
   // @ts-ignore
-  const { blog, setBlog } = useContext(BlogContext);
+  const { blog } = useContext(BlogContext);
+
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const { publish } = useNostr();
@@ -25,8 +26,6 @@ const WriteButton = () => {
 
   const handlePublish = async () => {
     const { title, text } = blog;
-    console.log("TITLE:", title);
-    console.log("TEXT:", text);
 
     const tags = [
       ["client", "blogstack.io"],
@@ -66,11 +65,7 @@ const WriteButton = () => {
   return (
     <>
       {pathname === "/write" ? (
-        <Button
-          size="sm"
-          color="green"
-          onClick={handlePublish}
-        >
+        <Button size="sm" color="green" onClick={handlePublish}>
           Publish
         </Button>
       ) : (

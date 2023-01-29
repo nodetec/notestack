@@ -2,23 +2,32 @@
 import { usePathname } from "next/navigation";
 import { useNostr } from "nostr-react";
 import type { Event, Filter } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { useEffect, useContext, useState } from "react";
+import { HiUserAdd } from "react-icons/hi";
+import { ImSearch } from "react-icons/im";
+import Article from "./Article";
+import Button from "./Button";
 // import Posts from "../Posts";
-import BlogFeed from "./BlogFeed";
 import Content from "./Content";
 import Posts from "./Posts";
+import { KeysContext } from "./context/keys-provider";
 
 export default function ArchivePage() {
   const pathname = usePathname();
-  const POSTS_PER_PAGE = 10;
+  const INITIAL_POSTS = 100;
+  const INITIAL_SHOWN_POSTS = 10;
   const { connectedRelays } = useNostr();
   const [events, setEvents] = useState<Event[]>([]);
-  const [numPages, setNumPages] = useState<number>(0);
+  const [addedPosts, setAddedPosts] = useState<number>(INITIAL_SHOWN_POSTS);
+
+  // @ts-ignore
+  const { keys: loggedInUserKeys } = useContext(KeysContext);
 
   const [filter, setFilter] = useState<Filter>({
     kinds: [2222],
-    limit: 100,
+    limit: INITIAL_POSTS,
     authors: undefined,
+    until: undefined,
   });
 
   if (pathname) {
@@ -27,6 +36,7 @@ export default function ArchivePage() {
   }
 
   useEffect(() => {
+    console.log("something should happen when I click filter")
     connectedRelays.forEach((relay) => {
       let sub = relay.sub([filter]);
       let eventArray: Event[] = [];
@@ -37,28 +47,118 @@ export default function ArchivePage() {
         console.log("EOSE");
         console.log("eventArray", eventArray);
         setEvents(eventArray);
-        if (eventArray.length) {
-          const length = Math.ceil(eventArray.length / POSTS_PER_PAGE);
-          if (length) {
-            setNumPages(length);
-          }
-        }
-        /* console.log("numPages", numPages); */
         sub.unsub();
       });
     });
   }, [filter, connectedRelays]);
 
+  useEffect(() => {
+    console.log("ADDED POSTS:", addedPosts);
+    if (addedPosts > 0.8 * events.length) {
+      console.log("added posts is:", addedPosts);
+      const currentEvents = events;
+
+      // console.log("latest event:", events.slice(-1)[0]);
+
+      let until: any;
+
+      if (events.length > 0) {
+        const lastEvent = events.slice(-1)[0];
+        until = lastEvent.created_at;
+        console.log("until", until);
+      }
+
+      connectedRelays.forEach((relay) => {
+        filter.until = until;
+        let sub = relay.sub([filter]);
+        let eventArray: Event[] = [];
+        sub.on("event", (event: Event) => {
+          eventArray.push(event);
+        });
+        sub.on("eose", () => {
+          console.log("EOSE");
+          console.log("eventArray", eventArray);
+          setEvents(currentEvents.concat(eventArray));
+          sub.unsub();
+        });
+      });
+    }
+  }, [addedPosts]);
+
+  function handleFollowFilter(e: any) {
+    e.preventDefault();
+    setAddedPosts(INITIAL_SHOWN_POSTS);
+
+    // let followedAuthors: Set<string> = new Set();
+    let followedAuthors: string[];
+
+    connectedRelays.forEach((relay) => {
+      let sub = relay.sub([
+        {
+          authors: [loggedInUserKeys.publicKey],
+          kinds: [3],
+          limit: 100,
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        // eventArray.push(event);
+        // TODO: we could go through each event and add each lis of followers to a set, but for now we'll just use one
+        followedAuthors = event.tags.map((pair: string[]) => pair[1]);
+        console.log("followedAuthors", followedAuthors);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE");
+        setFilter({
+          ...filter,
+          authors: followedAuthors,
+        });
+        sub.unsub();
+      });
+    });
+  }
+
+  function handleExploreFilter(e: any) {
+    e.preventDefault();
+    setAddedPosts(INITIAL_SHOWN_POSTS);
+    setFilter({
+      ...filter,
+      authors: undefined,
+    });
+  }
+
   return (
     <Content>
+      <div className="flex gap-2 rounded-md p-2">
+        <Button
+          variant={filter.authors?.length ? "ghost" : "solid"}
+          onClick={handleExploreFilter}
+          size="sm"
+          icon={<ImSearch />}
+          className="w-full"
+        >
+          explore
+        </Button>
+        <Button
+          variant={filter.authors?.length ? "solid" : "ghost"}
+          onClick={handleFollowFilter}
+          icon={<HiUserAdd />}
+          size="sm"
+          className="w-full"
+        >
+          following
+        </Button>
+      </div>
+
       <Posts title="Latest Posts" className="mx-auto my-16">
-        <BlogFeed
-          postPerPage={POSTS_PER_PAGE}
-          events={events}
-          numPages={numPages}
-          filter={filter}
-          setFilter={setFilter}
-        />
+        {events.slice(0, addedPosts).map((event: Event) => {
+          return <Article key={event.id} event={event} profile />;
+        })}
+        <button
+          className="bg-blue-400 rounded-lg p-4"
+          onClick={() => setAddedPosts(addedPosts + 10)}
+        >
+          load more
+        </button>
       </Posts>
     </Content>
   );
