@@ -28,7 +28,6 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
   }
 
   useEffect(() => {
-    console.log("something should happen when I click filter");
     connectedRelays.forEach((relay) => {
       let sub = relay.sub([filter]);
       let eventArray: Event[] = [];
@@ -103,6 +102,7 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
         setFilter({
           ...filter,
           authors: followedAuthors,
+          until: undefined,
         });
         sub.unsub();
       });
@@ -115,6 +115,7 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
     setFilter({
       ...filter,
       authors: undefined,
+      until: undefined,
     });
   }
 
@@ -160,7 +161,7 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
 
       <Posts title="Latest Posts" className="mx-auto mb-16">
         {events.slice(0, addedPosts).map((event: Event) => {
-          return <Article key={event.id} event={event} profile />
+          return <Article key={event.id} event={event} profile />;
         })}
       </Posts>
     </>
