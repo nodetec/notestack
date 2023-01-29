@@ -27,7 +27,7 @@ const RecommendedEvents = () => {
         {events.map((event) => (
           <Event
             key={event.id}
-            noteId={event.id}
+            noteId={event.id!}
             pubkey={event.pubkey}
             title={getTagValues("subject", event.tags)}
           />
