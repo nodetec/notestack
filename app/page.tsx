@@ -3,6 +3,7 @@ import Aside from "./Aside";
 import BlogFeed from "./BlogFeed";
 import Content from "./Content";
 import Main from "./Main";
+import RecommendedEvents from "./RecommendedEvents";
 import RecommendedTopics from "./RecommendedTopics";
 
 export default function HomePage() {
@@ -19,6 +20,7 @@ export default function HomePage() {
         <BlogFeed initialFilter={initialFilter} />
       </Content>
       <Aside>
+        <RecommendedEvents />
         <RecommendedTopics />
       </Aside>
     </Main>

@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import AsideSection from "./AsideSection";
 
 const TOPICS = [
   "nostr",
@@ -10,9 +12,8 @@ const TOPICS = [
 ];
 
 const RecommendedTopics = () => (
-  <div>
-    <h2 className="text-sm font-medium">Recommended Topics</h2>
-    <ul className="flex items-center gap-2 text-sm flex-wrap mt-2">
+  <AsideSection title="Recommended Topics">
+    <ul className="flex items-center gap-2 text-sm flex-wrap">
       {TOPICS.map((topic) => (
         <li key={topic}>
           <Link
@@ -24,7 +25,7 @@ const RecommendedTopics = () => (
         </li>
       ))}
     </ul>
-  </div>
+  </AsideSection>
 );
 
 export default RecommendedTopics;
