@@ -41,6 +41,7 @@ const Popup = ({
         <Button
           icon={<IoMdClose size={24} />}
           color="transparent"
+          variant="ghost"
           className="absolute w-fit right-0 top-0  opacity-70 hover:opacity-100"
           onClick={() => setIsOpen(false)}
           

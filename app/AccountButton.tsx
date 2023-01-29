@@ -19,6 +19,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
     <div className="relative">
       <Button
         color="transparent"
+        variant="ghost"
         size="xs"
         icon={<IoChevronDown />}
         iconAfter
