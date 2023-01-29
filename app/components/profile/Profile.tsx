@@ -72,7 +72,6 @@ const Profile = ({ npub, setProfileInfo }: any) => {
         loggedInContactList={loggedInContactList}
         profileContactList={profileContactList}
         profilePubkey={profilePubkey}
-        followingsCount={profileContactList?.length}
         name={name}
         npub={npub}
         nip05={nip05}

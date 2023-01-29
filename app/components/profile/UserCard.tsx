@@ -25,7 +25,6 @@ export default function UserCard({
   nip05,
   npub,
   about,
-  followingsCount,
   picture,
   profilePubkey,
   loggedInContactList,
@@ -257,7 +256,6 @@ export default function UserCard({
       {/* TODO: we can do a overlay popup for this */}
       <Link
         className="text-base text-gray hover:text-gray-hover my-2"
-        // href={`/${npub}/following`}
         href={`/u/${npub}`}
       >
         {followers.length > 100 ? "100+" : followers.length} Followers

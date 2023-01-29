@@ -157,7 +157,7 @@ export default function BlogFeed({ profilePubkey, initialFilter, profile }: any)
 
       <Posts title="Latest Posts" className="mx-auto mb-16">
         {events.slice(0, addedPosts).map((event: Event) => {
-          return <Article key={event.id} event={event} profile={profile} />;
+          return <Article key={event.id} event={event} profile={profile} />
         })}
       </Posts>
     </>
