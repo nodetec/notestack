@@ -94,6 +94,7 @@ export default function ProfilePage() {
             <BlogFeed
               profilePubkey={profilePubkey}
               initialFilter={initialFilter}
+              profile={false}
             />
           ) : activeTab === "About" ? (
             <About about={profileInfo.about} />
