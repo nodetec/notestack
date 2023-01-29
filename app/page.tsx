@@ -12,7 +12,7 @@ import Content from "./Content";
 import Posts from "./Posts";
 import { KeysContext } from "./context/keys-provider";
 
-export default function ArchivePage() {
+export default function HomePage() {
   const pathname = usePathname();
   const INITIAL_POSTS = 100;
   const INITIAL_SHOWN_POSTS = 10;
@@ -128,7 +128,7 @@ export default function ArchivePage() {
 
   return (
     <Content>
-      <div className="flex gap-2 rounded-md p-2">
+      <div className="flex gap-2 rounded-md p-2 mt-16">
         <Button
           variant={filter.authors?.length ? "ghost" : "solid"}
           onClick={handleExploreFilter}
