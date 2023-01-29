@@ -1,7 +1,7 @@
 import Popup from "../../Popup";
 import { useEffect, useState } from "react";
 import Button from "../../Button";
-import { useNostr } from "nostr-react";
+import { useNostr, useNostrEvents } from "nostr-react";
 import type { Event } from "nostr-tools";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { requestInvoice } from "lnurl-pay";
@@ -55,6 +55,15 @@ export default function UserCard({
   const [newLnAddress, setNewLnAddress] = useState<any>();
   const [convertedAddress, setConvertedAddress] = useState<any>();
   const [tippedAmount, setTippedAmount] = useState<any>();
+
+  // each object in the event array is a unique follower and we can look each one up with a 0 metadata kind
+  const { events: followers } = useNostrEvents({
+    filter: {
+      kinds: [3],
+      "#p": [profilePubkey],
+      limit: 100,
+    },
+  });
 
   useEffect(() => {
     setNewLnAddress(lud16);
@@ -243,9 +252,16 @@ export default function UserCard({
           src={picture}
           alt={name}
         />
-      <span>{name}</span>
+        <span>{name}</span>
       </Link>
-      <Link className="text-base text-gray hover:text-gray-hover my-2" href={`/${npub}/following`}>{followingsCount} Followings</Link>
+      {/* TODO: we can do a overlay popup for this */}
+      <Link
+        className="text-base text-gray hover:text-gray-hover my-2"
+        // href={`/${npub}/following`}
+        href={`/u/${npub}`}
+      >
+        {followers.length > 100 ? "100+" : followers.length} Followers
+      </Link>
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">
@@ -295,7 +311,6 @@ export default function UserCard({
             )}
           </div>
         ))}
-
       <Popup
         title="Success"
         isOpen={isTipSuccessOpen}
@@ -310,7 +325,12 @@ export default function UserCard({
         </h5>
       </Popup>
       {loggedInPubkey === profilePubkey ? (
-        <Popup title="Edit Profile" isOpen={isOpen} setIsOpen={setIsOpen} className="h-3/4 max-h-192 inset-0 overflow-auto scroll-smooth">
+        <Popup
+          title="Edit Profile"
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          className="h-3/4 max-h-192 inset-0 overflow-auto scroll-smooth"
+        >
           <PopupInput
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -346,7 +366,6 @@ export default function UserCard({
             </div>
           </h5>
           <Button
-            
             variant="solid"
             onClick={handleSubmitNewProfile}
             size="sm"
@@ -400,7 +419,6 @@ export default function UserCard({
             />
           </div>
           <Button
-            
             variant="solid"
             onClick={handleSendTip}
             size="md"
