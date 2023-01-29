@@ -30,7 +30,7 @@ const Search = () => {
   }, [searchTerm]);
 
   return (
-    <div className="flex flex-row items-center gap-2 pl-4 py-2 bg-neutral-100 rounded-full">
+    <div className="flex flex-row items-center gap-2 px-3 py-2 bg-neutral-100 rounded-full">
       <BsSearch className="text-neutral-500" size="15" />
       <input
         placeholder="this doesn't work lol"
