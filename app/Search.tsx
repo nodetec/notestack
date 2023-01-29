@@ -1,13 +1,33 @@
 "use client";
-import { useState } from "react";
+import { useNostr } from "nostr-react";
+import { useEffect, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { connectedRelays } = useNostr();
 
   const handleChange = (event: any) => {
     setSearchTerm(event.target.value);
   };
+
+  useEffect(() => {
+    connectedRelays.forEach((relay) => {
+      let sub = relay.sub([
+        {
+          kinds: [2222],
+          "#t": [searchTerm]
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        console.log("we got the event we wanted:", event);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE");
+        sub.unsub();
+      });
+    });
+  }, [searchTerm]);
 
   return (
     <div className="flex flex-row items-center gap-2 pl-4 py-2 bg-neutral-100 rounded-full">
