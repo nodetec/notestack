@@ -2,6 +2,7 @@
 
 import About from "@/app/About";
 import Aside from "@/app/Aside";
+import BlogFeed from "@/app/BlogFeed";
 import Button from "@/app/Button";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
@@ -42,6 +43,13 @@ export default function ProfilePage() {
     const npub = pathname.split("/").pop() || "";
     const profilePubkey = nip19.decode(npub).data.valueOf();
 
+    const initialFilter = {
+      kinds: [2222],
+      authors: [profilePubkey],
+      limit: 100,
+      until: undefined,
+    };
+
     return (
       <Main>
         <Content>
@@ -73,7 +81,9 @@ export default function ProfilePage() {
                 <Button
                   color="transparent"
                   size="xs"
-                  onClick={() => setNotifyMessage("click the ⚡ button under the user card")}
+                  onClick={() =>
+                    setNotifyMessage("click the ⚡ button under the user card")
+                  }
                 >
                   Support this author
                 </Button>
@@ -82,14 +92,15 @@ export default function ProfilePage() {
           </div>
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "Home" ? (
-            <LatestArticles
-              name={profileInfo.name}
+            <BlogFeed
               profilePubkey={profilePubkey}
+              initialFilter={initialFilter}
             />
           ) : activeTab === "About" ? (
             <About about={profileInfo.about} />
           ) : null}
         </Content>
+
         <Aside>
           <Profile npub={npub} setProfileInfo={setProfileInfo} />
         </Aside>

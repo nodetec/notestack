@@ -1,47 +1,86 @@
 "use client";
+import { usePathname } from "next/navigation";
 import { useNostr } from "nostr-react";
+import type { Event, Filter } from "nostr-tools";
 import { useEffect, useContext, useState } from "react";
-import { KeysContext } from "./context/keys-provider";
-import type { Event } from "nostr-tools";
-import { useSearchParams } from "next/navigation";
-import { ImSearch } from "react-icons/im";
 import { HiUserAdd } from "react-icons/hi";
-import Button from "./Button";
+import { ImSearch } from "react-icons/im";
 import Article from "./Article";
-import Pagination from "./components/util/Pagination";
+import Button from "./Button";
+import Content from "./Content";
+import Posts from "./Posts";
+import { KeysContext } from "./context/keys-provider";
 
-export default function BlogFeed({
-  numPages,
-  setNumPages,
-  events,
-  setEvents,
-  filter,
-  setFilter,
-  postPerPage,
-}: any) {
+export default function BlogFeed({ profilePubkey, initialFilter }: any) {
+  const pathname = usePathname();
+  const INITIAL_SHOWN_POSTS = 10;
+  const { connectedRelays } = useNostr();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [addedPosts, setAddedPosts] = useState<number>(INITIAL_SHOWN_POSTS);
+
   // @ts-ignore
   const { keys: loggedInUserKeys } = useContext(KeysContext);
 
-  const { connectedRelays } = useNostr();
+  const [filter, setFilter] = useState<Filter>(initialFilter);
 
-  const searchParams = useSearchParams();
-
-  const pageSearchParam = searchParams.get("page");
-
-  const currentPage = pageSearchParam ? parseInt(pageSearchParam) : 1;
-
-  const [localEvents, setLocalEvents] = useState([]);
+  if (pathname) {
+    console.log("pathname is:", pathname);
+    // page = pathname.split("/").pop() || "1";
+  }
 
   useEffect(() => {
-    setLocalEvents(events);
-  }, [connectedRelays, events]);
+    console.log("something should happen when I click filter");
+    connectedRelays.forEach((relay) => {
+      let sub = relay.sub([filter]);
+      let eventArray: Event[] = [];
+      sub.on("event", (event: Event) => {
+        eventArray.push(event);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE");
+        console.log("eventArray", eventArray);
+        setEvents(eventArray);
+        sub.unsub();
+      });
+    });
+  }, [filter, connectedRelays]);
 
   useEffect(() => {
-    console.log("searchParams", searchParams.get("page"));
-  }, [searchParams]);
+    console.log("ADDED POSTS:", addedPosts);
+    if (addedPosts > 0.8 * events.length) {
+      console.log("added posts is:", addedPosts);
+      const currentEvents = events;
+
+      // console.log("latest event:", events.slice(-1)[0]);
+
+      let until: any;
+
+      if (events.length > 0) {
+        const lastEvent = events.slice(-1)[0];
+        until = lastEvent.created_at;
+        console.log("until", until);
+      }
+
+      connectedRelays.forEach((relay) => {
+        filter.until = until;
+        let sub = relay.sub([filter]);
+        let eventArray: Event[] = [];
+        sub.on("event", (event: Event) => {
+          eventArray.push(event);
+        });
+        sub.on("eose", () => {
+          console.log("EOSE");
+          console.log("eventArray", eventArray);
+          setEvents(currentEvents.concat(eventArray));
+          sub.unsub();
+        });
+      });
+    }
+  }, [addedPosts]);
 
   function handleFollowFilter(e: any) {
     e.preventDefault();
+    setAddedPosts(INITIAL_SHOWN_POSTS);
 
     // let followedAuthors: Set<string> = new Set();
     let followedAuthors: string[];
@@ -71,47 +110,9 @@ export default function BlogFeed({
     });
   }
 
-  useEffect(() => {
-    console.log("NUMPAGES:", numPages);
-    console.log("CURRENTPAGE:", currentPage);
-
-    if (currentPage > numPages * 0.8) {
-      console.log("LOAD MORE");
-
-      if (events && events.slice(-1)) {
-        const lastEvent = events.slice(-1)[0];
-        // console.log("LAST EVENT date:", lastEvent.created_at);
-      }
-
-      connectedRelays.forEach((relay) => {
-        let sub = relay.sub([filter]);
-        let eventArray: Event[] = [];
-        sub.on("event", (event: Event) => {
-          eventArray.push(event);
-        });
-        sub.on("eose", () => {
-          console.log("EOSE");
-          console.log("eventArray", eventArray);
-          // localEvents.concat(eventArray)
-          const newEvents = events.concat(eventArray);
-          setLocalEvents(newEvents);
-          // console.log("CONCAT EVENTS", localEvents.concat(eventArray));
-
-          if (newEvents.length) {
-            const length = Math.ceil(newEvents.length / 10);
-            if (length) {
-              setNumPages(length);
-            }
-          }
-          /* console.log("numPages", numPages); */
-          sub.unsub();
-        });
-      });
-    }
-  }, [numPages, currentPage]);
-
   function handleExploreFilter(e: any) {
     e.preventDefault();
+    setAddedPosts(INITIAL_SHOWN_POSTS);
     setFilter({
       ...filter,
       authors: undefined,
@@ -120,37 +121,40 @@ export default function BlogFeed({
 
   return (
     <>
-      <div className="flex gap-2 rounded-md p-2">
-        <Button
-          variant={filter.authors?.length ? "ghost" : "solid"}
-          onClick={handleExploreFilter}
-          size="sm"
-          icon={<ImSearch />}
-          className="w-full"
+      {!profilePubkey && (
+        <div className="flex gap-2 rounded-md p-2">
+          <Button
+            variant={filter.authors?.length ? "ghost" : "solid"}
+            onClick={handleExploreFilter}
+            size="sm"
+            icon={<ImSearch />}
+            className="w-full"
+          >
+            explore
+          </Button>
+          <Button
+            variant={filter.authors?.length ? "solid" : "ghost"}
+            onClick={handleFollowFilter}
+            icon={<HiUserAdd />}
+            size="sm"
+            className="w-full"
+          >
+            following
+          </Button>
+        </div>
+      )}
+
+      <Posts title="Latest Posts" className="mx-auto mb-16">
+        {events.slice(0, addedPosts).map((event: Event) => {
+          return <Article key={event.id} event={event} profile />;
+        })}
+        <button
+          className="bg-blue-400 rounded-lg p-4"
+          onClick={() => setAddedPosts(addedPosts + 10)}
         >
-          explore
-        </Button>
-        <Button
-          variant={filter.authors?.length ? "solid" : "ghost"}
-          onClick={handleFollowFilter}
-          icon={<HiUserAdd />}
-          size="sm"
-          className="w-full"
-        >
-          following
-        </Button>
-      </div>
-      <div className="flex flex-col">
-        {localEvents
-          .slice(
-            currentPage * postPerPage - postPerPage,
-            currentPage * postPerPage
-          )
-          .map((event: Event) => {
-            return <Article key={event.id} event={event} profile />;
-          })}
-      </div>
-      {numPages > 1 ? <Pagination numPages={numPages} /> : null}
+          load more
+        </button>
+      </Posts>
     </>
   );
 }
