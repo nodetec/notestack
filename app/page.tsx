@@ -1,6 +1,9 @@
 "use client";
+import Aside from "./Aside";
 import BlogFeed from "./BlogFeed";
 import Content from "./Content";
+import Main from "./Main";
+import RecommendedTopics from "./RecommendedTopics";
 
 export default function HomePage() {
   const initialFilter = {
@@ -11,10 +14,13 @@ export default function HomePage() {
   };
 
   return (
-    <Content>
-      <div className="mt-16">
-        <BlogFeed initialFilter={initialFilter} />;
-      </div>
-    </Content>
+    <Main>
+      <Content>
+        <BlogFeed initialFilter={initialFilter} />
+      </Content>
+      <Aside>
+        <RecommendedTopics />
+      </Aside>
+    </Main>
   );
 }
