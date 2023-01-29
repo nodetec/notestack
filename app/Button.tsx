@@ -30,10 +30,12 @@ const colors = {
   green: {
     solid: "text-white bg-green hover:bg-green-hover border-transparent",
     outline: "text-green bg-transparent border-current hover:text-green-hover",
-    ghost: "text-green bg-transparent border-transparent hover:text-green-hover",
+    ghost:
+      "text-green bg-transparent border-transparent hover:text-green-hover",
   },
   transparent: {
-    solid: "text-gray hover:text-black hover:bg-light-gray bg-transparent border-transparent rounded-md",
+    solid:
+      "text-gray hover:text-black hover:bg-light-gray bg-transparent border-transparent rounded-md",
     outline: "text-gray hover:text-black bg-transparent border-current",
     ghost: "text-gray hover:text-black bg-transparent border-transparent",
   },

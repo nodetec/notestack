@@ -65,11 +65,7 @@ export default function Login() {
       {isLightningConnected && keys?.publicKey ? (
         <AccountButton pubkey={keys?.publicKey} />
       ) : (
-        <Button
-          variant="outline"
-          onClick={handleClick}
-          size="sm"
-        >
+        <Button variant="outline" onClick={handleClick} size="sm">
           login
         </Button>
       )}

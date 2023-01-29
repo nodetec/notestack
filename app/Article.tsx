@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
-import {
-  DetailedHTMLProps,
-  FC,
-  LiHTMLAttributes,
-  ReactNode,
-} from "react";
+import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
 import { BsFillTagFill } from "react-icons/bs";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
@@ -106,9 +101,7 @@ const Item = ({
 }: {
   className?: string;
   children: ReactNode;
-}) => (
-  <div className={`flex gap-2 items-center ${className}`}>{children}</div>
-);
+}) => <div className={`flex gap-2 items-center ${className}`}>{children}</div>;
 
 export const DatePosted = ({ timestamp }: { timestamp: number }) => {
   const timeStampToDate = (timestamp: number) => {

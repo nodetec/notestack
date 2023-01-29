@@ -66,7 +66,7 @@ const Item: React.FC<ItemProps> = ({
 );
 
 interface GroupMenuProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> { }
+  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
 
 const GroupMenu: React.FC<GroupMenuProps> = ({
   className = "",

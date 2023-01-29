@@ -14,7 +14,7 @@ export const NotifyContext = createContext<{
   setNotifyMessage: Dispatch<SetStateAction<string>>;
 }>({
   notifyMessage: "",
-  setNotifyMessage: () => { },
+  setNotifyMessage: () => {},
 });
 
 const NotifyProvider = ({ children }: { children: ReactNode }) => {

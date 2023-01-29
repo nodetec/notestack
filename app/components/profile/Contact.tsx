@@ -67,20 +67,22 @@ export default function Contact({ contact, followingsCount }: any) {
               src={contentObj?.picture || DUMMY_PROFILE_API(npub!)}
               alt=""
             />
-            <h3 className="text-black font-medium text-lg">
-              {name || npub}
-            </h3>
+            <h3 className="text-black font-medium text-lg">{name || npub}</h3>
           </Link>
-          <p className="text-sm text-gray-hover pb-2 border-b border-b-light-gray">{contentObj?.about}</p>
+          <p className="text-sm text-gray-hover pb-2 border-b border-b-light-gray">
+            {contentObj?.about}
+          </p>
           <div className="flex items-center gap-2 justify-between pt-2">
-            <span className="text-gray font-xs">{followingsCount} Followings</span>
+            <span className="text-gray font-xs">
+              {followingsCount} Followings
+            </span>
             <Button
               color="green"
               size="xs"
               className="py-1 px-2 text-xs"
               // FIXME: need follow functionality
             >
-            Follow
+              Follow
             </Button>
           </div>
         </div>

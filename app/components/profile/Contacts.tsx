@@ -19,7 +19,7 @@ export default function Contacts({ userContacts, npub }: any) {
     (obj, index, self) =>
       index === self.findIndex((t) => t.pubkey === obj.pubkey)
   );
-  const followingsCount = userContacts.length
+  const followingsCount = userContacts.length;
 
   return (
     <div className="flex flex-col gap-4 pt-10">
@@ -29,10 +29,19 @@ export default function Contacts({ userContacts, npub }: any) {
           uniqueContacts
             .slice(0, 5)
             .map((contact: any) => (
-              <Contact key={contact.id} followingsCount={followingsCount} contact={contact} />
+              <Contact
+                key={contact.id}
+                followingsCount={followingsCount}
+                contact={contact}
+              />
             ))}
       </ul>
-      <Link href={`/${npub}/following`} className="text-gray hover:text-gray-hover text-xs">See all ({followingsCount})</Link> 
+      <Link
+        href={`/${npub}/following`}
+        className="text-gray hover:text-gray-hover text-xs"
+      >
+        See all ({followingsCount})
+      </Link>
     </div>
   );
 }

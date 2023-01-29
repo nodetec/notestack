@@ -24,7 +24,7 @@ export default function ProfilePage() {
     picture: "",
   });
   const TABS = ["Home", "About"];
-  const [activeTab, setActiveTab] = useState<typeof TABS[number]>(TABS[0]);
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const { copyToClipboard, isCopied, isError } = useCopy();
   const { setNotifyMessage } = useContext(NotifyContext);
   const pathname = usePathname();

@@ -48,7 +48,7 @@ const Profile = ({ npub, setProfileInfo }: any) => {
     lud06 = contentObj?.lud06;
     lud16 = contentObj?.lud16;
     picture = contentObj?.picture || DUMMY_PROFILE_API(npub);
-    setProfileInfo({name, about, picture});
+    setProfileInfo({ name, about, picture });
   } catch {
     console.log("Error parsing content");
   }
@@ -80,9 +80,11 @@ const Profile = ({ npub, setProfileInfo }: any) => {
         lud06={lud06}
         lud16={lud16}
       />
-      {profileContactList && <Contacts npub={npub} userContacts={profileContactList} />}
+      {profileContactList && (
+        <Contacts npub={npub} userContacts={profileContactList} />
+      )}
     </Fragment>
   );
-}
+};
 
 export default memo(Profile);

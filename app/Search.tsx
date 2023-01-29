@@ -16,7 +16,7 @@ const Search = () => {
       let sub = relay.sub([
         {
           kinds: [2222],
-          "#t": [searchTerm]
+          "#t": [searchTerm],
         },
       ]);
       sub.on("event", (event: Event) => {

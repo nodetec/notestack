@@ -6,7 +6,7 @@ import Editor from "../Editor";
 const WritePage = () => {
   return (
     <Fragment>
-        <Editor></Editor>
+      <Editor></Editor>
     </Fragment>
   );
 };
