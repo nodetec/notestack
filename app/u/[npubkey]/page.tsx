@@ -8,7 +8,6 @@ import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
 import { NotifyContext } from "@/app/context/notify-provider";
 import useCopy from "@/app/hooks/useCopy";
-import LatestArticles from "@/app/LatestArticles";
 import { shortenHash } from "@/app/lib/utils";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
