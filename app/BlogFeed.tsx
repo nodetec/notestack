@@ -7,7 +7,6 @@ import { HiUserAdd } from "react-icons/hi";
 import { ImSearch } from "react-icons/im";
 import Article from "./Article";
 import Button from "./Button";
-import Content from "./Content";
 import Posts from "./Posts";
 import { KeysContext } from "./context/keys-provider";
 
@@ -119,6 +118,21 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
     });
   }
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop <
+        document.documentElement.offsetHeight - 10
+      )
+        return;
+      console.log("it worked");
+      setAddedPosts((prev) => prev + 10);
+    };
+
+    document.addEventListener("scroll", handleScroll);
+    return () => document.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       {!profilePubkey && (
@@ -146,14 +160,8 @@ export default function BlogFeed({ profilePubkey, initialFilter }: any) {
 
       <Posts title="Latest Posts" className="mx-auto mb-16">
         {events.slice(0, addedPosts).map((event: Event) => {
-          return <Article key={event.id} event={event} profile />;
+          return <Article key={event.id} event={event} profile />
         })}
-        <button
-          className="bg-blue-400 rounded-lg p-4"
-          onClick={() => setAddedPosts(addedPosts + 10)}
-        >
-          load more
-        </button>
       </Posts>
     </>
   );
