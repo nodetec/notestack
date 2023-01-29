@@ -27,6 +27,7 @@ const RecommendedEvents = () => {
         {events.map((event) => (
           <Event
             key={event.id}
+            noteId={event.id!}
             pubkey={event.pubkey}
             title={getTagValues("subject", event.tags)}
           />
@@ -36,15 +37,27 @@ const RecommendedEvents = () => {
   );
 };
 
-const Event = ({ pubkey, title }: { pubkey: string; title: string }) => {
+const Event = ({
+  noteId,
+  pubkey,
+  title,
+}: {
+  noteId: string;
+  pubkey: string;
+  title: string;
+}) => {
   const { data } = useProfile({
     pubkey: pubkey,
   });
-  const npub = nip19.npubEncode(pubkey);
+  const profileNpub = nip19.npubEncode(pubkey);
+  const noteNpub = nip19.noteEncode(noteId);
 
   return (
     <li>
-      <Link href={`u/${npub}`} className="flex items-center gap-2 py-2 group">
+      <Link
+        href={`u/${profileNpub}`}
+        className="flex items-center gap-2 py-2 group"
+      >
         <img
           className="w-5 h-5 bg-gray rounded-full object-cover"
           src={data?.picture}
@@ -54,7 +67,9 @@ const Event = ({ pubkey, title }: { pubkey: string; title: string }) => {
           {data?.name}
         </span>
       </Link>
-      <h3 className="font-bold text-base">{title}</h3>
+      <Link href={`/${noteNpub}`} className="font-bold text-base">
+        {title}
+      </Link>
     </li>
   );
 };
