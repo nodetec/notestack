@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <Main>
       <Content>
-        <BlogFeed initialFilter={initialFilter} />
+        <BlogFeed initialFilter={initialFilter} profile={true} />
       </Content>
       <Aside>
         <RecommendedEvents />
