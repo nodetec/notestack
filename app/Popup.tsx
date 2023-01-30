@@ -32,10 +32,14 @@ const Popup = ({
   }, [setIsOpen]);
 
   if (!isOpen){
-    document.body.className = "font-main";
+    if(typeof document !== "undefined"){
+      document.body.className = "font-main";
+    }
     return null;
   }
-  document.body.className = "overflow-hidden font-main";
+  if(typeof document !== "undefined"){
+    document.body.className = "overflow-hidden font-main";
+  }
 
   return (
     <Fragment>
