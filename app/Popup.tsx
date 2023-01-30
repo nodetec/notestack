@@ -31,12 +31,20 @@ const Popup = ({
     };
   }, [setIsOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen){
+    if(typeof document !== "undefined"){
+      document.body.className = "font-main";
+    }
+    return null;
+  }
+  if(typeof document !== "undefined"){
+    document.body.className = "overflow-hidden font-main";
+  }
 
   return (
     <Fragment>
       <div
-        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[32rem] border-2 bg-white/100 rounded-md overflow-hidden ${className}`}
+        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[32rem] border-2 bg-white/100 rounded-md ${className}`}
       >
         <Button
           icon={<IoMdClose size={24} />}
