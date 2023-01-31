@@ -3,6 +3,7 @@ import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import Tooltip from "@/app/Tooltip";
 import Link from "next/link";
 import { nip19 } from "nostr-tools";
+import { useState } from "react";
 import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { shortenHash } from "../../lib/utils";
 
@@ -14,6 +15,7 @@ export default function Contact({ contact, followingsCount }: any) {
 
   const pubkey = contact.pubkey;
   const npub = shortenHash(nip19.npubEncode(contact.pubkey));
+  const [showTooltip, setShowTooltip] = useState(false);
 
   try {
     const content = contact?.content;
@@ -46,7 +48,8 @@ export default function Contact({ contact, followingsCount }: any) {
         </span>
       </Link>
       <Tooltip
-        showOn="click"
+        show={showTooltip}
+        toggle={() => setShowTooltip((current) => !current)}
         Component={
           <Button
             variant="solid"
