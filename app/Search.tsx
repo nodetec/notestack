@@ -98,7 +98,7 @@ const SearchInput: FC<
   <div className="flex flex-row items-center gap-2 px-3 py-2 bg-light-gray bg-opacity-40 rounded-full">
     <BsSearch className="text-gray-hover" size="15" />
     <input
-      placeholder="this doesn't work lol"
+      placeholder="Search blogstack"
       className="bg-transparent focus:outline-none focus:ring-0"
       type="text"
       {...props}
