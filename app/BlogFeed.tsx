@@ -42,16 +42,16 @@ any) {
         until = lastEvent.created_at;
         console.log("until", until);
       }
-      filter.until = until;
-      let sub = relay.sub([filter]);
-      let eventArray: Event[] = [];
 
+      let eventArray: Event[] = [];
+      const eventsSeen: { [k: string]: boolean } = {};
       connectedRelays.forEach((relay) => {
+        filter.until = until;
+        let sub = relay.sub([filter]);
         sub.on("event", (event: Event) => {
           if (!eventsSeen[event.id!]) {
             eventArray.push(event);
           }
-          eventsSeen[event.id!] = true;
         });
         sub.on("eose", () => {
           console.log("EOSE");
