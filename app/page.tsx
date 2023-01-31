@@ -139,11 +139,11 @@ export default function HomePage() {
         <RecommendedTopics
           TOPICS={[
             "nostr",
-            "Lightning",
-            "blogstack",
-            "Programming",
-            "TailwindCSS",
-            "Chess",
+            "lightning",
+            "bitcoin",
+            "programming",
+            "tailwindcss",
+            "chess",
           ]}
         />
       </Aside>
