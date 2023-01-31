@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import Popup from "../Popup";
 
 const Account = () => {
+  const [popup, setPopup] = useState("");
   const [profile, setProfile] = useState({
     newName: "test",
     newNip05: "",
@@ -29,14 +31,34 @@ const Account = () => {
   } = profile;
 
   return (
-    <div className="flex flex-col gap-2">
-      <Item title="Name" value={newName} />
-    </div>
+    <Fragment>
+      <div className="flex flex-col gap-2">
+        <Item title="Name" value={newName} onClick={() => setPopup("name")} />
+      </div>
+      <Popup
+        title="Name"
+        isOpen={popup === "name"}
+        setIsOpen={() => setPopup("")}
+      >
+        hi
+      </Popup>
+    </Fragment>
   );
 };
 
-const Item = ({ title, value }: { title: string; value: string }) => (
-  <button className="w-full flex items-center gap-2 justify-between text-sm">
+const Item = ({
+  title,
+  value,
+  onClick,
+}: {
+  title: string;
+  value: string;
+  onClick: () => void;
+}) => (
+  <button
+    className="w-full flex items-center gap-2 justify-between text-sm"
+    onClick={onClick}
+  >
     <h3>{title}</h3>
     <span className="text-gray hover:text-gray-hover">{value}</span>
   </button>

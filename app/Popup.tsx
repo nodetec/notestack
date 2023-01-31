@@ -31,13 +31,13 @@ const Popup = ({
     };
   }, [setIsOpen]);
 
-  if (!isOpen){
-    if(typeof document !== "undefined"){
+  if (!isOpen) {
+    if (typeof document !== "undefined") {
       document.body.className = "font-main";
     }
     return null;
   }
-  if(typeof document !== "undefined"){
+  if (typeof document !== "undefined") {
     document.body.className = "overflow-hidden font-main";
   }
 
@@ -54,7 +54,7 @@ const Popup = ({
           onClick={() => setIsOpen(false)}
         />
         <div className=" flex flex-col justify-center items-stretch gap-4 p-10">
-          <h3 className="text-xl  text-center pb-4">{title}</h3>
+          <h3 className="text-xl pb-4">{title}</h3>
           {children}
         </div>
       </div>
