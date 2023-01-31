@@ -11,6 +11,7 @@ import { useNostr } from "nostr-react";
 import { useEffect, useState } from "react";
 import RecommendedTopics from "@/app/RecommendedTopics";
 import RecommendedEvents from "@/app/RecommendedEvents";
+import { AiFillTag } from "react-icons/ai";
 
 export default function TagPage() {
   const pathname = usePathname();
@@ -51,7 +52,8 @@ export default function TagPage() {
   return (
     <Main>
       <Content>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-start gap-2">
+          <AiFillTag size="20" />
           <h1 className="text-5xl font-medium my-12">{tagname}</h1>
         </div>
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
