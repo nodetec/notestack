@@ -53,7 +53,7 @@ const Search = () => {
           return {
             ...current,
             pubkeys: [event.pubkey],
-            tags: event.tags.filter((tag) => tag[0] === "t")[0],
+            tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
           };
         });
         setShowTooltip(true);
