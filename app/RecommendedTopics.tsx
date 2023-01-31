@@ -2,16 +2,11 @@
 import Link from "next/link";
 import AsideSection from "./AsideSection";
 
-const TOPICS = [
-  "nostr",
-  "Lightning",
-  "blogstack",
-  "Programming",
-  "TailwindCSS",
-  "Chess",
-];
+interface RecommendedTopicsProps {
+  TOPICS: string[];
+}
 
-const RecommendedTopics = () => (
+const RecommendedTopics: React.FC<RecommendedTopicsProps> = ({ TOPICS }) => (
   <AsideSection title="Recommended Topics">
     <ul className="flex items-center gap-2 text-sm flex-wrap">
       {TOPICS.map((topic) => (

@@ -6,13 +6,17 @@ import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { getTagValues, shortenHash } from "./lib/utils";
 
-const EVENTS = [
-  "616c252e86c5488faf65b5247800b517f00c658b528435bde12c481c4c0b3f37",
-  "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
-  "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27",
-];
+interface RecommendedEventsProps {
+  EVENTS: string[];
+  title: string;
+  showProfile?: boolean;
+}
 
-const RecommendedEvents = () => {
+const RecommendedEvents: React.FC<RecommendedEventsProps> = ({
+  EVENTS,
+  title,
+  showProfile = false,
+}) => {
   const { events } = useNostrEvents({
     filter: {
       ids: EVENTS,
@@ -20,16 +24,14 @@ const RecommendedEvents = () => {
     },
   });
 
-  console.log(events);
-
   return (
-    <AsideSection title="Recommended Events">
+    <AsideSection title={title}>
       <ul className="flex flex-col gap-2">
         {events.map((event) => (
           <Event
             key={event.id}
             noteId={event.id!}
-            pubkey={event.pubkey}
+            pubkey={showProfile ? event.pubkey : undefined}
             title={getTagValues("subject", event.tags)}
           />
         ))}
@@ -40,11 +42,11 @@ const RecommendedEvents = () => {
 
 const Event = ({
   noteId,
-  pubkey,
+  pubkey = "",
   title,
 }: {
   noteId: string;
-  pubkey: string;
+  pubkey?: string;
   title: string;
 }) => {
   const { data } = useProfile({ pubkey });
@@ -53,9 +55,24 @@ const Event = ({
 
   return (
     <li>
+      {pubkey ? (
+        <Link
+          href={`u/${profileNpub}`}
+          className="flex items-center gap-2 py-2 group"
+        >
+          <img
+            className="w-5 h-5 bg-gray rounded-full object-cover"
+            src={data?.picture}
+            alt=""
+          />
+          <span className="text-xs font-medium group-hover:underline">
+            {data?.name}
+          </span>
+        </Link>
+      ) : null}
       <Link
-        href={`u/${profileNpub}`}
-        className="flex items-center gap-2 py-2 group"
+        href={`/${noteNpub}`}
+        className={pubkey ? "font-bold text-base" : "text-sm"}
       >
         <img
           className="w-5 h-5 bg-gray rounded-full object-cover"
