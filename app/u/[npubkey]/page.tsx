@@ -72,8 +72,8 @@ export default function ProfilePage() {
           });
         });
       }
-      // }, [connectedRelays]);
-    }, []);
+      }, [connectedRelays]);
+    // }, []);
 
     return (
       <Main>
