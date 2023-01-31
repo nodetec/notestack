@@ -127,7 +127,7 @@ const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
   const npub = nip19.npubEncode(pubkey);
 
   return (
-    <Link href={npub} className="flex items-center gap-2 py-2">
+    <Link href={"/u/" + npub} className="flex items-center gap-2 py-2">
       <img
         className="w-5 h-5 bg-light-gray rounded-full object-cover"
         src={data?.picture || DUMMY_PROFILE_API(npub)}
