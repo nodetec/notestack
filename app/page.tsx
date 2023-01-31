@@ -103,7 +103,12 @@ export default function HomePage() {
   return (
     <Main>
       <Content className="mt-8">
-        <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Tabs
+          className="sticky top-16 bg-white"
+          TABS={TABS}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
         {activeTab === "Explore" && (
           <BlogFeed
             events={exploreEvents}
