@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useNostrEvents, useProfile } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
-import { getTagValues } from "./lib/utils";
+import { DUMMY_PROFILE_API } from "./lib/constants";
+import { getTagValues, shortenHash } from "./lib/utils";
 
 interface RecommendedEventsProps {
   EVENTS: string[];
@@ -73,6 +74,16 @@ const Event = ({
         href={`/${noteNpub}`}
         className={pubkey ? "font-bold text-base" : "text-sm"}
       >
+        <img
+          className="w-5 h-5 bg-gray rounded-full object-cover"
+          src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
+          alt=""
+        />
+        <span className="text-xs font-medium group-hover:underline">
+          {data?.name || shortenHash(profileNpub)}
+        </span>
+      </Link>
+      <Link href={`/${noteNpub}`} className="font-bold text-base">
         {title}
       </Link>
     </li>
