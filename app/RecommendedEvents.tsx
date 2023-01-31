@@ -70,19 +70,6 @@ const Event = ({
           </span>
         </Link>
       ) : null}
-      <Link
-        href={`/${noteNpub}`}
-        className={pubkey ? "font-bold text-base" : "text-sm"}
-      >
-        <img
-          className="w-5 h-5 bg-gray rounded-full object-cover"
-          src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
-          alt=""
-        />
-        <span className="text-xs font-medium group-hover:underline">
-          {data?.name || shortenHash(profileNpub)}
-        </span>
-      </Link>
       <Link href={`/${noteNpub}`} className="font-bold text-base">
         {title}
       </Link>
