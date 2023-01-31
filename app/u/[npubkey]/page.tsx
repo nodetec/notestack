@@ -9,7 +9,7 @@ import Content from "@/app/Content";
 import { NotifyContext } from "@/app/context/notify-provider";
 import useCopy from "@/app/hooks/useCopy";
 import { shortenHash } from "@/app/lib/utils";
-import type { Event, Filter } from "nostr-tools";
+import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import Tooltip from "@/app/Tooltip";
@@ -72,7 +72,7 @@ export default function ProfilePage() {
           });
         });
       }
-      }, [connectedRelays]);
+    }, [connectedRelays]);
     // }, []);
 
     return (

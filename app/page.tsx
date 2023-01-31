@@ -1,17 +1,15 @@
 "use client";
 import { useNostr } from "nostr-react";
 import { useContext, useEffect, useState } from "react";
-import { HiUserAdd } from "react-icons/hi";
-import { ImSearch } from "react-icons/im";
 import type { Event, Filter } from "nostr-tools";
 import Aside from "./Aside";
 import BlogFeed from "./BlogFeed";
-import Button from "./Button";
 import Content from "./Content";
 import { KeysContext } from "./context/keys-provider";
 import Main from "./Main";
 import RecommendedEvents from "./RecommendedEvents";
 import RecommendedTopics from "./RecommendedTopics";
+import Tabs from "./Tabs";
 
 export default function HomePage() {
   // @ts-ignore
@@ -25,9 +23,10 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
+  const TABS = ["Explore", "Following"];
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   const { connectedRelays } = useNostr();
-  const [activeTab, setActiveTab] = useState<string>("explore");
 
   useEffect(() => {
     if (exploreEvents.length === 0) {
@@ -101,41 +100,11 @@ export default function HomePage() {
     }
   }, [connectedRelays]);
 
-  function handleExploreFilter(e: any) {
-    e.preventDefault();
-    setActiveTab("explore");
-  }
-
-  function handleFollowFilter(e: any) {
-    e.preventDefault();
-    setActiveTab("following");
-  }
-
   return (
     <Main>
-      <Content>
-        <div className="flex gap-2 rounded-md p-2 mt-16">
-          <Button
-            variant={activeTab === "explore" ? "solid" : "ghost"}
-            onClick={handleExploreFilter}
-            size="sm"
-            icon={<ImSearch />}
-            className="w-full"
-          >
-            explore
-          </Button>
-          <Button
-            variant={activeTab === "following" ? "solid" : "ghost"}
-            onClick={handleFollowFilter}
-            icon={<HiUserAdd />}
-            size="sm"
-            className="w-full"
-          >
-            following
-          </Button>
-        </div>
-
-        {activeTab === "explore" && (
+      <Content className="mt-8">
+        <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
+        {activeTab === "Explore" && (
           <BlogFeed
             events={exploreEvents}
             setEvents={setExploreEvents}
@@ -143,7 +112,7 @@ export default function HomePage() {
             profile={true}
           />
         )}
-        {activeTab === "following" && (
+        {activeTab === "Following" && (
           <BlogFeed
             events={followingEvents}
             setEvents={setFollowingEvents}
@@ -151,8 +120,6 @@ export default function HomePage() {
             profile={true}
           />
         )}
-
-        {/* <BlogFeed filter={initialFilter} profile={true} /> */}
       </Content>
       <Aside>
         <RecommendedEvents
