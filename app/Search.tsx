@@ -17,7 +17,7 @@ import { shortenHash } from "./lib/utils";
 import { AiFillTag } from "react-icons/ai";
 
 type ResultType = {
-  ids: string[];
+  pubkeys: string[];
   tags: string[];
 };
 
@@ -25,9 +25,9 @@ const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const { connectedRelays } = useNostr();
-  const [{ tags, ids }, setResults] = useState<ResultType>({
+  const [{ tags, pubkeys }, setResults] = useState<ResultType>({
     tags: [],
-    ids: [],
+    pubkeys: [],
   });
 
   const handleChange = (event: any) => {
@@ -35,7 +35,7 @@ const Search = () => {
   };
 
   const handleToggle = () => {
-    if (tags.length === 0 && ids.length === 0) return;
+    if (tags.length === 0 && pubkeys.length === 0) return;
     setShowTooltip((current) => !current);
   };
 
@@ -52,7 +52,7 @@ const Search = () => {
         setResults((current: ResultType) => {
           return {
             ...current,
-            ids: [event.id!],
+            pubkeys: [event.pubkey],
             tags: event.tags.filter((tag) => tag[0] === "t")[0],
           };
         });
@@ -73,9 +73,9 @@ const Search = () => {
       Component={<SearchInput value={searchTerm} onChange={handleChange} />}
     >
       <div className="w-[20rem]">
-        {ids.length > 0 ? (
+        {pubkeys.length > 0 ? (
           <SearchGroup title="People">
-            {ids.map((id: string) => (
+            {pubkeys.map((id: string) => (
               <Profile key={id} pubkey={id} />
             ))}
           </SearchGroup>
@@ -125,6 +125,7 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
   const { data } = useProfile({ pubkey });
   const npub = nip19.npubEncode(pubkey);
+  console.log(data);
 
   return (
     <Link href={npub} className="flex items-center gap-2 py-2">
