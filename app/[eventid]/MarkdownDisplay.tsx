@@ -1,15 +1,17 @@
 import { getTagValues, shortenHash } from "../lib/utils";
 import { Event, nip19 } from "nostr-tools";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import Button from "../Button";
 import { IoChevronBack } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
 import { AiOutlineShareAlt } from "react-icons/ai";
+
 import SharePopup from "../SharePopup";
 import { DUMMY_PROFILE_API, HOST } from "../lib/constants";
 import { useProfile } from "nostr-react";
 import Link from "next/link";
 import { DatePosted } from "../Article";
+import Bookmark from "./Bookmark";
 
 interface MarkdownDisplayProps {
   event: Event;
@@ -41,7 +43,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
   const markdown = setupMarkdown(content);
 
   return (
-    <Fragment>
+    <>
       <div className="mx-auto w-full prose prose-xl text-accent flex items-center justify-between gap-2">
         <div className="flex items-center gap-4 w-full">
           <Button
@@ -78,6 +80,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
                   </div>
                 </div>
               </div>
+              <Bookmark event={event} />
 
               <Button
                 variant="ghost"
@@ -100,7 +103,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
         isOpen={isSharePopupOpen}
         setIsOpen={setIsSharePopupOpen}
       />
-    </Fragment>
+    </>
   );
 };
 

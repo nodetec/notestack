@@ -9,6 +9,7 @@ import Content from "@/app/Content";
 import { NotifyContext } from "@/app/context/notify-provider";
 import useCopy from "@/app/hooks/useCopy";
 import { shortenHash } from "@/app/lib/utils";
+import Lists from "@/app/Lists";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import Tooltip from "@/app/Tooltip";
@@ -23,7 +24,7 @@ export default function ProfilePage() {
     about: "",
     picture: "",
   });
-  const TABS = ["Home", "About"];
+  const TABS = ["Home", "Lists", "About"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const { copyToClipboard, isCopied, isError } = useCopy();
   const { setNotifyMessage } = useContext(NotifyContext);
@@ -98,6 +99,9 @@ export default function ProfilePage() {
             />
           ) : activeTab === "About" ? (
             <About about={profileInfo.about} />
+          ) : activeTab === "Lists" ? (
+            // TODO: only show lists for loggedin profile
+            <Lists />
           ) : null}
         </Content>
 
