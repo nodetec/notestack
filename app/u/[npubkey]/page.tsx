@@ -9,10 +9,12 @@ import Content from "@/app/Content";
 import { NotifyContext } from "@/app/context/notify-provider";
 import useCopy from "@/app/hooks/useCopy";
 import { shortenHash } from "@/app/lib/utils";
+import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import Tooltip from "@/app/Tooltip";
 import { usePathname } from "next/navigation";
+import { useNostr } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { BiDotsHorizontalRounded } from "react-icons/bi";
@@ -29,26 +31,49 @@ export default function ProfilePage() {
   const { copyToClipboard, isCopied, isError } = useCopy();
   const { setNotifyMessage } = useContext(NotifyContext);
   const pathname = usePathname();
-
-  useEffect(() => {
-    if (isCopied) {
-      setNotifyMessage("Link copied");
-    }
-    if (isError) {
-      setNotifyMessage("Error copying link");
-    }
-  }, [isCopied, isError, setNotifyMessage]);
-
+  const [events, setEvents] = useState<Event[]>([]);
+  const { connectedRelays } = useNostr();
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
-    const profilePubkey = nip19.decode(npub).data.valueOf();
-
-    const initialFilter = {
+    const profilePubkey = nip19.decode(npub).data.toString();
+    const filter = {
       kinds: [2222],
       authors: [profilePubkey],
       limit: 100,
       until: undefined,
     };
+
+    useEffect(() => {
+      if (isCopied) {
+        setNotifyMessage("Link copied");
+      }
+      if (isError) {
+        setNotifyMessage("Error copying link");
+      }
+    }, [isCopied, isError, setNotifyMessage]);
+
+    useEffect(() => {
+      if (events.length === 0) {
+        const eventsSeen: { [k: string]: boolean } = {};
+        let eventArray: Event[] = [];
+        connectedRelays.forEach((relay) => {
+          let sub = relay.sub([filter]);
+          sub.on("event", (event: Event) => {
+            if (!eventsSeen[event.id!]) {
+              eventArray.push(event);
+            }
+            eventsSeen[event.id!] = true;
+          });
+          sub.on("eose", () => {
+            // console.log("EOSE");
+            // console.log("EXPLORE eventArray", eventArray);
+            setEvents(eventArray);
+            sub.unsub();
+          });
+        });
+      }
+    }, [connectedRelays]);
+    // }, []);
 
     return (
       <Main>
@@ -99,8 +124,9 @@ export default function ProfilePage() {
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "Home" ? (
             <BlogFeed
-              profilePubkey={profilePubkey}
-              initialFilter={initialFilter}
+              events={events}
+              setEvents={setEvents}
+              filter={filter}
               profile={false}
             />
           ) : activeTab === "About" ? (
