@@ -11,9 +11,9 @@ export default function BlogFeed({
   setEvents,
   filter,
   profile,
-  // addedPosts,
-  // setAddedPosts,
-}: any) {
+}: // addedPosts,
+// setAddedPosts,
+any) {
   const pathname = usePathname();
   const { connectedRelays } = useNostr();
   const INITIAL_SHOWN_POSTS = 10;
@@ -42,13 +42,16 @@ export default function BlogFeed({
         until = lastEvent.created_at;
         console.log("until", until);
       }
+      filter.until = until;
+      let sub = relay.sub([filter]);
+      let eventArray: Event[] = [];
 
       connectedRelays.forEach((relay) => {
-        filter.until = until;
-        let sub = relay.sub([filter]);
-        let eventArray: Event[] = [];
         sub.on("event", (event: Event) => {
-          eventArray.push(event);
+          if (!eventsSeen[event.id!]) {
+            eventArray.push(event);
+          }
+          eventsSeen[event.id!] = true;
         });
         sub.on("eose", () => {
           console.log("EOSE");
