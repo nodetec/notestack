@@ -40,8 +40,6 @@ export default function HomePage() {
             eventArray.push(event);
           }
           eventsSeen[event.id!] = true;
-
-          eventArray.push(event);
         });
         sub.on("eose", () => {
           // console.log("EOSE");
