@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useNostrEvents, useProfile } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
-import { getTagValues } from "./lib/utils";
+import { DUMMY_PROFILE_API } from "./lib/constants";
+import { getTagValues, shortenHash } from "./lib/utils";
 
 const EVENTS = [
   "616c252e86c5488faf65b5247800b517f00c658b528435bde12c481c4c0b3f37",
@@ -46,9 +47,7 @@ const Event = ({
   pubkey: string;
   title: string;
 }) => {
-  const { data } = useProfile({
-    pubkey: pubkey,
-  });
+  const { data } = useProfile({ pubkey });
   const profileNpub = nip19.npubEncode(pubkey);
   const noteNpub = nip19.noteEncode(noteId);
 
@@ -60,11 +59,11 @@ const Event = ({
       >
         <img
           className="w-5 h-5 bg-gray rounded-full object-cover"
-          src={data?.picture}
+          src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
           alt=""
         />
         <span className="text-xs font-medium group-hover:underline">
-          {data?.name}
+          {data?.name || shortenHash(profileNpub)}
         </span>
       </Link>
       <Link href={`/${noteNpub}`} className="font-bold text-base">
