@@ -388,9 +388,9 @@ export default function UserCard({
               placeholder="Enter amount in sats"
               required
               min={1}
-              className="w-full flex-1 focus:ring-0 border-0 bg-transparent "
+              className="outline-none w-full flex-1 focus:ring-0 border-0 bg-transparent "
             />
-            <span className="text-black-600 text-sm font-bold">satoshis</span>
+            <span className="text-black-600 text-sm ml-2 font-bold">satoshis</span>
           </div>
           <Buttons>
             {presetAmounts.map((amount) => (
@@ -413,7 +413,7 @@ export default function UserCard({
               value={tipMessage}
               onChange={(e) => setTipMessage(e.target.value)}
               placeholder="optional"
-              className="w-full flex-1 focus:ring-0 border-0 bg-transparent "
+              className="outline-none w-full flex-1 focus:ring-0 border-0 bg-transparent "
             />
           </div>
           <Button
