@@ -21,7 +21,7 @@ const Tabs: React.FC<TabProps> = ({
         <button
           key={tab}
           className={`text-gray hover:text-gray-hover py-3 border-b border-transparent ${
-            activeTab === tab ? " border-b-gray-hover" : ""
+            activeTab === tab ? " border-b-gray-hover text-black" : ""
           }`}
           onClick={() => setActiveTab(tab)}
         >
