@@ -113,8 +113,8 @@ interface SearchGroupProps
 
 const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
   return (
-    <div className="flex flex-col gap-2 py-4">
-      <h3 className="text-gray pb-2 border-b border-b-light-gray">
+    <div className="flex flex-col gap-2 py-4 px-2">
+      <h3 className="text-gray pb-2 border-b border-b-light-gray text-sm">
         {title.toUpperCase()}
       </h3>
       {children}
@@ -125,7 +125,6 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
   const { data } = useProfile({ pubkey });
   const npub = nip19.npubEncode(pubkey);
-  console.log(data);
 
   return (
     <Link href={npub} className="flex items-center gap-2 py-2">
