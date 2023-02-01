@@ -17,7 +17,7 @@ export default function HomePage() {
   const { keys: loggedInUserKeys } = useContext(KeysContext);
   const exploreFilter = {
     kinds: [2222],
-    limit: 100,
+    limit: 50,
     authors: undefined,
     until: undefined,
   };
@@ -68,7 +68,7 @@ export default function HomePage() {
           {
             authors: [loggedInUserKeys.publicKey],
             kinds: [3],
-            limit: 100,
+            limit: 50,
           },
         ]);
         sub.on("event", (event: Event) => {

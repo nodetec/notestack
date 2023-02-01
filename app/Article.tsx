@@ -47,10 +47,6 @@ const Article: FC<NoteProps> = ({
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
-  const scrollToTop = () => {
-    window.scrollTo(0, 0);
-  };
-
   return (
     <article
       className="py-8 border-b border-b-light-gray overflow-x-hidden"
@@ -61,11 +57,7 @@ const Article: FC<NoteProps> = ({
           <div className="flex items-center gap-2 pb-4">
             {profile ? (
               <div className="flex items-center gap-2">
-                <Link
-                  className="group"
-                  href={`u/${npub}`}
-                  onClick={scrollToTop}
-                >
+                <Link className="group" href={`u/${npub}`}>
                   <Item className="text-gray-hover">
                     <img
                       className="rounded-full w-6 h-6 object-cover"
@@ -86,7 +78,7 @@ const Article: FC<NoteProps> = ({
         <DeleteBlog event={event} />
       </div>
 
-      <Link href={`/${nip19.noteEncode(noteId!)}`} onClick={scrollToTop}>
+      <Link href={`/${nip19.noteEncode(noteId!)}`}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (

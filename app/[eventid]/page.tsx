@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { useNostrEvents } from "nostr-react";
 import { Event } from "nostr-tools";
 import { nip19 } from "nostr-tools";
+import { useEffect } from "react";
 import Blog from "./Blog";
 
 export default function NotePage() {
@@ -13,6 +14,10 @@ export default function NotePage() {
     eventId = nip19.decode(eventId).data.toString();
     console.log("eventId", eventId);
   }
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { events } = useNostrEvents({
     filter: {
