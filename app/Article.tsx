@@ -3,6 +3,7 @@ import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
 import { BsFillTagFill } from "react-icons/bs";
+import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
@@ -22,7 +23,6 @@ const Article: FC<NoteProps> = ({
 }) => {
   const { tags, created_at: createdAt, id: noteId } = event;
   let { content } = event;
-  console.log("tags", event.tags);
 
   function getTValues(tags: string[][]) {
     return tags
@@ -32,8 +32,6 @@ const Article: FC<NoteProps> = ({
   }
 
   const tValues = getTValues(event.tags);
-
-  console.log("tValues", tValues);
 
   const { data } = useProfile({
     pubkey: event.pubkey,
@@ -58,25 +56,34 @@ const Article: FC<NoteProps> = ({
       className="py-8 border-b border-b-light-gray overflow-x-hidden"
       {...props}
     >
-      <div className="flex items-center gap-2 pb-4">
-        {profile ? (
-          <div className="flex items-center gap-2">
-            <Link className="group" href={`u/${npub}`} onClick={scrollToTop}>
-              <Item className="text-gray-hover">
-                <img
-                  className="rounded-full w-6 h-6 object-cover"
-                  src={data?.picture || DUMMY_PROFILE_API(npub)}
-                  alt={data?.name}
-                />
-                <span className="group-hover:underline">
-                  {data?.name || shortenHash(npub)!}
-                </span>
-              </Item>
-            </Link>
-            <span>·</span>
+      <div className="flex flex-row justify-between">
+        <div>
+          <div className="flex items-center gap-2 pb-4">
+            {profile ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  className="group"
+                  href={`u/${npub}`}
+                  onClick={scrollToTop}
+                >
+                  <Item className="text-gray-hover">
+                    <img
+                      className="rounded-full w-6 h-6 object-cover"
+                      src={data?.picture || DUMMY_PROFILE_API(npub)}
+                      alt={data?.name}
+                    />
+                    <span className="group-hover:underline">
+                      {data?.name || shortenHash(npub)!}
+                    </span>
+                  </Item>
+                </Link>
+                <span>·</span>
+              </div>
+            ) : null}
+            <DatePosted timestamp={createdAt} />
           </div>
-        ) : null}
-        <DatePosted timestamp={createdAt} />
+        </div>
+        <DeleteBlog event={event} />
       </div>
 
       <Link href={`/${nip19.noteEncode(noteId!)}`} onClick={scrollToTop}>
