@@ -5,7 +5,7 @@ import Aside from "@/app/Aside";
 import BlogFeed from "@/app/BlogFeed";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
-import { shortenHash } from "@/app/lib/utils";
+import { getTagValues, shortenHash } from "@/app/lib/utils";
 import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
@@ -49,9 +49,19 @@ export default function ProfilePage() {
             eventsSeen[event.id!] = true;
           });
           sub.on("eose", () => {
-            // console.log("EOSE");
-            // console.log("EXPLORE eventArray", eventArray);
-            setEvents(eventArray);
+            const filteredEvents = eventArray.filter((e1, index) => {
+              if (e1.content === "") {
+                return false;
+              }
+              const title = getTagValues("subject", e1.tags);
+              if (!title || title === "") {
+                return false;
+              }
+              return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+            });
+            if (filteredEvents.length > 0) {
+              setEvents(filteredEvents);
+            }
             sub.unsub();
           });
         });
