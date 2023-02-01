@@ -3,6 +3,7 @@ import { useNostr } from "nostr-react";
 import type { Event } from "nostr-tools";
 import { useEffect, useState } from "react";
 import Article from "./Article";
+import { getTagValues } from "./lib/utils";
 import Posts from "./Posts";
 
 export default function BlogFeed({ events, setEvents, filter, profile }: any) {
@@ -32,6 +33,10 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
             const filteredEvents = concatEvents.filter(
               (e1: Event, index: number) => {
                 if (e1.content === "") {
+                  return false;
+                }
+                const title = getTagValues("subject", e1.tags);
+                if (!title || title === "") {
                   return false;
                 }
                 return eventArray.findIndex((e2) => e2.id === e1.id) === index;

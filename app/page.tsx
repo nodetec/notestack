@@ -10,6 +10,7 @@ import Main from "./Main";
 import RecommendedEvents from "./RecommendedEvents";
 import RecommendedTopics from "./RecommendedTopics";
 import Tabs from "./Tabs";
+import { getTagValues } from "./lib/utils";
 
 export default function HomePage() {
   // @ts-ignore
@@ -43,6 +44,10 @@ export default function HomePage() {
         sub.on("eose", () => {
           const filteredEvents = eventArray.filter((e1, index) => {
             if (e1.content === "") {
+              return false;
+            }
+            const title = getTagValues("subject", e1.tags);
+            if (!title || title === "") {
               return false;
             }
             return eventArray.findIndex((e2) => e2.id === e1.id) === index;
@@ -94,6 +99,10 @@ export default function HomePage() {
             sub.on("eose", () => {
               const filteredEvents = eventArray.filter((e1, index) => {
                 if (e1.content === "") {
+                  return false;
+                }
+                const title = getTagValues("subject", e1.tags);
+                if (!title || title === "") {
                   return false;
                 }
                 return eventArray.findIndex((e2) => e2.id === e1.id) === index;
