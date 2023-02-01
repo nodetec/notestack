@@ -23,7 +23,7 @@ const PopupInput = ({
 
   return (
     <div>
-      <label className="text-sm font-bold pt-[.15rem]" htmlFor={id}>
+      <label className="text-sm text-gray" htmlFor={id}>
         {label}
       </label>
       {error && <p className="text-red-400 pl-3 text-sm mt-1">{error}</p>}
@@ -31,7 +31,7 @@ const PopupInput = ({
         <input
           type="text"
           id={id}
-          className={`outline-none focus:outline-none rounded-md border-2  mt-1 py-2 px-4 block w-full leading-normal ${className}`}
+          className={`outline-none text-gray-hover focus:outline-none border-b border-b-gray mt-1 py-2 block w-full leading-normal ${className}`}
           placeholder={placeholder}
           value={value}
           {...props}
