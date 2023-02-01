@@ -14,6 +14,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        error: "rgb(201, 74, 74)",
         red: "rgb(247, 0, 0)",
         "red-hover": "rgb(210, 19, 7)",
         green: "rgb(26, 137, 23)",

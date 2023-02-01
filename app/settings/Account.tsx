@@ -5,11 +5,14 @@ import { useNostr } from "nostr-react";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { KeysContext } from "../context/keys-provider";
 import type { Event } from "nostr-tools";
+import PopupInput from "../PopupInput";
+import Button from "../Button";
 
 const Account = () => {
   const [popup, setPopup] = useState("");
-  const [newName, setNewName] = useState("");
+  const [profileInfo, setProfileInfo] = useState({ name: "" });
   const [profileEvents, setProfileEvents] = useState<Event[]>();
+  const { name } = profileInfo;
   const { connectedRelays } = useNostr();
 
   // @ts-ignore
@@ -40,14 +43,13 @@ const Account = () => {
           try {
             const content = eventArray[0]?.content;
             const contentObj = JSON.parse(content);
-            let name = contentObj?.name;
             // nip05 = contentObj?.nip05;
             // about = contentObj?.about;
             // lud06 = contentObj?.lud06;
             // lud16 = contentObj?.lud16;
             // picture = contentObj?.picture || DUMMY_PROFILE_API(npub);
             // setProfileInfo({ name, about, picture });
-            setNewName(name);
+            setProfileInfo({ ...profileInfo, name: contentObj?.name });
           } catch {
             console.log("Error parsing content");
           }
@@ -67,13 +69,38 @@ const Account = () => {
   return (
     <Fragment>
       <div className="flex flex-col gap-2">
-        <Item title="Name" value={newName} onClick={() => setPopup("name")} />
+        <Item title="Name" value={name} onClick={() => setPopup("name")} />
       </div>
       <Popup
         title="Name"
         isOpen={popup === "name"}
         setIsOpen={() => setPopup("")}
-      ></Popup>
+      >
+        <PopupInput
+          label="Name"
+          value={name}
+          minLength={1}
+          error={false}
+          maxLength={32}
+          message={"Name must be between 1 and 32 characters."}
+          onChange={(e) =>
+            setProfileInfo({ ...profileInfo, name: e.target.value })
+          }
+        />
+        <div className="flex items-center gap-2 justify-end">
+          <Button
+            color="green"
+            size="sm"
+            variant="outline"
+            onClick={() => setPopup("")}
+          >
+            Cancel
+          </Button>
+          <Button color="green" size="sm">
+            Save
+          </Button>
+        </div>
+      </Popup>
     </Fragment>
   );
 };
