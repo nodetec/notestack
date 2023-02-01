@@ -62,7 +62,7 @@ export default function TagPage() {
             events={events}
             setEvents={setEvents}
             filter={filter}
-            profile={false}
+            profile={true}
           />
         ) : null}
       </Content>
