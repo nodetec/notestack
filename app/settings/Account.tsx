@@ -1,10 +1,17 @@
 "use client";
 
 import Popup from "@/app/Popup";
-import { Fragment, useState } from "react";
+import { useProfile } from "nostr-react";
+import { Fragment, useContext, useState } from "react";
+import { KeysContext } from "../context/keys-provider";
 
 const Account = () => {
   const [popup, setPopup] = useState("");
+
+  const { publicKey: pubkey = "" } = useContext(KeysContext);
+  const { data } = useProfile({ pubkey });
+  /* console.log(data); */
+
   const [profile, setProfile] = useState({
     newName: "test",
   });
