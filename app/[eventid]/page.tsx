@@ -11,6 +11,7 @@ export default function NotePage() {
   if (pathname) {
     eventId = pathname.split("/").pop() || "";
     eventId = nip19.decode(eventId).data.toString();
+    console.log("eventId", eventId);
   }
 
   const { events } = useNostrEvents({

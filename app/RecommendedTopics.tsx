@@ -13,7 +13,7 @@ const RecommendedTopics: React.FC<RecommendedTopicsProps> = ({ TOPICS }) => (
         <li key={topic}>
           <Link
             className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
-            href={`/tag/${topic.replace(" ", "-").toLowerCase()}`}
+            href={`/tag/${topic.replace(" ", "-")}`}
           >
             {topic}
           </Link>

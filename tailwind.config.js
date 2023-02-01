@@ -22,6 +22,7 @@ module.exports = {
         gray: "rgb(117, 117, 117)",
         "gray-hover": "rgb(41, 41, 41)",
         "light-gray": "rgb(225, 225, 225)",
+        "medium-gray": "rgb(168, 168, 168)",
       },
       gridTemplateColumns: {
         "content-porfile": "3fr 1fr",

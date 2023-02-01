@@ -142,7 +142,7 @@ const Tag: FC<{ tag: string }> = ({ tag }) => {
   return (
     <Link
       className="flex items-center gap-4 text-gray-hover pt-2"
-      href={`/tags/${tag}`}
+      href={`/tag/${tag}`}
     >
       <AiFillTag size="20" className="text-gray" />
       <span>{tag}</span>
