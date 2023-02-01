@@ -21,7 +21,7 @@ export default function Note({ event }: NoteProps) {
   return (
     <>
       {event && (
-        <div className="w-full self-center max-w-[70rem] mt-16">
+        <div className="w-full self-center max-w-[70rem] my-16">
           <MarkdownDisplay event={event} />
         </div>
       )}

@@ -42,18 +42,18 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
 
   return (
     <Fragment>
-      <div className="mx-auto w-full prose prose-xl text-accent flex items-center justify-between gap-2">
+      <div className="mx-auto w-full prose prose-lg text-accent flex items-center justify-between gap-2">
         <div className="flex items-center gap-4 w-full">
-          <Button
-            className="mb-auto"
-            variant="ghost"
-            icon={<IoChevronBack />}
-            title="Go back"
-            onClick={() => router.back()}
-          />
+          {/* <Button */}
+          {/*   className="mb-auto" */}
+          {/*   variant="ghost" */}
+          {/*   icon={<IoChevronBack />} */}
+          {/*   title="Go back" */}
+          {/*   onClick={() => router.back()} */}
+          {/* /> */}
 
           <div className="flex flex-col w-full">
-            <h1 className="my-0 text-light text-3xl">{title}</h1>
+            <h1 className="mb-0">{title}</h1>
             <div className="flex flex-row justify-between w-full">
               <div className="flex justify-start w-full">
                 <div className="flex flex-row items-center gap-2">
@@ -91,7 +91,7 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
       </div>
 
       <div
-        className="rounded-md mx-auto bg-secondary w-full prose prose-xl h-full"
+        className="rounded-md mx-auto bg-secondary w-full prose prose-lg h-full"
         dangerouslySetInnerHTML={{ __html: markdown }}
       />
       <SharePopup
