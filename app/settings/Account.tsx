@@ -1,34 +1,14 @@
 "use client";
 
+import Popup from "@/app/Popup";
 import { Fragment, useState } from "react";
-import Popup from "../Popup";
 
 const Account = () => {
   const [popup, setPopup] = useState("");
   const [profile, setProfile] = useState({
     newName: "test",
-    newNip05: "",
-    newNpub: "",
-    newAbout: "",
-    newPicture: "",
-    newProfilePubkey: "",
-    newLoggedInContactList: "",
-    newLoggedInPubkey: "",
-    newLud06: "",
-    newLud16: "",
   });
-  const {
-    newName,
-    newNip05,
-    newNpub,
-    newAbout,
-    newPicture,
-    newProfilePubkey,
-    newLoggedInContactList,
-    newLoggedInPubkey,
-    newLud06,
-    newLud16,
-  } = profile;
+  const { newName } = profile;
 
   return (
     <Fragment>
@@ -39,9 +19,7 @@ const Account = () => {
         title="Name"
         isOpen={popup === "name"}
         setIsOpen={() => setPopup("")}
-      >
-        hi
-      </Popup>
+      ></Popup>
     </Fragment>
   );
 };
