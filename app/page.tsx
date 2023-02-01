@@ -131,9 +131,9 @@ export default function HomePage() {
           title="Recommended Blogs"
           showProfile
           EVENTS={[
-            "616c252e86c5488faf65b5247800b517f00c658b528435bde12c481c4c0b3f37",
-            "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
+            "0d4dfa8b61c059d2f9a670f4a75c78db823fe48bb9999781bc9c204c46790019",
             "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27",
+            "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
           ]}
         />
         <RecommendedTopics
@@ -141,7 +141,7 @@ export default function HomePage() {
             "nostr",
             "lightning",
             "bitcoin",
-            "programming",
+            "taproot",
             "tailwindcss",
             "chess",
           ]}
