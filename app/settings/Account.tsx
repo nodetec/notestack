@@ -1,21 +1,68 @@
 "use client";
 
 import Popup from "@/app/Popup";
-import { useProfile } from "nostr-react";
-import { Fragment, useContext, useState } from "react";
+import { useNostr } from "nostr-react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { KeysContext } from "../context/keys-provider";
+import type { Event } from "nostr-tools";
 
 const Account = () => {
   const [popup, setPopup] = useState("");
+  const [newName, setNewName] = useState("");
+  const [profileEvents, setProfileEvents] = useState<Event[]>();
+  const { connectedRelays } = useNostr();
 
-  const { publicKey: pubkey = "" } = useContext(KeysContext);
-  const { data } = useProfile({ pubkey });
-  /* console.log(data); */
+  // @ts-ignore
+  const { keys } = useContext(KeysContext);
+  console.log("PUBKEY", keys.publicKey);
 
-  const [profile, setProfile] = useState({
-    newName: "test",
-  });
-  const { newName } = profile;
+  useEffect(() => {
+    const filter = {
+      kinds: [0],
+      authors: [keys.publicKey],
+    };
+    if (keys.publicKey) {
+      const eventsSeen: { [k: string]: boolean } = {};
+      let eventArray: Event[] = [];
+      connectedRelays.forEach((relay) => {
+        let sub = relay.sub([filter]);
+        sub.on("event", (event: Event) => {
+          if (!eventsSeen[event.id!]) {
+            eventArray.push(event);
+          }
+          eventsSeen[event.id!] = true;
+        });
+        sub.on("eose", () => {
+          // console.log("EOSE");
+          // console.log("EXPLORE eventArray", eventArray);
+          setProfileEvents(eventArray);
+
+          try {
+            const content = eventArray[0]?.content;
+            const contentObj = JSON.parse(content);
+            let name = contentObj?.name;
+            // nip05 = contentObj?.nip05;
+            // about = contentObj?.about;
+            // lud06 = contentObj?.lud06;
+            // lud16 = contentObj?.lud16;
+            // picture = contentObj?.picture || DUMMY_PROFILE_API(npub);
+            // setProfileInfo({ name, about, picture });
+            setNewName(name);
+          } catch {
+            console.log("Error parsing content");
+          }
+          // setNewName(eventArray[0].content.name);
+
+          // const [profile, setProfile] = useState({
+          //   newName: "test",
+          // });
+          sub.unsub();
+        });
+      });
+    }
+  }, [connectedRelays, keys]);
+
+  // const { newName } = profile;
 
   return (
     <Fragment>
