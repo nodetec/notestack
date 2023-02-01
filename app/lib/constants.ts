@@ -1,6 +1,6 @@
 export const RELAYS = [
   // "wss://nostr-pub.wellorder.net",
-  "wss://relay.nostr.ch",
+  // "wss://relay.nostr.ch",
   "wss://relay.snort.social",
   // "wss://nostr.bitcoiner.social",
   // "wss://nostr.onsats.org",

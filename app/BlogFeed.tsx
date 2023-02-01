@@ -1,65 +1,49 @@
 "use client";
-import { usePathname } from "next/navigation";
 import { useNostr } from "nostr-react";
-import type { Event, Filter } from "nostr-tools";
-import { useEffect, useContext, useState } from "react";
+import type { Event } from "nostr-tools";
+import { useEffect, useState } from "react";
 import Article from "./Article";
 import Posts from "./Posts";
 
-export default function BlogFeed({
-  events,
-  setEvents,
-  filter,
-  profile,
-}: // addedPosts,
-// setAddedPosts,
-any) {
-  const pathname = usePathname();
+export default function BlogFeed({ events, setEvents, filter, profile }: any) {
   const { connectedRelays } = useNostr();
-  const INITIAL_SHOWN_POSTS = 10;
-  const [addedPosts, setAddedPosts] = useState<number>(INITIAL_SHOWN_POSTS);
-  // const [events, setEvents] = useState<Event[]>([]);
-
-  if (pathname) {
-    console.log("pathname is:", pathname);
-    // page = pathname.split("/").pop() || "1";
-  }
+  const [addedPosts, setAddedPosts] = useState<number>(10);
 
   // fetch initial 100 events for filter
-
   useEffect(() => {
-    console.log("ADDED POSTS:", addedPosts);
     if (addedPosts > 0.8 * events.length) {
-      console.log("added posts is:", addedPosts);
       const currentEvents = events;
-
-      // console.log("latest event:", events.slice(-1)[0]);
-
-      let until: any;
 
       if (events.length > 0) {
         const lastEvent = events.slice(-1)[0];
-        until = lastEvent.created_at;
-        console.log("until", until);
+        let eventArray: Event[] = [];
+        const eventsSeen: { [k: string]: boolean } = {};
+        connectedRelays.forEach((relay) => {
+          filter.until = lastEvent.created_at;
+          let sub = relay.sub([filter]);
+          sub.on("event", (event: Event) => {
+            if (!eventsSeen[event.id!]) {
+              eventArray.push(event);
+            }
+          });
+          sub.on("eose", () => {
+            console.log("EOSE additional events from", relay.url);
+            const concatEvents = currentEvents.concat(eventArray);
+            const filteredEvents = concatEvents.filter(
+              (e1: Event, index: number) => {
+                if (e1.content === "") {
+                  return false;
+                }
+                return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+              }
+            );
+            if (filteredEvents.length > 0) {
+              setEvents(filteredEvents);
+            }
+            sub.unsub();
+          });
+        });
       }
-
-      let eventArray: Event[] = [];
-      const eventsSeen: { [k: string]: boolean } = {};
-      connectedRelays.forEach((relay) => {
-        filter.until = until;
-        let sub = relay.sub([filter]);
-        sub.on("event", (event: Event) => {
-          if (!eventsSeen[event.id!]) {
-            eventArray.push(event);
-          }
-        });
-        sub.on("eose", () => {
-          console.log("EOSE");
-          console.log("TEST ADDED eventArray", eventArray);
-          setEvents(currentEvents.concat(eventArray));
-          sub.unsub();
-        });
-      });
     }
   }, [addedPosts]);
 

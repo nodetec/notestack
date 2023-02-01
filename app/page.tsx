@@ -43,7 +43,13 @@ export default function HomePage() {
         sub.on("eose", () => {
           // console.log("EOSE");
           // console.log("EXPLORE eventArray", eventArray);
-          setExploreEvents(eventArray);
+          const filteredEvents = eventArray.filter((e1, index) => {
+            if (e1.content === "") {
+              return false;
+            }
+            return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+          });
+          setExploreEvents(filteredEvents);
           sub.unsub();
         });
       });
