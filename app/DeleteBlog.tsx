@@ -23,7 +23,9 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
   const handleDelete = async (e: any) => {
     e.preventDefault();
     const tags = [["e", eventToDelete.id]];
-    let event = NostrService.createEvent(
+    console.log("EVENT TO DELETE:", eventToDelete);
+
+    let deleteEvent = NostrService.createEvent(
       5,
       loggedInUserKeys.publicKey,
       "",
@@ -31,30 +33,25 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
     );
 
     try {
-      event = await NostrService.addEventData(event);
+      deleteEvent = await NostrService.addEventData(deleteEvent);
+      const pubs = publish(deleteEvent);
+      // @ts-ignore
+      for (const pub of pubs) {
+        pub.on("ok", () => {
+          console.log("OUR DELETE EVENT WAS ACCEPTED");
+        });
+
+        pub.on("seen", async () => {
+          console.log("OUR DELETE EVENT WAS SEEN");
+          // TODO: pass event list all they into here and remove it from state after deletion event is seen
+        });
+
+        pub.on("failed", (reason: any) => {
+          console.log("OUR DELETE EVENT HAS FAILED WITH REASON:", reason);
+        });
+      }
     } catch (err: any) {
-      return;
-    }
-
-    let eventId: any = null;
-    eventId = event?.id;
-
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for (const pub of pubs) {
-      pub.on("ok", () => {
-        console.log("OUR DELETE EVENT WAS ACCEPTED");
-      });
-
-      pub.on("seen", async () => {
-        console.log("OUR DELETE EVENT WAS SEEN");
-        // TODO: pass event list all they into here and remove it from state after deletion event is seen
-      });
-
-      pub.on("failed", (reason: any) => {
-        console.log("OUR DELETE EVENT HAS FAILED WITH REASON:", reason);
-      });
+      console.log("FAILED TO DELETE");
     }
   };
 
