@@ -41,15 +41,15 @@ export default function HomePage() {
           eventsSeen[event.id!] = true;
         });
         sub.on("eose", () => {
-          // console.log("EOSE");
-          // console.log("EXPLORE eventArray", eventArray);
           const filteredEvents = eventArray.filter((e1, index) => {
             if (e1.content === "") {
               return false;
             }
             return eventArray.findIndex((e2) => e2.id === e1.id) === index;
           });
-          setExploreEvents(filteredEvents);
+          if (filteredEvents.length > 0) {
+            setExploreEvents(filteredEvents);
+          }
           sub.unsub();
         });
       });
@@ -69,11 +69,9 @@ export default function HomePage() {
         sub.on("event", (event: Event) => {
           // TODO: we could go through each event and add each lis of followers to a set, but for now we'll just use one
           followedAuthors = event.tags.map((pair: string[]) => pair[1]);
-          // console.log("followedAuthors", followedAuthors);
         });
         sub.on("eose", () => {
           console.log("EOSE");
-
           const newfollowingFilter = {
             kinds: [2222],
             limit: 100,
@@ -94,9 +92,15 @@ export default function HomePage() {
               eventsSeen[event.id!] = true;
             });
             sub.on("eose", () => {
-              // console.log("EOSE");
-              // console.log("FOLLOWING eventArray", eventArray);
-              setFollowingEvents(eventArray);
+              const filteredEvents = eventArray.filter((e1, index) => {
+                if (e1.content === "") {
+                  return false;
+                }
+                return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+              });
+              if (filteredEvents.length > 0) {
+                setFollowingEvents(filteredEvents);
+              }
               sub.unsub();
             });
           });
