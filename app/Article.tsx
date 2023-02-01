@@ -22,6 +22,18 @@ const Article: FC<NoteProps> = ({
 }) => {
   const { tags, created_at: createdAt, id: noteId } = event;
   let { content } = event;
+  console.log("tags", event.tags);
+
+  function getTValues(tags: string[][]) {
+    return tags
+      .filter((subTags) => subTags[0] === "t")
+      .map((subTags) => subTags[1])
+      .filter((t) => t.length <= 20);
+  }
+
+  const tValues = getTValues(event.tags);
+
+  console.log("tValues", tValues);
 
   const { data } = useProfile({
     pubkey: event.pubkey,
@@ -91,6 +103,18 @@ const Article: FC<NoteProps> = ({
           ) : null}
         </div>
       </Link>
+      <ul className="flex items-center gap-2 text-sm flex-wrap mt-4">
+        {tValues.map((topic) => (
+          <li key={topic}>
+            <Link
+              className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
+              href={`/tag/${topic.replace(" ", "-")}`}
+            >
+              {topic}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </article>
   );
 };
