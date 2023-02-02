@@ -56,13 +56,33 @@ export default function UserCard({
   const [tippedAmount, setTippedAmount] = useState<any>();
 
   // each object in the event array is a unique follower and we can look each one up with a 0 metadata kind
-  const { events: followers } = useNostrEvents({
-    filter: {
-      kinds: [3],
-      "#p": [profilePubkey],
-      limit: 100,
-    },
-  });
+  // const followersEventString = sessionStorage.getItem(
+  //   profilePubkey + "_followers"
+  // );
+  let followers: Event[];
+
+  // if (!followersEventString) {
+  // TODO rewrite this, get events without hook and cache
+    let { events: followersFromEvent } = useNostrEvents({
+      filter: {
+        kinds: [3],
+        "#p": [profilePubkey],
+        limit: 100,
+      },
+    });
+    followers = followersFromEvent;
+  // }
+
+  // if (followersEventString) {
+  //   const cachedEvents = JSON.parse(followersEventString);
+  //   followers = cachedEvents;
+  //   console.log("using cached followers for user:", npub);
+  // } else {
+  //   if (followers && followers.length > 0) {
+  //     const followersString = JSON.stringify(followers);
+  //     sessionStorage.setItem(profilePubkey + "_followers", followersString);
+  //   }
+  // }
 
   useEffect(() => {
     setNewLnAddress(lud16);
@@ -95,10 +115,7 @@ export default function UserCard({
         const response = await fetch(url);
 
         if (utils.isLnurl(newLnAddress)) {
-          console.log("RESPONSE:", response);
           const data = await response.json();
-          console.log("DATA:", data);
-          console.log("METADATA:", JSON.parse(data.metadata)[0][1]);
           const newConvertedAddress = JSON.parse(data.metadata)[0][1];
 
           setNewLud16(newConvertedAddress);
@@ -258,7 +275,7 @@ export default function UserCard({
         className="text-base text-gray hover:text-gray-hover my-2"
         href={`/u/${npub}`}
       >
-        {followers.length > 100 ? "100+" : followers.length} Followers
+        {followers && followers.length > 100 ? "100+" : followers.length} Followers
       </Link>
       <div className="font-semibold">
         {nip05 && (
@@ -390,7 +407,9 @@ export default function UserCard({
               min={1}
               className="outline-none w-full flex-1 focus:ring-0 border-0 bg-transparent "
             />
-            <span className="text-black-600 text-sm ml-2 font-bold">satoshis</span>
+            <span className="text-black-600 text-sm ml-2 font-bold">
+              satoshis
+            </span>
           </div>
           <Buttons>
             {presetAmounts.map((amount) => (
