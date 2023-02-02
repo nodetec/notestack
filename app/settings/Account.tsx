@@ -282,16 +282,11 @@ const Account = () => {
                 setNewProfile({ ...newProfile, lud16: e.target.value })
               }
             />
-            <PopupInput
-              disabled
-              value={newProfile.convertedAddress}
-              onChange={(e) =>
-                setNewProfile({
-                  ...newProfile,
-                  convertedAddress: e.target.value,
-                })
-              }
-            />
+            {newProfile.convertedAddress ? (
+              <p className="w-full overflow-x-scroll mt-2 py-2">
+                {newProfile.convertedAddress}
+              </p>
+            ) : null}
           </Fragment>
         ) : null}
         <div className="flex items-center mt-2 gap-2 justify-end">
