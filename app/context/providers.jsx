@@ -8,7 +8,7 @@ import NotifyProvider from "./notify-provider";
 
 export default function Providers({ children }) {
   return (
-    <NostrProvider relayUrls={RELAYS} debug={false}>
+    <NostrProvider relayUrls={RELAYS} debug={true}>
       <BlogProvider>
         <NotifyProvider>
           <KeysProvider>{children}</KeysProvider>
