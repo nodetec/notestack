@@ -40,29 +40,31 @@ const Search = () => {
   };
 
   useEffect(() => {
-    connectedRelays.forEach((relay) => {
-      let sub = relay.sub([
-        {
-          kinds: [2222],
-          "#t": [searchTerm],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
-        setResults((current: ResultType) => {
-          return {
-            ...current,
-            pubkeys: [event.pubkey],
-            tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
-          };
+    if (searchTerm.length > 0) {
+      connectedRelays.forEach((relay) => {
+        let sub = relay.sub([
+          {
+            kinds: [2222],
+            "#t": [searchTerm],
+          },
+        ]);
+        sub.on("event", (event: Event) => {
+          console.log("we got the event we wanted:", event);
+          setResults((current: ResultType) => {
+            return {
+              ...current,
+              pubkeys: [event.pubkey],
+              tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
+            };
+          });
+          setShowTooltip(true);
         });
-        setShowTooltip(true);
+        sub.on("eose", () => {
+          console.log("EOSE searched events from", relay.url);
+          sub.unsub();
+        });
       });
-      sub.on("eose", () => {
-        console.log("EOSE searched events from", relay.url);
-        sub.unsub();
-      });
-    });
+    }
   }, [searchTerm, connectedRelays]);
 
   return (
