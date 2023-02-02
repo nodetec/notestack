@@ -32,12 +32,30 @@ export default function ProfilePage() {
     const filter = {
       kinds: [2222],
       authors: [profilePubkey],
-      limit: 100,
+      limit: 50,
       until: undefined,
     };
 
     useEffect(() => {
+      window.scrollTo(0, 0);
+
       if (events.length === 0) {
+        const profileEventsString = sessionStorage.getItem(
+          profilePubkey + "_events"
+        );
+        if (profileEventsString) {
+          const cachedEvents = JSON.parse(profileEventsString);
+          setEvents(cachedEvents);
+          console.log("using cached events for user:", npub);
+        }
+      }
+    }, []);
+
+    useEffect(() => {
+      const profileEventsString = sessionStorage.getItem(
+        profilePubkey + "_events"
+      );
+      if (!profileEventsString && events.length === 0) {
         const eventsSeen: { [k: string]: boolean } = {};
         let eventArray: Event[] = [];
         connectedRelays.forEach((relay) => {
@@ -62,6 +80,8 @@ export default function ProfilePage() {
             });
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
+              const eventsString = JSON.stringify(filteredEvents);
+              sessionStorage.setItem(profilePubkey + "_events", eventsString);
             }
             sub.unsub();
           });
