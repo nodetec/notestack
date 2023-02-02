@@ -89,32 +89,31 @@ export default function HomePage() {
     }
 
     const followingEventsString = sessionStorage.getItem("latest_events");
-    if (!followingEventsString && followingEvents.length === 0) {
-      let followedAuthors: string[];
+    let followedAuthors: string[];
 
-      connectedRelays.forEach((relay) => {
-        let sub = relay.sub([
-          {
-            authors: [loggedInUserKeys.publicKey],
-            kinds: [3],
-            limit: 50,
-          },
-        ]);
-        sub.on("event", (event: Event) => {
-          // TODO: we could go through each event and add each lis of followers to a set, but for now we'll just use one
-          followedAuthors = event.tags.map((pair: string[]) => pair[1]);
-        });
-        sub.on("eose", () => {
-          console.log("EOSE top 50 followed users from", relay.url);
-          const newfollowingFilter = {
-            kinds: [2222],
-            limit: 50,
-            authors: followedAuthors,
-            until: undefined,
-          };
+    connectedRelays.forEach((relay) => {
+      let sub = relay.sub([
+        {
+          authors: [loggedInUserKeys.publicKey],
+          kinds: [3],
+          limit: 50,
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        // TODO: we could go through each event and add each lis of followers to a set, but for now we'll just use one
+        followedAuthors = event.tags.map((pair: string[]) => pair[1]);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE top 50 followed users from", relay.url);
+        const newfollowingFilter = {
+          kinds: [2222],
+          limit: 50,
+          authors: followedAuthors,
+          until: undefined,
+        };
 
-          setFollowingFilter(newfollowingFilter);
-
+        setFollowingFilter(newfollowingFilter);
+        if (!followingEventsString && followingEvents.length === 0) {
           const eventsSeen: { [k: string]: boolean } = {};
           let eventArray: Event[] = [];
           connectedRelays.forEach((relay) => {
@@ -145,10 +144,10 @@ export default function HomePage() {
               sub.unsub();
             });
           });
-          sub.unsub();
-        });
+        }
+        sub.unsub();
       });
-    }
+    });
   }, [connectedRelays]);
 
   return (
