@@ -17,7 +17,7 @@ const ARTICLES = [
 ];
 
 const SettingsPage = () => {
-  const TABS = ["Account", "Publishing", "Notifications"];
+  const TABS = ["Account" /* , "Publishing", "Notifications" */];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   return (
