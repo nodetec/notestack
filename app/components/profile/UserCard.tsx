@@ -66,15 +66,15 @@ export default function UserCard({
 
   useEffect(() => {
     setNewLnAddress(lud16);
-    console.log("NAME:", name);
-    console.log("ABOUT:", about);
-    console.log("PICTURE:", picture);
-    console.log("NIP05:", nip05);
-    console.log("LUD06:", lud06);
-    console.log("LUD16:", lud16);
-    console.log("LNADDRESS:", newLnAddress);
-    console.log("CONVERTEDADDRESS:", convertedAddress);
-    console.log("TIPPEDAMOUNT:", tippedAmount);
+    // console.log("NAME:", name);
+    // console.log("ABOUT:", about);
+    // console.log("PICTURE:", picture);
+    // console.log("NIP05:", nip05);
+    // console.log("LUD06:", lud06);
+    // console.log("LUD16:", lud16);
+    // console.log("LNADDRESS:", newLnAddress);
+    // console.log("CONVERTEDADDRESS:", convertedAddress);
+    // console.log("TIPPEDAMOUNT:", tippedAmount);
   }, []);
 
   useEffect(() => {
