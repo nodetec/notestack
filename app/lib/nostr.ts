@@ -4,6 +4,7 @@ import { relayInit, generatePrivateKey, getPublicKey } from "nostr-tools";
 import type { Relay } from "nostr-tools";
 import sha256 from "crypto-js/sha256";
 import Hex from "crypto-js/enc-hex";
+import { getTagValues } from "./utils";
 
 export enum Kind {
   Metadata = 0,
@@ -134,5 +135,19 @@ export namespace NostrService {
     event = await window.nostr.signEvent(event);
     console.log("signed event", event);
     return event;
+  }
+
+  export function filterBlogEvents(eventArray: Event[]) {
+    const filteredEvents = eventArray.filter((e1, index) => {
+      if (e1.content === "") {
+        return false;
+      }
+      const title = getTagValues("subject", e1.tags);
+      if (!title || title === "") {
+        return false;
+      }
+      return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+    });
+    return filteredEvents;
   }
 }

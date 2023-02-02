@@ -10,7 +10,7 @@ import Main from "./Main";
 import RecommendedEvents from "./RecommendedEvents";
 import RecommendedTopics from "./RecommendedTopics";
 import Tabs from "./Tabs";
-import { getTagValues } from "./lib/utils";
+import { NostrService } from "./lib/nostr";
 
 export default function HomePage() {
   // @ts-ignore
@@ -68,16 +68,7 @@ export default function HomePage() {
         });
         sub.on("eose", () => {
           console.log("EOSE initial latest events from", relay.url);
-          const filteredEvents = eventArray.filter((e1, index) => {
-            if (e1.content === "") {
-              return false;
-            }
-            const title = getTagValues("subject", e1.tags);
-            if (!title || title === "") {
-              return false;
-            }
-            return eventArray.findIndex((e2) => e2.id === e1.id) === index;
-          });
+          const filteredEvents = NostrService.filterBlogEvents(eventArray);
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
             const eventsString = JSON.stringify(filteredEvents);
@@ -126,16 +117,8 @@ export default function HomePage() {
             });
             sub.on("eose", () => {
               console.log("EOSE initial following events from", relay.url);
-              const filteredEvents = eventArray.filter((e1, index) => {
-                if (e1.content === "") {
-                  return false;
-                }
-                const title = getTagValues("subject", e1.tags);
-                if (!title || title === "") {
-                  return false;
-                }
-                return eventArray.findIndex((e2) => e2.id === e1.id) === index;
-              });
+
+              const filteredEvents = NostrService.filterBlogEvents(eventArray);
               if (filteredEvents.length > 0) {
                 setFollowingEvents(filteredEvents);
                 const eventsString = JSON.stringify(filteredEvents);

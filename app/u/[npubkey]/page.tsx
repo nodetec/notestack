@@ -5,7 +5,7 @@ import Aside from "@/app/Aside";
 import BlogFeed from "@/app/BlogFeed";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
-import { getTagValues, shortenHash } from "@/app/lib/utils";
+import { shortenHash } from "@/app/lib/utils";
 import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
@@ -14,6 +14,7 @@ import { useNostr } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import { useEffect, useState } from "react";
 import AuthorTooltip from "@/app/AuthorTooltip";
+import { NostrService } from "@/app/lib/nostr";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -68,16 +69,7 @@ export default function ProfilePage() {
           });
           sub.on("eose", () => {
             console.log("EOSE initial latest profile events from", relay.url);
-            const filteredEvents = eventArray.filter((e1, index) => {
-              if (e1.content === "") {
-                return false;
-              }
-              const title = getTagValues("subject", e1.tags);
-              if (!title || title === "") {
-                return false;
-              }
-              return eventArray.findIndex((e2) => e2.id === e1.id) === index;
-            });
+            const filteredEvents = NostrService.filterBlogEvents(eventArray);
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
               const eventsString = JSON.stringify(filteredEvents);
