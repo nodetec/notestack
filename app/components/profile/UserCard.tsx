@@ -35,6 +35,8 @@ export default function UserCard({
   }
   const [isTipOpen, setIsTipOpen] = useState(false);
   const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
+  console.log("NAME:", name)
+  console.log("ABOUT:", about)
 
   const [tipInputValue, setTipInputValue] = useState<string>("1");
   const [tipMessage, setTipMessage] = useState<string>();
