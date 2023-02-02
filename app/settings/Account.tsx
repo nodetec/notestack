@@ -28,8 +28,6 @@ const Account = () => {
   const { connectedRelays } = useNostr();
   const { publish } = useNostr();
 
-  console.log("EXPLORE profileInfo", profileInfo);
-
   useEffect(() => {
     setNewProfile(profileInfo);
   }, [profileInfo, popup]);
