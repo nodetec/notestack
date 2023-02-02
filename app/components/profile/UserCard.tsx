@@ -63,14 +63,14 @@ export default function UserCard({
 
   // if (!followersEventString) {
   // TODO rewrite this, get events without hook and cache
-    let { events: followersFromEvent } = useNostrEvents({
-      filter: {
-        kinds: [3],
-        "#p": [profilePubkey],
-        limit: 100,
-      },
-    });
-    followers = followersFromEvent;
+  let { events: followersFromEvent } = useNostrEvents({
+    filter: {
+      kinds: [3],
+      "#p": [profilePubkey],
+      limit: 100,
+    },
+  });
+  followers = followersFromEvent;
   // }
 
   // if (followersEventString) {
@@ -86,18 +86,6 @@ export default function UserCard({
 
   useEffect(() => {
     setNewLnAddress(lud16);
-    // console.log("NAME:", name);
-    // console.log("ABOUT:", about);
-    // console.log("PICTURE:", picture);
-    // console.log("NIP05:", nip05);
-    // console.log("LUD06:", lud06);
-    // console.log("LUD16:", lud16);
-    // console.log("LNADDRESS:", newLnAddress);
-    // console.log("CONVERTEDADDRESS:", convertedAddress);
-    // console.log("TIPPEDAMOUNT:", tippedAmount);
-  }, []);
-
-  useEffect(() => {
     setNewLnAddress(lud16);
     setNewName(name);
     setNewAbout(about);
@@ -105,6 +93,16 @@ export default function UserCard({
     setNewNip05(nip05);
     setNewLud06(lud06);
     setNewLud16(lud16);
+  }, []);
+
+  useEffect(() => {
+    setNewLnAddress(newLud16);
+    setNewName(newName);
+    setNewAbout(newAbout);
+    setNewPicture(newPicture);
+    setNewNip05(newNip05);
+    setNewLud06(newLud06);
+    setNewLud16(newLud16);
   }, [isOpen]);
 
   async function convert(newLnAddress: any) {
@@ -119,6 +117,7 @@ export default function UserCard({
           const newConvertedAddress = JSON.parse(data.metadata)[0][1];
 
           setNewLud16(newConvertedAddress);
+          setNewLud06(newLnAddress);
           setConvertedAddress(newConvertedAddress);
           console.log(newConvertedAddress); // chrisatmachine@getalby.com
         }
@@ -128,6 +127,7 @@ export default function UserCard({
           let newConvertedAddress = "";
           newConvertedAddress = bech32.encode("lnurl", words, 2000);
           setNewLud06(newConvertedAddress);
+          setNewLud16(newLnAddress);
           setConvertedAddress(newConvertedAddress);
         }
       } catch (error) {
@@ -250,6 +250,7 @@ export default function UserCard({
 
       await pub.on("seen", async () => {
         console.log("OUR EVENT WAS SEEN");
+        sessionStorage.removeItem(profilePubkey + "_profile");
         setIsOpen(!isOpen);
       });
 
@@ -268,14 +269,15 @@ export default function UserCard({
           src={picture}
           alt={name}
         />
-        <span>{name}</span>
+        <span>{newName}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
       <Link
         className="text-base text-gray hover:text-gray-hover my-2"
         href={`/u/${npub}`}
       >
-        {followers && followers.length > 100 ? "100+" : followers.length} Followers
+        {followers && followers.length > 100 ? "100+" : followers.length}{" "}
+        Followers
       </Link>
       <div className="font-semibold">
         {nip05 && (
