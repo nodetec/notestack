@@ -41,6 +41,8 @@ export default function UserCard({
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
   const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
+  console.log("NAME:", name)
+  console.log("ABOUT:", about)
 
   const [newName, setNewName] = useState(name);
   const [newAbout, setNewAbout] = useState(about);
@@ -85,7 +87,6 @@ export default function UserCard({
   // }
 
   useEffect(() => {
-    setNewLnAddress(lud16);
     setNewLnAddress(lud16);
     setNewName(name);
     setNewAbout(about);
@@ -251,6 +252,7 @@ export default function UserCard({
       await pub.on("seen", async () => {
         console.log("OUR EVENT WAS SEEN");
         sessionStorage.removeItem(profilePubkey + "_profile");
+        window.location.reload();
         setIsOpen(!isOpen);
       });
 
@@ -269,7 +271,7 @@ export default function UserCard({
           src={picture}
           alt={name}
         />
-        <span>{newName}</span>
+        <span>{name}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
       <Link
