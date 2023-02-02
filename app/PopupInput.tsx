@@ -1,11 +1,11 @@
 import { DetailedHTMLProps, InputHTMLAttributes, useId } from "react";
 
-interface PopupInputProps
+export interface PopupInputProps
   extends DetailedHTMLProps<
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   > {
-  label: string;
+  label?: string;
   error?: boolean;
   message?: string;
   value?: string;
@@ -13,7 +13,7 @@ interface PopupInputProps
 }
 
 const PopupInput = ({
-  label,
+  label = "",
   error,
   message,
   placeholder = "",
@@ -25,9 +25,11 @@ const PopupInput = ({
 
   return (
     <div>
-      <label className="text-sm text-gray" htmlFor={id}>
-        {label}
-      </label>
+      {label ? (
+        <label className="text-sm text-gray" htmlFor={id}>
+          {label}
+        </label>
+      ) : null}
       <input
         type="text"
         id={id}
@@ -38,16 +40,16 @@ const PopupInput = ({
         value={value}
         {...props}
       />
-      <div className="flex items-center gap-2 justify-between">
-        {message ? (
+      {message ? (
+        <div className="flex items-center gap-2 justify-between">
           <p className={`text-xs mt-1 ${error ? "text-error" : "text-gray"}`}>
             {message}
           </p>
-        ) : null}
-        <span className="text-gray text-xs mt-1">
-          {value.length} / {props.maxLength}
-        </span>
-      </div>
+          <span className="text-gray text-xs mt-1">
+            {value.length} / {props.maxLength}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 };
