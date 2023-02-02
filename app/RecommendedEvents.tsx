@@ -13,35 +13,36 @@ interface RecommendedEventsProps {
   showProfile?: boolean;
 }
 
-const RecommendedEvents: React.FC<RecommendedEventsProps> = ({
+export default function RecommendedEvents({
   EVENTS,
   title,
   showProfile = false,
-}) => {
+}: RecommendedEventsProps) {
   // TODO do this manually and cache
 
   let recommendedEvents: Event[] = [];
 
-  const cachedRecommendedEvents = sessionStorage.getItem("recommended_events");
-  if (cachedRecommendedEvents) {
-    recommendedEvents = JSON.parse(cachedRecommendedEvents);
-    console.log("using cached recommended events");
-  }
+  // const cachedRecommendedEvents = sessionStorage.getItem("recommended_events");
+  // if (cachedRecommendedEvents) {
+  //   recommendedEvents = JSON.parse(cachedRecommendedEvents);
+  //   console.log("using cached recommended events");
+  // }
 
-  if (!cachedRecommendedEvents) {
-    const { events } = useNostrEvents({
-      filter: {
-        ids: EVENTS,
-        kinds: [2222],
-        limit: 3,
-      },
-    });
-    if (events.length >= 3) {
-      recommendedEvents = events;
-      const eventsString = JSON.stringify(events);
-      sessionStorage.setItem("recommended_events", eventsString);
-    }
-  }
+  // if (!cachedRecommendedEvents) {
+  const { events } = useNostrEvents({
+    filter: {
+      ids: EVENTS,
+      kinds: [2222],
+      limit: 3,
+    },
+  });
+  recommendedEvents = events;
+  //   if (events.length >= 3) {
+  //     recommendedEvents = events;
+  //     const eventsString = JSON.stringify(events);
+  //     sessionStorage.setItem("recommended_events", eventsString);
+  //   }
+  // }
 
   return (
     <AsideSection title={title}>
@@ -57,7 +58,7 @@ const RecommendedEvents: React.FC<RecommendedEventsProps> = ({
       </ul>
     </AsideSection>
   );
-};
+}
 
 const Event = ({
   noteId,
@@ -98,5 +99,3 @@ const Event = ({
     </li>
   );
 };
-
-export default RecommendedEvents;
