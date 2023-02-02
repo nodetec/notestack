@@ -49,6 +49,7 @@ export default function ProfilePage() {
             eventsSeen[event.id!] = true;
           });
           sub.on("eose", () => {
+            console.log("EOSE initial latest profile events from", relay.url);
             const filteredEvents = eventArray.filter((e1, index) => {
               if (e1.content === "") {
                 return false;

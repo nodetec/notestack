@@ -42,6 +42,7 @@ export default function HomePage() {
           eventsSeen[event.id!] = true;
         });
         sub.on("eose", () => {
+          console.log("EOSE initial latest events from", relay.url);
           const filteredEvents = eventArray.filter((e1, index) => {
             if (e1.content === "") {
               return false;
@@ -97,6 +98,7 @@ export default function HomePage() {
               eventsSeen[event.id!] = true;
             });
             sub.on("eose", () => {
+              console.log("EOSE initial following events from", relay.url);
               const filteredEvents = eventArray.filter((e1, index) => {
                 if (e1.content === "") {
                   return false;
