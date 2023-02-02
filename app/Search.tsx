@@ -59,7 +59,7 @@ const Search = () => {
         setShowTooltip(true);
       });
       sub.on("eose", () => {
-        console.log("EOSE");
+        console.log("EOSE searched events from", relay.url);
         sub.unsub();
       });
     });

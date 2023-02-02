@@ -77,7 +77,7 @@ export default function HomePage() {
           followedAuthors = event.tags.map((pair: string[]) => pair[1]);
         });
         sub.on("eose", () => {
-          console.log("EOSE top 50 followed users");
+          console.log("EOSE top 50 followed users from", relay.url);
           const newfollowingFilter = {
             kinds: [2222],
             limit: 50,
