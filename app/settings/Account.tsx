@@ -136,6 +136,7 @@ const Account = () => {
       pub.on("ok", () => {
         console.log("OUR EVENT WAS ACCEPTED");
         // setPost({ postSending: false, postError: "" });
+        setPopup("");
       });
 
       await pub.on("seen", async () => {
