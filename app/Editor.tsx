@@ -126,7 +126,7 @@ any) => {
                   required
                   rows={1}
                   className="text-black border-none focus:border-none resize-none font-medium text-4xl px-6 pt-6 pb-0 w-full 
-                  focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent overflow-hidden"
+                  focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent overflow-hidden outline-none"
                   value={title}
                   placeholder="Title..."
                   onChange={handleTitleChange}
