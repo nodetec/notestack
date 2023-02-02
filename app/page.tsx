@@ -31,10 +31,31 @@ export default function HomePage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    if (exploreEvents.length === 0) {
+      const latestEventsString = sessionStorage.getItem("latest_events");
+      if (latestEventsString) {
+        const cachedEvents = JSON.parse(latestEventsString);
+        setExploreEvents(cachedEvents);
+        console.log("using cached latest events");
+      }
+    }
+
+    if (followingEvents.length === 0) {
+      const followingEventsString = sessionStorage.getItem(
+        "latest_following_events"
+      );
+      if (followingEventsString) {
+        const cachedEvents = JSON.parse(followingEventsString);
+        setFollowingEvents(cachedEvents);
+        console.log("using cached latest following events");
+      }
+    }
   }, []);
 
   useEffect(() => {
-    if (exploreEvents.length === 0) {
+    const latestEventsString = sessionStorage.getItem("latest_events");
+    if (!latestEventsString && exploreEvents.length === 0) {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
       connectedRelays.forEach((relay) => {
@@ -59,13 +80,16 @@ export default function HomePage() {
           });
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
+            const eventsString = JSON.stringify(filteredEvents);
+            sessionStorage.setItem("latest_events", eventsString);
           }
           sub.unsub();
         });
       });
     }
 
-    if (followingEvents.length === 0) {
+    const followingEventsString = sessionStorage.getItem("latest_events");
+    if (!followingEventsString && followingEvents.length === 0) {
       let followedAuthors: string[];
 
       connectedRelays.forEach((relay) => {
@@ -115,6 +139,8 @@ export default function HomePage() {
               });
               if (filteredEvents.length > 0) {
                 setFollowingEvents(filteredEvents);
+                const eventsString = JSON.stringify(filteredEvents);
+                sessionStorage.setItem("latest_following_events", eventsString);
               }
               sub.unsub();
             });
