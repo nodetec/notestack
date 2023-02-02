@@ -30,6 +30,10 @@ export default function HomePage() {
   const { connectedRelays } = useNostr();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (exploreEvents.length === 0) {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
