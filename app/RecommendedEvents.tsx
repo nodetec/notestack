@@ -17,6 +17,7 @@ const RecommendedEvents: React.FC<RecommendedEventsProps> = ({
   title,
   showProfile = false,
 }) => {
+  // TODO do this manually and cache
   const { events } = useNostrEvents({
     filter: {
       ids: EVENTS,
