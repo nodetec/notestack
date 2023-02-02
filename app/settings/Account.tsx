@@ -259,16 +259,23 @@ const Account = () => {
           />
         ) : null}
         {popup === "Picture" ? (
-          <PopupInput
-            label="Profile Image URL"
-            minLength={1}
-            maxLength={256}
-            value={newProfile.picture}
-            message={"Picture must be between 1 and 256 characters."}
-            onChange={(e) =>
-              setNewProfile({ ...newProfile, picture: e.target.value })
-            }
-          />
+          <Fragment>
+            <img
+              src={newProfile.picture}
+              className="bg-light-gray w-28 h-28 rounded-full object-cover"
+              alt=""
+            />
+            <PopupInput
+              label="Profile Image URL"
+              minLength={1}
+              maxLength={256}
+              value={newProfile.picture}
+              message={"Picture must be between 1 and 256 characters."}
+              onChange={(e) =>
+                setNewProfile({ ...newProfile, picture: e.target.value })
+              }
+            />
+          </Fragment>
         ) : null}
         {popup === "Lightning Tips" ? (
           <Fragment>
