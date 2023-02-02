@@ -3160,18 +3160,18 @@
   "resolved" "https://registry.npmjs.org/normalize-range/-/normalize-range-0.1.2.tgz"
   "version" "0.1.2"
 
-"nostr-react@^0.6.1":
-  "integrity" "sha512-9VWzscj5974EO+q7qxU4Cdk3l4LbadvovOHhfmT0AfRZW/T77iaqj4M4T+OeGbFSLECveNj9SQC36dc14x7gXA=="
-  "resolved" "https://registry.npmjs.org/nostr-react/-/nostr-react-0.6.1.tgz"
-  "version" "0.6.1"
+"nostr-react@^0.6.4":
+  "integrity" "sha512-esRgmhTP5kPQ8ufs8cFAQxxJtMmzuba/k2QfXevG/ejHP3IMa41pb82qi8V0aPzY3KJ0Nr54x0OSa39d2InKzA=="
+  "resolved" "https://registry.npmjs.org/nostr-react/-/nostr-react-0.6.4.tgz"
+  "version" "0.6.4"
   dependencies:
     "jotai" "^1.12.1"
     "nostr-tools" "^1.1.0"
 
-"nostr-tools@^1.1.0", "nostr-tools@^1.2.0":
-  "integrity" "sha512-5bISmkAsFP2ZgSWlWo7Ra0PHpkDRDKylOxQQAfWs3I8OpuQBUmOKuQAAO2jYSFa3FGRvcCFmF+tO7+m533dtLw=="
-  "resolved" "https://registry.npmjs.org/nostr-tools/-/nostr-tools-1.2.0.tgz"
-  "version" "1.2.0"
+"nostr-tools@^1.1.0", "nostr-tools@^1.2.1":
+  "integrity" "sha512-SL0sst29mrQ7oUPGQn+NMH4yuTe69a8S4bliNpYB2IG0fDl3Cx+xSLnuCTb4nZiNalatYsA5l+751wQiDGA3+A=="
+  "resolved" "https://registry.npmjs.org/nostr-tools/-/nostr-tools-1.2.1.tgz"
+  "version" "1.2.1"
   dependencies:
     "@noble/hashes" "^0.5.7"
     "@noble/secp256k1" "^1.7.0"
