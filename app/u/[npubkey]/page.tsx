@@ -88,7 +88,6 @@ export default function ProfilePage() {
         });
       }
     }, [connectedRelays]);
-    // }, []);
 
     return (
       <Main>

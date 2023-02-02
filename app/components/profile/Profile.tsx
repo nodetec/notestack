@@ -3,26 +3,37 @@ import { nip19 } from "nostr-tools";
 import Contacts from "./Contacts";
 import UserCard from "./UserCard";
 
-import { Fragment, memo, useContext } from "react";
+import { Fragment, memo, useContext, useEffect } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
 const Profile = ({ npub, setProfileInfo }: any) => {
   const profilePubkey = nip19.decode(npub).data.valueOf();
-
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const loggedInPubkey = keys?.publicKey;
-
   const authors: any = [profilePubkey];
+  let profileMetadata;
+  let kinds = [0, 3];
 
   if (loggedInPubkey) {
     authors.push(loggedInPubkey);
   }
 
+  const profileEventsString = sessionStorage.getItem(
+    profilePubkey + "_profile"
+  );
+
+  if (profileEventsString) {
+    const cachedEvents = JSON.parse(profileEventsString);
+    profileMetadata = cachedEvents;
+    kinds = [3];
+    console.log("using cached profile for user:", npub);
+  }
+
   const { events } = useNostrEvents({
     filter: {
-      kinds: [0, 3],
+      kinds,
       authors,
       limit: 5,
     },
@@ -35,9 +46,15 @@ const Profile = ({ npub, setProfileInfo }: any) => {
   let lud16;
   let nip05;
 
-  const profileMetadata = events.filter(
-    (event) => event.kind === 0 && profilePubkey === event.pubkey
-  );
+  if (!profileMetadata) {
+    profileMetadata = events.filter(
+      (event) => event.kind === 0 && profilePubkey === event.pubkey
+    );
+    if (profileMetadata.length > 0) {
+      const profilesString = JSON.stringify(profileMetadata);
+      sessionStorage.setItem(profilePubkey + "_profile", profilesString);
+    }
+  }
 
   try {
     const content = profileMetadata[0]?.content;
