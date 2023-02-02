@@ -5,6 +5,7 @@ import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { getTagValues, shortenHash } from "./lib/utils";
+import { Event } from "nostr-tools";
 
 interface RecommendedEventsProps {
   EVENTS: string[];
@@ -18,17 +19,34 @@ const RecommendedEvents: React.FC<RecommendedEventsProps> = ({
   showProfile = false,
 }) => {
   // TODO do this manually and cache
-  const { events } = useNostrEvents({
-    filter: {
-      ids: EVENTS,
-      kinds: [2222],
-    },
-  });
+
+  let recommendedEvents: Event[] = [];
+
+  const cachedRecommendedEvents = sessionStorage.getItem("recommended_events");
+  if (cachedRecommendedEvents) {
+    recommendedEvents = JSON.parse(cachedRecommendedEvents);
+    console.log("using cached recommended events");
+  }
+
+  if (!cachedRecommendedEvents) {
+    const { events } = useNostrEvents({
+      filter: {
+        ids: EVENTS,
+        kinds: [2222],
+        limit: 3,
+      },
+    });
+    if (events.length >= 3) {
+      recommendedEvents = events;
+      const eventsString = JSON.stringify(events);
+      sessionStorage.setItem("recommended_events", eventsString);
+    }
+  }
 
   return (
     <AsideSection title={title}>
       <ul className="flex flex-col gap-2">
-        {events.map((event) => (
+        {recommendedEvents.map((event) => (
           <Event
             key={event.id}
             noteId={event.id!}
