@@ -104,15 +104,13 @@ any) {
     if (typeof window.webln !== "undefined") {
       const lnUrlOrAddress = lud06 || lud16;
 
-      if (lnUrlOrAddress) {
-        const { invoice, params, successAction, validatePreimage } =
-          await requestInvoice({
-            lnUrlOrAddress,
-            // @ts-ignore
-            tokens: tipInputValue, // satoshis
-            comment: tipMessage,
-          });
-      }
+      const { invoice, params, successAction, validatePreimage } =
+        await requestInvoice({
+          lnUrlOrAddress,
+          // @ts-ignore
+          tokens: tipInputValue, // satoshis
+          comment: tipMessage,
+        });
       try {
         // @ts-ignore
         const result = await webln.sendPayment(invoice);
