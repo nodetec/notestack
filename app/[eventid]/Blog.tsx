@@ -26,6 +26,7 @@ export default function Note({ event }: NoteProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const { connectedRelays } = useNostr();
   const profilePubkey = nip19.decode(npub).data.toString();
+  const [zenMode, setZenMode] = useState(false);
   const filter = {
     kinds: [2222],
     authors: [profilePubkey],
@@ -84,24 +85,30 @@ export default function Note({ event }: NoteProps) {
   }, [connectedRelays]);
 
   return (
-    <Main>
+    <Main mode={zenMode ? "zen" : "normal"}>
       <Content>
         {event && (
           <div className="w-full self-center max-w-[70rem] my-16">
-            <MarkdownDisplay event={event} />
+            <MarkdownDisplay
+              zenMode={zenMode}
+              setZenMode={setZenMode}
+              event={event}
+            />
           </div>
         )}
       </Content>
-      <Aside>
-        <Profile npub={npub} />
-        <RecommendedEvents
-          title="More from the author"
-          EVENTS={events.map((event: Event) => event.id!) || []}
-          showProfile
-          showThumbnail
-        />
-        <Topics title="Related topics" TOPICS={tagsTags} />
-      </Aside>
+      {zenMode ? null : (
+        <Aside>
+          <Profile npub={npub} />
+          <RecommendedEvents
+            title="More from the author"
+            EVENTS={events.map((event: Event) => event.id!) || []}
+            showProfile
+            showThumbnail
+          />
+          <Topics title="Related topics" TOPICS={tagsTags} />
+        </Aside>
+      )}
     </Main>
   );
 }

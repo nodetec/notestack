@@ -3,8 +3,10 @@ import { Event, nip19 } from "nostr-tools";
 import {
   AnchorHTMLAttributes,
   DetailedHTMLProps,
+  Dispatch,
   FC,
   Fragment,
+  SetStateAction,
   useContext,
   useEffect,
 } from "react";
@@ -22,6 +24,7 @@ import useCopy from "../hooks/useCopy";
 import { ImLink } from "react-icons/im";
 import Tooltip from "../Tooltip";
 import { FaFacebook } from "react-icons/fa";
+import { BsArrowBarRight } from "react-icons/bs";
 
 const SOCLIAL_LINKS = [
   {
@@ -46,9 +49,15 @@ const SOCLIAL_LINKS = [
 
 interface MarkdownDisplayProps {
   event: Event;
+  zenMode: boolean;
+  setZenMode: Dispatch<SetStateAction<boolean>>;
 }
 
-const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
+const MarkdownDisplay = ({
+  event,
+  zenMode,
+  setZenMode,
+}: MarkdownDisplayProps) => {
   const tags = event.tags;
   const pathname = usePathname();
   const title = getTagValues("subject", tags);
@@ -142,6 +151,28 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
             Copy link
           </Tooltip>
           <AuthorTooltip npub={npub} />
+          <Tooltip
+            showOnHover
+            color="black"
+            className="w-max"
+            size="sm"
+            Component={
+              <Button
+                color="transparent"
+                variant="ghost"
+                className="ml-auto"
+                onClick={() => setZenMode((current) => !current)}
+                icon={
+                  <BsArrowBarRight
+                    size={20}
+                    className={zenMode ? "rotate-180" : ""}
+                  />
+                }
+              />
+            }
+          >
+            {zenMode ? "Open Sidebar" : "Close Sidebar"}
+          </Tooltip>
         </div>
       </div>
 

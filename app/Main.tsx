@@ -2,10 +2,16 @@
 
 interface MainProps {
   children: React.ReactNode;
+  mode?: "normal" | "zen";
 }
 
-const Main: React.FC<MainProps> = ({ children }) => (
-  <div className="grid md:grid-cols-content-porfile items-start md:gap-8 lg:gap-14 lg:px-14 flex-1 justify-center">
+const Main: React.FC<MainProps> = ({ children, mode = "normal" }) => (
+  <div
+    className={`md:gap-8 lg:gap-14 lg:px-14 flex-1 justify-center 
+    ${mode === "normal" && "grid md:grid-cols-content-porfile items-start"}
+    ${mode === "zen" && "block"}
+    `}
+  >
     {children}
   </div>
 );
