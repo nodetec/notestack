@@ -29,9 +29,12 @@ const Profile = ({ npub, setProfileInfo }: any) => {
   useEffect(() => {
     if (user.content && user.pubkey === profilePubkey) {
       const contentObj = JSON.parse(user.content);
-      setName(contentObj.name);
-      setAbout(contentObj.about);
-      setPicture(contentObj.picture);
+      const name = contentObj.name;
+      const about = contentObj.about;
+      const picture = contentObj.picture;
+      setName(name);
+      setAbout(about);
+      setPicture(picture);
       setNip05(contentObj.nip05);
       setLud06(contentObj.lud06);
       setLud16(contentObj.lud16);
@@ -79,9 +82,12 @@ const Profile = ({ npub, setProfileInfo }: any) => {
       try {
         const content = profileMetadata[0]?.content;
         const contentObj = JSON.parse(content);
-        setName(contentObj.name);
-        setAbout(contentObj.about);
-        setPicture(contentObj.picture);
+        const name = contentObj.name;
+        const about = contentObj.about;
+        const picture = contentObj.picture;
+        setName(name);
+        setAbout(about);
+        setPicture(picture);
         setNip05(contentObj.nip05);
         setLud06(contentObj.lud06);
         setLud16(contentObj.lud16);
