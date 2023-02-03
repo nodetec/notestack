@@ -19,7 +19,9 @@ export default function Note({ event }: NoteProps) {
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
   const filetypeTag = getTagValues("filetype", tags);
-
+  const tagsTags = tags
+    .filter((tag: string[]) => tag[0] === "t")
+    .map((tag: string[]) => tag[1]);
   const npub = nip19.npubEncode(event.pubkey);
   const [events, setEvents] = useState<Event[]>([]);
   const { connectedRelays } = useNostr();
@@ -30,7 +32,6 @@ export default function Note({ event }: NoteProps) {
     limit: 50,
     until: undefined,
   };
-  console.log("event", events);
 
   let isMarkdown = false;
 
@@ -99,7 +100,7 @@ export default function Note({ event }: NoteProps) {
           showProfile
           showThumbnail
         />
-        <Topics title="Related topics" TOPICS={[]} />
+        <Topics title="Related topics" TOPICS={tagsTags} />
       </Aside>
     </Main>
   );
