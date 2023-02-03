@@ -10,11 +10,12 @@ import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import { usePathname } from "next/navigation";
-import { useNostr } from "nostr-react";
+import { useNostr, useNostrEvents } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import { useEffect, useState } from "react";
 import AuthorTooltip from "@/app/AuthorTooltip";
 import { NostrService } from "@/app/lib/nostr";
+import Contacts from "@/app/components/profile/Contacts";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -27,6 +28,19 @@ export default function ProfilePage() {
   const pathname = usePathname();
   const [events, setEvents] = useState<Event[]>([]);
   const { connectedRelays } = useNostr();
+
+  let kinds = [0, 3];
+  const npub = pathname?.split("/").pop() || "";
+  const profilePubkey = nip19.decode(npub).data.valueOf();
+  const authors: any = [profilePubkey];
+  const { events: contactsEvents } = useNostrEvents({
+    filter: {
+      kinds,
+      authors,
+      limit: 5,
+    },
+  });
+
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
     const profilePubkey = nip19.decode(npub).data.toString();
@@ -81,6 +95,12 @@ export default function ProfilePage() {
       }
     }, [connectedRelays]);
 
+    // contacts for the profile you're visiting
+    const profileContactEvents = contactsEvents.filter(
+      (event) => event.kind === 3 && event.pubkey === profilePubkey
+    );
+    const profileContactList = profileContactEvents[0]?.tags;
+
     return (
       <Main>
         <Content>
@@ -105,6 +125,10 @@ export default function ProfilePage() {
 
         <Aside>
           <Profile npub={npub} setProfileInfo={setProfileInfo} />
+
+          {profileContactList && (
+            <Contacts npub={npub} userContacts={profileContactList} />
+          )}
         </Aside>
       </Main>
     );

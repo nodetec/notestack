@@ -12,6 +12,7 @@ export const getTagValues = (name: string, tags: string[][]) => {
   return item;
 };
 
+
 export const uniqBy = <T>(arr: T[], key: keyof T): T[] => {
   return Object.values(
     // @ts-ignore
@@ -34,3 +35,6 @@ export const dateToUnix = (_date?: Date) => {
 
   return Math.floor(date.getTime() / 1000)
 }
+
+export const markdownImageContent = (content: string) =>
+  /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);

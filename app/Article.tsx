@@ -4,7 +4,7 @@ import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
 import { BsFillTagFill } from "react-icons/bs";
 import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
-import { shortenHash } from "./lib/utils";
+import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
 // TODO: profile
@@ -38,8 +38,7 @@ const Article: FC<NoteProps> = ({
 
   const title = getTagValues("subject", tags);
   // const actualTags = getTagValues("tags", tags);
-  const markdownImageContent =
-    /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
+  const thumbnail = markdownImageContent(content);
 
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
@@ -91,12 +90,12 @@ const Article: FC<NoteProps> = ({
             </p>
           </div>
 
-          {markdownImageContent ? (
+          {thumbnail ? (
             <div>
               <img
                 className="w-32 h-32 object-contain"
-                src={markdownImageContent.groups?.filename}
-                alt={markdownImageContent.groups?.title}
+                src={thumbnail.groups?.filename}
+                alt={thumbnail.groups?.title}
               />
             </div>
           ) : null}
