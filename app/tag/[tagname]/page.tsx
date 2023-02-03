@@ -77,6 +77,7 @@ export default function TagPage() {
           ]}
         />
         <Topics
+          title="Recommended Topics"
           TOPICS={[
             "nostr",
             "lightning",
