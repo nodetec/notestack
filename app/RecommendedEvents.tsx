@@ -50,8 +50,6 @@ export default function RecommendedEvents({
         const filteredEvents = NostrService.filterBlogEvents(eventArray);
         if (filteredEvents.length > 0) {
           setEvents(filteredEvents);
-          const eventsString = JSON.stringify(filteredEvents);
-          sessionStorage.setItem("latest_events", eventsString);
         }
         sub.unsub();
       });
