@@ -1,8 +1,7 @@
 import Popup from "../../Popup";
 import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
-import { useNostrEvents } from "nostr-react";
-import type { Event } from "nostr-tools";
+import type { Event, Relay } from "nostr-tools";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { requestInvoice } from "lnurl-pay";
 import { utils } from "lnurl-pay";
@@ -11,6 +10,8 @@ import Buttons from "@/app/Buttons";
 import FollowButton from "./FollowButton";
 import AccountSettings from "@/app/AccountSettings";
 import { UserContext } from "@/app/context/user-provider";
+import { RelayContext } from "@/app/context/relay-provider";
+import { NostrService } from "@/app/lib/nostr";
 
 const presetAmounts = [
   { value: "1000", label: "1k" },
@@ -29,20 +30,16 @@ export default function UserCard({
   loggedInContactList,
   lud06,
   lud16,
-}: // loggedInPubkey,
-any) {
+}: any) {
   let contacts = null;
   if (loggedInContactList) {
     contacts = loggedInContactList.map((pair: string) => pair[1]);
   }
 
-  // const [name, setName] = useState<string>();
-  // const [about, setAbout] = useState<string>();
-  // const [picture, setPicture] = useState<string>();
-  // const [nip05, setNip05] = useState<string>();
-  // const [lud06, setLud06] = useState<string>();
-  // const [lud16, setLud16] = useState<string>();
   const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
+
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
@@ -51,33 +48,44 @@ any) {
   const [tipMessage, setTipMessage] = useState<string>();
   const [paymentHash, setPaymentHash] = useState();
   const [tippedAmount, setTippedAmount] = useState<any>();
+  const [followers, setFollowers] = useState<Event[]>([]);
 
   // @ts-ignore
   const { user } = useContext(UserContext);
 
   useEffect(() => {
     setLoggedInPubkey(user.pubkey);
-    if (user.content) {
-      const contentObj = JSON.parse(user.content);
-      // setName(contentObj.name);
-      // setAbout(contentObj.about);
-      // setPicture(contentObj.picture);
-      // setNip05(contentObj.nip05);
-      // setLud06(contentObj.lud06);
-      // setLud16(contentObj.lud16);
-    }
   }, [user, isOpen]);
 
-  let followers: Event[];
+  useEffect(() => {
+    const eventsSeen: { [k: string]: boolean } = {};
+    let eventArray: Event[] = [];
+    connectedRelays.forEach((relay: Relay) => {
+      let sub = relay.sub([
+        {
+          kinds: [3],
+          "#p": [profilePubkey],
+          limit: 100,
+        },
+      ]);
 
-  let { events: followersFromEvent } = useNostrEvents({
-    filter: {
-      kinds: [3],
-      "#p": [profilePubkey],
-      limit: 100,
-    },
-  });
-  followers = followersFromEvent;
+      sub.on("event", (event: Event) => {
+        if (!eventsSeen[event.id!]) {
+          eventArray.push(event);
+        }
+        eventsSeen[event.id!] = true;
+      });
+
+      sub.on("eose", () => {
+        console.log("EOSE additional events from", relay.url);
+        const filteredEvents = NostrService.filterEvents(eventArray);
+        if (filteredEvents.length > 0) {
+          setFollowers(filteredEvents);
+        }
+        sub.unsub();
+      });
+    });
+  }, [connectedRelays]);
 
   useEffect(() => {
     setTipMessage("");

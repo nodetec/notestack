@@ -2,17 +2,15 @@
 import Popup from "./Popup";
 import { useContext, useEffect, useState } from "react";
 import Button from "./Button";
-import { useNostr } from "nostr-react";
-import type { Event } from "nostr-tools";
+import type { Relay } from "nostr-tools";
 import { utils } from "lnurl-pay";
 import { bech32 } from "bech32";
 import { NostrService } from "@/app/lib/nostr";
 import PopupInput from "@/app/PopupInput";
 import { UserContext } from "./context/user-provider";
+import { RelayContext } from "./context/relay-provider";
 
 export default function AccountSettings({ isOpen, setIsOpen }: any) {
-  const { connectedRelays } = useNostr();
-  const { publish } = useNostr();
   const [newName, setNewName] = useState<string>();
   const [newAbout, setNewAbout] = useState<string>();
   const [newPicture, setNewPicture] = useState<string>();
@@ -22,7 +20,8 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
   const [newLnAddress, setNewLnAddress] = useState<any>();
   const [convertedAddress, setConvertedAddress] = useState<any>();
   const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
-
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
 
@@ -115,44 +114,23 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
     sessionStorage.removeItem(loggedInPubkey + "_profile");
     sessionStorage.removeItem(loggedInPubkey + "_user");
 
-    let eventId: any = null;
-    eventId = event?.id;
-
-    connectedRelays.forEach((relay) => {
-      let sub = relay.sub([
-        {
-          ids: [eventId],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
-        setIsOpen(!isOpen);
-      });
-      sub.on("eose", () => {
-        console.log("EOSE");
-        sub.unsub();
-      });
-    });
-
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for (const pub of pubs) {
+    connectedRelays.forEach((relay: Relay) => {
+      let pub = relay.publish(event);
       pub.on("ok", () => {
-        console.log("OUR EVENT WAS ACCEPTED");
+        console.log(`DELETE EVENT WAS ACCEPTED by ${relay.url}`);
         setUser(event);
       });
-
-      pub.on("seen", async () => {
-        console.log("OUR EVENT WAS SEEN");
+      pub.on("seen", () => {
+        console.log(`DELETE EVENT WAS SEEN ON ${relay.url}`);
         setIsOpen(!isOpen);
       });
-
-      pub.on("failed", (reason: any) => {
-        console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
+      pub.on("failed", (reason: string) => {
+        console.log(
+          `OUR DELETE EVENT HAS FAILED WITH REASON: ${relay.url}: ${reason}`
+        );
         setIsOpen(!isOpen);
       });
-    }
+    });
   };
 
   return (

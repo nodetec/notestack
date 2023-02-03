@@ -1,30 +1,34 @@
-import { useNostr } from "nostr-react";
-import { Event, nip19 } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { Event, nip19, Relay } from "nostr-tools";
+import { useContext, useEffect, useState } from "react";
 import Aside from "../Aside";
 import Profile from "../components/profile/Profile";
 import Content from "../Content";
-import { getTagValues } from "../lib/utils";
 import Main from "../Main";
 import RecommendedEvents from "../RecommendedEvents";
 import MarkdownDisplay from "./MarkdownDisplay";
 import { NostrService } from "@/app/lib/nostr";
 import Topics from "../Topics";
+import { RelayContext } from "../context/relay-provider";
 
 interface NoteProps {
   event: Event;
 }
 
 export default function Note({ event }: NoteProps) {
+  const [profileInfo, setProfileInfo] = useState({
+    name: "",
+    about: "",
+    picture: "",
+  });
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
-  const filetypeTag = getTagValues("filetype", tags);
   const tagsTags = tags
     .filter((tag: string[]) => tag[0] === "t")
     .map((tag: string[]) => tag[1]);
   const npub = nip19.npubEncode(event.pubkey);
   const [events, setEvents] = useState<Event[]>([]);
-  const { connectedRelays } = useNostr();
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
   const profilePubkey = nip19.decode(npub).data.toString();
   const [zenMode, setZenMode] = useState(false);
   const filter = {
@@ -33,12 +37,6 @@ export default function Note({ event }: NoteProps) {
     limit: 50,
     until: undefined,
   };
-
-  let isMarkdown = false;
-
-  if (filetypeTag === "markdown") {
-    isMarkdown = true;
-  }
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,7 +60,7 @@ export default function Note({ event }: NoteProps) {
     if (!profileEventsString && events.length === 0) {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
-      connectedRelays.forEach((relay) => {
+      connectedRelays.forEach((relay: Relay) => {
         let sub = relay.sub([filter]);
         sub.on("event", (event: Event) => {
           if (!eventsSeen[event.id!]) {
@@ -99,7 +97,7 @@ export default function Note({ event }: NoteProps) {
       </Content>
       {zenMode ? null : (
         <Aside>
-          <Profile npub={npub} />
+          <Profile npub={npub} setProfileInfo={setProfileInfo} />
           <RecommendedEvents
             title="More from the author"
             EVENTS={events.map((event: Event) => event.id!) || []}

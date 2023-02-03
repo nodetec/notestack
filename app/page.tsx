@@ -10,8 +10,8 @@ import RecommendedEvents from "./RecommendedEvents";
 import Topics from "./Topics";
 import Tabs from "./Tabs";
 import { NostrService } from "./lib/nostr";
-import FollowedRelays from "./FollowedRelays";
 import { RelayContext } from "./context/relay-provider";
+import FollowedRelays from "./FollowedRelays";
 
 export default function HomePage() {
   // @ts-ignore

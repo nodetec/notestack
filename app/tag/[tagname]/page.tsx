@@ -2,25 +2,26 @@
 
 import Aside from "@/app/Aside";
 import BlogFeed from "@/app/BlogFeed";
-import type { Event } from "nostr-tools";
+import type { Event, Relay } from "nostr-tools";
 import Content from "@/app/Content";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import { usePathname } from "next/navigation";
-import { useNostr } from "nostr-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Topics from "@/app/Topics";
 import RecommendedEvents from "@/app/RecommendedEvents";
 import { AiFillTag } from "react-icons/ai";
+import { RelayContext } from "@/app/context/relay-provider";
 
 export default function TagPage() {
   const pathname = usePathname();
   const tagname = pathname!.split("/").pop();
   const [events, setEvents] = useState<Event[]>([]);
-  const { connectedRelays } = useNostr();
 
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
   const filter = {
     kinds: [2222],
@@ -32,7 +33,7 @@ export default function TagPage() {
     if (events.length === 0) {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
-      connectedRelays.forEach((relay) => {
+      connectedRelays.forEach((relay: Relay) => {
         // @ts-ignore
         let sub = relay.sub([filter]);
         sub.on("event", (event: Event) => {

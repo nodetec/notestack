@@ -6,16 +6,16 @@ import BlogFeed from "@/app/BlogFeed";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
 import { shortenHash } from "@/app/lib/utils";
-import type { Event } from "nostr-tools";
+import type { Event, Relay } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import { usePathname } from "next/navigation";
-import { useNostr, useNostrEvents } from "nostr-react";
 import { nip19 } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AuthorTooltip from "@/app/AuthorTooltip";
 import { NostrService } from "@/app/lib/nostr";
 import Contacts from "@/app/components/profile/Contacts";
+import { RelayContext } from "@/app/context/relay-provider";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -27,19 +27,9 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
   const [events, setEvents] = useState<Event[]>([]);
-  const { connectedRelays } = useNostr();
-
-  let kinds = [0, 3];
-  const npub = pathname?.split("/").pop() || "";
-  const profilePubkey = nip19.decode(npub).data.valueOf();
-  const authors: any = [profilePubkey];
-  const { events: contactsEvents } = useNostrEvents({
-    filter: {
-      kinds,
-      authors,
-      limit: 5,
-    },
-  });
+  const [contactEvents, setContactEvents] = useState<Event[]>([]);
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
@@ -73,7 +63,7 @@ export default function ProfilePage() {
       if (!profileEventsString && events.length === 0) {
         const eventsSeen: { [k: string]: boolean } = {};
         let eventArray: Event[] = [];
-        connectedRelays.forEach((relay) => {
+        connectedRelays.forEach((relay: Relay) => {
           let sub = relay.sub([filter]);
           sub.on("event", (event: Event) => {
             if (!eventsSeen[event.id!]) {
@@ -93,13 +83,37 @@ export default function ProfilePage() {
           });
         });
       }
-    }, [connectedRelays]);
 
-    // contacts for the profile you're visiting
-    const profileContactEvents = contactsEvents.filter(
-      (event) => event.kind === 3 && event.pubkey === profilePubkey
-    );
-    const profileContactList = profileContactEvents[0]?.tags;
+      const authors: any = [profilePubkey];
+      const eventsSeen: { [k: string]: boolean } = {};
+      let eventArray: Event[] = [];
+      connectedRelays.forEach((relay: Relay) => {
+        let sub = relay.sub([
+          {
+            kinds: [3],
+            authors,
+            limit: 5,
+          },
+        ]);
+        sub.on("event", (event: Event) => {
+          if (!eventsSeen[event.id!]) {
+            eventArray.push(event);
+          }
+          eventsSeen[event.id!] = true;
+        });
+        sub.on("eose", () => {
+          console.log("EOSE initial latest profile events from", relay.url);
+          const filteredEvents = NostrService.filterBlogEvents(eventArray);
+          if (filteredEvents.length > 0) {
+            setContactEvents(filteredEvents);
+            console.log("CONTACT EVENTS:", filteredEvents);
+            const eventsString = JSON.stringify(filteredEvents);
+            sessionStorage.setItem(profilePubkey + "_events", eventsString);
+          }
+          sub.unsub();
+        });
+      });
+    }, [connectedRelays]);
 
     return (
       <Main>
@@ -125,10 +139,6 @@ export default function ProfilePage() {
 
         <Aside>
           <Profile npub={npub} setProfileInfo={setProfileInfo} />
-
-          {profileContactList && (
-            <Contacts npub={npub} userContacts={profileContactList} />
-          )}
         </Aside>
       </Main>
     );

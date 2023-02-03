@@ -1,11 +1,14 @@
 import { nip19 } from "nostr-tools";
 import UserCard from "./UserCard";
+import type { Event, Relay } from "nostr-tools";
 
 import { memo, useContext, useEffect, useState } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
-import { useNostrEvents } from "nostr-react";
 import { UserContext } from "@/app/context/user-provider";
+import { RelayContext } from "@/app/context/relay-provider";
+import { NostrService } from "@/app/lib/nostr";
+import Contacts from "./Contacts";
 
 const Profile = ({ npub, setProfileInfo }: any) => {
   const profilePubkey = nip19.decode(npub).data.valueOf();
@@ -14,6 +17,12 @@ const Profile = ({ npub, setProfileInfo }: any) => {
   const loggedInPubkey = keys?.publicKey;
   const authors: any = [profilePubkey];
   let kinds = [0, 3];
+  const [events, setEvents] = useState<Event[]>([]);
+  const [profileContactList, setprofileContactList] = useState<string[][]>();
+  const [loggedInContactList, setloggedInContactList] = useState<string[][]>();
+
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
@@ -45,13 +54,35 @@ const Profile = ({ npub, setProfileInfo }: any) => {
     authors.push(loggedInPubkey);
   }
 
-  const { events } = useNostrEvents({
-    filter: {
-      kinds,
-      authors,
-      limit: 5,
-    },
-  });
+  useEffect(() => {
+    const eventsSeen: { [k: string]: boolean } = {};
+    let eventArray: Event[] = [];
+    connectedRelays.forEach((relay: Relay) => {
+      let sub = relay.sub([
+        {
+          kinds,
+          authors,
+          limit: 5,
+        },
+      ]);
+
+      sub.on("event", (event: Event) => {
+        if (!eventsSeen[event.id!]) {
+          eventArray.push(event);
+        }
+        eventsSeen[event.id!] = true;
+      });
+
+      sub.on("eose", () => {
+        console.log("EOSE additional events from", relay.url);
+        const filteredEvents = NostrService.filterEvents(eventArray);
+        if (filteredEvents.length > 0) {
+          setEvents(filteredEvents);
+        }
+        sub.unsub();
+      });
+    });
+  }, [connectedRelays]);
 
   useEffect(() => {
     let profileMetadata;
@@ -95,34 +126,42 @@ const Profile = ({ npub, setProfileInfo }: any) => {
         console.log("Error parsing content");
       }
     }
+
+    // contacts for the profile you're visiting
+    const profileContactEvents = events.filter(
+      (event) => event.kind === 3 && event.pubkey === profilePubkey
+    );
+    const profileContactList = profileContactEvents[0]?.tags;
+    setprofileContactList(profileContactList);
+
+    console.log("DO WE EVER GET HERE?", profileContactList);
+
+    // contacts for the logged in user
+    const loggedInContactEvents = events.filter(
+      (event) => event.kind === 3 && event.pubkey === loggedInPubkey
+    );
+    const loggedInContactList = loggedInContactEvents[0]?.tags;
+    setloggedInContactList(loggedInContactList);
   }, [events]);
 
-  // contacts for the profile you're visiting
-  const profileContactEvents = events.filter(
-    (event) => event.kind === 3 && event.pubkey === profilePubkey
-  );
-  const profileContactList = profileContactEvents[0]?.tags;
-
-  // contacts for the logged in user
-  const loggedInContactEvents = events.filter(
-    (event) => event.kind === 3 && event.pubkey === loggedInPubkey
-  );
-  const loggedInContactList = loggedInContactEvents[0]?.tags;
-
   return (
-    <UserCard
-      loggedInPubkey={loggedInPubkey}
-      loggedInContactList={loggedInContactList}
-      profileContactList={profileContactList}
-      profilePubkey={profilePubkey}
-      name={name}
-      npub={npub}
-      nip05={nip05}
-      about={about}
-      picture={picture || DUMMY_PROFILE_API(profilePubkey.toString())}
-      lud06={lud06}
-      lud16={lud16}
-    />
+    <>
+      <UserCard
+        loggedInPubkey={loggedInPubkey}
+        loggedInContactList={loggedInContactList}
+        profileContactList={profileContactList}
+        profilePubkey={profilePubkey}
+        name={name}
+        npub={npub}
+        nip05={nip05}
+        about={about}
+        picture={picture || DUMMY_PROFILE_API(profilePubkey.toString())}
+        lud06={lud06}
+        lud16={lud16}
+      />
+
+      {profileContactList && <Contacts npub={npub} userContacts={profileContactList} />}
+    </>
   );
 };
 

@@ -137,6 +137,13 @@ export namespace NostrService {
     return event;
   }
 
+  export function filterEvents(eventArray: Event[]) {
+    const filteredEvents = eventArray.filter((e1, index) => {
+      return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+    });
+    return filteredEvents;
+  }
+
   export function filterBlogEvents(eventArray: Event[]) {
     const filteredEvents = eventArray.filter((e1, index) => {
       if (e1.content === "") {

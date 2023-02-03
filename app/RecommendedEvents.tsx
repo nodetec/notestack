@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
-import { useNostrEvents } from "nostr-react";
-import { nip19 } from "nostr-tools";
+import { nip19, Relay } from "nostr-tools";
 import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { getTagValues, markdownImageContent, shortenHash } from "./lib/utils";
 import { Event } from "nostr-tools";
+import { useContext, useEffect, useState } from "react";
+import { RelayContext } from "./context/relay-provider";
+import { NostrService } from "./lib/nostr";
 
 interface RecommendedEventsProps {
   EVENTS: string[];
@@ -20,31 +22,44 @@ export default function RecommendedEvents({
   showProfile = false,
   showThumbnail = false,
 }: RecommendedEventsProps) {
-  // TODO do this manually and cache
-
   let recommendedEvents: Event[] = [];
 
-  // const cachedRecommendedEvents = sessionStorage.getItem("recommended_events");
-  // if (cachedRecommendedEvents) {
-  //   recommendedEvents = JSON.parse(cachedRecommendedEvents);
-  //   console.log("using cached recommended events");
-  // }
+  // @ts-ignore
+  const { connectedRelays, isLoading } = useContext(RelayContext);
+  const [events, setEvents] = useState<Event[]>([]);
 
-  // if (!cachedRecommendedEvents) {
-  const { events, isLoading } = useNostrEvents({
-    filter: {
-      ids: EVENTS,
-      kinds: [2222],
-      limit: 3,
-    },
-  });
+  useEffect(() => {
+    const eventsSeen: { [k: string]: boolean } = {};
+    let eventArray: Event[] = [];
+    connectedRelays.forEach((relay: Relay) => {
+      let sub = relay.sub([
+        {
+          ids: EVENTS,
+          kinds: [2222],
+          limit: 3,
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        if (!eventsSeen[event.id!]) {
+          eventArray.push(event);
+        }
+        eventsSeen[event.id!] = true;
+      });
+      sub.on("eose", () => {
+        console.log("EOSE initial latest events from", relay.url);
+        const filteredEvents = NostrService.filterBlogEvents(eventArray);
+        if (filteredEvents.length > 0) {
+          setEvents(filteredEvents);
+          const eventsString = JSON.stringify(filteredEvents);
+          sessionStorage.setItem("latest_events", eventsString);
+        }
+        sub.unsub();
+      });
+    });
+  }, [connectedRelays]);
+
   recommendedEvents = events;
-  //   if (events.length >= 3) {
-  //     recommendedEvents = events;
-  //     const eventsString = JSON.stringify(events);
-  //     sessionStorage.setItem("recommended_events", eventsString);
-  //   }
-  // }
+
   if (EVENTS.length === 0) return null;
 
   return (

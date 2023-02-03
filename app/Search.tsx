@@ -1,20 +1,21 @@
 "use client";
-import { useNostr } from "nostr-react";
 import {
   DetailedHTMLProps,
   FC,
   HTMLAttributes,
   InputHTMLAttributes,
+  useContext,
   useEffect,
   useState,
 } from "react";
 import { BsSearch } from "react-icons/bs";
 import Tooltip from "./Tooltip";
-import { Event, nip19 } from "nostr-tools";
+import { Event, nip19, Relay } from "nostr-tools";
 import Link from "next/link";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { AiFillTag } from "react-icons/ai";
+import { RelayContext } from "./context/relay-provider";
 
 type ResultType = {
   pubkeys: string[];
@@ -22,9 +23,10 @@ type ResultType = {
 };
 
 const Search = () => {
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
-  const { connectedRelays } = useNostr();
   const [{ tags, pubkeys }, setResults] = useState<ResultType>({
     tags: [],
     pubkeys: [],
@@ -41,7 +43,7 @@ const Search = () => {
 
   useEffect(() => {
     if (searchTerm.length > 0) {
-      connectedRelays.forEach((relay) => {
+      connectedRelays.forEach((relay: Relay) => {
         let sub = relay.sub([
           {
             kinds: [2222],

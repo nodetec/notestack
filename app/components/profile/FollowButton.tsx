@@ -1,7 +1,9 @@
 "use client";
 
+import { RelayContext } from "@/app/context/relay-provider";
 import { NostrService } from "@/app/lib/nostr";
-import { useNostr } from "nostr-react";
+import { Relay } from "nostr-tools";
+import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
 
 export default function FollowButton({
@@ -10,14 +12,15 @@ export default function FollowButton({
   profilePublicKey,
   contacts,
 }: any) {
-  const { publish } = useNostr();
-  const { connectedRelays } = useNostr();
+  const [isFollowing, setIsFollowing] = useState(false);
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
-  let isFollowing = false;
-
-  if (contacts) {
-    isFollowing = contacts.includes(profilePublicKey);
-  }
+  useEffect(() => {
+    if (contacts) {
+      setIsFollowing(contacts.includes(profilePublicKey));
+    }
+  }, [contacts]);
 
   const handleFollow = async (e: any) => {
     e.preventDefault();
@@ -45,40 +48,18 @@ export default function FollowButton({
       return;
     }
 
-    let eventId: any = null;
-    eventId = event?.id;
-
-    connectedRelays.forEach((relay) => {
-      let sub = relay.sub([
-        {
-          ids: [eventId],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
-      });
-      sub.on("eose", () => {
-        console.log("EOSE");
-        sub.unsub();
-      });
-    });
-
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for await (const pub of pubs) {
+    connectedRelays.forEach((relay: Relay) => {
+      let pub = relay.publish(event);
       pub.on("ok", () => {
         console.log("OUR EVENT WAS ACCEPTED");
       });
-
-      await pub.on("seen", async () => {
+      pub.on("seen", () => {
         console.log("OUR EVENT WAS SEEN");
       });
-
-      pub.on("failed", (reason: any) => {
+      pub.on("failed", (reason: string) => {
         console.log("OUR EVENT HAS FAILED");
       });
-    }
+    });
   };
 
   return (
