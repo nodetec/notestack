@@ -15,16 +15,27 @@ interface AccountButtonProps {
 export default function AccountButton({ pubkey }: AccountButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
   const { connectedRelays } = useNostr();
+  const [picture, setPicture] = useState(DUMMY_PROFILE_API(pubkey));
 
   // @ts-ignore
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
   useEffect(() => {
     const cachedUser = sessionStorage.getItem(pubkey + "_user");
 
+    try {
+      if (cachedUser) {
+        const contentObj = JSON.parse(cachedUser);
+        setPicture(contentObj.picture);
+      }
+    } catch (e) {
+      console.log("error parsing cached user profile", e);
+    }
+
     if (cachedUser) {
       const profileMetadata = JSON.parse(cachedUser);
       setUser(profileMetadata);
+      console.log("using cached user profile:", profileMetadata);
     } else {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
@@ -44,19 +55,18 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         sub.on("eose", () => {
           console.log("EOSE initial latest events from", relay.url);
           sub.unsub();
-          // TODO: just grab the first one for now in the future check the content
           console.log("PROFILE EVENT ARRAY", eventArray);
 
           if (eventArray.length !== 0) {
+            // TODO: just grab the first one for now in the future check the content
+            const profileMetadata = eventArray[0];
+            setUser(profileMetadata);
+            const profileString = JSON.stringify(profileMetadata);
+            sessionStorage.setItem(pubkey + "_user", profileString);
             const content = eventArray[0].content;
             if (content) {
-              const profileMetadata = JSON.parse(content);
-              console.log("CONTENT OBJ", profileMetadata);
-              // add user profile to global context object
-              setUser(profileMetadata);
-              // cache user profile for quick lookup across refresh
-              const profileString = JSON.stringify(profileMetadata);
-              sessionStorage.setItem(pubkey + "_user", profileString);
+              const contentObj = JSON.parse(content);
+              setPicture(contentObj.picture);
             }
           }
         });
@@ -78,7 +88,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         <span className="rounded-full">
           <img
             className="rounded-full w-8 h-8 object-cover"
-            src={user?.picture || DUMMY_PROFILE_API(user?.npub!)}
+            src={picture}
             alt=""
           />
         </span>
