@@ -41,8 +41,8 @@ export default function UserCard({
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
   const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
-  console.log("NAME:", name)
-  console.log("ABOUT:", about)
+  console.log("NAME:", name);
+  console.log("ABOUT:", about);
 
   const [newName, setNewName] = useState(name);
   const [newAbout, setNewAbout] = useState(about);
@@ -97,13 +97,13 @@ export default function UserCard({
   }, []);
 
   useEffect(() => {
-    setNewLnAddress(newLud16);
-    setNewName(newName);
-    setNewAbout(newAbout);
-    setNewPicture(newPicture);
-    setNewNip05(newNip05);
-    setNewLud06(newLud06);
-    setNewLud16(newLud16);
+    // setNewLnAddress(newLud16);
+    // setNewName(newName);
+    // setNewAbout(newAbout);
+    // setNewPicture(newPicture);
+    // setNewNip05(newNip05);
+    // setNewLud06(newLud06);
+    // setNewLud16(newLud16);
   }, [isOpen]);
 
   async function convert(newLnAddress: any) {
@@ -153,6 +153,16 @@ export default function UserCard({
   }, [isTipOpen]);
 
   const handleClick = async () => {
+    if (!isOpen) {
+      console.log("LUD16", lud16);
+      setNewLnAddress(lud16);
+      setNewName(name);
+      setNewAbout(about);
+      setNewPicture(picture);
+      setNewNip05(nip05);
+      setNewLud06(lud06);
+      setNewLud16(lud16);
+    }
     setIsOpen(!isOpen);
   };
 
@@ -220,6 +230,7 @@ export default function UserCard({
       // setPost({ postSending: false, postError: err.message });
       return;
     }
+    sessionStorage.removeItem(profilePubkey + "_profile");
 
     let eventId: any = null;
     eventId = event?.id;
@@ -251,7 +262,6 @@ export default function UserCard({
 
       await pub.on("seen", async () => {
         console.log("OUR EVENT WAS SEEN");
-        sessionStorage.removeItem(profilePubkey + "_profile");
         window.location.reload();
         setIsOpen(!isOpen);
       });
