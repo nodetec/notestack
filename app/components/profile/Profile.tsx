@@ -1,11 +1,10 @@
-import { useNostrEvents } from "nostr-react";
 import { nip19 } from "nostr-tools";
-import Contacts from "./Contacts";
 import UserCard from "./UserCard";
 
-import { Fragment, memo, useContext, useEffect } from "react";
+import { memo, useContext } from "react";
 import { KeysContext } from "../../context/keys-provider.jsx";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
+import { useNostrEvents } from "nostr-react";
 
 const Profile = ({ npub, setProfileInfo }: any) => {
   const profilePubkey = nip19.decode(npub).data.valueOf();
@@ -83,24 +82,19 @@ const Profile = ({ npub, setProfileInfo }: any) => {
   const loggedInContactList = loggedInContactEvents[0]?.tags;
 
   return (
-    <Fragment>
-      <UserCard
-        loggedInPubkey={loggedInPubkey}
-        loggedInContactList={loggedInContactList}
-        profileContactList={profileContactList}
-        profilePubkey={profilePubkey}
-        name={name}
-        npub={npub}
-        nip05={nip05}
-        about={about}
-        picture={picture}
-        lud06={lud06}
-        lud16={lud16}
-      />
-      {profileContactList && (
-        <Contacts npub={npub} userContacts={profileContactList} />
-      )}
-    </Fragment>
+    <UserCard
+      loggedInPubkey={loggedInPubkey}
+      loggedInContactList={loggedInContactList}
+      profileContactList={profileContactList}
+      profilePubkey={profilePubkey}
+      name={name}
+      npub={npub}
+      nip05={nip05}
+      about={about}
+      picture={picture}
+      lud06={lud06}
+      lud16={lud16}
+    />
   );
 };
 
