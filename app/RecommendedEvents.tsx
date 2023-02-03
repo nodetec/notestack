@@ -4,19 +4,21 @@ import { useNostrEvents, useProfile } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
-import { getTagValues, shortenHash } from "./lib/utils";
+import { getTagValues, markdownImageContent, shortenHash } from "./lib/utils";
 import { Event } from "nostr-tools";
 
 interface RecommendedEventsProps {
   EVENTS: string[];
   title: string;
   showProfile?: boolean;
+  showThumbnail?: boolean;
 }
 
 export default function RecommendedEvents({
   EVENTS,
   title,
   showProfile = false,
+  showThumbnail = false,
 }: RecommendedEventsProps) {
   // TODO do this manually and cache
 
@@ -29,7 +31,7 @@ export default function RecommendedEvents({
   // }
 
   // if (!cachedRecommendedEvents) {
-  const { events } = useNostrEvents({
+  const { events, isLoading } = useNostrEvents({
     filter: {
       ids: EVENTS,
       kinds: [2222],
@@ -43,18 +45,28 @@ export default function RecommendedEvents({
   //     sessionStorage.setItem("recommended_events", eventsString);
   //   }
   // }
+  if (EVENTS.length === 0) return null;
 
   return (
     <AsideSection title={title}>
       <ul className="flex flex-col gap-2">
-        {recommendedEvents.map((event) => (
-          <Event
-            key={event.id}
-            noteId={event.id!}
-            pubkey={showProfile ? event.pubkey : undefined}
-            title={getTagValues("subject", event.tags)}
-          />
-        ))}
+        {isLoading ? (
+          <span>Loading...</span>
+        ) : (
+          recommendedEvents.map((event) => (
+            <Event
+              key={event.id}
+              noteId={event.id!}
+              pubkey={showProfile ? event.pubkey : undefined}
+              title={getTagValues("subject", event.tags)}
+              thumbnail={
+                showThumbnail
+                  ? markdownImageContent(event.content) || undefined
+                  : undefined
+              }
+            />
+          ))
+        )}
       </ul>
     </AsideSection>
   );
@@ -63,10 +75,12 @@ export default function RecommendedEvents({
 const Event = ({
   noteId,
   pubkey = "",
+  thumbnail,
   title,
 }: {
   noteId: string;
   pubkey?: string;
+  thumbnail?: RegExpExecArray;
   title: string;
 }) => {
   const { data } = useProfile({ pubkey });
@@ -92,9 +106,18 @@ const Event = ({
       ) : null}
       <Link
         href={`/${noteNpub}`}
-        className={pubkey ? "font-bold text-base" : ""}
+        className={`flex gap-2 justify-between ${
+          pubkey ? "font-bold text-base" : ""
+        }`}
       >
-        {title}
+        <span>{title}</span>
+        {thumbnail ? (
+          <img
+            className="w-16 h-16 object-contain"
+            src={thumbnail.groups?.filename}
+            alt={thumbnail.groups?.title}
+          />
+        ) : null}
       </Link>
     </li>
   );

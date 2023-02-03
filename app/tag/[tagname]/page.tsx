@@ -9,7 +9,7 @@ import Tabs from "@/app/Tabs";
 import { usePathname } from "next/navigation";
 import { useNostr } from "nostr-react";
 import { useEffect, useState } from "react";
-import RecommendedTopics from "@/app/RecommendedTopics";
+import Topics from "@/app/Topics";
 import RecommendedEvents from "@/app/RecommendedEvents";
 import { AiFillTag } from "react-icons/ai";
 
@@ -76,7 +76,7 @@ export default function TagPage() {
             "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
           ]}
         />
-        <RecommendedTopics
+        <Topics
           TOPICS={[
             "nostr",
             "lightning",

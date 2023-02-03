@@ -11,3 +11,6 @@ export const getTagValues = (name: string, tags: string[][]) => {
   const [, item] = itemTag || [, undefined];
   return item;
 };
+
+export const markdownImageContent = (content: string) =>
+  /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
