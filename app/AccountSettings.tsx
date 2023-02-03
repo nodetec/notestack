@@ -10,7 +10,7 @@ import { NostrService } from "@/app/lib/nostr";
 import PopupInput from "@/app/PopupInput";
 import { UserContext } from "./context/user-provider";
 
-export default function UserCard({ isOpen, setIsOpen }: any) {
+export default function AccountSettings({ isOpen, setIsOpen }: any) {
   const { connectedRelays } = useNostr();
   const { publish } = useNostr();
   const [newName, setNewName] = useState<string>();
