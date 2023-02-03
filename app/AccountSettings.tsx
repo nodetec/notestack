@@ -145,12 +145,12 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
 
       pub.on("seen", async () => {
         console.log("OUR EVENT WAS SEEN");
-        window.location.reload();
         setIsOpen(!isOpen);
       });
 
       pub.on("failed", (reason: any) => {
         console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
+        setIsOpen(!isOpen);
       });
     }
   };

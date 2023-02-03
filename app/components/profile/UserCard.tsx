@@ -20,28 +20,28 @@ const presetAmounts = [
 ];
 
 export default function UserCard({
-  // name,
-  // nip05,
+  name,
+  nip05,
   npub,
-  // about,
-  // picture,
+  about,
+  picture,
   profilePubkey,
   loggedInContactList,
+  lud06,
+  lud16,
 }: // loggedInPubkey,
-// lud06,
-// lud16,
 any) {
   let contacts = null;
   if (loggedInContactList) {
     contacts = loggedInContactList.map((pair: string) => pair[1]);
   }
 
-  const [name, setName] = useState<string>();
-  const [about, setAbout] = useState<string>();
-  const [picture, setPicture] = useState<string>();
-  const [nip05, setNip05] = useState<string>();
-  const [lud06, setLud06] = useState<string>();
-  const [lud16, setLud16] = useState<string>();
+  // const [name, setName] = useState<string>();
+  // const [about, setAbout] = useState<string>();
+  // const [picture, setPicture] = useState<string>();
+  // const [nip05, setNip05] = useState<string>();
+  // const [lud06, setLud06] = useState<string>();
+  // const [lud16, setLud16] = useState<string>();
   const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -59,12 +59,12 @@ any) {
     setLoggedInPubkey(user.pubkey);
     if (user.content) {
       const contentObj = JSON.parse(user.content);
-      setName(contentObj.name);
-      setAbout(contentObj.about);
-      setPicture(contentObj.picture);
-      setNip05(contentObj.nip05);
-      setLud06(contentObj.lud06);
-      setLud16(contentObj.lud16);
+      // setName(contentObj.name);
+      // setAbout(contentObj.about);
+      // setPicture(contentObj.picture);
+      // setNip05(contentObj.nip05);
+      // setLud06(contentObj.lud06);
+      // setLud16(contentObj.lud16);
     }
   }, [user, isOpen]);
 
