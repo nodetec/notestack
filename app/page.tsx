@@ -8,7 +8,7 @@ import Content from "./Content";
 import { KeysContext } from "./context/keys-provider";
 import Main from "./Main";
 import RecommendedEvents from "./RecommendedEvents";
-import RecommendedTopics from "./RecommendedTopics";
+import Topics from "./Topics";
 import Tabs from "./Tabs";
 import { NostrService } from "./lib/nostr";
 
@@ -169,7 +169,8 @@ export default function HomePage() {
             "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
           ]}
         />
-        <RecommendedTopics
+        <Topics
+          title="Recommended Topics"
           TOPICS={[
             "nostr",
             "lightning",

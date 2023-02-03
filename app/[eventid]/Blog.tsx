@@ -9,6 +9,7 @@ import Main from "../Main";
 import RecommendedEvents from "../RecommendedEvents";
 import MarkdownDisplay from "./MarkdownDisplay";
 import { NostrService } from "@/app/lib/nostr";
+import Topics from "../Topics";
 
 interface NoteProps {
   event: Event;
@@ -18,6 +19,7 @@ export default function Note({ event }: NoteProps) {
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
   const filetypeTag = getTagValues("filetype", tags);
+
   const npub = nip19.npubEncode(event.pubkey);
   const [events, setEvents] = useState<Event[]>([]);
   const { connectedRelays } = useNostr();
@@ -93,10 +95,11 @@ export default function Note({ event }: NoteProps) {
         <Profile npub={npub} />
         <RecommendedEvents
           title="More from the author"
-          EVENTS={events.map((event: Event) => event.id) || []}
+          EVENTS={events.map((event: Event) => event.id!) || []}
           showProfile
           showThumbnail
         />
+        <Topics title="Related topics" TOPICS={[]} />
       </Aside>
     </Main>
   );

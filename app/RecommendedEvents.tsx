@@ -31,7 +31,7 @@ export default function RecommendedEvents({
   // }
 
   // if (!cachedRecommendedEvents) {
-  const { events } = useNostrEvents({
+  const { events, isLoading } = useNostrEvents({
     filter: {
       ids: EVENTS,
       kinds: [2222],
@@ -45,23 +45,28 @@ export default function RecommendedEvents({
   //     sessionStorage.setItem("recommended_events", eventsString);
   //   }
   // }
+  if (EVENTS.length === 0) return null;
 
   return (
     <AsideSection title={title}>
       <ul className="flex flex-col gap-2">
-        {recommendedEvents.map((event) => (
-          <Event
-            key={event.id}
-            noteId={event.id!}
-            pubkey={showProfile ? event.pubkey : undefined}
-            title={getTagValues("subject", event.tags)}
-            thumbnail={
-              showThumbnail
-                ? markdownImageContent(event.content) || undefined
-                : undefined
-            }
-          />
-        ))}
+        {isLoading ? (
+          <span>Loading...</span>
+        ) : (
+          recommendedEvents.map((event) => (
+            <Event
+              key={event.id}
+              noteId={event.id!}
+              pubkey={showProfile ? event.pubkey : undefined}
+              title={getTagValues("subject", event.tags)}
+              thumbnail={
+                showThumbnail
+                  ? markdownImageContent(event.content) || undefined
+                  : undefined
+              }
+            />
+          ))
+        )}
       </ul>
     </AsideSection>
   );
