@@ -23,19 +23,16 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
   useEffect(() => {
     const cachedUser = sessionStorage.getItem(pubkey + "_user");
 
-    try {
-      if (cachedUser) {
-        const contentObj = JSON.parse(cachedUser);
-        setPicture(contentObj.picture);
-      }
-    } catch (e) {
-      console.log("error parsing cached user profile", e);
-    }
-
     if (cachedUser) {
-      const profileMetadata = JSON.parse(cachedUser);
-      setUser(profileMetadata);
-      console.log("using cached user profile:", profileMetadata);
+      try {
+        const profileMetadata = JSON.parse(cachedUser);
+        setUser(profileMetadata);
+        const contentObj = JSON.parse(profileMetadata.content);
+        setPicture(contentObj.picture);
+        console.log("using cached user profile:", profileMetadata);
+      } catch (e) {
+        console.log("error parsing cached user profile", e);
+      }
     } else {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
