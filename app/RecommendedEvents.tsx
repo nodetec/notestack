@@ -101,7 +101,9 @@ const Event = ({
       ) : null}
       <Link
         href={`/${noteNpub}`}
-        className={`flex gap-2 ${pubkey ? "font-bold text-base" : ""}`}
+        className={`flex gap-2 justify-between ${
+          pubkey ? "font-bold text-base" : ""
+        }`}
       >
         <span>{title}</span>
         {thumbnail ? (
