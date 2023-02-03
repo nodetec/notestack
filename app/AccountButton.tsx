@@ -1,12 +1,12 @@
 "use client";
-import { useNostr } from "nostr-react";
 import { useContext, useEffect, useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import Button from "./Button";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import ProfileMenu from "./ProfileMenu";
-import type { Event } from "nostr-tools";
+import type { Event, Relay } from "nostr-tools";
 import { UserContext } from "./context/user-provider";
+import { RelayContext } from "./context/relay-provider";
 
 interface AccountButtonProps {
   pubkey: string;
@@ -14,11 +14,13 @@ interface AccountButtonProps {
 
 export default function AccountButton({ pubkey }: AccountButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
-  const { connectedRelays } = useNostr();
   const [picture, setPicture] = useState(DUMMY_PROFILE_API(pubkey));
 
   // @ts-ignore
   const { setUser } = useContext(UserContext);
+
+  // @ts-ignore
+  const { connectedRelays } = useContext(RelayContext);
 
   useEffect(() => {
     const cachedUser = sessionStorage.getItem(pubkey + "_user");
@@ -36,7 +38,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
     } else {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
-      connectedRelays.forEach((relay) => {
+      connectedRelays.forEach((relay: Relay) => {
         let sub = relay.sub([
           {
             kinds: [0],

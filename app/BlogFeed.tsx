@@ -1,14 +1,16 @@
 "use client";
-import { useNostr } from "nostr-react";
-import type { Event } from "nostr-tools";
-import { useEffect, useState } from "react";
+import type { Event, Relay } from "nostr-tools";
+import { useContext, useEffect, useState } from "react";
 import Article from "./Article";
+import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 import Posts from "./Posts";
 
 export default function BlogFeed({ events, setEvents, filter, profile }: any) {
-  const { connectedRelays } = useNostr();
   const [addedPosts, setAddedPosts] = useState<number>(10);
+
+  // @ts-ignore
+  const { connectedRelays, activeRelays } = useContext(RelayContext);
 
   // fetch initial 100 events for filter
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
         const lastEvent = events.slice(-1)[0];
         let eventArray: Event[] = [];
         const eventsSeen: { [k: string]: boolean } = {};
-        connectedRelays.forEach((relay) => {
+        connectedRelays.forEach((relay: Relay) => {
           filter.until = lastEvent.created_at;
           let sub = relay.sub([filter]);
           sub.on("event", (event: Event) => {

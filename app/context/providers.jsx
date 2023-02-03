@@ -1,15 +1,14 @@
 "use client";
 
 import KeysProvider from "./keys-provider.jsx";
+import RelayProvider from "./relay-provider.jsx";
 import BlogProvider from "./blog-provider.jsx";
 import UserProvider from "./user-provider.jsx";
-import { NostrProvider } from "nostr-react";
-import { RELAYS } from "../lib/constants";
 import NotifyProvider from "./notify-provider";
 
 export default function Providers({ children }) {
   return (
-    <NostrProvider relayUrls={RELAYS} debug={true}>
+    <RelayProvider>
       <BlogProvider>
         <UserProvider>
           <NotifyProvider>
@@ -17,6 +16,6 @@ export default function Providers({ children }) {
           </NotifyProvider>
         </UserProvider>
       </BlogProvider>
-    </NostrProvider>
+    </RelayProvider>
   );
 }

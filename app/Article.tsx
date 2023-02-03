@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useProfile } from "nostr-react";
 import { Event, nip19 } from "nostr-tools";
 import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
 import { BsFillTagFill } from "react-icons/bs";
@@ -7,6 +6,8 @@ import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
+
+// TODO: profile
 
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
@@ -33,10 +34,6 @@ const Article: FC<NoteProps> = ({
 
   const tValues = getTValues(event.tags);
 
-  const { data } = useProfile({
-    pubkey: event.pubkey,
-  });
-
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("subject", tags);
@@ -61,11 +58,14 @@ const Article: FC<NoteProps> = ({
                   <Item className="text-gray-hover">
                     <img
                       className="rounded-full w-6 h-6 object-cover"
-                      src={data?.picture || DUMMY_PROFILE_API(npub)}
-                      alt={data?.name}
+                      // src={data?.picture || DUMMY_PROFILE_API(npub)}
+                      // alt={data?.name}
+                      src={DUMMY_PROFILE_API(npub)}
+                      alt={shortenHash(npub)}
                     />
                     <span className="group-hover:underline">
-                      {data?.name || shortenHash(npub)!}
+                      {/* {data?.name || shortenHash(npub)!} */}
+                      {shortenHash(npub)!}
                     </span>
                   </Item>
                 </Link>

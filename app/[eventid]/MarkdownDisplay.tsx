@@ -12,7 +12,6 @@ import Button from "../Button";
 import { usePathname } from "next/navigation";
 import { AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import { DUMMY_PROFILE_API, HOST } from "../lib/constants";
-import { useProfile } from "nostr-react";
 import Link from "next/link";
 import { DatePosted } from "../Article";
 import AuthorTooltip from "../AuthorTooltip";
@@ -22,6 +21,8 @@ import useCopy from "../hooks/useCopy";
 import { ImLink } from "react-icons/im";
 import Tooltip from "../Tooltip";
 import { FaFacebook } from "react-icons/fa";
+
+// TODO: profile
 
 const SOCLIAL_LINKS = [
   {
@@ -61,10 +62,6 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
     window.scrollTo(0, 0);
   };
 
-  const { data } = useProfile({
-    pubkey: event.pubkey,
-  });
-
   function setupMarkdown(content: string) {
     var md = require("markdown-it")();
     var result = md.render(content);
@@ -90,14 +87,17 @@ const MarkdownDisplay = ({ event }: MarkdownDisplayProps) => {
             <Link href={`u/${npub}`} onClick={scrollToTop}>
               <img
                 className="rounded-full w-11 h-11 object-cover"
-                src={data?.picture || DUMMY_PROFILE_API(npub)}
-                alt={data?.name}
+                // src={data?.picture || DUMMY_PROFILE_API(npub)}
+                // alt={data?.name}
+                src={DUMMY_PROFILE_API(npub)}
+                alt={shortenHash(npub)}
               />
             </Link>
             <div className="flex flex-col gap-1">
               <Link href={`u/${npub}`} onClick={scrollToTop}>
                 <span className="hover:underline text-sm">
-                  {data?.name || shortenHash(npub)!}
+                  {/* {data?.name || shortenHash(npub)!} */}
+                  {shortenHash(npub)!}
                 </span>
               </Link>
               <DatePosted timestamp={event.created_at} />

@@ -1,5 +1,5 @@
 "use client";
-import { useNostr, useProfile } from "nostr-react";
+import { useNostr } from "nostr-react";
 import {
   DetailedHTMLProps,
   FC,
@@ -124,18 +124,21 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
   );
 };
 
+// TODO: profile
+
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
-  const { data } = useProfile({ pubkey });
   const npub = nip19.npubEncode(pubkey);
 
   return (
     <Link href={"/u/" + npub} className="flex items-center gap-2 py-2">
       <img
         className="w-5 h-5 bg-light-gray rounded-full object-cover"
-        src={data?.picture || DUMMY_PROFILE_API(npub)}
+        // src={data?.picture || DUMMY_PROFILE_API(npub)}
+        src={DUMMY_PROFILE_API(npub)}
         alt=""
       />
-      <span>{data?.name || shortenHash(npub)}</span>
+      {/* <span>{data?.name || shortenHash(npub)}</span> */}
+      <span>{shortenHash(npub)}</span>
     </Link>
   );
 };

@@ -1,7 +1,6 @@
 "use client";
-import { useNostr } from "nostr-react";
 import { useContext, useEffect, useState } from "react";
-import type { Event, Filter } from "nostr-tools";
+import type { Event, Filter, Relay } from "nostr-tools";
 import Aside from "./Aside";
 import BlogFeed from "./BlogFeed";
 import Content from "./Content";
@@ -11,6 +10,8 @@ import RecommendedEvents from "./RecommendedEvents";
 import RecommendedTopics from "./RecommendedTopics";
 import Tabs from "./Tabs";
 import { NostrService } from "./lib/nostr";
+import FollowedRelays from "./FollowedRelays";
+import { RelayContext } from "./context/relay-provider";
 
 export default function HomePage() {
   // @ts-ignore
@@ -27,7 +28,8 @@ export default function HomePage() {
   const TABS = ["Explore", "Following"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
-  const { connectedRelays } = useNostr();
+  // @ts-ignore
+  const { connectedRelays, activeRelays } = useContext(RelayContext);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -58,7 +60,7 @@ export default function HomePage() {
     if (!latestEventsString && exploreEvents.length === 0) {
       const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
-      connectedRelays.forEach((relay) => {
+      connectedRelays.forEach((relay: Relay) => {
         let sub = relay.sub([exploreFilter]);
         sub.on("event", (event: Event) => {
           if (!eventsSeen[event.id!]) {
@@ -82,7 +84,7 @@ export default function HomePage() {
     const followingEventsString = sessionStorage.getItem("latest_events");
     let followedAuthors: string[];
 
-    connectedRelays.forEach((relay) => {
+    connectedRelays.forEach((relay: Relay) => {
       let sub = relay.sub([
         {
           authors: [loggedInUserKeys.publicKey],
@@ -107,7 +109,7 @@ export default function HomePage() {
         if (!followingEventsString && followingEvents.length === 0) {
           const eventsSeen: { [k: string]: boolean } = {};
           let eventArray: Event[] = [];
-          connectedRelays.forEach((relay) => {
+          connectedRelays.forEach((relay: Relay) => {
             let sub = relay.sub([newfollowingFilter]);
             sub.on("event", (event: Event) => {
               if (!eventsSeen[event.id!]) {
@@ -131,11 +133,12 @@ export default function HomePage() {
         sub.unsub();
       });
     });
-  }, [connectedRelays]);
+  }, [connectedRelays, activeRelays]);
 
   return (
     <Main>
       <Content className="mt-8">
+        <FollowedRelays />
         <Tabs
           className="sticky top-16 bg-white"
           TABS={TABS}

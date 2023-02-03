@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useNostrEvents, useProfile } from "nostr-react";
+import { useNostrEvents } from "nostr-react";
 import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
@@ -60,6 +60,8 @@ export default function RecommendedEvents({
   );
 }
 
+// TODO profile
+
 const Event = ({
   noteId,
   pubkey = "",
@@ -69,7 +71,6 @@ const Event = ({
   pubkey?: string;
   title: string;
 }) => {
-  const { data } = useProfile({ pubkey });
   const profileNpub = nip19.npubEncode(pubkey);
   const noteNpub = nip19.noteEncode(noteId);
 
@@ -82,11 +83,13 @@ const Event = ({
         >
           <img
             className="w-5 h-5 bg-gray rounded-full object-cover"
-            src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
+            // src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
+            src={DUMMY_PROFILE_API(profileNpub)}
             alt=""
           />
           <span className="text-xs font-medium group-hover:underline">
-            {data?.name || shortenHash(pubkey)}
+            {/* {data?.name || shortenHash(pubkey)} */}
+            {shortenHash(pubkey)}
           </span>
         </Link>
       ) : null}

@@ -26,6 +26,7 @@ export default function RootLayout({
           </div>
           <Notification />
         </Providers>
+        ;
       </body>
     </html>
   );
