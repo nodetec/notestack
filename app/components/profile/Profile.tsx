@@ -35,6 +35,7 @@ const Profile = ({ npub, setProfileInfo }: any) => {
       setNip05(contentObj.nip05);
       setLud06(contentObj.lud06);
       setLud16(contentObj.lud16);
+      setProfileInfo({ name, about, picture });
     }
   }, [user]);
 
