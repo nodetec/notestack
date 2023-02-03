@@ -1,17 +1,16 @@
 import Popup from "../../Popup";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
-import { useNostr, useNostrEvents } from "nostr-react";
+import { useNostrEvents } from "nostr-react";
 import type { Event } from "nostr-tools";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { requestInvoice } from "lnurl-pay";
 import { utils } from "lnurl-pay";
-import { bech32 } from "bech32";
 import Link from "next/link";
-import { NostrService } from "@/app/lib/nostr";
 import Buttons from "@/app/Buttons";
 import FollowButton from "./FollowButton";
-import PopupInput from "@/app/PopupInput";
+import AccountSettings from "@/app/AccountSettings";
+import { UserContext } from "@/app/context/user-provider";
 
 const presetAmounts = [
   { value: "1000", label: "1k" },
@@ -21,50 +20,56 @@ const presetAmounts = [
 ];
 
 export default function UserCard({
-  name,
-  nip05,
+  // name,
+  // nip05,
   npub,
-  about,
-  picture,
+  // about,
+  // picture,
   profilePubkey,
   loggedInContactList,
-  loggedInPubkey,
-  lud06,
-  lud16,
-}: any) {
-  const { connectedRelays } = useNostr();
-  const { publish } = useNostr();
+}: // loggedInPubkey,
+// lud06,
+// lud16,
+any) {
   let contacts = null;
   if (loggedInContactList) {
     contacts = loggedInContactList.map((pair: string) => pair[1]);
   }
+
+  const [name, setName] = useState<string>();
+  const [about, setAbout] = useState<string>();
+  const [picture, setPicture] = useState<string>();
+  const [nip05, setNip05] = useState<string>();
+  const [lud06, setLud06] = useState<string>();
+  const [lud16, setLud16] = useState<string>();
+  const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
   const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
-  console.log("NAME:", name);
-  console.log("ABOUT:", about);
-
-  const [newName, setNewName] = useState(name);
-  const [newAbout, setNewAbout] = useState(about);
-  const [newPicture, setNewPicture] = useState(picture);
-  const [newNip05, setNewNip05] = useState(nip05);
-  const [newLud06, setNewLud06] = useState(lud06);
-  const [newLud16, setNewLud16] = useState(lud16);
   const [tipInputValue, setTipInputValue] = useState<string>("1");
   const [tipMessage, setTipMessage] = useState<string>();
   const [paymentHash, setPaymentHash] = useState();
-  const [newLnAddress, setNewLnAddress] = useState<any>();
-  const [convertedAddress, setConvertedAddress] = useState<any>();
   const [tippedAmount, setTippedAmount] = useState<any>();
 
-  // each object in the event array is a unique follower and we can look each one up with a 0 metadata kind
-  // const followersEventString = sessionStorage.getItem(
-  //   profilePubkey + "_followers"
-  // );
+  // @ts-ignore
+  const { user } = useContext(UserContext);
+
+  useEffect(() => {
+    setLoggedInPubkey(user.pubkey);
+    if (user.content) {
+      const contentObj = JSON.parse(user.content);
+      setName(contentObj.name);
+      setAbout(contentObj.about);
+      setPicture(contentObj.picture);
+      setNip05(contentObj.nip05);
+      setLud06(contentObj.lud06);
+      setLud16(contentObj.lud16);
+    }
+  }, [user, isOpen]);
+
   let followers: Event[];
 
-  // if (!followersEventString) {
-  // TODO rewrite this, get events without hook and cache
   let { events: followersFromEvent } = useNostrEvents({
     filter: {
       kinds: [3],
@@ -73,79 +78,6 @@ export default function UserCard({
     },
   });
   followers = followersFromEvent;
-  // }
-
-  // if (followersEventString) {
-  //   const cachedEvents = JSON.parse(followersEventString);
-  //   followers = cachedEvents;
-  //   console.log("using cached followers for user:", npub);
-  // } else {
-  //   if (followers && followers.length > 0) {
-  //     const followersString = JSON.stringify(followers);
-  //     sessionStorage.setItem(profilePubkey + "_followers", followersString);
-  //   }
-  // }
-
-  useEffect(() => {
-    setNewLnAddress(lud16);
-    setNewName(name);
-    setNewAbout(about);
-    setNewPicture(picture);
-    setNewNip05(nip05);
-    setNewLud06(lud06);
-    setNewLud16(lud16);
-  }, []);
-
-  useEffect(() => {
-    // setNewLnAddress(newLud16);
-    // setNewName(newName);
-    // setNewAbout(newAbout);
-    // setNewPicture(newPicture);
-    // setNewNip05(newNip05);
-    // setNewLud06(newLud06);
-    // setNewLud16(newLud16);
-  }, [isOpen]);
-
-  async function convert(newLnAddress: any) {
-    const url = utils.decodeUrlOrAddress(newLnAddress);
-
-    if (utils.isUrl(url)) {
-      try {
-        const response = await fetch(url);
-
-        if (utils.isLnurl(newLnAddress)) {
-          const data = await response.json();
-          const newConvertedAddress = JSON.parse(data.metadata)[0][1];
-
-          setNewLud16(newConvertedAddress);
-          setNewLud06(newLnAddress);
-          setConvertedAddress(newConvertedAddress);
-          console.log(newConvertedAddress); // chrisatmachine@getalby.com
-        }
-
-        if (utils.isLightningAddress(newLnAddress)) {
-          let words = bech32.toWords(Buffer.from(url, "utf8"));
-          let newConvertedAddress = "";
-          newConvertedAddress = bech32.encode("lnurl", words, 2000);
-          setNewLud06(newConvertedAddress);
-          setNewLud16(newLnAddress);
-          setConvertedAddress(newConvertedAddress);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }
-
-  useEffect(() => {
-    async function getLnAddress() {
-      if (newLnAddress) {
-        convert(newLnAddress);
-      }
-    }
-    setConvertedAddress("");
-    getLnAddress();
-  }, [newLnAddress]);
 
   useEffect(() => {
     setTipMessage("");
@@ -153,16 +85,6 @@ export default function UserCard({
   }, [isTipOpen]);
 
   const handleClick = async () => {
-    if (!isOpen) {
-      console.log("LUD16", lud16);
-      setNewLnAddress(lud16);
-      setNewName(name);
-      setNewAbout(about);
-      setNewPicture(picture);
-      setNewNip05(nip05);
-      setNewLud06(lud06);
-      setNewLud16(lud16);
-    }
     setIsOpen(!isOpen);
   };
 
@@ -182,13 +104,15 @@ export default function UserCard({
     if (typeof window.webln !== "undefined") {
       const lnUrlOrAddress = lud06 || lud16;
 
-      const { invoice, params, successAction, validatePreimage } =
-        await requestInvoice({
-          lnUrlOrAddress,
-          // @ts-ignore
-          tokens: tipInputValue, // satoshis
-          comment: tipMessage,
-        });
+      if (lnUrlOrAddress) {
+        const { invoice, params, successAction, validatePreimage } =
+          await requestInvoice({
+            lnUrlOrAddress,
+            // @ts-ignore
+            tokens: tipInputValue, // satoshis
+            comment: tipMessage,
+          });
+      }
       try {
         // @ts-ignore
         const result = await webln.sendPayment(invoice);
@@ -201,76 +125,6 @@ export default function UserCard({
     }
     setIsTipOpen(!isTipOpen);
     setIsTipSuccessOpen(!isTipSuccessOpen);
-  };
-
-  const handleSubmitNewProfile = async (e: any) => {
-    e.preventDefault();
-
-    const content = {
-      name: newName,
-      about: newAbout,
-      picture: newPicture,
-      nip05: newNip05,
-      lud06: newLud06,
-      lud16: newLud16,
-    };
-
-    const stringifiedContent = JSON.stringify(content);
-
-    let event = NostrService.createEvent(
-      0,
-      loggedInPubkey,
-      stringifiedContent,
-      []
-    );
-
-    try {
-      event = await NostrService.addEventData(event);
-    } catch (err: any) {
-      // setPost({ postSending: false, postError: err.message });
-      return;
-    }
-    sessionStorage.removeItem(profilePubkey + "_profile");
-
-    let eventId: any = null;
-    eventId = event?.id;
-
-    connectedRelays.forEach((relay) => {
-      let sub = relay.sub([
-        {
-          ids: [eventId],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
-        setIsOpen(!isOpen);
-      });
-      sub.on("eose", () => {
-        console.log("EOSE");
-        sub.unsub();
-      });
-    });
-
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for await (const pub of pubs) {
-      pub.on("ok", () => {
-        console.log("OUR EVENT WAS ACCEPTED");
-        // setPost({ postSending: false, postError: "" });
-      });
-
-      await pub.on("seen", async () => {
-        console.log("OUR EVENT WAS SEEN");
-        window.location.reload();
-        setIsOpen(!isOpen);
-      });
-
-      pub.on("failed", (reason: any) => {
-        // setPost({ postSending: false, postError: reason });
-        console.log("OUR EVENT HAS FAILED");
-      });
-    }
   };
 
   return (
@@ -354,55 +208,17 @@ export default function UserCard({
         </h5>
       </Popup>
       {loggedInPubkey === profilePubkey ? (
-        <Popup
-          title="Edit Profile"
+        <AccountSettings
+          name={name}
+          nip05={nip05}
+          about={about}
+          picture={picture}
+          loggedInPubkey={loggedInPubkey}
+          lud06={lud06}
+          lud16={lud16}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          className="h-3/4 max-h-192 inset-0 overflow-auto scroll-smooth"
-        >
-          <PopupInput
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            label="Name"
-          />
-          <PopupInput
-            value={newNip05}
-            onChange={(e) => setNewNip05(e.target.value)}
-            label="NIP-05 ID"
-          />
-          <PopupInput
-            value={newPicture}
-            onChange={(e) => setNewPicture(e.target.value)}
-            label="Profile Image Url"
-          />
-          <PopupInput
-            value={newAbout}
-            onChange={(e) => setNewAbout(e.target.value)}
-            label="About"
-          />
-          <h3 className="text-xl  text-center pt-4">
-            ⚡ Enable Lightning Tips ⚡
-          </h3>
-          <PopupInput
-            value={newLnAddress}
-            onChange={(e) => setNewLnAddress(e.target.value)}
-            label="Lightning Address or LUD-06 Identifier"
-          ></PopupInput>
-
-          <h5 className="text bg-neutral-200 overflow-x-scroll rounded-md text-center p-3 mb-3">
-            <div className="cursor-text  flex justify-start whitespace-nowrap items-center">
-              <div className="pr-4">{convertedAddress}</div>
-            </div>
-          </h5>
-          <Button
-            variant="solid"
-            onClick={handleSubmitNewProfile}
-            size="sm"
-            className="w-1/4"
-          >
-            Save
-          </Button>
-        </Popup>
+        />
       ) : (
         <Popup
           title="Pay with Lightning"
