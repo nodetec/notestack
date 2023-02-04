@@ -74,13 +74,7 @@ export default function HomePage() {
         count++;
         console.log("EOSE initial latest events from", relay.url);
         if (count === connectedRelays.length) {
-          const concatenatedArray = Object.values(eventObj).reduce(
-            (acc, value) => acc.concat(value),
-            []
-          );
-
-          const filteredEvents =
-            NostrService.filterBlogEvents(concatenatedArray);
+          const filteredEvents = NostrService.filterBlogEvents(eventObj);
           console.log("FILTERED____EVENTS", filteredEvents);
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
