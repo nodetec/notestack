@@ -14,7 +14,6 @@ export default function RelayProvider({ children }) {
   const [connectedRelays, setConnectedRelays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
-  // const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     console.log("ACTIVE RELAYS ARE:", activeRelays);

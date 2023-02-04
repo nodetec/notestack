@@ -57,9 +57,6 @@ export default function FollowedRelays() {
       );
       console.log("ADD RELAY: INACTIVE LIST", updatedInactiveRelays);
       setInactiveRelays(updatedInactiveRelays);
-      // let prunedConnectedRelays = connectedRelays.filter((connectedRelay) => {
-      //   return inactiveRelays.includes(connectedRelay);
-      // });
     }
   };
 

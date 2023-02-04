@@ -29,8 +29,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
-  const { connectedRelays, activeRelays, isReady } =
-    useContext(RelayContext);
+  const { connectedRelays, activeRelays, isReady } = useContext(RelayContext);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,17 +58,6 @@ export default function HomePage() {
   useEffect(() => {
     setExploreEvents([]);
     setFollowingEvents([]);
-    console.log("RERENDER?");
-    // const latestEventsString = sessionStorage.getItem("latest_events");
-    // if (!latestEventsString && exploreEvents.length === 0) {
-    // const eventsSeen: { [k: string]: boolean } = {};
-    // let eventArray: Event[] = [];
-    // let eventObj: object = {};
-    // {
-    //   "r1EventArray": []
-    //   "r2EventArray": []
-    //   "r3EventArray": []
-    // }
     let count = 0;
     const eventObj: { [fieldName: string]: any } = {};
     connectedRelays.forEach((relay: Relay) => {
@@ -96,15 +84,12 @@ export default function HomePage() {
           console.log("FILTERED____EVENTS", filteredEvents);
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
-            // const eventsString = JSON.stringify(filteredEvents);
-            // sessionStorage.setItem("latest_events", eventsString);
           }
           console.log("eventObj", eventObj);
         }
         sub.unsub();
       });
     });
-    // }
 
     // const followingEventsString = sessionStorage.getItem("latest_events");
     let followedAuthors: string[];
