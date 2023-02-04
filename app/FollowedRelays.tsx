@@ -1,11 +1,25 @@
 "use client";
 import { RelayContext } from "./context/relay-provider.jsx";
 import { useContext, useEffect, useState } from "react";
+import { Relay } from "nostr-tools/relay.js";
 
 export default function FollowedRelays() {
-  // @ts-ignore
-  const { activeRelays, setActiveRelays, allRelays, setClosedRelays } =
-    useContext(RelayContext);
+  const {
+    // @ts-ignore
+    connectedRelays,
+    // @ts-ignore
+    activeRelays,
+    // @ts-ignore
+    setActiveRelays,
+    // @ts-ignore
+    allRelays,
+    // @ts-ignore
+    inactiveRelays,
+    // @ts-ignore
+    setInactiveRelays,
+    // @ts-ignore
+    setIsReady,
+  } = useContext(RelayContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -17,20 +31,35 @@ export default function FollowedRelays() {
   }, [activeRelays]);
 
   const handleRelayClick = (relay: string) => {
-    sessionStorage.removeItem("latest_events");
-
-    // if it's all add all
-    // make sure to clear cache
-    // add total relays and active relays to localstorage
     if (activeRelays.includes("wss://" + relay)) {
       let prunedRelayList = activeRelays.filter((activeRelay: string) => {
         return activeRelay !== "wss://" + relay;
       });
-      console.log("PRUNED RELAY LIST", prunedRelayList);
+      setIsReady(false);
+      console.log("PRUNE RELAY: ACTIVE LIST", prunedRelayList);
       setActiveRelays(prunedRelayList);
-      setClosedRelays(["wss://" + relay]);
+      console.log("PRUNE RELAY: INACTIVE LIST", [
+        ...inactiveRelays,
+        "wss://" + relay,
+      ]);
+      setInactiveRelays([...inactiveRelays, "wss://" + relay]);
     } else {
+      setIsReady(false);
+      console.log("ADD RELAY: ACTIVE LIST", [
+        ...activeRelays,
+        "wss://" + relay,
+      ]);
       setActiveRelays([...activeRelays, "wss://" + relay]);
+      const updatedInactiveRelays = inactiveRelays.filter(
+        (closedRelay: string) => {
+          return closedRelay !== "wss://" + relay;
+        }
+      );
+      console.log("ADD RELAY: INACTIVE LIST", updatedInactiveRelays);
+      setInactiveRelays(updatedInactiveRelays);
+      // let prunedConnectedRelays = connectedRelays.filter((connectedRelay) => {
+      //   return inactiveRelays.includes(connectedRelay);
+      // });
     }
   };
 
@@ -44,7 +73,9 @@ export default function FollowedRelays() {
                 key={relay}
                 onClick={() => handleRelayClick(relay)}
                 className={
-                  activeRelays.includes("wss://" + relay)
+                  connectedRelays
+                    .map((relay: Relay) => relay.url)
+                    .includes("wss://" + relay)
                     ? "border border-black bg-black text-white rounded-full p-2"
                     : "border border-black rounded-full p-2"
                 }

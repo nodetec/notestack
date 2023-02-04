@@ -19,19 +19,28 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
 
       if (events.length > 0) {
         const lastEvent = events.slice(-1)[0];
-        let eventArray: Event[] = [];
-        const eventsSeen: { [k: string]: boolean } = {};
+
+        let count = 0;
+        const eventObj: { [fieldName: string]: any } = {};
+
         connectedRelays.forEach((relay: Relay) => {
           filter.until = lastEvent.created_at;
           let sub = relay.sub([filter]);
+          let relayUrl = relay.url.replace("wss://", "");
+          eventObj[relayUrl] = [];
           sub.on("event", (event: Event) => {
-            if (!eventsSeen[event.id!]) {
-              eventArray.push(event);
-            }
+            // @ts-ignore
+            event.relayUrl = relayUrl;
+            eventObj[relayUrl].push(event);
           });
           sub.on("eose", () => {
             console.log("EOSE additional events from", relay.url);
-            const concatEvents = currentEvents.concat(eventArray);
+
+            const allValues = Object.values(eventObj).reduce(
+              (acc, value) => acc.concat(value),
+              []
+            );
+            const concatEvents = currentEvents.concat(allValues);
             const filteredEvents = NostrService.filterBlogEvents(concatEvents);
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);

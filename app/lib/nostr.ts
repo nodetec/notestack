@@ -157,4 +157,38 @@ export namespace NostrService {
     });
     return filteredEvents;
   }
+
+  export function filterBlogEvents2(eventObj: { [fieldName: string]: any }) {
+    let uniqueItems: any = [];
+
+    Object.keys(eventObj).forEach((fieldName) => {
+      uniqueItems = eventObj[fieldName].reduce((acc, item) => {
+        if (!acc.find((i) => i.id === item.id)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+    });
+
+    console.log(uniqueItems);
+
+    return uniqueItems;
+  }
+
+  export function filterBlogEvents3(eventObj: { [fieldName: string]: any }) {
+    let uniqueItems: any = [];
+
+    Object.keys(eventObj).forEach((fieldName) => {
+      uniqueItems = eventObj[fieldName].reduce((acc, item) => {
+        if (!acc.find((i) => i.id === item.id)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+    });
+
+    console.log(uniqueItems);
+
+    return uniqueItems;
+  }
 }

@@ -72,6 +72,8 @@ const Article: FC<NoteProps> = ({
               </div>
             ) : null}
             <DatePosted timestamp={createdAt} />
+            <span>·</span>
+            <span className="text-gray">{event.relayUrl}</span>
           </div>
         </div>
         <DeleteBlog event={event} />
