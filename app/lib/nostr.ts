@@ -144,8 +144,13 @@ export namespace NostrService {
     return filteredEvents;
   }
 
-  export function filterBlogEvents(eventArray: Event[]) {
-    const filteredEvents = eventArray.filter((e1, index) => {
+  export function filterBlogEvents(eventObj: { [fieldName: string]: any }) {
+    const eventArray = Object.values(eventObj).reduce(
+      (acc, value) => acc.concat(value),
+      []
+    );
+
+    const filteredEvents = eventArray.filter((e1: Event, index: number) => {
       if (e1.content === "") {
         return false;
       }
@@ -153,42 +158,8 @@ export namespace NostrService {
       if (!title || title === "") {
         return false;
       }
-      return eventArray.findIndex((e2) => e2.id === e1.id) === index;
+      return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
     });
     return filteredEvents;
-  }
-
-  export function filterBlogEvents2(eventObj: { [fieldName: string]: any }) {
-    let uniqueItems: any = [];
-
-    Object.keys(eventObj).forEach((fieldName) => {
-      uniqueItems = eventObj[fieldName].reduce((acc, item) => {
-        if (!acc.find((i) => i.id === item.id)) {
-          acc.push(item);
-        }
-        return acc;
-      }, []);
-    });
-
-    console.log(uniqueItems);
-
-    return uniqueItems;
-  }
-
-  export function filterBlogEvents3(eventObj: { [fieldName: string]: any }) {
-    let uniqueItems: any = [];
-
-    Object.keys(eventObj).forEach((fieldName) => {
-      uniqueItems = eventObj[fieldName].reduce((acc, item) => {
-        if (!acc.find((i) => i.id === item.id)) {
-          acc.push(item);
-        }
-        return acc;
-      }, []);
-    });
-
-    console.log(uniqueItems);
-
-    return uniqueItems;
   }
 }
