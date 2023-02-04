@@ -73,6 +73,7 @@ const Article: FC<NoteProps> = ({
             ) : null}
             <DatePosted timestamp={createdAt} />
             <span>·</span>
+            {/* @ts-ignore */}
             <span className="text-gray">{event.relayUrl}</span>
           </div>
         </div>
