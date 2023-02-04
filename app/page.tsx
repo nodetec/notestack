@@ -34,15 +34,6 @@ export default function HomePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // if (exploreEvents.length === 0) {
-    //   const latestEventsString = sessionStorage.getItem("latest_events");
-    //   if (latestEventsString) {
-    //     const cachedEvents = JSON.parse(latestEventsString);
-    //     setExploreEvents(cachedEvents);
-    //     console.log("using cached latest events");
-    //   }
-    // }
-
     // if (followingEvents.length === 0) {
     //   const followingEventsString = sessionStorage.getItem(
     //     "latest_following_events"
@@ -62,17 +53,21 @@ export default function HomePage() {
     const eventObj: { [fieldName: string]: any } = {};
     connectedRelays.forEach((relay: Relay) => {
       let sub = relay.sub([exploreFilter]);
+
       let relayUrl = relay.url.replace("wss://", "");
       eventObj[relayUrl] = [];
-      sub.on("event", (event: Event) => {
-        // console.log("getting event", event, "from relay:", relay.url);
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        eventObj[relayUrl].push(event);
-      });
-      sub.on("eose", () => {
+
+      const cachedLatestEventsString = sessionStorage.getItem(
+        `latest_events_${relayUrl}`
+      );
+
+      if (cachedLatestEventsString) {
+        console.log("USING THE CACHE")
         count++;
-        console.log("EOSE initial latest events from", relay.url);
+        const cachedEvents = JSON.parse(cachedLatestEventsString);
+        eventObj[relayUrl] = cachedEvents;
+        console.log("using cached latest events for:" + relayUrl);
+
         if (count === connectedRelays.length) {
           const filteredEvents = NostrService.filterBlogEvents(eventObj);
           console.log("FILTERED____EVENTS", filteredEvents);
@@ -81,8 +76,30 @@ export default function HomePage() {
           }
           console.log("eventObj", eventObj);
         }
-        sub.unsub();
-      });
+      } else {
+        sub.on("event", (event: Event) => {
+          // console.log("getting event", event, "from relay:", relay.url);
+          // @ts-ignore
+          event.relayUrl = relayUrl;
+          eventObj[relayUrl].push(event);
+        });
+
+        sub.on("eose", () => {
+          const eventsString = JSON.stringify(eventObj[relayUrl]);
+          sessionStorage.setItem(`latest_events_${relayUrl}`, eventsString);
+          count++;
+          console.log("EOSE initial latest events from", relay.url);
+          if (count === connectedRelays.length) {
+            const filteredEvents = NostrService.filterBlogEvents(eventObj);
+            console.log("FILTERED____EVENTS", filteredEvents);
+            if (filteredEvents.length > 0) {
+              setExploreEvents(filteredEvents);
+            }
+            console.log("eventObj", eventObj);
+          }
+          sub.unsub();
+        });
+      }
     });
 
     // const followingEventsString = sessionStorage.getItem("latest_events");
@@ -111,29 +128,34 @@ export default function HomePage() {
 
         setFollowingFilter(newfollowingFilter);
         // if (!followingEventsString && followingEvents.length === 0) {
-        const eventsSeen: { [k: string]: boolean } = {};
-        let eventArray: Event[] = [];
+        let count = 0;
+        const eventObj: { [fieldName: string]: any } = {};
         connectedRelays.forEach((relay: Relay) => {
           let sub = relay.sub([newfollowingFilter]);
+
+          let relayUrl = relay.url.replace("wss://", "");
+          eventObj[relayUrl] = [];
+
           sub.on("event", (event: Event) => {
-            if (!eventsSeen[event.id!]) {
-              eventArray.push(event);
-            }
-            eventsSeen[event.id!] = true;
+            // @ts-ignore
+            event.relayUrl = relayUrl;
+            eventObj[relayUrl].push(event);
           });
           sub.on("eose", () => {
-            console.log("EOSE initial following events from", relay.url);
+            count++;
 
-            const filteredEvents = NostrService.filterBlogEvents(eventArray);
-            if (filteredEvents.length > 0) {
-              setFollowingEvents(filteredEvents);
-              // const eventsString = JSON.stringify(filteredEvents);
-              // sessionStorage.setItem("latest_following_events", eventsString);
+            console.log("EOSE initial latest events from", relay.url);
+            if (count === connectedRelays.length) {
+              const filteredEvents = NostrService.filterBlogEvents(eventObj);
+              console.log("FILTERED____EVENTS", filteredEvents);
+              if (filteredEvents.length > 0) {
+                setFollowingEvents(filteredEvents);
+              }
+              console.log("eventObj", eventObj);
             }
             sub.unsub();
           });
         });
-        // }
         sub.unsub();
       });
     });
