@@ -47,8 +47,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    setExploreEvents([]);
-    setFollowingEvents([]);
+    // setExploreEvents([]);
+    // setFollowingEvents([]);
     let count = 0;
     const eventObj: { [fieldName: string]: any } = {};
     connectedRelays.forEach((relay: Relay) => {
