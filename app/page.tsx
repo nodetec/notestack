@@ -46,22 +46,16 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // if (activeRelay) {
-    //   console.log("TEST ACTIVE RELAY:", activeRelay.url);
-    //   console.log("TEST PENDING RELAY:", pendingActiveRelayUrl);
-    //   if (pendingActiveRelayUrl !== activeRelay.url) {
-    //     setExploreEvents([]);
-    //   }
-    // }
     let pubkeysSet = new Set<string>();
 
     if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
-      console.log("ACTIVERELAY", activeRelay);
+      setExploreEvents([]);
+      // console.log("ACTIVERELAY", activeRelay);
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `latest_${relayUrl}`;
 
       if (feed[feedKey]) {
-        console.log("Cached events from context");
+        // console.log("Cached events from context");
         setExploreEvents(feed[feedKey]);
       } else {
         console.log("Getting events from relay");
@@ -78,7 +72,7 @@ export default function HomePage() {
         });
 
         sub.on("eose", () => {
-          console.log("PUBKEYS ARE:", pubkeysSet);
+          // console.log("PUBKEYS ARE:", pubkeysSet);
           // console.log("EOSE initial latest events from", activeRelay.url);
           const filteredEvents = NostrService.filterBlogEvents(events);
           const feedKey = `latest_${relayUrl}`;
@@ -87,6 +81,8 @@ export default function HomePage() {
           // console.log("FILTERED____EVENTS", filteredEvents);
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
+          } else {
+            setExploreEvents([]);
           }
           if (pubkeysSet.size > 0) {
             setpubkeys(Array.from(pubkeysSet));
@@ -97,6 +93,7 @@ export default function HomePage() {
     }
 
     if (activeRelay) {
+      setFollowingEvents([]);
       let relayUrl = activeRelay.url.replace("wss://", "");
       let followedAuthors: string[];
 
@@ -125,7 +122,7 @@ export default function HomePage() {
 
           let followingFeedKey = `following_${relayUrl}`;
           if (feed[followingFeedKey]) {
-            console.log("Cached events from context");
+            // console.log("Cached events from context");
             setFollowingEvents(feed[followingFeedKey]);
           } else {
             let sub = activeRelay.sub([newfollowingFilter]);
@@ -153,6 +150,8 @@ export default function HomePage() {
               // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
               if (filteredEvents.length > 0) {
                 setFollowingEvents(filteredEvents);
+              } else {
+                setExploreEvents([]);
               }
               sub.unsub();
             });

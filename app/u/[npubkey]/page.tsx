@@ -14,8 +14,8 @@ import { nip19 } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import AuthorTooltip from "@/app/AuthorTooltip";
 import { NostrService } from "@/app/lib/nostr";
-import Contacts from "@/app/components/profile/Contacts";
 import { RelayContext } from "@/app/context/relay-provider";
+import FollowedRelays from "@/app/FollowedRelays";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -29,7 +29,7 @@ export default function ProfilePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [contactEvents, setContactEvents] = useState<Event[]>([]);
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { connectedRelays, activeRelays } = useContext(RelayContext);
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
@@ -113,7 +113,7 @@ export default function ProfilePage() {
           sub.unsub();
         });
       });
-    }, [connectedRelays]);
+    }, [activeRelays]);
 
     return (
       <Main>
@@ -124,6 +124,7 @@ export default function ProfilePage() {
             </h1>
             <AuthorTooltip npub={npub} />
           </div>
+          <FollowedRelays />
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "Home" ? (
             <BlogFeed

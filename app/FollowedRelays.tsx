@@ -17,9 +17,9 @@ export default function FollowedRelays() {
 
   const handleRelayClick = (relay: string) => {
     console.log("clicked relay:", relay);
-    if (activeRelay.url !== "wss://" + relay) {
+    if (activeRelay && activeRelay.url !== "wss://" + relay) {
       setPendingActiveRelayUrl("wss://" + relay);
-      setActiveRelay(null)
+      setActiveRelay(null);
     }
   };
 
@@ -33,7 +33,7 @@ export default function FollowedRelays() {
                 key={relay}
                 onClick={() => handleRelayClick(relay)}
                 className={
-                 activeRelay && activeRelay.url === "wss://" + relay
+                  activeRelay && activeRelay.url === "wss://" + relay
                     ? "border border-black bg-black text-white rounded-full p-2"
                     : "border border-black rounded-full p-2"
                 }
