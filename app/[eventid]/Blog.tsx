@@ -53,34 +53,34 @@ export default function Note({ event }: NoteProps) {
     }
   }, []);
 
-  useEffect(() => {
-    const profileEventsString = sessionStorage.getItem(
-      profilePubkey + "_events"
-    );
-    if (!profileEventsString && events.length === 0) {
-      const eventsSeen: { [k: string]: boolean } = {};
-      let eventArray: Event[] = [];
-      connectedRelays.forEach((relay: Relay) => {
-        let sub = relay.sub([filter]);
-        sub.on("event", (event: Event) => {
-          if (!eventsSeen[event.id!]) {
-            eventArray.push(event);
-          }
-          eventsSeen[event.id!] = true;
-        });
-        sub.on("eose", () => {
-          console.log("EOSE initial latest profile events from", relay.url);
-          const filteredEvents = NostrService.filterBlogEvents(eventArray);
-          if (filteredEvents.length > 0) {
-            setEvents(filteredEvents);
-            const eventsString = JSON.stringify(filteredEvents);
-            sessionStorage.setItem(profilePubkey + "_events", eventsString);
-          }
-          sub.unsub();
-        });
-      });
-    }
-  }, [connectedRelays]);
+  // useEffect(() => {
+  //   const profileEventsString = sessionStorage.getItem(
+  //     profilePubkey + "_events"
+  //   );
+  //   if (!profileEventsString && events.length === 0) {
+  //     const eventsSeen: { [k: string]: boolean } = {};
+  //     let eventArray: Event[] = [];
+  //     connectedRelays.forEach((relay: Relay) => {
+  //       let sub = relay.sub([filter]);
+  //       sub.on("event", (event: Event) => {
+  //         if (!eventsSeen[event.id!]) {
+  //           eventArray.push(event);
+  //         }
+  //         eventsSeen[event.id!] = true;
+  //       });
+  //       sub.on("eose", () => {
+  //         console.log("EOSE initial latest profile events from", relay.url);
+  //         const filteredEvents = NostrService.filterBlogEvents(eventArray);
+  //         if (filteredEvents.length > 0) {
+  //           setEvents(filteredEvents);
+  //           const eventsString = JSON.stringify(filteredEvents);
+  //           sessionStorage.setItem(profilePubkey + "_events", eventsString);
+  //         }
+  //         sub.unsub();
+  //       });
+  //     });
+  //   }
+  // }, [connectedRelays]);
 
   return (
     <Main mode={zenMode ? "zen" : "normal"}>

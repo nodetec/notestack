@@ -28,33 +28,33 @@ export default function RecommendedEvents({
   const { connectedRelays, isLoading } = useContext(RelayContext);
   const [events, setEvents] = useState<Event[]>([]);
 
-  useEffect(() => {
-    const eventsSeen: { [k: string]: boolean } = {};
-    let eventArray: Event[] = [];
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
-        {
-          ids: EVENTS,
-          kinds: [2222],
-          limit: 3,
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        if (!eventsSeen[event.id!]) {
-          eventArray.push(event);
-        }
-        eventsSeen[event.id!] = true;
-      });
-      sub.on("eose", () => {
-        console.log("EOSE initial latest events from", relay.url);
-        const filteredEvents = NostrService.filterBlogEvents(eventArray);
-        if (filteredEvents.length > 0) {
-          setEvents(filteredEvents);
-        }
-        sub.unsub();
-      });
-    });
-  }, [connectedRelays]);
+  // useEffect(() => {
+  //   const eventsSeen: { [k: string]: boolean } = {};
+  //   let eventArray: Event[] = [];
+  //   connectedRelays.forEach((relay: Relay) => {
+  //     let sub = relay.sub([
+  //       {
+  //         ids: EVENTS,
+  //         kinds: [2222],
+  //         limit: 3,
+  //       },
+  //     ]);
+  //     sub.on("event", (event: Event) => {
+  //       if (!eventsSeen[event.id!]) {
+  //         eventArray.push(event);
+  //       }
+  //       eventsSeen[event.id!] = true;
+  //     });
+  //     sub.on("eose", () => {
+  //       console.log("EOSE initial latest events from", relay.url);
+  //       const filteredEvents = NostrService.filterBlogEvents(eventArray);
+  //       if (filteredEvents.length > 0) {
+  //         setEvents(filteredEvents);
+  //       }
+  //       sub.unsub();
+  //     });
+  //   });
+  // }, [connectedRelays]);
 
   recommendedEvents = events;
 

@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 
 export default function FollowedRelays() {
   // @ts-ignore
-  const { setPendingActiveRelayUrl, activeRelay, allRelays } =
+  const { setPendingActiveRelayUrl, activeRelay, setActiveRelay, allRelays } =
     useContext(RelayContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);
 
@@ -19,6 +19,7 @@ export default function FollowedRelays() {
     console.log("clicked relay:", relay);
     if (activeRelay.url !== "wss://" + relay) {
       setPendingActiveRelayUrl("wss://" + relay);
+      setActiveRelay(null)
     }
   };
 

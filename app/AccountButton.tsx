@@ -15,7 +15,6 @@ interface AccountButtonProps {
 export default function AccountButton({ pubkey }: AccountButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [picture, setPicture] = useState(DUMMY_PROFILE_API(pubkey));
-  const [account, setAccount] = useState();
 
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
@@ -55,7 +54,8 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         sub.on("eose", () => {
           if (events.length !== 0) {
             const profileMetadata = events[0];
-            setUser(profileMetadata);
+            user[userKey] = profileMetadata;
+            setUser(user);
             const content = events[0].content;
             if (content) {
               const contentObj = JSON.parse(content);

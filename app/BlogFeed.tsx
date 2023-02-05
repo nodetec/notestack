@@ -2,12 +2,17 @@
 import type { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Article from "./Article";
+import { ProfilesContext } from "./context/profiles-provider";
 import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 import Posts from "./Posts";
 
 export default function BlogFeed({ events, setEvents, filter, profile }: any) {
   const [addedPosts, setAddedPosts] = useState<number>(10);
+  const [pubkeysReady, setpubkeysReady] = useState<boolean>(false);
+  // @ts-ignore
+  const { profiles, setProfiles, pubkeys, setpubkeys } =
+    useContext(ProfilesContext);
 
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
@@ -16,6 +21,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
   useEffect(() => {
     if (addedPosts > 0.8 * events.length) {
       const currentEvents = events;
+      let pubkeysSet = new Set<string>(pubkeys);
 
       if (events.length > 0) {
         if (activeRelay) {
@@ -31,6 +37,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
             // @ts-ignore
             event.relayUrl = relayUrl;
             events.push(event);
+            pubkeysSet.add(event.pubkey);
           });
           sub.on("eose", () => {
             console.log("EOSE initial latest events from", activeRelay.url);
@@ -39,12 +46,18 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
             }
+
+            if (pubkeysSet.size > 0) {
+              setpubkeys(Array.from(pubkeysSet));
+            }
+
             sub.unsub();
           });
         }
       }
     }
   }, [addedPosts]);
+
 
   useEffect(() => {
     const handleScroll = () => {

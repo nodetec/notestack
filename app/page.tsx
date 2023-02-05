@@ -13,6 +13,7 @@ import { NostrService } from "./lib/nostr";
 import { RelayContext } from "./context/relay-provider";
 import FollowedRelays from "./FollowedRelays";
 import { FeedContext } from "./context/feed-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 
 export default function HomePage() {
   // @ts-ignore
@@ -26,11 +27,16 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
+  // const [pubkeys, setpubkeys] = useState<string[]>();
   const TABS = ["Explore", "Following"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+
+  // @ts-ignore
+  const { profiles, setProfiles, pubkeys, setpubkeys } =
+    useContext(ProfilesContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -40,7 +46,17 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (activeRelay) {
+    // if (activeRelay) {
+    //   console.log("TEST ACTIVE RELAY:", activeRelay.url);
+    //   console.log("TEST PENDING RELAY:", pendingActiveRelayUrl);
+    //   if (pendingActiveRelayUrl !== activeRelay.url) {
+    //     setExploreEvents([]);
+    //   }
+    // }
+    let pubkeysSet = new Set<string>();
+
+    if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
+      console.log("ACTIVERELAY", activeRelay);
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `latest_${relayUrl}`;
 
@@ -58,9 +74,11 @@ export default function HomePage() {
           // @ts-ignore
           event.relayUrl = relayUrl;
           events.push(event);
+          pubkeysSet.add(event.pubkey);
         });
 
         sub.on("eose", () => {
+          console.log("PUBKEYS ARE:", pubkeysSet);
           // console.log("EOSE initial latest events from", activeRelay.url);
           const filteredEvents = NostrService.filterBlogEvents(events);
           const feedKey = `latest_${relayUrl}`;
@@ -70,13 +88,14 @@ export default function HomePage() {
           if (filteredEvents.length > 0) {
             setExploreEvents(filteredEvents);
           }
+          if (pubkeysSet.size > 0) {
+            setpubkeys(Array.from(pubkeysSet));
+          }
           sub.unsub();
         });
       }
     }
-  }, [activeRelay]);
 
-  useEffect(() => {
     if (activeRelay) {
       let relayUrl = activeRelay.url.replace("wss://", "");
       let followedAuthors: string[];
@@ -117,6 +136,7 @@ export default function HomePage() {
               // @ts-ignore
               event.relayUrl = relayUrl;
               events.push(event);
+              pubkeysSet.add(event.pubkey);
             });
             sub.on("eose", () => {
               // console.log("EOSE initial latest events from", activeRelay.url);
@@ -124,6 +144,12 @@ export default function HomePage() {
               const feedKey = `following_${relayUrl}`;
               feed[feedKey] = filteredEvents;
               setFeed(feed);
+
+              if (pubkeysSet.size > 0) {
+                // setpubkeys(...pubkeys, [Array.from(pubkeysSet)]);
+                setpubkeys(Array.from(pubkeysSet));
+              }
+
               // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
               if (filteredEvents.length > 0) {
                 setFollowingEvents(filteredEvents);

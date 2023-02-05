@@ -20,7 +20,10 @@ export default function RelayProvider({ children }) {
     console.log("ACTIVE RELAY IS:", activeRelay);
     if (pendingActiveRelayUrl !== "") {
       const relay = relayInit(pendingActiveRelayUrl);
-      relay.connect();
+
+      // if (pendingActiveRelayUrl === relay.url) {
+        relay.connect();
+      // }
 
       relay.on("connect", () => {
         console.log("info", `✅ nostr (${pendingActiveRelayUrl}): Connected!`);
@@ -30,23 +33,31 @@ export default function RelayProvider({ children }) {
           console.log("NEW ACTIVE RELAY IS:", activeRelay);
           setActiveRelay(relay);
         }
-        setIsReady(true);
+        // setIsReady(true);
+        // setPendingActiveRelayUrl("");
       });
 
       relay.on("disconnect", () => {
-        console.log("warn", `🚪 nostr (${pendingActiveRelayUrl}): Connection closed.`);
-        setConnectedRelays((prev) => prev.filter((r) => r.url !== pendingActiveRelayUrl));
-        if (activeRelay === relay.url) {
-          setActiveRelay("");
-        }
+        console.log(
+          "warn",
+          `🚪 nostr (${pendingActiveRelayUrl}): Connection closed.`
+        );
+        setConnectedRelays((prev) =>
+          prev.filter((r) => r.url !== pendingActiveRelayUrl)
+        );
+        // if (activeRelay === relay.url) {
+        //   setActiveRelay("");
+        // }
       });
 
       relay.on("error", () => {
-        console.log("error", `❌ nostr (${pendingActiveRelayUrl}): Connection error!`);
+        console.log(
+          "error",
+          `❌ nostr (${pendingActiveRelayUrl}): Connection error!`
+        );
       });
     }
   }, [pendingActiveRelayUrl]);
-
 
   return (
     <RelayContext.Provider

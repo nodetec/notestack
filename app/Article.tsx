@@ -14,7 +14,6 @@ import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
-import { NostrService } from "./lib/nostr";
 import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
@@ -55,50 +54,12 @@ const Article: FC<NoteProps> = ({
   content = content.replace(markdownImagePattern, "");
 
   // @ts-ignore
-  // const { connectedRelays, activeRelays, isReady } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
-  // const { profiles, setProfiles } = useContext(ProfilesContext);
+  const { profiles } = useContext(ProfilesContext);
 
-  // const [user, setUser] = useState();
-
-  // useEffect(() => {
-  //   // setExploreEvents([]);
-  //   // setFollowingEvents([]);
-  //   let count = 0;
-  //   const eventObj: { [fieldName: string]: any } = {};
-  //   connectedRelays.forEach((relay: Relay) => {
-  //     let sub = relay.sub([
-  //       {
-  //         kinds: [0],
-  //         authors: [event.pubkey],
-  //       },
-  //     ]);
-
-  //     let relayUrl = relay.url.replace("wss://", "");
-  //     eventObj[relayUrl] = [];
-
-  //     sub.on("event", (event: Event) => {
-  //       // console.log("getting event", event, "from relay:", relay.url);
-  //       // @ts-ignore
-  //       event.relayUrl = relayUrl;
-  //       eventObj[relayUrl].push(event);
-  //     });
-
-  //     sub.on("eose", () => {
-  //       count++;
-  //       console.log("EOSE initial latest events from", relay.url);
-  //       if (count === connectedRelays.length) {
-  //         const filteredEvents = NostrService.filterUserEvents(eventObj);
-  //         console.log("FILTERED____EVENTS", filteredEvents);
-  //         if (filteredEvents.length > 0) {
-  //           setUser(filteredEvents[0]);
-  //         }
-  //         console.log("eventObj", eventObj);
-  //       }
-  //       sub.unsub();
-  //     });
-  //   });
-  // }, [isReady]);
+  const [picture, setPicture] = useState(DUMMY_PROFILE_API(event.pubkey));
+  const [name, setName] = useState(shortenHash(npub));
 
   return (
     <article
@@ -112,17 +73,46 @@ const Article: FC<NoteProps> = ({
               <div className="flex items-center gap-2">
                 <Link className="group" href={`u/${npub}`}>
                   <Item className="text-gray-hover">
-                    <img
-                      className="rounded-full w-6 h-6 object-cover"
-                      // src={data?.picture || DUMMY_PROFILE_API(npub)}
-                      // alt={data?.name}
-                      src={DUMMY_PROFILE_API(npub)}
-                      alt={shortenHash(npub)}
-                    />
-                    <span className="group-hover:underline">
-                      {/* {data?.name || shortenHash(npub)!} */}
-                      {shortenHash(npub)!}
-                    </span>
+                    {activeRelay &&
+                    profiles[
+                      `profile_${activeRelay.url.replace("wss://", "")}_${
+                        event.pubkey
+                      }`
+                    ] ? (
+                      <>
+                        <img
+                          className="rounded-full w-6 h-6 object-cover"
+                          src={
+                            profiles[
+                              `profile_${activeRelay.url.replace(
+                                "wss://",
+                                ""
+                              )}_${event.pubkey}`
+                            ].picture || DUMMY_PROFILE_API(event.pubkey)
+                          }
+                          alt={""}
+                        />
+                        <span className="group-hover:underline">
+                          {
+                            profiles[
+                              `profile_${activeRelay.url.replace(
+                                "wss://",
+                                ""
+                              )}_${event.pubkey}`
+                            ].name
+                          }
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <img
+                          className="rounded-full w-6 h-6 object-cover"
+                          src={picture}
+                          alt={""}
+                        />
+                        <span className="group-hover:underline">{name}</span>
+                      </>
+                    )}
                   </Item>
                 </Link>
                 <span>·</span>
