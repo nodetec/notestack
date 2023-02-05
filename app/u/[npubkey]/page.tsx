@@ -6,7 +6,7 @@ import BlogFeed from "@/app/BlogFeed";
 import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
 import { shortenHash } from "@/app/lib/utils";
-import type { Event, Relay } from "nostr-tools";
+import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,8 @@ import AuthorTooltip from "@/app/AuthorTooltip";
 import { NostrService } from "@/app/lib/nostr";
 import { RelayContext } from "@/app/context/relay-provider";
 import FollowedRelays from "@/app/FollowedRelays";
+import { FeedContext } from "@/app/context/feed-provider";
+import { ProfilesContext } from "@/app/context/profiles-provider";
 
 export default function ProfilePage() {
   const [profileInfo, setProfileInfo] = useState({
@@ -27,9 +29,12 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
   const [events, setEvents] = useState<Event[]>([]);
-  const [contactEvents, setContactEvents] = useState<Event[]>([]);
   // @ts-ignore
-  const { connectedRelays, activeRelays } = useContext(RelayContext);
+  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+  // @ts-ignore
+  const { feed, setFeed } = useContext(FeedContext);
+  // @ts-ignore
+  const { setpubkeys } = useContext(ProfilesContext);
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
@@ -43,77 +48,49 @@ export default function ProfilePage() {
 
     useEffect(() => {
       window.scrollTo(0, 0);
-
-      if (events.length === 0) {
-        const profileEventsString = sessionStorage.getItem(
-          profilePubkey + "_events"
-        );
-        if (profileEventsString) {
-          const cachedEvents = JSON.parse(profileEventsString);
-          setEvents(cachedEvents);
-          console.log("using cached events for user:", npub);
-        }
-      }
     }, []);
 
     useEffect(() => {
-      const profileEventsString = sessionStorage.getItem(
-        profilePubkey + "_events"
-      );
-      if (!profileEventsString && events.length === 0) {
-        const eventsSeen: { [k: string]: boolean } = {};
-        let eventArray: Event[] = [];
-        connectedRelays.forEach((relay: Relay) => {
-          let sub = relay.sub([filter]);
+      let pubkeysSet = new Set<string>();
+
+      if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
+        setEvents([]);
+        let relayUrl = activeRelay.url.replace("wss://", "");
+        let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
+
+        if (feed[feedKey]) {
+          setEvents(feed[feedKey]);
+        } else {
+          console.log("Getting events from relay");
+          let sub = activeRelay.sub([filter]);
+
+          let events: Event[] = [];
+
           sub.on("event", (event: Event) => {
-            if (!eventsSeen[event.id!]) {
-              eventArray.push(event);
-            }
-            eventsSeen[event.id!] = true;
+            // console.log("getting event", event, "from relay:", relay.url);
+            // @ts-ignore
+            event.relayUrl = relayUrl;
+            events.push(event);
+            pubkeysSet.add(event.pubkey);
           });
+
           sub.on("eose", () => {
-            console.log("EOSE initial latest profile events from", relay.url);
-            const filteredEvents = NostrService.filterBlogEvents(eventArray);
+            const filteredEvents = NostrService.filterBlogEvents(events);
+            feed[feedKey] = filteredEvents;
+            setFeed(feed);
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
-              const eventsString = JSON.stringify(filteredEvents);
-              sessionStorage.setItem(profilePubkey + "_events", eventsString);
+            } else {
+              setEvents([]);
+            }
+            if (pubkeysSet.size > 0) {
+              setpubkeys(Array.from(pubkeysSet));
             }
             sub.unsub();
           });
-        });
+        }
       }
-
-      const authors: any = [profilePubkey];
-      const eventsSeen: { [k: string]: boolean } = {};
-      let eventArray: Event[] = [];
-      connectedRelays.forEach((relay: Relay) => {
-        let sub = relay.sub([
-          {
-            kinds: [3],
-            authors,
-            limit: 5,
-          },
-        ]);
-        sub.on("event", (event: Event) => {
-          if (!eventsSeen[event.id!]) {
-            eventArray.push(event);
-          }
-          eventsSeen[event.id!] = true;
-        });
-        sub.on("eose", () => {
-          console.log("EOSE initial latest profile events from", relay.url);
-          const filteredEvents = NostrService.filterBlogEvents(eventArray);
-          if (filteredEvents.length > 0) {
-            setContactEvents(filteredEvents);
-            console.log("CONTACT EVENTS:", filteredEvents);
-            const eventsString = JSON.stringify(filteredEvents);
-            sessionStorage.setItem(profilePubkey + "_events", eventsString);
-          }
-          sub.unsub();
-        });
-      });
-    }, [activeRelays]);
+    }, [activeRelay]);
 
     return (
       <Main>
