@@ -64,12 +64,12 @@ export default function Contacts({ userContacts, npub }: any) {
               />
             ))}
       </ul>
-      <Link
-        href={`/${npub}/following`}
-        className="text-gray hover:text-gray-hover text-xs"
-      >
-        See all ({followingsCount})
-      </Link>
+      {/* <Link */}
+      {/*   href={`/${npub}/following`} */}
+      {/*   className="text-gray hover:text-gray-hover text-xs" */}
+      {/* > */}
+      {/*   See all ({followingsCount}) */}
+      {/* </Link> */}
     </div>
   );
 }

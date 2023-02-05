@@ -150,13 +150,14 @@ export default function UserCard({
         <span>{name}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
-      <Link
-        className="text-base text-gray hover:text-gray-hover my-2"
-        href={`/u/${npub}`}
+      <div
+        // className="text-base text-gray hover:text-gray-hover my-2"
+        className="text-base text-gray my-2"
+        // href={`/u/${npub}`}
       >
         {followers && followers.length > 100 ? "100+" : followers.length}{" "}
         Followers
-      </Link>
+      </div>
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">
