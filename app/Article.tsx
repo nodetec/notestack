@@ -55,50 +55,50 @@ const Article: FC<NoteProps> = ({
   content = content.replace(markdownImagePattern, "");
 
   // @ts-ignore
-  const { connectedRelays, activeRelays, isReady } = useContext(RelayContext);
+  // const { connectedRelays, activeRelays, isReady } = useContext(RelayContext);
   // @ts-ignore
-  const { profiles, setProfiles } = useContext(ProfilesContext);
+  // const { profiles, setProfiles } = useContext(ProfilesContext);
 
-  const [user, setUser] = useState();
+  // const [user, setUser] = useState();
 
-  useEffect(() => {
-    // setExploreEvents([]);
-    // setFollowingEvents([]);
-    let count = 0;
-    const eventObj: { [fieldName: string]: any } = {};
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
-        {
-          kinds: [0],
-          authors: [event.pubkey],
-        },
-      ]);
+  // useEffect(() => {
+  //   // setExploreEvents([]);
+  //   // setFollowingEvents([]);
+  //   let count = 0;
+  //   const eventObj: { [fieldName: string]: any } = {};
+  //   connectedRelays.forEach((relay: Relay) => {
+  //     let sub = relay.sub([
+  //       {
+  //         kinds: [0],
+  //         authors: [event.pubkey],
+  //       },
+  //     ]);
 
-      let relayUrl = relay.url.replace("wss://", "");
-      eventObj[relayUrl] = [];
+  //     let relayUrl = relay.url.replace("wss://", "");
+  //     eventObj[relayUrl] = [];
 
-      sub.on("event", (event: Event) => {
-        // console.log("getting event", event, "from relay:", relay.url);
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        eventObj[relayUrl].push(event);
-      });
+  //     sub.on("event", (event: Event) => {
+  //       // console.log("getting event", event, "from relay:", relay.url);
+  //       // @ts-ignore
+  //       event.relayUrl = relayUrl;
+  //       eventObj[relayUrl].push(event);
+  //     });
 
-      sub.on("eose", () => {
-        count++;
-        console.log("EOSE initial latest events from", relay.url);
-        if (count === connectedRelays.length) {
-          const filteredEvents = NostrService.filterUserEvents(eventObj);
-          console.log("FILTERED____EVENTS", filteredEvents);
-          if (filteredEvents.length > 0) {
-            setUser(filteredEvents[0]);
-          }
-          console.log("eventObj", eventObj);
-        }
-        sub.unsub();
-      });
-    });
-  }, [isReady]);
+  //     sub.on("eose", () => {
+  //       count++;
+  //       console.log("EOSE initial latest events from", relay.url);
+  //       if (count === connectedRelays.length) {
+  //         const filteredEvents = NostrService.filterUserEvents(eventObj);
+  //         console.log("FILTERED____EVENTS", filteredEvents);
+  //         if (filteredEvents.length > 0) {
+  //           setUser(filteredEvents[0]);
+  //         }
+  //         console.log("eventObj", eventObj);
+  //       }
+  //       sub.unsub();
+  //     });
+  //   });
+  // }, [isReady]);
 
   return (
     <article

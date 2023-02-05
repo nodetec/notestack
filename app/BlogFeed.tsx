@@ -1,5 +1,5 @@
 "use client";
-import type { Event, Relay } from "nostr-tools";
+import type { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Article from "./Article";
 import { RelayContext } from "./context/relay-provider";
@@ -10,7 +10,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
   const [addedPosts, setAddedPosts] = useState<number>(10);
 
   // @ts-ignore
-  const { connectedRelays, activeRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   // fetch initial 100 events for filter
   useEffect(() => {
@@ -18,36 +18,30 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
       const currentEvents = events;
 
       if (events.length > 0) {
-        const lastEvent = events.slice(-1)[0];
+        if (activeRelay) {
+          let relayUrl = activeRelay.url.replace("wss://", "");
+          const lastEvent = currentEvents.slice(-1)[0];
+          let events: Event[] = [];
 
-        let count = 0;
-        const eventObj: { [fieldName: string]: any } = {};
-
-        connectedRelays.forEach((relay: Relay) => {
           filter.until = lastEvent.created_at;
-          let sub = relay.sub([filter]);
-          let relayUrl = relay.url.replace("wss://", "");
-          eventObj[relayUrl] = [];
+          let sub = activeRelay.sub([filter]);
+
           sub.on("event", (event: Event) => {
+            // console.log("getting event", event, "from relay:", relay.url);
             // @ts-ignore
             event.relayUrl = relayUrl;
-            eventObj[relayUrl].push(event);
+            events.push(event);
           });
           sub.on("eose", () => {
-            console.log("EOSE additional events from", relay.url);
-
-            const allValues = Object.values(eventObj).reduce(
-              (acc, value) => acc.concat(value),
-              []
-            );
-            const concatEvents = currentEvents.concat(allValues);
+            console.log("EOSE initial latest events from", activeRelay.url);
+            const concatEvents = currentEvents.concat(events);
             const filteredEvents = NostrService.filterBlogEvents(concatEvents);
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
             }
             sub.unsub();
           });
-        });
+        }
       }
     }
   }, [addedPosts]);

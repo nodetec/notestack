@@ -9,81 +9,58 @@ export const RelayContext = createContext({});
 
 export default function RelayProvider({ children }) {
   const [allRelays, setAllRelays] = useState(RELAYS);
-  const [activeRelays, setActiveRelays] = useState([RELAYS[0]]);
-  const [inactiveRelays, setInactiveRelays] = useState(RELAYS.slice(1));
+  const [pendingActiveRelayUrl, setPendingActiveRelayUrl] = useState(RELAYS[0]);
+  const [activeRelay, setActiveRelay] = useState();
   const [connectedRelays, setConnectedRelays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    console.log("ACTIVE RELAYS ARE:", activeRelays);
-    activeRelays.forEach(async (relayUrl) => {
-      const relay = relayInit(relayUrl);
+    console.log("PENDING ACTIVE RELAY IS:", pendingActiveRelayUrl);
+    console.log("ACTIVE RELAY IS:", activeRelay);
+    if (pendingActiveRelayUrl !== "") {
+      const relay = relayInit(pendingActiveRelayUrl);
       relay.connect();
-      if (inactiveRelays.includes(relay.url)) {
-        // relay.close();
-        setInactiveRelays(...inactiveRelays, relay.url);
-      }
 
-      // if (!inactiveRelays.includes(relay.url)) {
       relay.on("connect", () => {
-        console.log("info", `✅ nostr (${relayUrl}): Connected!`);
+        console.log("info", `✅ nostr (${pendingActiveRelayUrl}): Connected!`);
         setIsLoading(false);
         setConnectedRelays((prev) => uniqBy([...prev, relay], "url"));
-        // activeRelays.forEach(activeRelay => {
-
-        // })
+        if (pendingActiveRelayUrl === relay.url) {
+          setActiveRelay(relay);
+        }
+        setIsReady(true);
       });
 
       relay.on("disconnect", () => {
-        console.log("warn", `🚪 nostr (${relayUrl}): Connection closed.`);
-        setConnectedRelays((prev) => prev.filter((r) => r.url !== relayUrl));
-        setActiveRelays((prev) => prev.filter((r) => r !== relayUrl));
-        setInactiveRelays([...inactiveRelays, relayUrl]);
-        setIsReady(false);
+        console.log("warn", `🚪 nostr (${pendingActiveRelayUrl}): Connection closed.`);
+        setConnectedRelays((prev) => prev.filter((r) => r.url !== pendingActiveRelayUrl));
+        if (activeRelay === relay.url) {
+          setActiveRelay("");
+        }
       });
 
       relay.on("error", () => {
-        console.log("error", `❌ nostr (${relayUrl}): Connection error!`);
+        console.log("error", `❌ nostr (${pendingActiveRelayUrl}): Connection error!`);
       });
-      // }
-    });
-  }, [activeRelays]);
-
-  useEffect(() => {
-    if (
-      connectedRelays.length === activeRelays.length &&
-      connectedRelays.length !== 0
-    ) {
-      console.log("WE'RE READY TO GO");
-      console.log("CONNECTED RELAYS ARE:", connectedRelays);
-      console.log("ACTIVE RELAYS ARE:", activeRelays);
-      setIsReady(true);
     }
-  }, [connectedRelays, activeRelays]);
+  }, [pendingActiveRelayUrl]);
 
-  useEffect(() => {
-    console.log("INACTIVE RELAYS ARE:", inactiveRelays);
-    let prunedConnectedRelays = connectedRelays.filter((connectedRelay) => {
-      return inactiveRelays.includes(connectedRelay);
-    });
-    setConnectedRelays(prunedConnectedRelays);
-  }, [inactiveRelays]);
 
   return (
     <RelayContext.Provider
       value={{
         allRelays,
         setAllRelays,
-        activeRelays,
-        setActiveRelays,
-        inactiveRelays,
-        setInactiveRelays,
+        activeRelay,
+        setActiveRelay,
         connectedRelays,
         setConnectedRelays,
         isLoading,
         isReady,
         setIsReady,
+        pendingActiveRelayUrl,
+        setPendingActiveRelayUrl,
       }}
     >
       {children}

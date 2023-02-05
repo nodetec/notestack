@@ -159,12 +159,7 @@ export namespace NostrService {
     return filteredEvents;
   }
 
-  export function filterBlogEvents(eventObj: { [fieldName: string]: any }) {
-    const eventArray = Object.values(eventObj).reduce(
-      (acc, value) => acc.concat(value),
-      []
-    );
-
+  export function filterBlogEvents(eventArray: Event[]) {
     const filteredEvents = eventArray.filter((e1: Event, index: number) => {
       if (e1.content === "") {
         return false;

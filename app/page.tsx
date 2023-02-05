@@ -25,144 +25,42 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
-  const TABS = ["Explore", "Following"];
+  // const TABS = ["Explore", "Following"];
+  const TABS = ["Explore"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
-  const { connectedRelays, activeRelays, isReady } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    // if (followingEvents.length === 0) {
-    //   const followingEventsString = sessionStorage.getItem(
-    //     "latest_following_events"
-    //   );
-    //   if (followingEventsString) {
-    //     const cachedEvents = JSON.parse(followingEventsString);
-    //     setFollowingEvents(cachedEvents);
-    //     console.log("using cached latest following events");
-    //   }
-    // }
   }, []);
 
   useEffect(() => {
-    // setExploreEvents([]);
-    // setFollowingEvents([]);
-    let count = 0;
-    const eventObj: { [fieldName: string]: any } = {};
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([exploreFilter]);
+    if (activeRelay) {
+      let sub = activeRelay.sub([exploreFilter]);
 
-      let relayUrl = relay.url.replace("wss://", "");
-      eventObj[relayUrl] = [];
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      let events: Event[] = [];
 
-      const cachedLatestEventsString = sessionStorage.getItem(
-        `latest_events_${relayUrl}`
-      );
-
-      if (cachedLatestEventsString) {
-        console.log("USING THE CACHE");
-        count++;
-        const cachedEvents = JSON.parse(cachedLatestEventsString);
-        eventObj[relayUrl] = cachedEvents;
-        console.log("cachedEvents are:", cachedEvents);
-        console.log("using cached latest events for:" + relayUrl);
-
-        if (count === connectedRelays.length) {
-          const filteredEvents = NostrService.filterBlogEvents(eventObj);
-          console.log("FILTERED____EVENTS", filteredEvents);
-          if (filteredEvents.length > 0) {
-            setExploreEvents(filteredEvents);
-          }
-          console.log("eventObj", eventObj);
-        }
-      } else {
-        sub.on("event", (event: Event) => {
-          // console.log("getting event", event, "from relay:", relay.url);
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          eventObj[relayUrl].push(event);
-        });
-
-        sub.on("eose", () => {
-          const eventsString = JSON.stringify(eventObj[relayUrl]);
-          if (eventsString.length > 0) {
-            sessionStorage.setItem(`latest_events_${relayUrl}`, eventsString);
-          }
-          count++;
-          console.log("EOSE initial latest events from", relay.url);
-          if (count === connectedRelays.length) {
-            const filteredEvents = NostrService.filterBlogEvents(eventObj);
-            console.log("FILTERED____EVENTS", filteredEvents);
-            if (filteredEvents.length > 0) {
-              setExploreEvents(filteredEvents);
-            }
-            console.log("eventObj", eventObj);
-          }
-          sub.unsub();
-        });
-      }
-    });
-
-    // const followingEventsString = sessionStorage.getItem("latest_events");
-    let followedAuthors: string[];
-
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
-        {
-          authors: [loggedInUserKeys.publicKey],
-          kinds: [3],
-          limit: 50,
-        },
-      ]);
       sub.on("event", (event: Event) => {
-        // TODO: we could go through each event and add each lis of followers to a set, but for now we'll just use one
-        followedAuthors = event.tags.map((pair: string[]) => pair[1]);
+        // console.log("getting event", event, "from relay:", relay.url);
+        // @ts-ignore
+        event.relayUrl = relayUrl;
+        events.push(event);
       });
+
       sub.on("eose", () => {
-        console.log("EOSE top 50 followed users from", relay.url);
-        const newfollowingFilter = {
-          kinds: [2222],
-          limit: 50,
-          authors: followedAuthors,
-          until: undefined,
-        };
-
-        setFollowingFilter(newfollowingFilter);
-        // if (!followingEventsString && followingEvents.length === 0) {
-        let count = 0;
-        const eventObj: { [fieldName: string]: any } = {};
-        connectedRelays.forEach((relay: Relay) => {
-          let sub = relay.sub([newfollowingFilter]);
-
-          let relayUrl = relay.url.replace("wss://", "");
-          eventObj[relayUrl] = [];
-
-          sub.on("event", (event: Event) => {
-            // @ts-ignore
-            event.relayUrl = relayUrl;
-            eventObj[relayUrl].push(event);
-          });
-          sub.on("eose", () => {
-            count++;
-
-            console.log("EOSE initial latest events from", relay.url);
-            if (count === connectedRelays.length) {
-              const filteredEvents = NostrService.filterBlogEvents(eventObj);
-              console.log("FILTERED____EVENTS", filteredEvents);
-              if (filteredEvents.length > 0) {
-                setFollowingEvents(filteredEvents);
-              }
-              console.log("eventObj", eventObj);
-            }
-            sub.unsub();
-          });
-        });
+        console.log("EOSE initial latest events from", activeRelay.url);
+        const filteredEvents = NostrService.filterBlogEvents(events);
+        console.log("FILTERED____EVENTS", filteredEvents);
+        if (filteredEvents.length > 0) {
+          setExploreEvents(filteredEvents);
+        }
         sub.unsub();
       });
-    });
-  }, [isReady]);
+    }
+  }, [activeRelay]);
 
   return (
     <Main>
@@ -182,14 +80,14 @@ export default function HomePage() {
             profile={true}
           />
         )}
-        {activeTab === "Following" && (
-          <BlogFeed
-            events={followingEvents}
-            setEvents={setFollowingEvents}
-            filter={followingFilter}
-            profile={true}
-          />
-        )}
+        {/* {activeTab === "Following" && ( */}
+        {/*   <BlogFeed */}
+        {/*     events={followingEvents} */}
+        {/*     setEvents={setFollowingEvents} */}
+        {/*     filter={followingFilter} */}
+        {/*     profile={true} */}
+        {/*   /> */}
+        {/* )} */}
       </Content>
       <Aside>
         <RecommendedEvents
