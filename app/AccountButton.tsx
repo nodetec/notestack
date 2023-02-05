@@ -15,43 +15,58 @@ interface AccountButtonProps {
 export default function AccountButton({ pubkey }: AccountButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [picture, setPicture] = useState(DUMMY_PROFILE_API(pubkey));
+  const [account, setAccount] = useState();
 
   // @ts-ignore
-  const { setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
 
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
   useEffect(() => {
     if (activeRelay) {
-      let sub = activeRelay.sub([
-        {
-          kinds: [0],
-          authors: [pubkey],
-        },
-      ]);
       let relayUrl = activeRelay.url.replace("wss://", "");
-      let events: Event[] = [];
 
-      sub.on("event", (event: Event) => {
-        console.log("DO WE GET HERE?");
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
-      });
-
-      sub.on("eose", () => {
-        if (events.length !== 0) {
-          const profileMetadata = events[0];
-          setUser(profileMetadata);
-          const content = events[0].content;
-          if (content) {
-            const contentObj = JSON.parse(content);
+      let userKey = `user_${relayUrl}`;
+      if (user[userKey]) {
+        console.log("Cached events from context");
+        const content = user[userKey].content;
+        if (content) {
+          const contentObj = JSON.parse(content);
+          if (contentObj.picture) {
             setPicture(contentObj.picture);
           }
         }
-        sub.unsub();
-      });
+      } else {
+        let sub = activeRelay.sub([
+          {
+            kinds: [0],
+            authors: [pubkey],
+          },
+        ]);
+        let events: Event[] = [];
+
+        sub.on("event", (event: Event) => {
+          // @ts-ignore
+          event.relayUrl = relayUrl;
+          events.push(event);
+        });
+
+        sub.on("eose", () => {
+          if (events.length !== 0) {
+            const profileMetadata = events[0];
+            setUser(profileMetadata);
+            const content = events[0].content;
+            if (content) {
+              const contentObj = JSON.parse(content);
+              if (contentObj.picture) {
+                setPicture(contentObj.picture);
+              }
+            }
+          }
+          sub.unsub();
+        });
+      }
     }
   }, [activeRelay]);
 
