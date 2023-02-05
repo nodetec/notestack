@@ -10,7 +10,7 @@ import { UserContext } from "@/app/context/user-provider";
 import { RelayContext } from "@/app/context/relay-provider";
 import Followers from "./Followers";
 import LightningTip from "@/app/LightningTip";
-import { nip19 } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
@@ -24,8 +24,11 @@ export default function UserCard({ npub }: any) {
   // @ts-ignore
   const { user } = useContext(UserContext);
 
+  const [loggedInPubkey, setLoggedInPubkey] = useState<string>();
+  const [profilePubkey, setProfilePubkey] = useState<string>();
+
   // @ts-ignore
-  const { profiles, pubkeys, setpubkeys } = useContext(ProfilesContext);
+  const { profiles, setProfiles } = useContext(ProfilesContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
@@ -40,31 +43,12 @@ export default function UserCard({ npub }: any) {
   // if we don't look up the user
 
   useEffect(() => {
-    // if (!activeRelay) return;
-    // if (!user) return;
-    // let relayUrl = activeRelay.url.replace("wss://", "");
-    // if (!user[`user_${relayUrl}`]) return;
-    // const cachedUser = user[`user_${relayUrl}`];
-    // if (!cachedUser) return;
-    // console.log("FROM PROFILE: cachedUser", cachedUser);
-    // const profilePubkey = nip19.decode(npub).data.valueOf();
-    // if (profilePubkey === cachedUser.pubkey) {
-    //   const cachedUserContent = JSON.parse(cachedUser.content);
-    //   setName(cachedUserContent.name);
-    //   setAbout(cachedUserContent.about);
-    //   setPicture(cachedUserContent.picture);
-    //   setNip05(cachedUserContent.nip05);
-    //   setLud06(cachedUserContent.lud06);
-    //   setLud16(cachedUserContent.lud16);
-    // }
-
     if (!activeRelay) return;
-    if (!profiles) return;
-    const profilePubkey = nip19.decode(npub).data.valueOf();
+    const profilePubkey = nip19.decode(npub).data.toString();
+    setProfilePubkey(profilePubkey);
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
     if (cachedProfile) {
-      console.log("GETTING PROFILE FROM CACHE", cachedProfile);
       // const cachedUserContent = JSON.parse(cachedUser.content);
       setName(cachedProfile.name);
       setAbout(cachedProfile.about);
@@ -72,21 +56,66 @@ export default function UserCard({ npub }: any) {
       if (cachedProfile.picture) {
         setPicture(cachedProfile.picture);
       } else {
-        setPicture(DUMMY_PROFILE_API(profilePubkey.toString()));
+        setPicture(DUMMY_PROFILE_API(profilePubkey));
       }
       setNip05(cachedProfile.nip05);
       setLud06(cachedProfile.lud06);
       setLud16(cachedProfile.lud16);
     } else {
-      setpubkeys([...pubkeys, profilePubkey]);
       setName("");
       setAbout("");
-      setPicture(DUMMY_PROFILE_API(profilePubkey.toString()));
+      if ("") {
+        setPicture("");
+      } else {
+        setPicture(DUMMY_PROFILE_API(profilePubkey));
+      }
       setNip05("");
       setLud06("");
       setLud16("");
+      let sub = activeRelay.sub([
+        {
+          kinds: [0],
+          authors: [profilePubkey],
+        },
+      ]);
+      let events: Event[] = [];
+      sub.on("event", (event: Event) => {
+        // @ts-ignore
+        event.relayUrl = relayUrl;
+        events.push(event);
+      });
+      sub.on("eose", () => {
+        if (events.length !== 0) {
+          let event = events[0];
+          let profileKey = `profile_${relayUrl}_${event.pubkey}`;
+          const contentObj = JSON.parse(event.content);
+          setName(contentObj.name);
+          setAbout(contentObj.about);
+          if (contentObj.picture) {
+            setPicture(contentObj.picture);
+          } else {
+            setPicture(DUMMY_PROFILE_API(profilePubkey));
+          }
+          setNip05(contentObj.nip05);
+          setLud06(contentObj.lud06);
+          setLud16(contentObj.lud16);
+          profiles[profileKey] = contentObj;
+          setProfiles(profiles);
+        }
+        sub.unsub();
+      });
     }
-  }, [profiles, activeRelay]);
+  }, [activeRelay]);
+
+  useEffect(() => {
+    if (!activeRelay) return;
+    if (!user) return;
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    if (!user[`user_${relayUrl}`]) return;
+    const cachedUser = user[`user_${relayUrl}`];
+    if (!cachedUser) return;
+    setLoggedInPubkey(cachedUser.pubkey);
+  }, [activeRelay]);
 
   const handleClick = async () => {
     setIsOpen(!isOpen);
@@ -126,37 +155,37 @@ export default function UserCard({ npub }: any) {
         )}
       </div>
       <p className="text-sm mb-4 text-gray">{about}</p>
-      {/* {loggedInPubkey && */}
-      {/*   (loggedInPubkey === profilePubkey ? ( */}
-      {/*     <Buttons> */}
-      {/*       <Button */}
-      {/*         color="green" */}
-      {/*         variant="ghost" */}
-      {/*         onClick={handleClick} */}
-      {/*         size="xs" */}
-      {/*       > */}
-      {/*         Edit profile */}
-      {/*       </Button> */}
-      {/*     </Buttons> */}
-      {/*   ) : ( */}
-      {/*     <div className="flex items-center gap-2"> */}
-      {/*       <FollowButton */}
-      {/*         loggedInUserPublicKey={loggedInPubkey} */}
-      {/*         currentContacts={loggedInContactList} */}
-      {/*         profilePublicKey={profilePubkey} */}
-      {/*         contacts={contacts} */}
-      {/*       /> */}
-      {/*       {(lud06 || lud16) && ( */}
-      {/*         <Button */}
-      {/*           color="red" */}
-      {/*           variant="solid" */}
-      {/*           onClick={handleTipClick} */}
-      {/*           icon={<BsLightningChargeFill />} */}
-      {/*           title="tip" */}
-      {/*         /> */}
-      {/*       )} */}
-      {/*     </div> */}
-      {/*   ))} */}
+      {loggedInPubkey &&
+        (loggedInPubkey === profilePubkey ? (
+          <Buttons>
+            <Button
+              color="green"
+              variant="ghost"
+              onClick={handleClick}
+              size="xs"
+            >
+              Edit profile
+            </Button>
+          </Buttons>
+        ) : (
+          <div className="flex items-center gap-2">
+            <FollowButton
+            // loggedInUserPublicKey={loggedInPubkey}
+            // currentContacts={loggedInContactList}
+            // profilePublicKey={profilePubkey}
+            // contacts={contacts}
+            />
+            {(lud06 || lud16) && (
+              <Button
+                color="red"
+                variant="solid"
+                onClick={handleTipClick}
+                icon={<BsLightningChargeFill />}
+                title="tip"
+              />
+            )}
+          </div>
+        ))}
       {/* {loggedInPubkey === profilePubkey ? ( */}
       {/*   <AccountSettings */}
       {/*     name={name} */}
