@@ -6,17 +6,20 @@ import BlogProvider from "./blog-provider.jsx";
 import UserProvider from "./user-provider.jsx";
 import NotifyProvider from "./notify-provider";
 import ProfilesProvider from "./profiles-provider";
+import FeedProvider from "./feed-provider";
 
 export default function Providers({ children }) {
   return (
     <RelayProvider>
       <BlogProvider>
         <UserProvider>
-          <ProfilesProvider>
-            <NotifyProvider>
-              <KeysProvider>{children}</KeysProvider>
-            </NotifyProvider>
-          </ProfilesProvider>
+          <FeedProvider>
+            <ProfilesProvider>
+              <NotifyProvider>
+                <KeysProvider>{children}</KeysProvider>
+              </NotifyProvider>
+            </ProfilesProvider>
+          </FeedProvider>
         </UserProvider>
       </BlogProvider>
     </RelayProvider>

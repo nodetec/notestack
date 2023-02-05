@@ -27,6 +27,7 @@ export default function RelayProvider({ children }) {
         setIsLoading(false);
         setConnectedRelays((prev) => uniqBy([...prev, relay], "url"));
         if (pendingActiveRelayUrl === relay.url) {
+          console.log("NEW ACTIVE RELAY IS:", activeRelay);
           setActiveRelay(relay);
         }
         setIsReady(true);

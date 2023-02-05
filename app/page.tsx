@@ -12,6 +12,7 @@ import Tabs from "./Tabs";
 import { NostrService } from "./lib/nostr";
 import { RelayContext } from "./context/relay-provider";
 import FollowedRelays from "./FollowedRelays";
+import { FeedContext } from "./context/feed-provider";
 
 export default function HomePage() {
   // @ts-ignore
@@ -25,12 +26,14 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
-  // const TABS = ["Explore", "Following"];
-  const TABS = ["Explore"];
+  const TABS = ["Explore", "Following"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
+
+  // @ts-ignore
+  const { feed, setFeed } = useContext(FeedContext);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -38,26 +41,107 @@ export default function HomePage() {
 
   useEffect(() => {
     if (activeRelay) {
-      let sub = activeRelay.sub([exploreFilter]);
-
+      console.log("is there some feed stuff:", feed);
       let relayUrl = activeRelay.url.replace("wss://", "");
-      let events: Event[] = [];
+      let feedKey = `latest_${relayUrl}`;
 
-      sub.on("event", (event: Event) => {
-        // console.log("getting event", event, "from relay:", relay.url);
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
+      if (feed[feedKey]) {
+        console.log("Cached events from context");
+        setExploreEvents(feed[feedKey]);
+      } else {
+        console.log("Getting events from relay");
+        let sub = activeRelay.sub([exploreFilter]);
+
+        let events: Event[] = [];
+
+        sub.on("event", (event: Event) => {
+          // console.log("getting event", event, "from relay:", relay.url);
+          // @ts-ignore
+          event.relayUrl = relayUrl;
+          events.push(event);
+        });
+
+        sub.on("eose", () => {
+          // console.log("EOSE initial latest events from", activeRelay.url);
+          const filteredEvents = NostrService.filterBlogEvents(events);
+          const feedKey = `latest_${relayUrl}`;
+          feed[feedKey] = filteredEvents;
+          setFeed(feed);
+          // console.log("FILTERED____EVENTS", filteredEvents);
+          if (filteredEvents.length > 0) {
+            setExploreEvents(filteredEvents);
+          }
+          sub.unsub();
+        });
+      }
+    }
+  }, [activeRelay]);
+
+  useEffect(() => {
+    if (activeRelay) {
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      let followedAuthors: string[];
+
+      let follow_sub = activeRelay.sub([
+        {
+          authors: [loggedInUserKeys.publicKey],
+          kinds: [3],
+          limit: 50,
+        },
+      ]);
+      follow_sub.on("event", (event: Event) => {
+        console.log(
+          "YOU ARE FOLLOWING: getting event",
+          event,
+          "from relay:",
+          activeRelay.url
+        );
+        followedAuthors = event.tags.map((pair: string[]) => pair[1]);
       });
 
-      sub.on("eose", () => {
-        console.log("EOSE initial latest events from", activeRelay.url);
-        const filteredEvents = NostrService.filterBlogEvents(events);
-        console.log("FILTERED____EVENTS", filteredEvents);
-        if (filteredEvents.length > 0) {
-          setExploreEvents(filteredEvents);
+      follow_sub.on("eose", () => {
+        // console.log("EOSE top 50 followed users from", activeRelay.url);
+        if (followedAuthors) {
+          const newfollowingFilter = {
+            kinds: [2222],
+            limit: 50,
+            authors: followedAuthors,
+            until: undefined,
+          };
+
+          setFollowingFilter(newfollowingFilter);
+
+          let followingFeedKey = `following_${relayUrl}`;
+          if (feed[followingFeedKey]) {
+            console.log("Cached events from context");
+            setFollowingEvents(feed[followingFeedKey]);
+          } else {
+            let sub = activeRelay.sub([newfollowingFilter]);
+            // console.log("SUBSCRIBING TO FOLLOWING FILTER", newfollowingFilter);
+            let events: Event[] = [];
+            sub.on("event", (event: Event) => {
+              // console.log("FOLLOWING: getting event", event, "from relay:", activeRelay.url);
+              // @ts-ignore
+              event.relayUrl = relayUrl;
+              events.push(event);
+            });
+            sub.on("eose", () => {
+              // console.log("EOSE initial latest events from", activeRelay.url);
+              const filteredEvents = NostrService.filterBlogEvents(events);
+              const feedKey = `following_${relayUrl}`;
+              feed[feedKey] = filteredEvents;
+              setFeed(feed);
+              // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
+              if (filteredEvents.length > 0) {
+                setFollowingEvents(filteredEvents);
+              }
+              sub.unsub();
+            });
+          }
+        } else {
+          setFollowingEvents([]);
         }
-        sub.unsub();
+        follow_sub.unsub();
       });
     }
   }, [activeRelay]);
@@ -80,14 +164,14 @@ export default function HomePage() {
             profile={true}
           />
         )}
-        {/* {activeTab === "Following" && ( */}
-        {/*   <BlogFeed */}
-        {/*     events={followingEvents} */}
-        {/*     setEvents={setFollowingEvents} */}
-        {/*     filter={followingFilter} */}
-        {/*     profile={true} */}
-        {/*   /> */}
-        {/* )} */}
+        {activeTab === "Following" && (
+          <BlogFeed
+            events={followingEvents}
+            setEvents={setFollowingEvents}
+            filter={followingFilter}
+            profile={true}
+          />
+        )}
       </Content>
       <Aside>
         <RecommendedEvents
