@@ -54,8 +54,15 @@ export default function UserCard({
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    setLoggedInPubkey(user.pubkey);
-  }, [user, isOpen]);
+    console.log("USER PUBLIC KEY:", user.pubkey);
+    console.log("USER!!!!! :", user);
+
+    if (!activeRelay) return;
+    if (!user) return;
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    if (!user[`user_${relayUrl}`]) return;
+    setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
+  }, [user, isOpen, activeRelay]);
 
   // TODO: implement caching
   useEffect(() => {

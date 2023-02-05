@@ -2,7 +2,6 @@
 
 import { RelayContext } from "@/app/context/relay-provider";
 import { NostrService } from "@/app/lib/nostr";
-import { Relay } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
 
@@ -13,6 +12,7 @@ export default function FollowButton({
   contacts,
 }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followButtonText, setFollowButtonText] = useState("Follow");
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
@@ -21,6 +21,28 @@ export default function FollowButton({
       setIsFollowing(contacts.includes(profilePublicKey));
     }
   }, [contacts]);
+
+  useEffect(() => {
+    if (isFollowing) {
+      setFollowButtonText("Following");
+    } else {
+      setFollowButtonText("Follow");
+    }
+  }, [isFollowing]);
+
+  const handleHover = async (e: any) => {
+    if (isFollowing) {
+      setFollowButtonText("Unfollow");
+    }
+  };
+
+  const handleMouseOut = async (e: any) => {
+    if (isFollowing) {
+      setFollowButtonText("Following");
+    } else {
+      setFollowButtonText("Follow");
+    }
+  };
 
   const handleFollow = async (e: any) => {
     e.preventDefault();
@@ -71,8 +93,10 @@ export default function FollowButton({
       variant={isFollowing ? "outline" : "solid"}
       size="sm"
       onClick={handleFollow}
+      onMouseOver={handleHover}
+      onMouseOut={handleMouseOut}
     >
-      {isFollowing ? "Following" : "Follow"}
+      {followButtonText}
     </Button>
   );
 }
