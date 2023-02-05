@@ -41,7 +41,6 @@ export default function HomePage() {
 
   useEffect(() => {
     if (activeRelay) {
-      console.log("is there some feed stuff:", feed);
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `latest_${relayUrl}`;
 
@@ -90,12 +89,6 @@ export default function HomePage() {
         },
       ]);
       follow_sub.on("event", (event: Event) => {
-        console.log(
-          "YOU ARE FOLLOWING: getting event",
-          event,
-          "from relay:",
-          activeRelay.url
-        );
         followedAuthors = event.tags.map((pair: string[]) => pair[1]);
       });
 
