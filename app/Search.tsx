@@ -24,7 +24,7 @@ type ResultType = {
 
 const Search = () => {
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const [{ tags, pubkeys }, setResults] = useState<ResultType>({
@@ -41,33 +41,42 @@ const Search = () => {
     setShowTooltip((current) => !current);
   };
 
+  // TODO: fix this
   useEffect(() => {
+    if (searchTerm.length === 0) {
+      setResults({ tags: [], pubkeys: [] });
+      setShowTooltip(false);
+      return;
+    }
+    if (!activeRelay) {
+      setResults({ tags: [], pubkeys: [] });
+      // setShowTooltip(false);
+      return;
+    }
     if (searchTerm.length > 0) {
-      connectedRelays.forEach((relay: Relay) => {
-        let sub = relay.sub([
-          {
-            kinds: [2222],
-            "#t": [searchTerm],
-          },
-        ]);
-        sub.on("event", (event: Event) => {
-          console.log("we got the event we wanted:", event);
-          setResults((current: ResultType) => {
-            return {
-              ...current,
-              pubkeys: [event.pubkey],
-              tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
-            };
-          });
-          setShowTooltip(true);
+      let sub = activeRelay.sub([
+        {
+          kinds: [2222],
+          "#t": [searchTerm],
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        console.log("we got the event we wanted:", event);
+        setResults((current: ResultType) => {
+          return {
+            ...current,
+            pubkeys: [event.pubkey],
+            tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
+          };
         });
-        sub.on("eose", () => {
-          console.log("EOSE searched events from", relay.url);
-          sub.unsub();
-        });
+        setShowTooltip(true);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE searched events from", activeRelay.url);
+        sub.unsub();
       });
     }
-  }, [searchTerm, connectedRelays]);
+  }, [searchTerm, activeRelay]);
 
   return (
     <Tooltip

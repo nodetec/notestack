@@ -1,49 +1,47 @@
 import { RelayContext } from "@/app/context/relay-provider";
 import { NostrService } from "@/app/lib/nostr";
 import Link from "next/link";
-import { Event, Relay } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Contact from "./Contact";
 
 export default function Contacts({ userContacts, npub }: any) {
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   const [events, setEvents] = useState<Event[]>();
 
+  // TODO: add caching
   useEffect(() => {
+    if (!activeRelay) return;
     const contactPublicKeys = userContacts.map((contact: any) => {
       return contact[1];
     });
 
-    const eventsSeen: { [k: string]: boolean } = {};
     let eventArray: Event[] = [];
 
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
-        {
-          kinds: [0],
-          authors: contactPublicKeys,
-          limit: 5,
-        },
-      ]);
+    let sub = activeRelay.sub([
+      {
+        kinds: [0],
+        authors: contactPublicKeys,
+        limit: 5,
+      },
+    ]);
 
-      sub.on("event", (event: Event) => {
-        if (!eventsSeen[event.id!]) {
-          eventArray.push(event);
-        }
-        eventsSeen[event.id!] = true;
-      });
-
-      sub.on("eose", () => {
-        console.log("EOSE additional events from", relay.url);
-        const filteredEvents = NostrService.filterEvents(eventArray);
-        if (filteredEvents.length > 0) {
-          setEvents(filteredEvents);
-        }
-        sub.unsub();
-      });
+    sub.on("event", (event: Event) => {
+      eventArray.push(event);
     });
-  }, [connectedRelays]);
+
+    sub.on("eose", () => {
+      // console.log("EOSE additional events from", activeRelay.url);
+      const filteredEvents = NostrService.filterEvents(eventArray);
+      if (filteredEvents.length > 0) {
+        setEvents(filteredEvents);
+      } else {
+        setEvents([]);
+      }
+      sub.unsub();
+    });
+  }, [activeRelay]);
 
   // let uniqueContacts = contacts.filter(
   //   (obj, index, self) =>

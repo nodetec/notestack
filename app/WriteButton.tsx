@@ -4,7 +4,6 @@ import { SlNote } from "react-icons/sl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BlogContext } from "./context/blog-provider";
-import { Relay } from "nostr-tools";
 import { useContext, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
 import { useRouter } from "next/navigation";
@@ -30,7 +29,7 @@ const WriteButton = () => {
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -70,20 +69,23 @@ const WriteButton = () => {
     let eventId: any = null;
     eventId = event?.id;
 
-    connectedRelays.forEach((relay: Relay) => {
-      let pub = relay.publish(event);
-      pub.on("ok", () => {
-        console.log(`DELETE EVENT WAS ACCEPTED by ${relay.url}`);
-      });
-      pub.on("seen", () => {
-        console.log(`DELETE EVENT WAS SEEN ON ${relay.url}`);
-        router.push("/u/" + nip19.npubEncode(publicKey));
-      });
-      pub.on("failed", (reason: string) => {
-        console.log(
-          `OUR DELETE EVENT HAS FAILED WITH REASON: ${relay.url}: ${reason}`
-        );
-      });
+    if (!activeRelay) {
+      console.log("relay not active!");
+      return;
+      // TODO: handle this
+    }
+    let pub = activeRelay.publish(event);
+    pub.on("ok", () => {
+      console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
+    });
+    pub.on("seen", () => {
+      console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+      router.push("/u/" + nip19.npubEncode(publicKey));
+    });
+    pub.on("failed", (reason: string) => {
+      console.log(
+        `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      );
     });
   };
 

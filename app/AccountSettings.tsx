@@ -2,7 +2,6 @@
 import Popup from "./Popup";
 import { useContext, useEffect, useState } from "react";
 import Button from "./Button";
-import type { Relay } from "nostr-tools";
 import { utils } from "lnurl-pay";
 import { bech32 } from "bech32";
 import { NostrService } from "@/app/lib/nostr";
@@ -21,7 +20,7 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
   const [convertedAddress, setConvertedAddress] = useState<any>();
   const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
 
@@ -110,26 +109,24 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
       return;
     }
 
-    // remove from cache
-    sessionStorage.removeItem(loggedInPubkey + "_profile");
-    sessionStorage.removeItem(loggedInPubkey + "_user");
+    // TODO: remove from context cache
+    // sessionStorage.removeItem(loggedInPubkey + "_profile");
+    // sessionStorage.removeItem(loggedInPubkey + "_user");
 
-    connectedRelays.forEach((relay: Relay) => {
-      let pub = relay.publish(event);
-      pub.on("ok", () => {
-        console.log(`DELETE EVENT WAS ACCEPTED by ${relay.url}`);
-        setUser(event);
-      });
-      pub.on("seen", () => {
-        console.log(`DELETE EVENT WAS SEEN ON ${relay.url}`);
-        setIsOpen(!isOpen);
-      });
-      pub.on("failed", (reason: string) => {
-        console.log(
-          `OUR DELETE EVENT HAS FAILED WITH REASON: ${relay.url}: ${reason}`
-        );
-        setIsOpen(!isOpen);
-      });
+    let pub = activeRelay.publish(event);
+    pub.on("ok", () => {
+      // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);
+      setUser(event);
+    });
+    pub.on("seen", () => {
+      // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
+      setIsOpen(!isOpen);
+    });
+    pub.on("failed", (reason: string) => {
+      console.log(
+        `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      );
+      setIsOpen(!isOpen);
     });
   };
 

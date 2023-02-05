@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import { Event, Relay } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { nip19 } from "nostr-tools";
 import Blog from "./Blog";
 import { RelayContext } from "../context/relay-provider";
@@ -16,34 +16,35 @@ export default function NotePage() {
   }
 
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   const [events, setEvents] = useState<Event[]>([]);
 
+  // todo cache
   useEffect(() => {
+    if (!activeRelay) return;
     if (events.length === 0) {
-      const eventsSeen: { [k: string]: boolean } = {};
       let eventArray: Event[] = [];
-      connectedRelays.forEach((relay: Relay) => {
-        // @ts-ignore
-        let sub = relay.sub([
-          {
-            ids: [eventId],
-            kinds: [2222],
-          },
-        ]);
-        sub.on("event", (event: Event) => {
-          if (!eventsSeen[event.id!]) {
-            eventArray.push(event);
-          }
-          eventsSeen[event.id!] = true;
-        });
-        sub.on("eose", () => {
+      // @ts-ignore
+      let sub = activeRelay.sub([
+        {
+          ids: [eventId],
+          kinds: [2222],
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        eventArray.push(event);
+      });
+      sub.on("eose", () => {
+        if (eventArray.length > 0) {
           setEvents(eventArray);
-          sub.unsub();
-        });
+        } else {
+          console.log("Event not present");
+          // TODO: Show 404 page
+        }
+        sub.unsub();
       });
     }
-  }, [connectedRelays]);
+  }, [activeRelay]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

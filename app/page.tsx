@@ -35,8 +35,7 @@ export default function HomePage() {
   const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
 
   // @ts-ignore
-  const { profiles, setProfiles, pubkeys, setpubkeys } =
-    useContext(ProfilesContext);
+  const { setpubkeys } = useContext(ProfilesContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);

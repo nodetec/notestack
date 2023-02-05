@@ -22,7 +22,7 @@ const Profile = ({ npub, setProfileInfo }: any) => {
   const [loggedInContactList, setloggedInContactList] = useState<string[][]>();
 
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
@@ -54,11 +54,11 @@ const Profile = ({ npub, setProfileInfo }: any) => {
     authors.push(loggedInPubkey);
   }
 
+  // TODO: implement caching here
   useEffect(() => {
-    const eventsSeen: { [k: string]: boolean } = {};
-    let eventArray: Event[] = [];
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
+    if (activeRelay) {
+      let eventArray: Event[] = [];
+      let sub = activeRelay.sub([
         {
           kinds,
           authors,
@@ -67,36 +67,35 @@ const Profile = ({ npub, setProfileInfo }: any) => {
       ]);
 
       sub.on("event", (event: Event) => {
-        if (!eventsSeen[event.id!]) {
-          eventArray.push(event);
-        }
-        eventsSeen[event.id!] = true;
+        eventArray.push(event);
       });
 
       sub.on("eose", () => {
-        console.log("EOSE additional events from", relay.url);
+        console.log("EOSE additional events from", activeRelay.url);
         const filteredEvents = NostrService.filterEvents(eventArray);
         if (filteredEvents.length > 0) {
           setEvents(filteredEvents);
+        } else {
+          setEvents([]);
         }
         sub.unsub();
       });
-    });
-  }, [connectedRelays]);
+    }
+  }, [activeRelay]);
 
   useEffect(() => {
     let profileMetadata;
 
-    const profileEventsString = sessionStorage.getItem(
-      profilePubkey + "_profile"
-    );
+    // const profileEventsString = sessionStorage.getItem(
+    //   profilePubkey + "_profile"
+    // );
 
-    if (profileEventsString) {
-      const cachedEvents = JSON.parse(profileEventsString);
-      profileMetadata = cachedEvents;
-      kinds = [3];
-      console.log("using cached profile for user:", npub);
-    }
+    // if (profileEventsString) {
+    //   const cachedEvents = JSON.parse(profileEventsString);
+    //   profileMetadata = cachedEvents;
+    //   kinds = [3];
+    //   console.log("using cached profile for user:", npub);
+    // }
 
     if (!profileMetadata) {
       profileMetadata = events.filter(
@@ -104,7 +103,7 @@ const Profile = ({ npub, setProfileInfo }: any) => {
       );
       if (profileMetadata.length > 0) {
         const profilesString = JSON.stringify(profileMetadata);
-        sessionStorage.setItem(profilePubkey + "_profile", profilesString);
+        // sessionStorage.setItem(profilePubkey + "_profile", profilesString);
       }
     }
 
@@ -134,8 +133,6 @@ const Profile = ({ npub, setProfileInfo }: any) => {
     const profileContactList = profileContactEvents[0]?.tags;
     setprofileContactList(profileContactList);
 
-    console.log("DO WE EVER GET HERE?", profileContactList);
-
     // contacts for the logged in user
     const loggedInContactEvents = events.filter(
       (event) => event.kind === 3 && event.pubkey === loggedInPubkey
@@ -160,7 +157,9 @@ const Profile = ({ npub, setProfileInfo }: any) => {
         lud16={lud16}
       />
 
-      {profileContactList && <Contacts npub={npub} userContacts={profileContactList} />}
+      {profileContactList && (
+        <Contacts npub={npub} userContacts={profileContactList} />
+      )}
     </>
   );
 };

@@ -14,7 +14,7 @@ export default function FollowButton({
 }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   useEffect(() => {
     if (contacts) {
@@ -48,17 +48,20 @@ export default function FollowButton({
       return;
     }
 
-    connectedRelays.forEach((relay: Relay) => {
-      let pub = relay.publish(event);
-      pub.on("ok", () => {
-        console.log("OUR EVENT WAS ACCEPTED");
-      });
-      pub.on("seen", () => {
-        console.log("OUR EVENT WAS SEEN");
-      });
-      pub.on("failed", (reason: string) => {
-        console.log("OUR EVENT HAS FAILED");
-      });
+    if (!activeRelay) {
+      console.log("relay not active!");
+      return;
+      // TODO: handle this
+    }
+    let pub = activeRelay.publish(event);
+    pub.on("ok", () => {
+      console.log("OUR EVENT WAS ACCEPTED");
+    });
+    pub.on("seen", () => {
+      console.log("OUR EVENT WAS SEEN");
+    });
+    pub.on("failed", (reason: string) => {
+      console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
     });
   };
 

@@ -39,7 +39,7 @@ export default function UserCard({
   const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
 
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
@@ -57,11 +57,11 @@ export default function UserCard({
     setLoggedInPubkey(user.pubkey);
   }, [user, isOpen]);
 
+  // TODO: implement caching
   useEffect(() => {
-    const eventsSeen: { [k: string]: boolean } = {};
-    let eventArray: Event[] = [];
-    connectedRelays.forEach((relay: Relay) => {
-      let sub = relay.sub([
+    if (activeRelay) {
+      let eventArray: Event[] = [];
+      let sub = activeRelay.sub([
         {
           kinds: [3],
           "#p": [profilePubkey],
@@ -70,22 +70,21 @@ export default function UserCard({
       ]);
 
       sub.on("event", (event: Event) => {
-        if (!eventsSeen[event.id!]) {
-          eventArray.push(event);
-        }
-        eventsSeen[event.id!] = true;
+        eventArray.push(event);
       });
 
       sub.on("eose", () => {
-        console.log("EOSE additional events from", relay.url);
+        console.log("EOSE additional events from", activeRelay.url);
         const filteredEvents = NostrService.filterEvents(eventArray);
         if (filteredEvents.length > 0) {
           setFollowers(filteredEvents);
+        } else {
+          setFollowers([]);
         }
         sub.unsub();
       });
-    });
-  }, [connectedRelays]);
+    }
+  }, [activeRelay]);
 
   useEffect(() => {
     setTipMessage("");

@@ -14,7 +14,7 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
   // @ts-ignore
   const { keys: loggedInUserKeys } = useContext(KeysContext);
   // @ts-ignore
-  const { connectedRelays } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
 
   useEffect(() => {
@@ -35,20 +35,23 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
 
     try {
       deleteEvent = await NostrService.addEventData(deleteEvent);
-      connectedRelays.forEach((relay: Relay) => {
-        let pub = relay.publish(event);
+      if (activeRelay) {
+        let pub = activeRelay.publish(event);
         pub.on("ok", () => {
-          console.log(`DELETE EVENT WAS ACCEPTED by ${relay.url}`);
+          console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
         });
         pub.on("seen", () => {
-          console.log(`DELETE EVENT WAS SEEN ON ${relay.url}`);
+          console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
         });
         pub.on("failed", (reason: string) => {
           console.log(
-            `OUR DELETE EVENT HAS FAILED WITH REASON: ${relay.url}: ${reason}`
+            `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
           );
         });
-      });
+      } else {
+        console.log("relay not active!");
+        // TODO: handle this
+      }
     } catch (err: any) {
       console.log("FAILED TO DELETE");
     }
