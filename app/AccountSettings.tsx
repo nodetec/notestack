@@ -25,10 +25,18 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
   const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    console.log("CONTENT:", user.content);
-    setLoggedInPubkey(user.pubkey);
-    if (user.content) {
-      const contentObj = JSON.parse(user.content);
+    // console.log("CONTENT:", user.content);
+    if (!activeRelay) return;
+    console.log("THE USER:", user);
+
+    if (!activeRelay) return;
+    if (!user) return;
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    if (!user[`user_${relayUrl}`]) return;
+    setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
+
+    if (user[`user_${relayUrl}`].content) {
+      const contentObj = JSON.parse(user[`user_${relayUrl}`].content);
       setNewLnAddress(contentObj.lud16);
       setNewName(contentObj.name);
       setNewAbout(contentObj.about);
@@ -109,16 +117,13 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
       return;
     }
 
-    // TODO: remove from context cache
-    // sessionStorage.removeItem(loggedInPubkey + "_profile");
-    // sessionStorage.removeItem(loggedInPubkey + "_user");
-
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
       // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);
       setUser(event);
     });
     pub.on("seen", () => {
+      // TODO: set profile in context
       // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
       setIsOpen(!isOpen);
     });

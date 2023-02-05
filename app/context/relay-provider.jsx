@@ -11,9 +11,11 @@ export default function RelayProvider({ children }) {
   const [allRelays, setAllRelays] = useState(RELAYS);
   const [pendingActiveRelayUrl, setPendingActiveRelayUrl] = useState(RELAYS[0]);
   const [activeRelay, setActiveRelay] = useState();
+  const [activeUrl, setActiveRelayUrl] = useState();
   const [connectedRelays, setConnectedRelays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  // TODO: need active relay URL for getting stuff, don't have to wait for it to connect
 
   useEffect(() => {
     console.log("PENDING ACTIVE RELAY IS:", pendingActiveRelayUrl);

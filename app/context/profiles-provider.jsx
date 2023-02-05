@@ -11,6 +11,7 @@ export default function ProfilesProvider({ children }) {
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
+  // TODO: set entire profile not just content
   useEffect(() => {
     if (activeRelay) {
       let relayUrl = activeRelay.url.replace("wss://", "");
