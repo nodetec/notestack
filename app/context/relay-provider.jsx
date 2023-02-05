@@ -51,12 +51,15 @@ export default function RelayProvider({ children }) {
   }, [activeRelays]);
 
   useEffect(() => {
-    if (connectedRelays.length === activeRelays.length) {
+    if (
+      connectedRelays.length === activeRelays.length &&
+      connectedRelays.length !== 0
+    ) {
       console.log("WE'RE READY TO GO");
       console.log("CONNECTED RELAYS ARE:", connectedRelays);
       console.log("ACTIVE RELAYS ARE:", activeRelays);
       setIsReady(true);
-    } 
+    }
   }, [connectedRelays, activeRelays]);
 
   useEffect(() => {

@@ -144,6 +144,21 @@ export namespace NostrService {
     return filteredEvents;
   }
 
+  export function filterUserEvents(eventObj: { [fieldName: string]: any }) {
+    const eventArray = Object.values(eventObj).reduce(
+      (acc, value) => acc.concat(value),
+      []
+    );
+
+    const filteredEvents = eventArray.filter((e1: Event, index: number) => {
+      if (e1.content === "") {
+        return false;
+      }
+      return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+    });
+    return filteredEvents;
+  }
+
   export function filterBlogEvents(eventObj: { [fieldName: string]: any }) {
     const eventArray = Object.values(eventObj).reduce(
       (acc, value) => acc.concat(value),

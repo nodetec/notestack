@@ -62,10 +62,11 @@ export default function HomePage() {
       );
 
       if (cachedLatestEventsString) {
-        console.log("USING THE CACHE")
+        console.log("USING THE CACHE");
         count++;
         const cachedEvents = JSON.parse(cachedLatestEventsString);
         eventObj[relayUrl] = cachedEvents;
+        console.log("cachedEvents are:", cachedEvents);
         console.log("using cached latest events for:" + relayUrl);
 
         if (count === connectedRelays.length) {
@@ -86,7 +87,9 @@ export default function HomePage() {
 
         sub.on("eose", () => {
           const eventsString = JSON.stringify(eventObj[relayUrl]);
-          sessionStorage.setItem(`latest_events_${relayUrl}`, eventsString);
+          if (eventsString.length > 0) {
+            sessionStorage.setItem(`latest_events_${relayUrl}`, eventsString);
+          }
           count++;
           console.log("EOSE initial latest events from", relay.url);
           if (count === connectedRelays.length) {
