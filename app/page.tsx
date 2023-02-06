@@ -191,15 +191,24 @@ export default function HomePage() {
         )}
       </Content>
       <Aside>
-        <RecommendedEvents
-          title="Recommended Blogs"
-          showProfile
-          EVENTS={[
-            "0d4dfa8b61c059d2f9a670f4a75c78db823fe48bb9999781bc9c204c46790019",
-            "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27",
-            "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79",
-          ]}
-        />
+        {/* <RecommendedEvents */}
+        {/*   title="Recommended Blogs" */}
+        {/*   showProfile */}
+        {/*   // EVENTS={ */}
+        {/*   //   activeRelay && */}
+        {/*   //   feed && */}
+        {/*   //   feed[`latest_${activeRelay.url.replace("wss://", "")}`] && */}
+        {/*   //   Array.from(feed[`latest_${activeRelay.url.replace("wss://", "")}`]) */}
+        {/*   //     .sort(() => 0.5 - Math.random()) */}
+        {/*   //     .slice(0, 3) */}
+
+        {/*   //   //   [ */}
+        {/*   //   //   "0d4dfa8b61c059d2f9a670f4a75c78db823fe48bb9999781bc9c204c46790019", */}
+        {/*   //   //   "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27", */}
+        {/*   //   //   "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79", */}
+        {/*   //   // ] */}
+        {/*   // } */}
+        {/* /> */}
         <Topics
           title="Recommended Topics"
           TOPICS={[

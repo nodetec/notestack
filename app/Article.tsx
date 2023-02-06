@@ -58,7 +58,7 @@ const Article: FC<NoteProps> = ({
   // @ts-ignore
   const { profiles } = useContext(ProfilesContext);
 
-  const [picture, setPicture] = useState(DUMMY_PROFILE_API(event.pubkey));
+  const [picture, setPicture] = useState(DUMMY_PROFILE_API(npub));
   const [name, setName] = useState(shortenHash(npub));
 
   return (
@@ -88,7 +88,7 @@ const Article: FC<NoteProps> = ({
                                 "wss://",
                                 ""
                               )}_${event.pubkey}`
-                            ].picture || DUMMY_PROFILE_API(event.pubkey)
+                            ].picture || DUMMY_PROFILE_API(npub)
                           }
                           alt={""}
                         />

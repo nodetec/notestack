@@ -60,12 +60,12 @@ export default function Note({ event }: NoteProps) {
       {zenMode ? null : (
         <Aside>
           <Profile npub={npub} setProfileInfo={setProfileInfo} />
-          <RecommendedEvents
-            title="More from the author"
-            EVENTS={events.map((event: Event) => event.id!) || []}
-            showProfile
-            showThumbnail
-          />
+          {/* <RecommendedEvents */}
+          {/*   title="More from the author" */}
+          {/*   EVENTS={events.map((event: Event) => event.id!) || []} */}
+          {/*   showProfile */}
+          {/*   showThumbnail */}
+          {/* /> */}
           <Topics title="Related topics" TOPICS={tagsTags} />
         </Aside>
       )}

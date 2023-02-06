@@ -1,64 +1,58 @@
 "use client";
 import Link from "next/link";
-import { nip19, Relay } from "nostr-tools";
+import { nip19 } from "nostr-tools";
 import AsideSection from "./AsideSection";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { getTagValues, markdownImageContent, shortenHash } from "./lib/utils";
 import { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
-import { NostrService } from "./lib/nostr";
+import { FeedContext } from "./context/feed-provider";
 
 interface RecommendedEventsProps {
-  EVENTS: string[];
+  // EVENTS: [];
   title: string;
   showProfile?: boolean;
   showThumbnail?: boolean;
 }
 
 export default function RecommendedEvents({
-  EVENTS,
+  // EVENTS,
   title,
   showProfile = false,
   showThumbnail = false,
 }: RecommendedEventsProps) {
-  let recommendedEvents: Event[] = [];
+  // let recommendedEvents: Event[] = [];
 
   // @ts-ignore
-  const { connectedRelays, isLoading } = useContext(RelayContext);
-  const [events, setEvents] = useState<Event[]>([]);
+  const { activeRelay, isLoading } = useContext(RelayContext);
+  const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
+
+  // @ts-ignore
+  const { feed, setFeed } = useContext(FeedContext);
 
   // useEffect(() => {
-  //   const eventsSeen: { [k: string]: boolean } = {};
-  //   let eventArray: Event[] = [];
-  //   connectedRelays.forEach((relay: Relay) => {
-  //     let sub = relay.sub([
-  //       {
-  //         ids: EVENTS,
-  //         kinds: [2222],
-  //         limit: 3,
-  //       },
-  //     ]);
-  //     sub.on("event", (event: Event) => {
-  //       if (!eventsSeen[event.id!]) {
-  //         eventArray.push(event);
-  //       }
-  //       eventsSeen[event.id!] = true;
-  //     });
-  //     sub.on("eose", () => {
-  //       console.log("EOSE initial latest events from", relay.url);
-  //       const filteredEvents = NostrService.filterBlogEvents(eventArray);
-  //       if (filteredEvents.length > 0) {
-  //         setEvents(filteredEvents);
-  //       }
-  //       sub.unsub();
-  //     });
-  //   });
-  // }, [connectedRelays]);
+  //   if (!activeRelay) return;
+  //   // if (!feed) return;
+  //   // setRecommendedEvents([]);
+  //   let relayUrl = activeRelay.url.replace("wss://", "");
+  //   let feedKey = `latest_${relayUrl}`;
 
-  recommendedEvents = events;
+  //   if (feed[feedKey]) {
+  //     // console.log("Cached events from context");
 
-  if (EVENTS.length === 0) return null;
+  //     if (feed[feedKey].length > 3) {
+  //       const randomEvents = feed[feedKey]
+  //         .sort(() => 0.5 - Math.random())
+  //         .slice(0, 3);
+  //       setRecommendedEvents(randomEvents);
+  //     } else {
+  //       setRecommendedEvents(feed[feedKey].slice(0, 3));
+  //     }
+  //   }
+  // }, [feed, activeRelay]);
+
+  // if (EVENTS.length === 0) return null;
 
   return (
     <AsideSection title={title}>
@@ -66,26 +60,30 @@ export default function RecommendedEvents({
         {isLoading ? (
           <span>Loading...</span>
         ) : (
-          recommendedEvents.map((event) => (
-            <Event
-              key={event.id}
-              noteId={event.id!}
-              pubkey={showProfile ? event.pubkey : undefined}
-              title={getTagValues("subject", event.tags)}
-              thumbnail={
-                showThumbnail
-                  ? markdownImageContent(event.content) || undefined
-                  : undefined
-              }
-            />
-          ))
+          activeRelay &&
+          feed &&
+          feed[`latest_${activeRelay.url.replace("wss://", "")}`] &&
+          Array.from(feed[`latest_${activeRelay.url.replace("wss://", "")}`])
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+            .map((event: any) => (
+              <Event
+                key={event.id}
+                noteId={event.id!}
+                pubkey={showProfile ? event.pubkey : undefined}
+                title={getTagValues("subject", event.tags)}
+                thumbnail={
+                  showThumbnail
+                    ? markdownImageContent(event.content) || undefined
+                    : undefined
+                }
+              />
+            ))
         )}
       </ul>
     </AsideSection>
   );
 }
-
-// TODO profile
 
 const Event = ({
   noteId,
