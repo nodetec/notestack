@@ -132,7 +132,9 @@ const MarkdownDisplay = ({
           let profileKey = `profile_${relayUrl}_${event.pubkey}`;
           const contentObj = JSON.parse(event.content);
           setName(contentObj.name);
-          setPicture(contentObj.picture);
+          if (contentObj.picture) {
+            setPicture(contentObj.picture);
+          }
           profiles[profileKey] = event.content;
           setProfiles(profiles);
         }
