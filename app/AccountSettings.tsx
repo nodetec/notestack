@@ -51,7 +51,7 @@ export default function AccountSettings({
 
     setNewLnAddress(lud16);
     setNewName(name);
-    console.log("NAMEYNAMENAME:", name);
+    // console.log("NAMEYNAMENAME:", name);
     setNewAbout(about);
     setNewPicture(picture);
     setNewNip05(nip05);
@@ -74,7 +74,7 @@ export default function AccountSettings({
             setNewLud16(newConvertedAddress);
             setNewLud06(newLnAddress);
             setConvertedAddress(newConvertedAddress);
-            console.log(newConvertedAddress); // chrisatmachine@getalby.com
+            // console.log(newConvertedAddress); // chrisatmachine@getalby.com
           }
 
           if (utils.isLightningAddress(newLnAddress)) {
@@ -144,9 +144,9 @@ export default function AccountSettings({
       setIsOpen(!isOpen);
     });
     pub.on("failed", (reason: string) => {
-      console.log(
-        `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-      );
+      // console.log(
+      //   `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      // );
       setIsOpen(!isOpen);
     });
   };

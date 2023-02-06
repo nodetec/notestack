@@ -50,7 +50,7 @@ export default function TagPage() {
       if (feed[feedKey]) {
         setEvents(feed[feedKey]);
       } else {
-        console.log("Getting events from relay");
+        // console.log("Getting events from relay");
         let sub = activeRelay.sub([filter]);
 
         let events: Event[] = [];

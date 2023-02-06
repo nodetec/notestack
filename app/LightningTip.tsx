@@ -45,7 +45,7 @@ export default function LightningTip({
       try {
         // @ts-ignore
         const result = await webln.sendPayment(invoice);
-        console.log("Tip Result:", result);
+        // console.log("Tip Result:", result);
         setTippedAmount(tipInputValue);
         setPaymentHash(result.paymentHash);
       } catch (e) {

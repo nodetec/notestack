@@ -47,7 +47,7 @@ export default function UserCard({ npub }: any) {
 
   useEffect(() => {
     if (!activeRelay) return;
-    console.log("HIIIIIIIIII!!!!!!!!!!!");
+    // console.log("HIIIIIIIIII!!!!!!!!!!!");
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
     if (cachedProfile && cachedProfile.content) {

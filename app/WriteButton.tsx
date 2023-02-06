@@ -70,22 +70,22 @@ const WriteButton = () => {
     eventId = event?.id;
 
     if (!activeRelay) {
-      console.log("relay not active!");
+      // console.log("relay not active!");
       return;
       // TODO: handle this
     }
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
-      console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
+      // console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
     });
     pub.on("seen", () => {
-      console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+      // console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
       router.push("/u/" + nip19.npubEncode(publicKey));
     });
     pub.on("failed", (reason: string) => {
-      console.log(
-        `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-      );
+      // console.log(
+      //   `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      // );
     });
   };
 

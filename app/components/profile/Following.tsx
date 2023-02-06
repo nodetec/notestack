@@ -33,7 +33,7 @@ export default function Following({ npub }: any) {
         // console.log("Cached events from context");
         setFollowingEvents(following[followingKey].slice(5));
       } else {
-        console.log("Getting events from relay");
+        // console.log("Getting events from relay");
         let sub = activeRelay.sub([
           {
             kinds: [3],
@@ -44,7 +44,7 @@ export default function Following({ npub }: any) {
         let events: Event[] = [];
 
         sub.on("event", (event: Event) => {
-          console.log("getting event", event, "from relay:", activeRelay.url);
+          // console.log("getting event", event, "from relay:", activeRelay.url);
           // @ts-ignore
           event.relayUrl = relayUrl;
           events.push(event);
@@ -101,9 +101,6 @@ export default function Following({ npub }: any) {
     if (profilesToLookup.length === 0) {
       setFollowingEvents(cachedProfiles);
     }
-
-    console.log("CACHED PROFILES:", cachedProfiles);
-    console.log("PROFILES TO LOOKUP:", profilesToLookup);
 
     // check if any are already in context cache if they are add them to list
     // if there are any left look them up

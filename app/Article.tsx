@@ -63,7 +63,7 @@ const Article: FC<NoteProps> = ({
     const profileKey = `profile_${relayUrl}_${event.pubkey}`;
     const profile = profiles[profileKey];
 
-    if (profile && profile.content !== "") {
+    if (profile && profile.content) {
       // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
       return profileContent.picture || DUMMY_PROFILE_API(npub);

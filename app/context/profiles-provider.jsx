@@ -30,7 +30,7 @@ export default function ProfilesProvider({ children }) {
       });
       sub.on("eose", () => {
         if (events.length !== 0) {
-          console.log("WE HAVE PROFILES:", events);
+          // console.log("WE HAVE PROFILES:", events);
           events.forEach((event) => {
             let profileKey = `profile_${relayUrl}_${event.pubkey}`;
             // const contentObj = JSON.parse(event.content);

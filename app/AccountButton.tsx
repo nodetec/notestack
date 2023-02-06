@@ -28,7 +28,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
 
       let userKey = `user_${relayUrl}`;
       if (user[userKey]) {
-        console.log("Cached events from context");
+        // console.log("Cached events from context");
         const content = user[userKey].content;
         if (content) {
           const contentObj = JSON.parse(content);

@@ -12,7 +12,7 @@ export default function NotePage() {
   if (pathname) {
     eventId = pathname.split("/").pop() || "";
     eventId = nip19.decode(eventId).data.toString();
-    console.log("eventId", eventId);
+    // console.log("eventId", eventId);
   }
 
   // @ts-ignore
@@ -38,7 +38,7 @@ export default function NotePage() {
         if (eventArray.length > 0) {
           setEvents(eventArray);
         } else {
-          console.log("Event not present");
+          // console.log("Event not present");
           // TODO: Show 404 page
         }
         sub.unsub();

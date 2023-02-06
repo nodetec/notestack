@@ -25,10 +25,10 @@ export default function Followers({ npub }: any) {
     }
 
     if (cachedFollowers) {
-      console.log("GETTING FOLLOWERS FROM CACHE:", cachedFollowers);
+      // console.log("GETTING FOLLOWERS FROM CACHE:", cachedFollowers);
       setLocalFollowers(cachedFollowers);
     } else {
-      console.log("GETTING FOLLOWERS FROM RELAY:");
+      // console.log("GETTING FOLLOWERS FROM RELAY:");
       let eventArray: Event[] = [];
       let sub = activeRelay.sub([
         {
@@ -43,7 +43,7 @@ export default function Followers({ npub }: any) {
       });
 
       sub.on("eose", () => {
-        console.log("EOSE additional events from", activeRelay.url);
+        // console.log("EOSE additional events from", activeRelay.url);
         const filteredEvents = NostrService.filterEvents(eventArray);
         if (filteredEvents.length > 0) {
           setLocalFollowers(filteredEvents);

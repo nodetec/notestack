@@ -40,7 +40,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
             pubkeysSet.add(event.pubkey);
           });
           sub.on("eose", () => {
-            console.log("EOSE initial latest events from", activeRelay.url);
+            // console.log("EOSE initial latest events from", activeRelay.url);
             const concatEvents = currentEvents.concat(events);
             const filteredEvents = NostrService.filterBlogEvents(concatEvents);
             if (filteredEvents.length > 0) {

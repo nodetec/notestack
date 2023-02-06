@@ -61,7 +61,7 @@ const Search = () => {
         },
       ]);
       sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
+        // console.log("we got the event we wanted:", event);
         setResults((current: ResultType) => {
           return {
             ...current,
@@ -72,7 +72,7 @@ const Search = () => {
         setShowTooltip(true);
       });
       sub.on("eose", () => {
-        console.log("EOSE searched events from", activeRelay.url);
+        // console.log("EOSE searched events from", activeRelay.url);
         sub.unsub();
       });
     }

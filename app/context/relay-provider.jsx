@@ -18,8 +18,6 @@ export default function RelayProvider({ children }) {
   // TODO: need active relay URL for getting stuff, don't have to wait for it to connect
 
   useEffect(() => {
-    console.log("PENDING ACTIVE RELAY IS:", pendingActiveRelayUrl);
-    console.log("ACTIVE RELAY IS:", activeRelay);
     if (pendingActiveRelayUrl !== "") {
       const relay = relayInit(pendingActiveRelayUrl);
       setIsLoading(true)

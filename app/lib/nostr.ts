@@ -40,15 +40,15 @@ export namespace NostrService {
 
       await relay.connect();
 
-      console.log(relay);
+      // console.log(relay);
 
       relay.on("connect", () => {
-        console.log(`connected to ${relay.url}`);
+        // console.log(`connected to ${relay.url}`);
         relays.push(relay);
       });
 
       relay.on("error", () => {
-        console.log(`failed to connect to ${relay.url}`);
+        // console.log(`failed to connect to ${relay.url}`);
       });
     }))
       return relays;
@@ -71,7 +71,7 @@ export namespace NostrService {
         },
       ]);
       sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
+        // console.log("we got the event we wanted:", event);
         resolve(event);
       });
       sub.on("eose", () => {
@@ -88,7 +88,7 @@ export namespace NostrService {
         },
       ]);
       sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
+        // console.log("we got the event we wanted:", event);
         resolve(event);
       });
       sub.on("eose", () => {
@@ -133,7 +133,7 @@ export namespace NostrService {
     event.id = getEventHash(event);
     // @ts-ignore
     event = await window.nostr.signEvent(event);
-    console.log("signed event", event);
+    // console.log("signed event", event);
     return event;
   }
 

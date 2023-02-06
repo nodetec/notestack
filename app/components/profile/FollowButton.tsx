@@ -71,19 +71,19 @@ export default function FollowButton({
     }
 
     if (!activeRelay) {
-      console.log("relay not active!");
+      // console.log("relay not active!");
       return;
       // TODO: handle this
     }
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
-      console.log("OUR EVENT WAS ACCEPTED");
+      // console.log("OUR EVENT WAS ACCEPTED");
     });
     pub.on("seen", () => {
-      console.log("OUR EVENT WAS SEEN");
+      // console.log("OUR EVENT WAS SEEN");
     });
     pub.on("failed", (reason: string) => {
-      console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
+      // console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
     });
   };
 

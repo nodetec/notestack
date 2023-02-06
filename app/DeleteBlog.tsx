@@ -24,7 +24,7 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
   const handleDelete = async (e: any) => {
     e.preventDefault();
     const tags = [["e", eventToDelete.id]];
-    console.log("EVENT TO DELETE:", eventToDelete);
+    // console.log("EVENT TO DELETE:", eventToDelete);
 
     let deleteEvent = NostrService.createEvent(
       5,
@@ -38,22 +38,22 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
       if (activeRelay) {
         let pub = activeRelay.publish(event);
         pub.on("ok", () => {
-          console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
+          // console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
         });
         pub.on("seen", () => {
-          console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+          // console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
         });
         pub.on("failed", (reason: string) => {
-          console.log(
-            `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-          );
+          // console.log(
+          //   `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+          // );
         });
       } else {
-        console.log("relay not active!");
+        // console.log("relay not active!");
         // TODO: handle this
       }
     } catch (err: any) {
-      console.log("FAILED TO DELETE");
+      // console.log("FAILED TO DELETE");
     }
   };
 

@@ -57,7 +57,7 @@ export default function HomePage() {
         // console.log("Cached events from context");
         setExploreEvents(feed[feedKey]);
       } else {
-        console.log("Getting events from relay");
+        // console.log("Getting events from relay");
         let sub = activeRelay.sub([exploreFilter]);
 
         let events: Event[] = [];

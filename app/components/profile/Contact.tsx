@@ -24,7 +24,7 @@ export default function Contact({ contact, followingsCount }: any) {
     about = contentObj?.about;
     picture = contentObj?.picture;
   } catch (e) {
-    console.log("Error parsing content");
+    // console.log("Error parsing content");
   }
 
   const scrollToTop = () => {

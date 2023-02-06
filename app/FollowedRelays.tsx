@@ -19,7 +19,7 @@ export default function FollowedRelays() {
   }, [allRelays]);
 
   const handleRelayClick = (relay: string) => {
-    console.log("clicked relay:", relay);
+    // console.log("clicked relay:", relay);
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
       setPendingActiveRelayUrl("wss://" + relay);
       setActiveRelay(null);

@@ -39,7 +39,7 @@ export default function Note({ event }: NoteProps) {
       if (profileEventsString) {
         const cachedEvents = JSON.parse(profileEventsString);
         setEvents(cachedEvents);
-        console.log("using cached events for user:", npub);
+        // console.log("using cached events for user:", npub);
       }
     }
   }, []);
