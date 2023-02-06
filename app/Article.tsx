@@ -1,8 +1,17 @@
 import Link from "next/link";
-import { useProfile } from "nostr-react";
-import { Event, nip19 } from "nostr-tools";
-import { DetailedHTMLProps, FC, LiHTMLAttributes, ReactNode } from "react";
+import { Event, nip19, Relay } from "nostr-tools";
+import {
+  DetailedHTMLProps,
+  FC,
+  LiHTMLAttributes,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { BsFillTagFill } from "react-icons/bs";
+import { RelayContext } from "./context/relay-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { markdownImageContent, shortenHash } from "./lib/utils";
@@ -33,10 +42,6 @@ const Article: FC<NoteProps> = ({
 
   const tValues = getTValues(event.tags);
 
-  const { data } = useProfile({
-    pubkey: event.pubkey,
-  });
-
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("subject", tags);
@@ -45,6 +50,41 @@ const Article: FC<NoteProps> = ({
 
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
+
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
+  // @ts-ignore
+  const { profiles } = useContext(ProfilesContext);
+
+  const getPicture = (event: Event) => {
+    if (!activeRelay) return DUMMY_PROFILE_API(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content !== "") {
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.picture || DUMMY_PROFILE_API(npub);
+    }
+
+    return DUMMY_PROFILE_API(npub);
+  };
+
+  const getName = (event: Event) => {
+    if (!activeRelay) return shortenHash(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content !== "") {
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.name || shortenHash(npub);
+    }
+
+    return shortenHash(npub);
+  };
 
   return (
     <article
@@ -60,11 +100,11 @@ const Article: FC<NoteProps> = ({
                   <Item className="text-gray-hover">
                     <img
                       className="rounded-full w-6 h-6 object-cover"
-                      src={data?.picture || DUMMY_PROFILE_API(npub)}
-                      alt={data?.name}
+                      src={getPicture(event)}
+                      alt={""}
                     />
                     <span className="group-hover:underline">
-                      {data?.name || shortenHash(npub)!}
+                      {getName(event)}
                     </span>
                   </Item>
                 </Link>
@@ -72,6 +112,9 @@ const Article: FC<NoteProps> = ({
               </div>
             ) : null}
             <DatePosted timestamp={createdAt} />
+            <span>·</span>
+            {/* @ts-ignore */}
+            <span className="text-gray">{event.relayUrl}</span>
           </div>
         </div>
         <DeleteBlog event={event} />

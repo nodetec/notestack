@@ -5,29 +5,31 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BlogContext } from "./context/blog-provider";
 import { useContext, useState } from "react";
-import { useNostr } from "nostr-react";
+import { RelayContext } from "./context/relay-provider";
 import { useRouter } from "next/navigation";
 import { NostrService } from "./lib/nostr";
 import { KeysContext } from "./context/keys-provider.jsx";
 import { nip19 } from "nostr-tools";
 import Button from "./Button";
 import Popup from "./Popup";
-import CreatableSelect from 'react-select/creatable';
+import CreatableSelect from "react-select/creatable";
 
 const WriteButton = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [tagsList, setTagsList] = useState<{label: string, value: string;}[]>([]);
+  const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
+    []
+  );
 
   // @ts-ignore
   const { blog } = useContext(BlogContext);
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
-  const { publish } = useNostr();
-  // const { connectedRelays } = useNostr();
   const publicKey = keys?.publicKey;
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -53,7 +55,7 @@ const WriteButton = () => {
     ];
 
     for (let tagValue of tagsList) {
-      tags.push(['t', tagValue.value]);
+      tags.push(["t", tagValue.value]);
     }
 
     let event = NostrService.createEvent(2222, publicKey, text, tags);
@@ -67,23 +69,24 @@ const WriteButton = () => {
     let eventId: any = null;
     eventId = event?.id;
 
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for await (const pub of pubs) {
-      pub.on("ok", () => {
-        console.log("OUR EVENT WAS ACCEPTED");
-      });
-
-      await pub.on("seen", async () => {
-        console.log("OUR EVENT WAS SEEN");
-        router.push("/u/" + nip19.npubEncode(publicKey));
-      });
-
-      pub.on("failed", (reason: any) => {
-        console.log("OUR EVENT HAS FAILED WITH REASON:", reason);
-      });
+    if (!activeRelay) {
+      console.log("relay not active!");
+      return;
+      // TODO: handle this
     }
+    let pub = activeRelay.publish(event);
+    pub.on("ok", () => {
+      console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
+    });
+    pub.on("seen", () => {
+      console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+      router.push("/u/" + nip19.npubEncode(publicKey));
+    });
+    pub.on("failed", (reason: string) => {
+      console.log(
+        `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      );
+    });
   };
 
   return (
@@ -93,13 +96,17 @@ const WriteButton = () => {
           <Button size="sm" color="green" onClick={handlePublish}>
             Publish
           </Button>
-          <Popup
-            title="Add Tags"
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-          >
+          <Popup title="Add Tags" isOpen={isOpen} setIsOpen={setIsOpen}>
             <small>Add topics (up to 5)</small>
-            <CreatableSelect isMulti noOptionsMessage={setNoOptionsMessage} value={tagsList} isOptionDisabled={() => tagsList.length >= 5} options={[]} onChange={handleSetTagsList}/>;
+            <CreatableSelect
+              isMulti
+              noOptionsMessage={setNoOptionsMessage}
+              value={tagsList}
+              isOptionDisabled={() => tagsList.length >= 5}
+              options={[]}
+              onChange={handleSetTagsList}
+            />
+            ;
             <Button size="sm" color="green" onClick={submitPublish}>
               Publish Now
             </Button>

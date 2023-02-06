@@ -1,88 +1,117 @@
-import Popup from "../../Popup";
 import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
-import { useNostrEvents } from "nostr-react";
-import type { Event } from "nostr-tools";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
-import { requestInvoice } from "lnurl-pay";
 import { utils } from "lnurl-pay";
 import Link from "next/link";
 import Buttons from "@/app/Buttons";
 import FollowButton from "./FollowButton";
 import AccountSettings from "@/app/AccountSettings";
 import { UserContext } from "@/app/context/user-provider";
+import { RelayContext } from "@/app/context/relay-provider";
+import Followers from "./Followers";
+import LightningTip from "@/app/LightningTip";
+import { Event, nip19 } from "nostr-tools";
+import { ProfilesContext } from "@/app/context/profiles-provider";
+import { DUMMY_PROFILE_API } from "@/app/lib/constants";
+import { KeysContext } from "@/app/context/keys-provider";
 
-const presetAmounts = [
-  { value: "1000", label: "1k" },
-  { value: "5000", label: "5k" },
-  { value: "10000", label: "10k" },
-  { value: "25000", label: "25k" },
-];
-
-export default function UserCard({
-  name,
-  nip05,
-  npub,
-  about,
-  picture,
-  profilePubkey,
-  loggedInContactList,
-  lud06,
-  lud16,
-}: // loggedInPubkey,
-any) {
-  let contacts = null;
-  if (loggedInContactList) {
-    contacts = loggedInContactList.map((pair: string) => pair[1]);
-  }
-
-  // const [name, setName] = useState<string>();
-  // const [about, setAbout] = useState<string>();
-  // const [picture, setPicture] = useState<string>();
-  // const [nip05, setNip05] = useState<string>();
-  // const [lud06, setLud06] = useState<string>();
-  // const [lud16, setLud16] = useState<string>();
-  const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
+export default function UserCard({ npub }: any) {
+  // @ts-ignore
+  const { activeRelay, isLoading } = useContext(RelayContext);
+  // @ts-ignore
+  const { keys } = useContext(KeysContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
-  const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
-  const [tipInputValue, setTipInputValue] = useState<string>("1");
-  const [tipMessage, setTipMessage] = useState<string>();
-  const [paymentHash, setPaymentHash] = useState();
-  const [tippedAmount, setTippedAmount] = useState<any>();
 
   // @ts-ignore
   const { user } = useContext(UserContext);
 
+  const [loggedInPubkey, setLoggedInPubkey] = useState<string>();
+
+  // @ts-ignore
+  const { profiles, setProfiles, reload } = useContext(ProfilesContext);
+
+  const [name, setName] = useState<string>();
+  const [about, setAbout] = useState<string>();
+  const [picture, setPicture] = useState<string>();
+  const [nip05, setNip05] = useState<string>();
+  const [lud06, setLud06] = useState<string>();
+  const [lud16, setLud16] = useState<string>();
+
+  // check if it's the logged in user, if so set cached info
+  // check if it's some other profile
+  // if so see if we have cached profile info
+  // if we don't look up the user
+  const profilePubkey = nip19.decode(npub).data.toString();
+
   useEffect(() => {
-    setLoggedInPubkey(user.pubkey);
-    if (user.content) {
-      const contentObj = JSON.parse(user.content);
-      // setName(contentObj.name);
-      // setAbout(contentObj.about);
-      // setPicture(contentObj.picture);
-      // setNip05(contentObj.nip05);
-      // setLud06(contentObj.lud06);
-      // setLud16(contentObj.lud16);
+    if (!activeRelay) return;
+    console.log("HIIIIIIIIII!!!!!!!!!!!");
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
+    if (cachedProfile && cachedProfile.content) {
+      const profileContent = JSON.parse(cachedProfile.content);
+      setName(profileContent.name);
+      setAbout(profileContent.about);
+
+      if (profileContent.picture) {
+        setPicture(profileContent.picture);
+      } else {
+        setPicture(DUMMY_PROFILE_API(npub));
+      }
+      setNip05(profileContent.nip05);
+      setLud06(profileContent.lud06);
+      setLud16(profileContent.lud16);
+    } else {
+      setName("");
+      setAbout("");
+      if ("") {
+        setPicture("");
+      } else {
+        setPicture(DUMMY_PROFILE_API(npub));
+      }
+      setNip05("");
+      setLud06("");
+      setLud16("");
+      let sub = activeRelay.sub([
+        {
+          kinds: [0],
+          authors: [profilePubkey],
+        },
+      ]);
+      let events: Event[] = [];
+      sub.on("event", (event: Event) => {
+        // @ts-ignore
+        event.relayUrl = relayUrl;
+        events.push(event);
+      });
+      sub.on("eose", () => {
+        if (events.length !== 0) {
+          let event = events[0];
+          let profileKey = `profile_${relayUrl}_${event.pubkey}`;
+          const contentObj = JSON.parse(event.content);
+          setName(contentObj.name);
+          setAbout(contentObj.about);
+          if (contentObj.picture) {
+            setPicture(contentObj.picture);
+          } else {
+            setPicture(DUMMY_PROFILE_API(npub));
+          }
+          setNip05(contentObj.nip05);
+          setLud06(contentObj.lud06);
+          setLud16(contentObj.lud16);
+          profiles[profileKey] = event.content;
+          setProfiles(profiles);
+        }
+        sub.unsub();
+      });
     }
-  }, [user, isOpen]);
-
-  let followers: Event[];
-
-  let { events: followersFromEvent } = useNostrEvents({
-    filter: {
-      kinds: [3],
-      "#p": [profilePubkey],
-      limit: 100,
-    },
-  });
-  followers = followersFromEvent;
+  }, [activeRelay, reload, isLoading]);
 
   useEffect(() => {
-    setTipMessage("");
-    setTipInputValue("1");
-  }, [isTipOpen]);
+    setLoggedInPubkey(keys.publicKey);
+  }, []);
 
   const handleClick = async () => {
     setIsOpen(!isOpen);
@@ -90,39 +119,6 @@ any) {
 
   const handleTipClick = async () => {
     setIsTipOpen(!isTipOpen);
-  };
-
-  const validateTipInputKeyDown = (e: any) => {
-    if ((e.which != 8 && e.which != 0 && e.which < 48) || e.which > 57) {
-      e.preventDefault();
-    }
-  };
-
-  const handleSendTip = async (e: any) => {
-    e.preventDefault();
-    // @ts-ignore
-    if (typeof window.webln !== "undefined") {
-      const lnUrlOrAddress = lud06 || lud16;
-
-      const { invoice, params, successAction, validatePreimage } =
-        await requestInvoice({
-          lnUrlOrAddress,
-          // @ts-ignore
-          tokens: tipInputValue, // satoshis
-          comment: tipMessage,
-        });
-      try {
-        // @ts-ignore
-        const result = await webln.sendPayment(invoice);
-        console.log("Tip Result:", result);
-        setTippedAmount(tipInputValue);
-        setPaymentHash(result.paymentHash);
-      } catch (e) {
-        console.log("Tip Error:", e);
-      }
-    }
-    setIsTipOpen(!isTipOpen);
-    setIsTipSuccessOpen(!isTipSuccessOpen);
   };
 
   return (
@@ -136,13 +132,7 @@ any) {
         <span>{name}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
-      <Link
-        className="text-base text-gray hover:text-gray-hover my-2"
-        href={`/u/${npub}`}
-      >
-        {followers && followers.length > 100 ? "100+" : followers.length}{" "}
-        Followers
-      </Link>
+      <Followers npub={npub} />
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">
@@ -161,8 +151,8 @@ any) {
         )}
       </div>
       <p className="text-sm mb-4 text-gray">{about}</p>
-      {loggedInPubkey &&
-        (loggedInPubkey === profilePubkey ? (
+      {keys.publicKey &&
+        (keys.publicKey === profilePubkey ? (
           <Buttons>
             <Button
               color="green"
@@ -175,12 +165,10 @@ any) {
           </Buttons>
         ) : (
           <div className="flex items-center gap-2">
-            <FollowButton
-              loggedInUserPublicKey={loggedInPubkey}
-              currentContacts={loggedInContactList}
-              profilePublicKey={profilePubkey}
-              contacts={contacts}
-            />
+            {/* <FollowButton */}
+            {/*   loggedInUserPublicKey={loggedInPubkey} */}
+            {/*   profilePublicKey={profilePubkey} */}
+            {/* /> */}
             {(lud06 || lud16) && (
               <Button
                 color="red"
@@ -192,87 +180,25 @@ any) {
             )}
           </div>
         ))}
-      <Popup
-        title="Success"
-        isOpen={isTipSuccessOpen}
-        setIsOpen={setIsTipSuccessOpen}
-      >
-        <h4 className="text-lg text-green-500 text-center pb-4">{`You sent ${name} ${tippedAmount} sat(s)!`}</h4>
-        <h5 className="text overflow-x-scroll rounded-md text-center p-4">
-          <div className="cursor-text flex justify-start whitespace-nowrap items-center">
-            <div className="mr-2">{"Payment Hash:"}</div>
-            <div className="pr-4">{paymentHash}</div>
-          </div>
-        </h5>
-      </Popup>
-      {loggedInPubkey === profilePubkey ? (
+      {name && keys.publicKey === profilePubkey ? (
         <AccountSettings
           name={name}
           nip05={nip05}
           about={about}
           picture={picture}
-          loggedInPubkey={loggedInPubkey}
+          loggedInPubkey={keys.publicKey}
           lud06={lud06}
           lud16={lud16}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
         />
       ) : (
-        <Popup
-          title="Pay with Lightning"
-          isOpen={isTipOpen}
-          setIsOpen={setIsTipOpen}
-        >
-          <h2 className="pt-2 font-bold text-lg ">Amount</h2>
-          <div className="flex items-center w-full py-2 px-4 rounded-md   ring-1 ring-black-700">
-            <input
-              type="number"
-              value={tipInputValue}
-              onKeyDown={validateTipInputKeyDown}
-              onChange={(e) => setTipInputValue(e.target.value)}
-              placeholder="Enter amount in sats"
-              required
-              min={1}
-              className="outline-none w-full flex-1 focus:ring-0 border-0 bg-transparent "
-            />
-            <span className="text-black-600 text-sm ml-2 font-bold">
-              satoshis
-            </span>
-          </div>
-          <Buttons>
-            {presetAmounts.map((amount) => (
-              <Button
-                key={amount.label}
-                variant="outline"
-                iconAfter
-                className="w-full"
-                icon={<BsLightningChargeFill size="14" />}
-                onClick={() => setTipInputValue(amount.value)}
-              >
-                {amount.label}
-              </Button>
-            ))}
-          </Buttons>
-          <h2 className="pt-2 font-bold text-lg ">Message</h2>
-          <div className="flex items-center w-full py-2 px-4 rounded-md   ring-1 ">
-            <input
-              type="text"
-              value={tipMessage}
-              onChange={(e) => setTipMessage(e.target.value)}
-              placeholder="optional"
-              className="outline-none w-full flex-1 focus:ring-0 border-0 bg-transparent "
-            />
-          </div>
-          <Button
-            variant="solid"
-            onClick={handleSendTip}
-            size="md"
-            icon={<BsLightningChargeFill size="14" />}
-            className="w-full"
-          >
-            Send
-          </Button>
-        </Popup>
+        <LightningTip
+          lud06={lud06}
+          lud16={lud16}
+          isTipOpen={isTipOpen}
+          setIsTipOpen={setIsTipOpen}
+        />
       )}
     </div>
   );

@@ -1,20 +1,21 @@
 "use client";
-import { useNostr, useProfile } from "nostr-react";
 import {
   DetailedHTMLProps,
   FC,
   HTMLAttributes,
   InputHTMLAttributes,
+  useContext,
   useEffect,
   useState,
 } from "react";
 import { BsSearch } from "react-icons/bs";
 import Tooltip from "./Tooltip";
-import { Event, nip19 } from "nostr-tools";
+import { Event, nip19, Relay } from "nostr-tools";
 import Link from "next/link";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { AiFillTag } from "react-icons/ai";
+import { RelayContext } from "./context/relay-provider";
 
 type ResultType = {
   pubkeys: string[];
@@ -22,9 +23,10 @@ type ResultType = {
 };
 
 const Search = () => {
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
-  const { connectedRelays } = useNostr();
   const [{ tags, pubkeys }, setResults] = useState<ResultType>({
     tags: [],
     pubkeys: [],
@@ -39,33 +41,42 @@ const Search = () => {
     setShowTooltip((current) => !current);
   };
 
+  // TODO: fix this
   useEffect(() => {
+    if (searchTerm.length === 0) {
+      setResults({ tags: [], pubkeys: [] });
+      setShowTooltip(false);
+      return;
+    }
+    if (!activeRelay) {
+      setResults({ tags: [], pubkeys: [] });
+      // setShowTooltip(false);
+      return;
+    }
     if (searchTerm.length > 0) {
-      connectedRelays.forEach((relay) => {
-        let sub = relay.sub([
-          {
-            kinds: [2222],
-            "#t": [searchTerm],
-          },
-        ]);
-        sub.on("event", (event: Event) => {
-          console.log("we got the event we wanted:", event);
-          setResults((current: ResultType) => {
-            return {
-              ...current,
-              pubkeys: [event.pubkey],
-              tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
-            };
-          });
-          setShowTooltip(true);
+      let sub = activeRelay.sub([
+        {
+          kinds: [2222],
+          "#t": [searchTerm],
+        },
+      ]);
+      sub.on("event", (event: Event) => {
+        console.log("we got the event we wanted:", event);
+        setResults((current: ResultType) => {
+          return {
+            ...current,
+            pubkeys: [event.pubkey],
+            tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
+          };
         });
-        sub.on("eose", () => {
-          console.log("EOSE searched events from", relay.url);
-          sub.unsub();
-        });
+        setShowTooltip(true);
+      });
+      sub.on("eose", () => {
+        console.log("EOSE searched events from", activeRelay.url);
+        sub.unsub();
       });
     }
-  }, [searchTerm, connectedRelays]);
+  }, [searchTerm, activeRelay]);
 
   return (
     <Tooltip
@@ -124,18 +135,21 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
   );
 };
 
+// TODO: profile
+
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
-  const { data } = useProfile({ pubkey });
   const npub = nip19.npubEncode(pubkey);
 
   return (
     <Link href={"/u/" + npub} className="flex items-center gap-2 py-2">
       <img
         className="w-5 h-5 bg-light-gray rounded-full object-cover"
-        src={data?.picture || DUMMY_PROFILE_API(npub)}
+        // src={data?.picture || DUMMY_PROFILE_API(npub)}
+        src={DUMMY_PROFILE_API(npub)}
         alt=""
       />
-      <span>{data?.name || shortenHash(npub)}</span>
+      {/* <span>{data?.name || shortenHash(npub)}</span> */}
+      <span>{shortenHash(npub)}</span>
     </Link>
   );
 };

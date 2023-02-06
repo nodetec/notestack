@@ -1,14 +1,21 @@
 export const RELAYS = [
-  // "wss://nostr-pub.wellorder.net",
-  // "wss://relay.nostr.ch",
+  "wss://nostr-pub.wellorder.net",
   "wss://relay.snort.social",
-  // "wss://nostr.nostrelay.org",
+  "wss://nostr.nostrelay.org",
+  // "wss://relay.nostr.ch",
   // "wss://nostr.bitcoiner.social",
   // "wss://nostr.onsats.org",
   // "wss://nostr-relay.wlvs.space",
-  // "wss://nostr.zebedee.cloud",
-  // "wss://relay.damus.io",
-  // "wss://relay.nostr.info",
+  "wss://nostr.zebedee.cloud",
+  "wss://relay.damus.io",
+  "wss://relay.nostr.info",
+];
+
+export const PRESET_AMOUNTS = [
+  { value: "1000", label: "1k" },
+  { value: "5000", label: "5k" },
+  { value: "10000", label: "10k" },
+  { value: "25000", label: "25k" },
 ];
 
 export const HOST = "https://blogstack.io";

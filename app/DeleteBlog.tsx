@@ -1,9 +1,9 @@
 "use client";
-import { useNostr } from "nostr-react";
-import { Event } from "nostr-tools";
+import { Event, Relay } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { RiDeleteBin2Line } from "react-icons/ri";
 import { KeysContext } from "./context/keys-provider";
+import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 
 interface DeleteBlogProps {
@@ -13,7 +13,8 @@ interface DeleteBlogProps {
 export default function DeleteBlog({ event }: DeleteBlogProps) {
   // @ts-ignore
   const { keys: loggedInUserKeys } = useContext(KeysContext);
-  const { publish } = useNostr();
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
 
   useEffect(() => {
@@ -34,21 +35,22 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
 
     try {
       deleteEvent = await NostrService.addEventData(deleteEvent);
-      const pubs = publish(deleteEvent);
-      // @ts-ignore
-      for (const pub of pubs) {
+      if (activeRelay) {
+        let pub = activeRelay.publish(event);
         pub.on("ok", () => {
-          console.log("OUR DELETE EVENT WAS ACCEPTED");
+          console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
         });
-
-        pub.on("seen", async () => {
-          console.log("OUR DELETE EVENT WAS SEEN");
-          // TODO: pass event list all they into here and remove it from state after deletion event is seen
+        pub.on("seen", () => {
+          console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
         });
-
-        pub.on("failed", (reason: any) => {
-          console.log("OUR DELETE EVENT HAS FAILED WITH REASON:", reason);
+        pub.on("failed", (reason: string) => {
+          console.log(
+            `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+          );
         });
+      } else {
+        console.log("relay not active!");
+        // TODO: handle this
       }
     } catch (err: any) {
       console.log("FAILED TO DELETE");

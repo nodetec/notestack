@@ -2,44 +2,54 @@
 import Popup from "./Popup";
 import { useContext, useEffect, useState } from "react";
 import Button from "./Button";
-import { useNostr } from "nostr-react";
-import type { Event } from "nostr-tools";
 import { utils } from "lnurl-pay";
 import { bech32 } from "bech32";
 import { NostrService } from "@/app/lib/nostr";
 import PopupInput from "@/app/PopupInput";
 import { UserContext } from "./context/user-provider";
+import { RelayContext } from "./context/relay-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 
-export default function AccountSettings({ isOpen, setIsOpen }: any) {
-  const { connectedRelays } = useNostr();
-  const { publish } = useNostr();
-  const [newName, setNewName] = useState<string>();
-  const [newAbout, setNewAbout] = useState<string>();
-  const [newPicture, setNewPicture] = useState<string>();
-  const [newNip05, setNewNip05] = useState<string>();
-  const [newLud06, setNewLud06] = useState<string>();
-  const [newLud16, setNewLud16] = useState<string>();
-  const [newLnAddress, setNewLnAddress] = useState<any>();
+export default function AccountSettings({ name, nip05, about, picture, loggedInPubkey, lud06, lud16, isOpen, setIsOpen }: any) {
+  const [newName, setNewName] = useState<string>(name);
+  const [newAbout, setNewAbout] = useState<string>(about);
+  const [newPicture, setNewPicture] = useState<string>(picture);
+  const [newNip05, setNewNip05] = useState<string>(nip05);
+  const [newLud06, setNewLud06] = useState<string>(lud06);
+  const [newLud16, setNewLud16] = useState<string>(lud16);
+  const [newLnAddress, setNewLnAddress] = useState<any>(lud16);
   const [convertedAddress, setConvertedAddress] = useState<any>();
-  const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
-
+  // const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
+  // @ts-ignore
+  const { setpubkeys, profiles, setProfiles, setReload, reload } =
+    useContext(ProfilesContext);
 
-  useEffect(() => {
-    console.log("CONTENT:", user.content);
-    setLoggedInPubkey(user.pubkey);
-    if (user.content) {
-      const contentObj = JSON.parse(user.content);
-      setNewLnAddress(contentObj.lud16);
-      setNewName(contentObj.name);
-      setNewAbout(contentObj.about);
-      setNewPicture(contentObj.picture);
-      setNewNip05(contentObj.nip05);
-      setNewLud06(contentObj.lud06);
-      setNewLud16(contentObj.lud16);
-    }
-  }, [user, isOpen]);
+  // useEffect(() => {
+    // console.log("CONTENT:", user.content);
+    // if (!activeRelay) return;
+    // console.log("THE USER:", user);
+
+    // if (!activeRelay) return;
+    // if (!user) return;
+    // let relayUrl = activeRelay.url.replace("wss://", "");
+    // if (!user[`user_${relayUrl}`]) return;
+    // setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
+
+    // if (user[`user_${relayUrl}`].content) {
+      // const contentObj = JSON.parse(user[`user_${relayUrl}`].content);
+      // setNewLnAddress(contentObj.lud16);
+      // setNewName(contentObj.name);
+      // setNewAbout(contentObj.about);
+      // setNewPicture(contentObj.picture);
+      // setNewNip05(contentObj.nip05);
+      // setNewLud06(contentObj.lud06);
+      // setNewLud16(contentObj.lud16);
+    // }
+  // }, [user, isOpen, reload]);
 
   async function convert(newLnAddress: string) {
     if (newLnAddress) {
@@ -111,48 +121,26 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
       return;
     }
 
-    // remove from cache
-    sessionStorage.removeItem(loggedInPubkey + "_profile");
-    sessionStorage.removeItem(loggedInPubkey + "_user");
-
-    let eventId: any = null;
-    eventId = event?.id;
-
-    connectedRelays.forEach((relay) => {
-      let sub = relay.sub([
-        {
-          ids: [eventId],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        console.log("we got the event we wanted:", event);
-        setIsOpen(!isOpen);
-      });
-      sub.on("eose", () => {
-        console.log("EOSE");
-        sub.unsub();
-      });
+    let pub = activeRelay.publish(event);
+    pub.on("ok", () => {
+      // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);
+      setUser(event);
     });
+    pub.on("seen", () => {
+      // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      profiles[`profile_${relayUrl}_${event.pubkey}`] = event;
 
-    const pubs = publish(event);
-
-    // @ts-ignore
-    for (const pub of pubs) {
-      pub.on("ok", () => {
-        console.log("OUR EVENT WAS ACCEPTED");
-        setUser(event);
-      });
-
-      pub.on("seen", async () => {
-        console.log("OUR EVENT WAS SEEN");
-        setIsOpen(!isOpen);
-      });
-
-      pub.on("failed", (reason: any) => {
-        console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
-        setIsOpen(!isOpen);
-      });
-    }
+      setReload(!reload);
+      setProfiles(profiles);
+      setIsOpen(!isOpen);
+    });
+    pub.on("failed", (reason: string) => {
+      console.log(
+        `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      );
+      setIsOpen(!isOpen);
+    });
   };
 
   return (

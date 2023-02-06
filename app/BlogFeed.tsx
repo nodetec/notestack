@@ -1,45 +1,63 @@
 "use client";
-import { useNostr } from "nostr-react";
 import type { Event } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Article from "./Article";
+import { ProfilesContext } from "./context/profiles-provider";
+import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 import Posts from "./Posts";
 
 export default function BlogFeed({ events, setEvents, filter, profile }: any) {
-  const { connectedRelays } = useNostr();
   const [addedPosts, setAddedPosts] = useState<number>(10);
+  const [pubkeysReady, setpubkeysReady] = useState<boolean>(false);
+  // @ts-ignore
+  const { profiles, setProfiles, pubkeys, setpubkeys } =
+    useContext(ProfilesContext);
+
+  // @ts-ignore
+  const { activeRelay } = useContext(RelayContext);
 
   // fetch initial 100 events for filter
   useEffect(() => {
     if (addedPosts > 0.8 * events.length) {
       const currentEvents = events;
+      let pubkeysSet = new Set<string>(pubkeys);
 
       if (events.length > 0) {
-        const lastEvent = events.slice(-1)[0];
-        let eventArray: Event[] = [];
-        const eventsSeen: { [k: string]: boolean } = {};
-        connectedRelays.forEach((relay) => {
+        if (activeRelay) {
+          let relayUrl = activeRelay.url.replace("wss://", "");
+          const lastEvent = currentEvents.slice(-1)[0];
+          let events: Event[] = [];
+
           filter.until = lastEvent.created_at;
-          let sub = relay.sub([filter]);
+          let sub = activeRelay.sub([filter]);
+
           sub.on("event", (event: Event) => {
-            if (!eventsSeen[event.id!]) {
-              eventArray.push(event);
-            }
+            // console.log("getting event", event, "from relay:", relay.url);
+            // @ts-ignore
+            event.relayUrl = relayUrl;
+            events.push(event);
+            pubkeysSet.add(event.pubkey);
           });
           sub.on("eose", () => {
-            console.log("EOSE additional events from", relay.url);
-            const concatEvents = currentEvents.concat(eventArray);
+            console.log("EOSE initial latest events from", activeRelay.url);
+            const concatEvents = currentEvents.concat(events);
             const filteredEvents = NostrService.filterBlogEvents(concatEvents);
             if (filteredEvents.length > 0) {
               setEvents(filteredEvents);
             }
+
+            if (pubkeysSet.size > 0) {
+              setpubkeys(Array.from(pubkeysSet));
+            }
+
             sub.unsub();
           });
-        });
+        }
       }
     }
   }, [addedPosts]);
+
 
   useEffect(() => {
     const handleScroll = () => {
