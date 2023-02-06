@@ -143,21 +143,29 @@ const MarkdownDisplay = ({
       <div className="mx-auto w-full text-accent flex items-center justify-between gap-2">
         <div className="flex justify-start w-full">
           <div className="flex flex-row items-center gap-4">
-            <Link href={`u/${npub}`} onClick={scrollToTop}>
-              <img
-                className="rounded-full w-11 h-11 object-cover"
-                src={picture}
-                alt={""}
-              />
-            </Link>
-            <div className="flex flex-col gap-1">
-              <Link href={`u/${npub}`} onClick={scrollToTop}>
-                <span className="hover:underline text-sm">
-                  {name || shortenHash(npub)}
-                </span>
-              </Link>
-              <DatePosted timestamp={event.created_at} />
-            </div>
+            {zenMode ? (
+              <>
+                <Link href={`u/${npub}`} onClick={scrollToTop}>
+                  <img
+                    className="rounded-full w-11 h-11 object-cover"
+                    src={picture}
+                    alt={""}
+                  />
+                </Link>
+                <div className="flex flex-col gap-1">
+                  <Link href={`u/${npub}`} onClick={scrollToTop}>
+                    <span className="hover:underline text-sm">
+                      {name || shortenHash(npub)}
+                    </span>
+                  </Link>
+                  <DatePosted timestamp={event.created_at} />
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <DatePosted timestamp={event.created_at} />
+              </div>
+            )}
           </div>
         </div>
 
