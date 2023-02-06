@@ -87,7 +87,6 @@ export default function HomePage() {
           if (pubkeysSet.size > 0) {
             setpubkeys(Array.from(pubkeysSet));
           }
-          setExploreIsLoading(false);
           sub.unsub();
         });
       }
@@ -175,17 +174,14 @@ export default function HomePage() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        {activeTab === "Explore" &&
-          (!exploreIsLoading ? (
-            <BlogFeed
-              events={exploreEvents}
-              setEvents={setExploreEvents}
-              filter={exploreFilter}
-              profile={true}
-            />
-          ) : (
-            <p>loading...</p>
-          ))}
+        {activeTab === "Explore" && (
+          <BlogFeed
+            events={exploreEvents}
+            setEvents={setExploreEvents}
+            filter={exploreFilter}
+            profile={true}
+          />
+        )}
         {activeTab === "Following" && (
           <BlogFeed
             events={followingEvents}
