@@ -34,7 +34,8 @@ export default function RelayProvider({ children }) {
         setConnectedRelays((prev) => uniqBy([...prev, relay], "url"));
         if (pendingActiveRelayUrl === relay.url) {
           console.log("NEW ACTIVE RELAY IS:", activeRelay);
-          setActiveRelay(relay);
+          const newRelay = relay
+          setActiveRelay(newRelay);
         }
         // setIsReady(true);
         // setPendingActiveRelayUrl("");

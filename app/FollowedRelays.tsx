@@ -1,11 +1,14 @@
 "use client";
 import { RelayContext } from "./context/relay-provider.jsx";
 import { useContext, useEffect, useState } from "react";
+import { ProfilesContext } from "./context/profiles-provider.jsx";
 
 export default function FollowedRelays() {
   // @ts-ignore
   const { setPendingActiveRelayUrl, activeRelay, setActiveRelay, allRelays } =
     useContext(RelayContext);
+  // @ts-ignore
+  const { reload, setReload } = useContext(ProfilesContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -20,6 +23,7 @@ export default function FollowedRelays() {
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
       setPendingActiveRelayUrl("wss://" + relay);
       setActiveRelay(null);
+      setReload(!reload);
     }
   };
 

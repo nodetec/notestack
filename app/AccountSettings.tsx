@@ -10,7 +10,17 @@ import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 
-export default function AccountSettings({ name, nip05, about, picture, loggedInPubkey, lud06, lud16, isOpen, setIsOpen }: any) {
+export default function AccountSettings({
+  name,
+  nip05,
+  about,
+  picture,
+  loggedInPubkey,
+  lud06,
+  lud16,
+  isOpen,
+  setIsOpen,
+}: any) {
   const [newName, setNewName] = useState<string>(name);
   const [newAbout, setNewAbout] = useState<string>(about);
   const [newPicture, setNewPicture] = useState<string>(picture);
@@ -28,7 +38,7 @@ export default function AccountSettings({ name, nip05, about, picture, loggedInP
   const { setpubkeys, profiles, setProfiles, setReload, reload } =
     useContext(ProfilesContext);
 
-  // useEffect(() => {
+  useEffect(() => {
     // console.log("CONTENT:", user.content);
     // if (!activeRelay) return;
     // console.log("THE USER:", user);
@@ -39,17 +49,15 @@ export default function AccountSettings({ name, nip05, about, picture, loggedInP
     // if (!user[`user_${relayUrl}`]) return;
     // setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
 
-    // if (user[`user_${relayUrl}`].content) {
-      // const contentObj = JSON.parse(user[`user_${relayUrl}`].content);
-      // setNewLnAddress(contentObj.lud16);
-      // setNewName(contentObj.name);
-      // setNewAbout(contentObj.about);
-      // setNewPicture(contentObj.picture);
-      // setNewNip05(contentObj.nip05);
-      // setNewLud06(contentObj.lud06);
-      // setNewLud16(contentObj.lud16);
-    // }
-  // }, [user, isOpen, reload]);
+    setNewLnAddress(lud16);
+    setNewName(name);
+    console.log("NAMEYNAMENAME:", name);
+    setNewAbout(about);
+    setNewPicture(picture);
+    setNewNip05(nip05);
+    setNewLud06(lud06);
+    setNewLud16(lud16);
+  }, [isOpen]);
 
   async function convert(newLnAddress: string) {
     if (newLnAddress) {

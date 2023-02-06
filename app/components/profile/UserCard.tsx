@@ -107,7 +107,7 @@ export default function UserCard({ npub }: any) {
         sub.unsub();
       });
     }
-  }, [activeRelay, reload, isLoading]);
+  }, [activeRelay, profiles, reload]);
 
   useEffect(() => {
     setLoggedInPubkey(keys.publicKey);
@@ -180,7 +180,7 @@ export default function UserCard({ npub }: any) {
             )}
           </div>
         ))}
-      {name && keys.publicKey === profilePubkey ? (
+      {activeRelay && name && keys.publicKey === profilePubkey ? (
         <AccountSettings
           name={name}
           nip05={nip05}

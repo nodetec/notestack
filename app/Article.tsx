@@ -64,6 +64,7 @@ const Article: FC<NoteProps> = ({
     const profile = profiles[profileKey];
 
     if (profile && profile.content !== "") {
+      // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
       return profileContent.picture || DUMMY_PROFILE_API(npub);
     }
