@@ -22,7 +22,7 @@ export default function FollowedRelays() {
     // console.log("clicked relay:", relay);
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
       setPendingActiveRelayUrl("wss://" + relay);
-      setActiveRelay(null);
+      // setActiveRelay();
       setReload(!reload);
     }
   };
