@@ -108,7 +108,9 @@ const MarkdownDisplay = ({
     if (cachedProfile && cachedProfile.content) {
       const profileContent = JSON.parse(cachedProfile.content);
       setName(profileContent.name);
-      setPicture(profileContent.picture);
+      if (profileContent.picture) {
+        setPicture(profileContent.picture);
+      }
     } else {
       setName("");
       setPicture(DUMMY_PROFILE_API(npub));
