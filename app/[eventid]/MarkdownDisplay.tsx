@@ -106,8 +106,9 @@ const MarkdownDisplay = ({
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
     if (cachedProfile) {
-      setName(cachedProfile.name);
-      setPicture(cachedProfile.picture);
+      const profileContent = JSON.parse(cachedProfile.content);
+      setName(profileContent.name);
+      setPicture(profileContent.picture);
     } else {
       setName("");
       setPicture(DUMMY_PROFILE_API(npub));
@@ -130,7 +131,7 @@ const MarkdownDisplay = ({
           const contentObj = JSON.parse(event.content);
           setName(contentObj.name);
           setPicture(contentObj.picture);
-          profiles[profileKey] = contentObj;
+          profiles[profileKey] = event.content;
           setProfiles(profiles);
         }
         sub.unsub();

@@ -49,18 +49,18 @@ export default function UserCard({ npub }: any) {
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
     if (cachedProfile) {
-      // const cachedUserContent = JSON.parse(cachedUser.content);
-      setName(cachedProfile.name);
-      setAbout(cachedProfile.about);
+      const profileContent = JSON.parse(cachedProfile.content);
+      setName(profileContent.name);
+      setAbout(profileContent.about);
 
-      if (cachedProfile.picture) {
-        setPicture(cachedProfile.picture);
+      if (profileContent.picture) {
+        setPicture(profileContent.picture);
       } else {
         setPicture(DUMMY_PROFILE_API(npub));
       }
-      setNip05(cachedProfile.nip05);
-      setLud06(cachedProfile.lud06);
-      setLud16(cachedProfile.lud16);
+      setNip05(profileContent.nip05);
+      setLud06(profileContent.lud06);
+      setLud16(profileContent.lud16);
     } else {
       setName("");
       setAbout("");
@@ -99,7 +99,7 @@ export default function UserCard({ npub }: any) {
           setNip05(contentObj.nip05);
           setLud06(contentObj.lud06);
           setLud16(contentObj.lud16);
-          profiles[profileKey] = contentObj;
+          profiles[profileKey] = event.content;
           setProfiles(profiles);
         }
         sub.unsub();
@@ -170,10 +170,10 @@ export default function UserCard({ npub }: any) {
         ) : (
           <div className="flex items-center gap-2">
             <FollowButton
-            // loggedInUserPublicKey={loggedInPubkey}
-            // currentContacts={loggedInContactList}
-            // profilePublicKey={profilePubkey}
-            // contacts={contacts}
+              loggedInUserPublicKey={loggedInPubkey}
+              // currentContacts={loggedInContactList}
+              profilePublicKey={profilePubkey}
+              // contacts={contacts}
             />
             {(lud06 || lud16) && (
               <Button

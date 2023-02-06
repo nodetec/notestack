@@ -8,21 +8,24 @@ import NotifyProvider from "./notify-provider";
 import ProfilesProvider from "./profiles-provider";
 import FeedProvider from "./feed-provider";
 import FollowersProvider from "./followers-provider";
+import FollowingProvider from "./following-provider";
 
 export default function Providers({ children }) {
   return (
     <RelayProvider>
       <BlogProvider>
         <UserProvider>
-          <FollowersProvider>
-            <FeedProvider>
-              <ProfilesProvider>
-                <NotifyProvider>
-                  <KeysProvider>{children}</KeysProvider>
-                </NotifyProvider>
-              </ProfilesProvider>
-            </FeedProvider>
-          </FollowersProvider>
+          <FollowingProvider>
+            <FollowersProvider>
+              <FeedProvider>
+                <ProfilesProvider>
+                  <NotifyProvider>
+                    <KeysProvider>{children}</KeysProvider>
+                  </NotifyProvider>
+                </ProfilesProvider>
+              </FeedProvider>
+            </FollowersProvider>
+          </FollowingProvider>
         </UserProvider>
       </BlogProvider>
     </RelayProvider>

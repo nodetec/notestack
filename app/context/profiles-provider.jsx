@@ -32,8 +32,8 @@ export default function ProfilesProvider({ children }) {
           console.log("WE HAVE PROFILES:", events);
           events.forEach((event) => {
             let profileKey = `profile_${relayUrl}_${event.pubkey}`;
-            const contentObj = JSON.parse(event.content);
-            profiles[profileKey] = contentObj;
+            // const contentObj = JSON.parse(event.content);
+            profiles[profileKey] = event;
             setProfiles(profiles);
           });
         }

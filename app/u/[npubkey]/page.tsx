@@ -37,7 +37,6 @@ export default function ProfilePage() {
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>("");
 
-
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
     const profilePubkey = nip19.decode(npub).data.toString();
@@ -59,8 +58,9 @@ export default function ProfilePage() {
       let relayUrl = activeRelay.url.replace("wss://", "");
       const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
       if (cachedProfile) {
-        setName(cachedProfile.name);
-        setAbout(cachedProfile.about);
+        const profileContent = JSON.parse(cachedProfile.content);
+        setName(profileContent.name);
+        setAbout(profileContent.about);
       } else {
         setName("");
         setAbout("");
@@ -83,7 +83,7 @@ export default function ProfilePage() {
             const contentObj = JSON.parse(event.content);
             setName(contentObj.name);
             setAbout(contentObj.about);
-            profiles[profileKey] = contentObj;
+            profiles[profileKey] = event.content;
             setProfiles(profiles);
           }
           sub.unsub();

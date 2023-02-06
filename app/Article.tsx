@@ -17,8 +17,6 @@ import { DUMMY_PROFILE_API } from "./lib/constants";
 import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 
-// TODO: profile
-
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
   event: Event;
@@ -58,8 +56,35 @@ const Article: FC<NoteProps> = ({
   // @ts-ignore
   const { profiles } = useContext(ProfilesContext);
 
-  const [picture, setPicture] = useState(DUMMY_PROFILE_API(npub));
-  const [name, setName] = useState(shortenHash(npub));
+  const getPicture = (event: Event) => {
+    if (!activeRelay) return DUMMY_PROFILE_API(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content !== "") {
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.picture || DUMMY_PROFILE_API(npub);
+    }
+
+    return DUMMY_PROFILE_API(npub);
+  };
+
+  const getName = (event: Event) => {
+    if (!activeRelay) return shortenHash(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content !== "") {
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.name || shortenHash(npub);
+    }
+
+    return shortenHash(npub);
+  };
 
   return (
     <article
@@ -73,46 +98,14 @@ const Article: FC<NoteProps> = ({
               <div className="flex items-center gap-2">
                 <Link className="group" href={`u/${npub}`}>
                   <Item className="text-gray-hover">
-                    {activeRelay &&
-                    profiles[
-                      `profile_${activeRelay.url.replace("wss://", "")}_${
-                        event.pubkey
-                      }`
-                    ] ? (
-                      <>
-                        <img
-                          className="rounded-full w-6 h-6 object-cover"
-                          src={
-                            profiles[
-                              `profile_${activeRelay.url.replace(
-                                "wss://",
-                                ""
-                              )}_${event.pubkey}`
-                            ].picture || DUMMY_PROFILE_API(npub)
-                          }
-                          alt={""}
-                        />
-                        <span className="group-hover:underline">
-                          {
-                            profiles[
-                              `profile_${activeRelay.url.replace(
-                                "wss://",
-                                ""
-                              )}_${event.pubkey}`
-                            ].name
-                          }
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <img
-                          className="rounded-full w-6 h-6 object-cover"
-                          src={picture}
-                          alt={""}
-                        />
-                        <span className="group-hover:underline">{name}</span>
-                      </>
-                    )}
+                    <img
+                      className="rounded-full w-6 h-6 object-cover"
+                      src={getPicture(event)}
+                      alt={""}
+                    />
+                    <span className="group-hover:underline">
+                      {getName(event)}
+                    </span>
                   </Item>
                 </Link>
                 <span>·</span>
