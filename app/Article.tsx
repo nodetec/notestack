@@ -66,6 +66,7 @@ const Article: FC<NoteProps> = ({
     if (profile && profile.content) {
       // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
+      console.log("PROFILE CONTENT:", profileContent);
       return profileContent.picture || DUMMY_PROFILE_API(npub);
     }
 
@@ -95,19 +96,21 @@ const Article: FC<NoteProps> = ({
       <div className="flex flex-row justify-between">
         <div>
           <div className="flex items-center gap-2 pb-4">
-            {profile ? (
+            {activeRelay && profile ? (
               <div className="flex items-center gap-2">
                 <Link className="group" href={`u/${npub}`}>
-                  <Item className="text-gray-hover">
-                    <img
-                      className="rounded-full w-6 h-6 object-cover"
-                      src={getPicture(event)}
-                      alt={""}
-                    />
-                    <span className="group-hover:underline">
-                      {getName(event)}
-                    </span>
-                  </Item>
+                  {activeRelay && (
+                    <Item className="text-gray-hover">
+                      <img
+                        className="rounded-full w-6 h-6 object-cover"
+                        src={getPicture(event)}
+                        alt={""}
+                      />
+                      <span className="group-hover:underline">
+                        {getName(event)}
+                      </span>
+                    </Item>
+                  )}
                 </Link>
                 <span>·</span>
               </div>

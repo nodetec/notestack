@@ -35,7 +35,9 @@ export default function ProfilesProvider({ children }) {
             let profileKey = `profile_${relayUrl}_${event.pubkey}`;
             // const contentObj = JSON.parse(event.content);
             profiles[profileKey] = event;
-            setProfiles([...profiles]);
+            // setProfiles([...profiles]);
+            const newProfiles = profiles
+            setProfiles(newProfiles);
           });
         }
         sub.unsub();
