@@ -56,7 +56,7 @@ export default function UserCard({ npub }: any) {
       if (cachedProfile.picture) {
         setPicture(cachedProfile.picture);
       } else {
-        setPicture(DUMMY_PROFILE_API(profilePubkey));
+        setPicture(DUMMY_PROFILE_API(npub));
       }
       setNip05(cachedProfile.nip05);
       setLud06(cachedProfile.lud06);
@@ -67,7 +67,7 @@ export default function UserCard({ npub }: any) {
       if ("") {
         setPicture("");
       } else {
-        setPicture(DUMMY_PROFILE_API(profilePubkey));
+        setPicture(DUMMY_PROFILE_API(npub));
       }
       setNip05("");
       setLud06("");
@@ -94,7 +94,7 @@ export default function UserCard({ npub }: any) {
           if (contentObj.picture) {
             setPicture(contentObj.picture);
           } else {
-            setPicture(DUMMY_PROFILE_API(profilePubkey));
+            setPicture(DUMMY_PROFILE_API(npub));
           }
           setNip05(contentObj.nip05);
           setLud06(contentObj.lud06);

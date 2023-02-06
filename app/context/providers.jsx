@@ -7,19 +7,22 @@ import UserProvider from "./user-provider.jsx";
 import NotifyProvider from "./notify-provider";
 import ProfilesProvider from "./profiles-provider";
 import FeedProvider from "./feed-provider";
+import FollowersProvider from "./followers-provider";
 
 export default function Providers({ children }) {
   return (
     <RelayProvider>
       <BlogProvider>
         <UserProvider>
-          <FeedProvider>
-            <ProfilesProvider>
-              <NotifyProvider>
-                <KeysProvider>{children}</KeysProvider>
-              </NotifyProvider>
-            </ProfilesProvider>
-          </FeedProvider>
+          <FollowersProvider>
+            <FeedProvider>
+              <ProfilesProvider>
+                <NotifyProvider>
+                  <KeysProvider>{children}</KeysProvider>
+                </NotifyProvider>
+              </ProfilesProvider>
+            </FeedProvider>
+          </FollowersProvider>
         </UserProvider>
       </BlogProvider>
     </RelayProvider>

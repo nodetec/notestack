@@ -1,18 +1,34 @@
 import { useContext, useEffect, useState } from "react";
-import { Event, nip19, Relay } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import { RelayContext } from "@/app/context/relay-provider";
+import { FollowersContext } from "@/app/context/followers-provider";
 import { NostrService } from "@/app/lib/nostr";
 
 export default function Followers({ npub }: any) {
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
-  const [followers, setFollowers] = useState<Event[]>([]);
+  // @ts-ignore
+  const { followers, setFollowers } = useContext(FollowersContext);
 
-  // TODO: implement caching
+  const [localFollowers, setLocalFollowers] = useState<Event[]>([]);
+
   useEffect(() => {
-    if (activeRelay) {
-      const profilePubkey = nip19.decode(npub).data.valueOf();
+    if (!activeRelay) return;
+    setLocalFollowers([]);
+    const profilePubkey = nip19.decode(npub).data.toString();
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    let cachedFollowers;
+
+    if (followers) {
+      cachedFollowers = followers[`followers_${relayUrl}_${profilePubkey}`];
+    }
+
+    if (cachedFollowers) {
+      console.log("GETTING FOLLOWERS FROM CACHE:", cachedFollowers);
+      setLocalFollowers(cachedFollowers);
+    } else {
+      console.log("GETTING FOLLOWERS FROM RELAY:");
       let eventArray: Event[] = [];
       let sub = activeRelay.sub([
         {
@@ -30,9 +46,11 @@ export default function Followers({ npub }: any) {
         console.log("EOSE additional events from", activeRelay.url);
         const filteredEvents = NostrService.filterEvents(eventArray);
         if (filteredEvents.length > 0) {
-          setFollowers(filteredEvents);
+          setLocalFollowers(filteredEvents);
+          followers[`followers_${relayUrl}_${profilePubkey}`] = filteredEvents;
+          setFollowers(followers);
         } else {
-          setFollowers([]);
+          setLocalFollowers([]);
         }
         sub.unsub();
       });
@@ -45,7 +63,9 @@ export default function Followers({ npub }: any) {
       className="text-base text-gray my-2"
       // href={`/u/${npub}`}
     >
-      {followers && followers.length > 100 ? "100+" : followers.length}{" "}
+      {localFollowers && localFollowers.length > 100
+        ? "100+"
+        : localFollowers.length}{" "}
       Followers
     </div>
   );
