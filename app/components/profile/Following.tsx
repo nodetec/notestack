@@ -127,8 +127,6 @@ export default function Following({ npub }: any) {
             profiles[`profile_${relayUrl}_${event.pubkey}`];
           });
 
-          console.log("LOOKED UP PROFILES DAWG:", newProfiles);
-
           setFollowingEvents([...newProfiles, ...cachedProfiles]);
           setProfiles(profiles);
         }
