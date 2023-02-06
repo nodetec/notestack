@@ -79,7 +79,7 @@ const Article: FC<NoteProps> = ({
     const profileKey = `profile_${relayUrl}_${event.pubkey}`;
     const profile = profiles[profileKey];
 
-    if (profile && profile.content !== "") {
+    if (profile && profile.content) {
       const profileContent = JSON.parse(profile.content);
       return profileContent.name || shortenHash(npub);
     }
