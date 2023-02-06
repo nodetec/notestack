@@ -20,11 +20,6 @@ import { FeedContext } from "@/app/context/feed-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 
 export default function ProfilePage() {
-  const [profileInfo, setProfileInfo] = useState({
-    name: "",
-    about: "",
-    picture: "",
-  });
   const TABS = ["Home", "About"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
@@ -35,6 +30,13 @@ export default function ProfilePage() {
   const { feed, setFeed } = useContext(FeedContext);
   // @ts-ignore
   const { setpubkeys } = useContext(ProfilesContext);
+
+  // @ts-ignore
+  const { profiles, setProfiles } = useContext(ProfilesContext);
+
+  const [name, setName] = useState<string>();
+  const [about, setAbout] = useState<string>("");
+
 
   if (pathname) {
     const npub = pathname.split("/").pop() || "";
@@ -50,8 +52,49 @@ export default function ProfilePage() {
       window.scrollTo(0, 0);
     }, []);
 
+    // get profile info
+    useEffect(() => {
+      if (!activeRelay) return;
+      const profilePubkey = nip19.decode(npub).data.toString();
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
+      if (cachedProfile) {
+        setName(cachedProfile.name);
+        setAbout(cachedProfile.about);
+      } else {
+        setName("");
+        setAbout("");
+        let sub = activeRelay.sub([
+          {
+            kinds: [0],
+            authors: [profilePubkey],
+          },
+        ]);
+        let events: Event[] = [];
+        sub.on("event", (event: Event) => {
+          // @ts-ignore
+          event.relayUrl = relayUrl;
+          events.push(event);
+        });
+        sub.on("eose", () => {
+          if (events.length !== 0) {
+            let event = events[0];
+            let profileKey = `profile_${relayUrl}_${event.pubkey}`;
+            const contentObj = JSON.parse(event.content);
+            setName(contentObj.name);
+            setAbout(contentObj.about);
+            profiles[profileKey] = contentObj;
+            setProfiles(profiles);
+          }
+          sub.unsub();
+        });
+      }
+    }, [activeRelay]);
+
+    // look up blogs
     useEffect(() => {
       let pubkeysSet = new Set<string>();
+      const profilePubkey = nip19.decode(npub).data.toString();
 
       if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
         setEvents([]);
@@ -97,7 +140,7 @@ export default function ProfilePage() {
         <Content>
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-5xl font-medium my-12">
-              {profileInfo.name || shortenHash(npub)}
+              {name || shortenHash(npub)}
             </h1>
             <AuthorTooltip npub={npub} />
           </div>
@@ -111,12 +154,12 @@ export default function ProfilePage() {
               profile={false}
             />
           ) : activeTab === "About" ? (
-            <About about={profileInfo.about} />
+            <About about={about} />
           ) : null}
         </Content>
 
         <Aside>
-          <Profile npub={npub} setProfileInfo={setProfileInfo} />
+          <Profile npub={npub} />
         </Aside>
       </Main>
     );
