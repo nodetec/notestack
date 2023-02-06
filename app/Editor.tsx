@@ -77,7 +77,7 @@ any) => {
 
   return (
     //state for mx-0
-    <div className={`h-full ${mdPreviewMode === "split" ? "mx-0" : "mx-80"}`}>
+    <div className={`h-full ${mdPreviewMode === "split" ? "mx-0" : "lg:mx-80 md:mx-3"}`}>
       <div className="bg-secondary p-2 flex items-center justify-between">
         <div className="flex gap-2">
           <Fragment>
