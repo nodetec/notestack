@@ -25,6 +25,7 @@ export default function HomePage() {
     until: undefined,
   };
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
+  const [exploreIsLoading, setExploreIsLoading] = useState<boolean>(true);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
   // const [pubkeys, setpubkeys] = useState<string[]>();
@@ -86,6 +87,7 @@ export default function HomePage() {
           if (pubkeysSet.size > 0) {
             setpubkeys(Array.from(pubkeysSet));
           }
+          setExploreIsLoading(false);
           sub.unsub();
         });
       }
@@ -173,14 +175,17 @@ export default function HomePage() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        {activeTab === "Explore" && (
-          <BlogFeed
-            events={exploreEvents}
-            setEvents={setExploreEvents}
-            filter={exploreFilter}
-            profile={true}
-          />
-        )}
+        {activeTab === "Explore" &&
+          (!exploreIsLoading ? (
+            <BlogFeed
+              events={exploreEvents}
+              setEvents={setExploreEvents}
+              filter={exploreFilter}
+              profile={true}
+            />
+          ) : (
+            <p>loading...</p>
+          ))}
         {activeTab === "Following" && (
           <BlogFeed
             events={followingEvents}

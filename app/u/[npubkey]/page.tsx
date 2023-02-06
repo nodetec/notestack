@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState<boolean>(true);
   // @ts-ignore
   const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
   // @ts-ignore
@@ -51,7 +52,7 @@ export default function ProfilePage() {
       window.scrollTo(0, 0);
     }, []);
 
-    // get profile info 
+    // get profile info
     // TODO: I think this is completely pointless
     useEffect(() => {
       if (!activeRelay) return;
@@ -94,6 +95,7 @@ export default function ProfilePage() {
 
     // look up blogs
     useEffect(() => {
+      setEventsLoading(true);
       let pubkeysSet = new Set<string>();
       const profilePubkey = nip19.decode(npub).data.toString();
 
@@ -134,6 +136,7 @@ export default function ProfilePage() {
           });
         }
       }
+      setEventsLoading(false);
     }, [activeRelay]);
 
     return (
@@ -148,12 +151,16 @@ export default function ProfilePage() {
           <FollowedRelays />
           <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "Home" ? (
-            <BlogFeed
-              events={events}
-              setEvents={setEvents}
-              filter={filter}
-              profile={false}
-            />
+            !eventsLoading ? (
+              <BlogFeed
+                events={events}
+                setEvents={setEvents}
+                filter={filter}
+                profile={false}
+              />
+            ) : (
+              <p>loading...</p>
+            )
           ) : activeTab === "About" ? (
             <About about={about} />
           ) : null}
