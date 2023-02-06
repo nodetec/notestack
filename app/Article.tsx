@@ -16,6 +16,8 @@ import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
+import { useRouter } from "next/navigation";
+import { CachedEventContext } from "./context/cached-event-provider";
 
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
@@ -40,6 +42,8 @@ const Article: FC<NoteProps> = ({
       .filter((t) => t.length <= 20);
   }
 
+  const router = useRouter();
+
   const tValues = getTValues(event.tags);
 
   const npub = nip19.npubEncode(event.pubkey);
@@ -55,6 +59,9 @@ const Article: FC<NoteProps> = ({
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { profiles } = useContext(ProfilesContext);
+
+  // @ts-ignore
+  const { setCachedEvent } = useContext(CachedEventContext);
 
   const getPicture = (event: Event) => {
     if (!activeRelay) return DUMMY_PROFILE_API(npub);
@@ -85,6 +92,11 @@ const Article: FC<NoteProps> = ({
     }
 
     return shortenHash(npub);
+  };
+
+  const routeCachedEvent = () => {
+    setCachedEvent(event);
+    router.push("/" + nip19.noteEncode(event.id!));
   };
 
   return (
@@ -123,7 +135,7 @@ const Article: FC<NoteProps> = ({
         <DeleteBlog event={event} />
       </div>
 
-      <Link href={`/${nip19.noteEncode(noteId!)}`}>
+      <div className="cursor-pointer" onClick={routeCachedEvent}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
@@ -146,7 +158,7 @@ const Article: FC<NoteProps> = ({
             </div>
           ) : null}
         </div>
-      </Link>
+      </div>
       <ul className="flex items-center gap-2 text-sm flex-wrap mt-4">
         {tValues.map((topic) => (
           <li key={topic}>

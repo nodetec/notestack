@@ -9,6 +9,7 @@ import ProfilesProvider from "./profiles-provider";
 import FeedProvider from "./feed-provider";
 import FollowersProvider from "./followers-provider";
 import FollowingProvider from "./following-provider";
+import CachedEventProvider from "./cached-event-provider";
 
 export default function Providers({ children }) {
   return (
@@ -17,13 +18,15 @@ export default function Providers({ children }) {
         <UserProvider>
           <FollowingProvider>
             <FollowersProvider>
-              <FeedProvider>
-                <ProfilesProvider>
-                  <NotifyProvider>
-                    <KeysProvider>{children}</KeysProvider>
-                  </NotifyProvider>
-                </ProfilesProvider>
-              </FeedProvider>
+              <CachedEventProvider>
+                <FeedProvider>
+                  <ProfilesProvider>
+                    <NotifyProvider>
+                      <KeysProvider>{children}</KeysProvider>
+                    </NotifyProvider>
+                  </ProfilesProvider>
+                </FeedProvider>
+              </CachedEventProvider>
             </FollowersProvider>
           </FollowingProvider>
         </UserProvider>

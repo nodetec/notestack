@@ -5,6 +5,7 @@ import { Event } from "nostr-tools";
 import { nip19 } from "nostr-tools";
 import Blog from "./Blog";
 import { RelayContext } from "../context/relay-provider";
+import { CachedEventContext } from "../context/cached-event-provider";
 
 export default function NotePage() {
   const pathname = usePathname();
@@ -12,15 +13,24 @@ export default function NotePage() {
   if (pathname) {
     eventId = pathname.split("/").pop() || "";
     eventId = nip19.decode(eventId).data.toString();
-    // console.log("eventId", eventId);
   }
 
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   const [events, setEvents] = useState<Event[]>([]);
 
+  // @ts-ignore
+  const { cachedEvent, setCachedEvent } = useContext(CachedEventContext);
+
   // todo cache
   useEffect(() => {
+    if (cachedEvent) {
+      console.log("Using cached event", cachedEvent);
+      setEvents([cachedEvent]);
+      setCachedEvent(undefined);
+      return;
+    }
+
     if (!activeRelay) return;
     if (events.length === 0) {
       let eventArray: Event[] = [];
