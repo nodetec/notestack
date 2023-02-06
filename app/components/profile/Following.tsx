@@ -15,7 +15,7 @@ export default function Following({ npub }: any) {
   const { following, setFollowing } = useContext(FollowingContext);
 
   // @ts-ignore
-  const { setpubkeys } = useContext(ProfilesContext);
+  const { setpubkeys, profiles, setProfiles } = useContext(ProfilesContext);
 
   const [followingEvents, setFollowingEvents] = useState<Event[]>();
 
@@ -29,16 +29,15 @@ export default function Following({ npub }: any) {
       let relayUrl = activeRelay.url.replace("wss://", "");
       let followingKey = `following_${relayUrl}_${profilePubkey}`;
 
-      if (following[followingKey]) {
+      if (following[followingKey] && following[followingKey].length >= 5) {
         // console.log("Cached events from context");
-        setFollowingEvents(following[followingKey]);
+        setFollowingEvents(following[followingKey].slice(5));
       } else {
         console.log("Getting events from relay");
         let sub = activeRelay.sub([
           {
             kinds: [3],
             authors: [profilePubkey],
-            limit: 5,
           },
         ]);
 
@@ -69,18 +68,77 @@ export default function Following({ npub }: any) {
             const contactPublicKeys = contacts.map((contact: any) => {
               return contact[1];
             });
-            setFollowingEvents(contactPublicKeys);
-          } else {
-            setFollowingEvents([]);
-          }
-          if (pubkeysSet.size > 0) {
-            setpubkeys(Array.from(pubkeysSet));
+
+            // console.log("CONTACT PUBLIC KEYS:", contactPublicKeys);
+
+            getProfiles(contactPublicKeys);
+
+            // console.log("FOLLOWING PROFILES:", followingProfiles);
+
+            // setFollowingEvents(followingProfiles);
           }
           sub.unsub();
         });
       }
     }
   }, [activeRelay]);
+
+  const getProfiles = (publicKeys: string[]) => {
+    let relayUrl = activeRelay.url.replace("wss://", "");
+
+    const cachedProfiles: Event[] = [];
+    const profilesToLookup: string[] = [];
+
+    publicKeys.forEach((pubkey) => {
+      const cachedProfile = profiles[`profile_${relayUrl}_${pubkey}`];
+      if (cachedProfile) {
+        cachedProfiles.push(cachedProfile);
+      } else {
+        profilesToLookup.push(pubkey);
+      }
+    });
+
+    if (profilesToLookup.length === 0) {
+      setFollowingEvents(cachedProfiles);
+    }
+
+    console.log("CACHED PROFILES:", cachedProfiles);
+    console.log("PROFILES TO LOOKUP:", profilesToLookup);
+
+    // check if any are already in context cache if they are add them to list
+    // if there are any left look them up
+    // add them to list
+
+    if (profilesToLookup.length > 0) {
+      let sub = activeRelay.sub([
+        {
+          kinds: [0],
+          authors: profilesToLookup,
+          limit: 5,
+        },
+      ]);
+      let events: Event[] = [];
+      sub.on("event", (event: Event) => {
+        // @ts-ignore
+        events.push(event);
+      });
+      sub.on("eose", () => {
+        if (events.length !== 0) {
+          let newProfiles: Event[] = [];
+          events.forEach((event) => {
+            newProfiles.push(event);
+            profiles[`profile_${relayUrl}_${event.pubkey}`];
+          });
+
+          console.log("LOOKED UP PROFILES DAWG:", newProfiles);
+
+          setFollowingEvents([...newProfiles, ...cachedProfiles]);
+          setProfiles(profiles);
+        }
+        sub.unsub();
+      });
+    }
+  };
 
   // TODO: add caching
   // useEffect(() => {

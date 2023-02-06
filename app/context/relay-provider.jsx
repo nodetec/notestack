@@ -22,6 +22,7 @@ export default function RelayProvider({ children }) {
     console.log("ACTIVE RELAY IS:", activeRelay);
     if (pendingActiveRelayUrl !== "") {
       const relay = relayInit(pendingActiveRelayUrl);
+      setIsLoading(true)
 
       // if (pendingActiveRelayUrl === relay.url) {
         relay.connect();

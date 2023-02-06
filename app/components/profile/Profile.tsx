@@ -5,7 +5,7 @@ const Profile = ({ npub }: any) => {
   return (
     <>
       <UserCard npub={npub} />
-      {/* <Following npub={npub} /> */}
+      <Following npub={npub} />
     </>
   );
 };

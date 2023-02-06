@@ -13,10 +13,13 @@ import LightningTip from "@/app/LightningTip";
 import { Event, nip19 } from "nostr-tools";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
+import { KeysContext } from "@/app/context/keys-provider";
 
 export default function UserCard({ npub }: any) {
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { activeRelay, isLoading } = useContext(RelayContext);
+  // @ts-ignore
+  const { keys } = useContext(KeysContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
@@ -25,10 +28,9 @@ export default function UserCard({ npub }: any) {
   const { user } = useContext(UserContext);
 
   const [loggedInPubkey, setLoggedInPubkey] = useState<string>();
-  const [profilePubkey, setProfilePubkey] = useState<string>();
 
   // @ts-ignore
-  const { profiles, setProfiles } = useContext(ProfilesContext);
+  const { profiles, setProfiles, reload } = useContext(ProfilesContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
@@ -41,14 +43,14 @@ export default function UserCard({ npub }: any) {
   // check if it's some other profile
   // if so see if we have cached profile info
   // if we don't look up the user
+  const profilePubkey = nip19.decode(npub).data.toString();
 
   useEffect(() => {
     if (!activeRelay) return;
-    const profilePubkey = nip19.decode(npub).data.toString();
-    setProfilePubkey(profilePubkey);
+    console.log("HIIIIIIIIII!!!!!!!!!!!");
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
-    if (cachedProfile) {
+    if (cachedProfile && cachedProfile.content) {
       const profileContent = JSON.parse(cachedProfile.content);
       setName(profileContent.name);
       setAbout(profileContent.about);
@@ -105,17 +107,11 @@ export default function UserCard({ npub }: any) {
         sub.unsub();
       });
     }
-  }, [activeRelay]);
+  }, [activeRelay, reload, isLoading]);
 
   useEffect(() => {
-    if (!activeRelay) return;
-    if (!user) return;
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    if (!user[`user_${relayUrl}`]) return;
-    const cachedUser = user[`user_${relayUrl}`];
-    if (!cachedUser) return;
-    setLoggedInPubkey(cachedUser.pubkey);
-  }, [activeRelay]);
+    setLoggedInPubkey(keys.publicKey);
+  }, []);
 
   const handleClick = async () => {
     setIsOpen(!isOpen);
@@ -155,8 +151,8 @@ export default function UserCard({ npub }: any) {
         )}
       </div>
       <p className="text-sm mb-4 text-gray">{about}</p>
-      {loggedInPubkey &&
-        (loggedInPubkey === profilePubkey ? (
+      {keys.publicKey &&
+        (keys.publicKey === profilePubkey ? (
           <Buttons>
             <Button
               color="green"
@@ -171,9 +167,7 @@ export default function UserCard({ npub }: any) {
           <div className="flex items-center gap-2">
             <FollowButton
               loggedInUserPublicKey={loggedInPubkey}
-              // currentContacts={loggedInContactList}
               profilePublicKey={profilePubkey}
-              // contacts={contacts}
             />
             {(lud06 || lud16) && (
               <Button
@@ -186,26 +180,26 @@ export default function UserCard({ npub }: any) {
             )}
           </div>
         ))}
-      {/* {loggedInPubkey === profilePubkey ? ( */}
-      {/*   <AccountSettings */}
-      {/*     name={name} */}
-      {/*     nip05={nip05} */}
-      {/*     about={about} */}
-      {/*     picture={picture} */}
-      {/*     loggedInPubkey={loggedInPubkey} */}
-      {/*     lud06={lud06} */}
-      {/*     lud16={lud16} */}
-      {/*     isOpen={isOpen} */}
-      {/*     setIsOpen={setIsOpen} */}
-      {/*   /> */}
-      {/* ) : ( */}
-      {/*   <LightningTip */}
-      {/*     lud06={lud06} */}
-      {/*     lud16={lud16} */}
-      {/*     isTipOpen={isTipOpen} */}
-      {/*     setIsTipOpen={setIsTipOpen} */}
-      {/*   /> */}
-      {/* )} */}
+      {name && keys.publicKey === profilePubkey ? (
+        <AccountSettings
+          name={name}
+          nip05={nip05}
+          about={about}
+          picture={picture}
+          loggedInPubkey={keys.publicKey}
+          lud06={lud06}
+          lud16={lud16}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
+      ) : (
+        <LightningTip
+          lud06={lud06}
+          lud16={lud16}
+          isTipOpen={isTipOpen}
+          setIsTipOpen={setIsTipOpen}
+        />
+      )}
     </div>
   );
 }

@@ -105,7 +105,7 @@ const MarkdownDisplay = ({
     const profilePubkey = nip19.decode(npub).data.toString();
     let relayUrl = activeRelay.url.replace("wss://", "");
     const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
-    if (cachedProfile) {
+    if (cachedProfile && cachedProfile.content) {
       const profileContent = JSON.parse(cachedProfile.content);
       setName(profileContent.name);
       setPicture(profileContent.picture);

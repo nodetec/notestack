@@ -8,6 +8,7 @@ export const ProfilesContext = createContext([]);
 export default function ProfilesProvider({ children }) {
   const [profiles, setProfiles] = useState({});
   const [pubkeys, setpubkeys] = useState([]);
+  const [reload, setReload] = useState(false);
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
@@ -44,7 +45,7 @@ export default function ProfilesProvider({ children }) {
 
   return (
     <ProfilesContext.Provider
-      value={{ profiles, setProfiles, pubkeys, setpubkeys }}
+      value={{ profiles, setProfiles, pubkeys, setpubkeys, reload, setReload }}
     >
       {children}
     </ProfilesContext.Provider>

@@ -8,44 +8,48 @@ import { NostrService } from "@/app/lib/nostr";
 import PopupInput from "@/app/PopupInput";
 import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 
-export default function AccountSettings({ isOpen, setIsOpen }: any) {
-  const [newName, setNewName] = useState<string>();
-  const [newAbout, setNewAbout] = useState<string>();
-  const [newPicture, setNewPicture] = useState<string>();
-  const [newNip05, setNewNip05] = useState<string>();
-  const [newLud06, setNewLud06] = useState<string>();
-  const [newLud16, setNewLud16] = useState<string>();
-  const [newLnAddress, setNewLnAddress] = useState<any>();
+export default function AccountSettings({ name, nip05, about, picture, loggedInPubkey, lud06, lud16, isOpen, setIsOpen }: any) {
+  const [newName, setNewName] = useState<string>(name);
+  const [newAbout, setNewAbout] = useState<string>(about);
+  const [newPicture, setNewPicture] = useState<string>(picture);
+  const [newNip05, setNewNip05] = useState<string>(nip05);
+  const [newLud06, setNewLud06] = useState<string>(lud06);
+  const [newLud16, setNewLud16] = useState<string>(lud16);
+  const [newLnAddress, setNewLnAddress] = useState<any>(lud16);
   const [convertedAddress, setConvertedAddress] = useState<any>();
-  const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
+  // const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
+  // @ts-ignore
+  const { setpubkeys, profiles, setProfiles, setReload, reload } =
+    useContext(ProfilesContext);
 
-  useEffect(() => {
+  // useEffect(() => {
     // console.log("CONTENT:", user.content);
-    if (!activeRelay) return;
-    console.log("THE USER:", user);
+    // if (!activeRelay) return;
+    // console.log("THE USER:", user);
 
-    if (!activeRelay) return;
-    if (!user) return;
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    if (!user[`user_${relayUrl}`]) return;
-    setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
+    // if (!activeRelay) return;
+    // if (!user) return;
+    // let relayUrl = activeRelay.url.replace("wss://", "");
+    // if (!user[`user_${relayUrl}`]) return;
+    // setLoggedInPubkey(user[`user_${relayUrl}`].pubkey);
 
-    if (user[`user_${relayUrl}`].content) {
-      const contentObj = JSON.parse(user[`user_${relayUrl}`].content);
-      setNewLnAddress(contentObj.lud16);
-      setNewName(contentObj.name);
-      setNewAbout(contentObj.about);
-      setNewPicture(contentObj.picture);
-      setNewNip05(contentObj.nip05);
-      setNewLud06(contentObj.lud06);
-      setNewLud16(contentObj.lud16);
-    }
-  }, [user, isOpen]);
+    // if (user[`user_${relayUrl}`].content) {
+      // const contentObj = JSON.parse(user[`user_${relayUrl}`].content);
+      // setNewLnAddress(contentObj.lud16);
+      // setNewName(contentObj.name);
+      // setNewAbout(contentObj.about);
+      // setNewPicture(contentObj.picture);
+      // setNewNip05(contentObj.nip05);
+      // setNewLud06(contentObj.lud06);
+      // setNewLud16(contentObj.lud16);
+    // }
+  // }, [user, isOpen, reload]);
 
   async function convert(newLnAddress: string) {
     if (newLnAddress) {
@@ -123,8 +127,12 @@ export default function AccountSettings({ isOpen, setIsOpen }: any) {
       setUser(event);
     });
     pub.on("seen", () => {
-      // TODO: set profile in context
       // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      profiles[`profile_${relayUrl}_${event.pubkey}`] = event;
+
+      setReload(!reload);
+      setProfiles(profiles);
       setIsOpen(!isOpen);
     });
     pub.on("failed", (reason: string) => {

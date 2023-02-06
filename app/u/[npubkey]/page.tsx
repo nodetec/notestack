@@ -32,7 +32,7 @@ export default function ProfilePage() {
   const { setpubkeys } = useContext(ProfilesContext);
 
   // @ts-ignore
-  const { profiles, setProfiles } = useContext(ProfilesContext);
+  const { profiles, setProfiles, reload } = useContext(ProfilesContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>("");
@@ -51,13 +51,14 @@ export default function ProfilePage() {
       window.scrollTo(0, 0);
     }, []);
 
-    // get profile info
+    // get profile info 
+    // TODO: I think this is completely pointless
     useEffect(() => {
       if (!activeRelay) return;
       const profilePubkey = nip19.decode(npub).data.toString();
       let relayUrl = activeRelay.url.replace("wss://", "");
       const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
-      if (cachedProfile) {
+      if (cachedProfile && cachedProfile.content) {
         const profileContent = JSON.parse(cachedProfile.content);
         setName(profileContent.name);
         setAbout(profileContent.about);
@@ -89,7 +90,7 @@ export default function ProfilePage() {
           sub.unsub();
         });
       }
-    }, [activeRelay]);
+    }, [activeRelay, reload]);
 
     // look up blogs
     useEffect(() => {

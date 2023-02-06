@@ -75,19 +75,19 @@ export default function Contact({ contact, followingsCount }: any) {
           <p className="text-sm text-gray-hover pb-2 border-b border-b-light-gray">
             {contentObj?.about}
           </p>
-          <div className="flex items-center gap-2 justify-between pt-2">
-            <span className="text-gray font-xs">
-              {followingsCount} Followings
-            </span>
-            <Button
-              color="green"
-              size="xs"
-              className="py-1 px-2 text-xs"
-              // FIXME: need follow functionality
-            >
-              Follow
-            </Button>
-          </div>
+          {/* <div className="flex items-center gap-2 justify-between pt-2"> */}
+          {/* <span className="text-gray font-xs"> */}
+          {/*   {followingsCount} Followings */}
+          {/* </span> */}
+          {/* <Button */}
+          {/*   color="green" */}
+          {/*   size="xs" */}
+          {/*   className="py-1 px-2 text-xs" */}
+          {/*   // FIXME: need follow functionality */}
+          {/* > */}
+          {/*   Follow */}
+          {/* </Button> */}
+          {/* </div> */}
         </div>
       </Tooltip>
     </li>
