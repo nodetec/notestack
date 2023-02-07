@@ -72,7 +72,7 @@ any) => {
   const handleTextChange = (evn: any) => {
     setText(evn.target.value);
     setTextValid(true);
-    setBlog({ ...blog, text: evn.target.value });
+    setBlog({ ...blog, content: evn.target.value });
   };
 
   return (

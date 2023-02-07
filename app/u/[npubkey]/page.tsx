@@ -42,7 +42,7 @@ export default function ProfilePage() {
     const npub = pathname.split("/").pop() || "";
     const profilePubkey = nip19.decode(npub).data.toString();
     const filter = {
-      kinds: [2222],
+      kinds: [30023],
       authors: [profilePubkey],
       limit: 50,
       until: undefined,

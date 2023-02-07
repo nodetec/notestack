@@ -4,13 +4,19 @@ import { createContext, useState } from "react";
 
 export const BlogContext = createContext({
   title: null,
-  body: null,
+  summary: null,
+  content: null,
+  image: null,
+  identifier: null,
 });
 
 export default function BlogProvider({ children }) {
   const [blog, setBlog] = useState({
     title: null,
-    body: null,
+    summary: null,
+    content: null,
+    image: null,
+    identifier: null,
   });
 
   return (

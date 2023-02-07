@@ -34,7 +34,7 @@ export default function TagPage() {
   const { setpubkeys } = useContext(ProfilesContext);
 
   const filter = {
-    kinds: [2222],
+    kinds: [30023],
     limit: 100,
     "#t": [tagname],
   };

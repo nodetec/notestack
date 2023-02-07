@@ -47,18 +47,22 @@ const WriteButton = () => {
   };
 
   const submitPublish = async () => {
-    const { title, text } = blog;
+    const { title, summary, content, image, indentifier } = blog;
 
     const tags = [
       ["client", "blogstack.io"],
-      ["subject", title],
+      ["title", title],
+      ["d", NostrService.randomId()],
     ];
+
+    if (image && image !== "") tags.push(["image", image]);
+    if (summary && summary !== "") tags.push(["summary", summary]);
 
     for (let tagValue of tagsList) {
       tags.push(["t", tagValue.value]);
     }
 
-    let event = NostrService.createEvent(2222, publicKey, text, tags);
+    let event = NostrService.createEvent(30023, publicKey, content, tags);
 
     try {
       event = await NostrService.addEventData(event);

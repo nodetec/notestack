@@ -20,7 +20,7 @@ export default function HomePage() {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const exploreFilter = {
-    kinds: [2222],
+    kinds: [30023],
     limit: 50,
     authors: undefined,
     until: undefined,
@@ -49,49 +49,48 @@ export default function HomePage() {
 
   useEffect(() => {
     let pubkeysSet = new Set<string>();
+    if (!activeRelay) return;
 
-    if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
-      setExploreEvents([]);
-      // console.log("ACTIVERELAY", activeRelay);
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let feedKey = `latest_${relayUrl}`;
+    setExploreEvents([]);
+    // console.log("ACTIVERELAY", activeRelay);
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    let feedKey = `latest_${relayUrl}`;
 
-      if (feed[feedKey]) {
-        // console.log("Cached events from context");
-        setExploreEvents(feed[feedKey]);
-      } else {
-        // console.log("Getting events from relay");
-        let sub = activeRelay.sub([exploreFilter]);
+    if (feed[feedKey]) {
+      // console.log("Cached events from context");
+      setExploreEvents(feed[feedKey]);
+    } else {
+      // console.log("Getting events from relay");
+      let sub = activeRelay.sub([exploreFilter]);
 
-        let events: Event[] = [];
+      let events: Event[] = [];
 
-        sub.on("event", (event: Event) => {
-          // console.log("getting event", event, "from relay:", relay.url);
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-          pubkeysSet.add(event.pubkey);
-        });
+      sub.on("event", (event: Event) => {
+        console.log("getting event", event, "from relay:", activeRelay.url);
+        // @ts-ignore
+        event.relayUrl = relayUrl;
+        events.push(event);
+        pubkeysSet.add(event.pubkey);
+      });
 
-        sub.on("eose", () => {
-          // console.log("PUBKEYS ARE:", pubkeysSet);
-          // console.log("EOSE initial latest events from", activeRelay.url);
-          const filteredEvents = NostrService.filterBlogEvents(events);
-          const feedKey = `latest_${relayUrl}`;
-          feed[feedKey] = filteredEvents;
-          setFeed(feed);
-          // console.log("FILTERED____EVENTS", filteredEvents);
-          if (filteredEvents.length > 0) {
-            setExploreEvents(filteredEvents);
-          } else {
-            setExploreEvents([]);
-          }
-          if (pubkeysSet.size > 0) {
-            setpubkeys(Array.from(pubkeysSet));
-          }
-          sub.unsub();
-        });
-      }
+      sub.on("eose", () => {
+        // console.log("PUBKEYS ARE:", pubkeysSet);
+        // console.log("EOSE initial latest events from", activeRelay.url);
+        const filteredEvents = NostrService.filterBlogEvents(events);
+        const feedKey = `latest_${relayUrl}`;
+        feed[feedKey] = filteredEvents;
+        setFeed(feed);
+        // console.log("FILTERED____EVENTS", filteredEvents);
+        if (filteredEvents.length > 0) {
+          setExploreEvents(filteredEvents);
+        } else {
+          setExploreEvents([]);
+        }
+        if (pubkeysSet.size > 0) {
+          setpubkeys(Array.from(pubkeysSet));
+        }
+        sub.unsub();
+      });
     }
   }, [activeRelay]);
 
@@ -104,7 +103,7 @@ export default function HomePage() {
 
       let followingKey = `following_${relayUrl}_${keys.publicKey}`;
       console.log("FOLLOWING KEY:", followingKey);
-      
+
       const followingEvents = following[followingKey];
       console.log("FOLLOWING EVENTS:", followingEvents);
       let followingPublicKeys: string[] = [];
@@ -123,7 +122,7 @@ export default function HomePage() {
         return;
       }
       const newfollowingFilter = {
-        kinds: [2222],
+        kinds: [30023],
         limit: 50,
         authors: followingPublicKeys,
         until: undefined,
@@ -136,7 +135,7 @@ export default function HomePage() {
       let followingFeedKey = `following_${relayUrl}`;
       if (feed[followingFeedKey]) {
         // console.log("Cached events from context");
-        console.log("FOLLOWING EVENTS:", feed[followingKey])
+        console.log("FOLLOWING EVENTS:", feed[followingKey]);
         setFollowingEvents(feed[followingFeedKey]);
       } else {
         let sub = activeRelay.sub([newfollowingFilter]);
@@ -152,11 +151,11 @@ export default function HomePage() {
         sub.on("eose", () => {
           console.log("EOSE initial latest events from", activeRelay.url);
           const filteredEvents = NostrService.filterBlogEvents(events);
-          console.log("FILTERED EVENTS:", filteredEvents)
+          console.log("FILTERED EVENTS:", filteredEvents);
           const feedKey = `following_${relayUrl}`;
-          console.log("FEED KEY:", feedKey)
+          console.log("FEED KEY:", feedKey);
           feed[feedKey] = filteredEvents;
-          console.log("FEED:", feed)
+          console.log("FEED:", feed);
           setFeed(feed);
 
           if (pubkeysSet.size > 0) {

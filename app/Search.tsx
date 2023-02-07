@@ -56,7 +56,7 @@ const Search = () => {
     if (searchTerm.length > 0) {
       let sub = activeRelay.sub([
         {
-          kinds: [2222],
+          kinds: [30023],
           "#t": [searchTerm],
         },
       ]);

@@ -159,16 +159,29 @@ export namespace NostrService {
     return filteredEvents;
   }
 
+  export function randomId() {
+    // @ts-ignore
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11)
+      .replace(/[018]/g, (c: any) =>
+        (
+          c ^
+          (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+        ).toString(16)
+      )
+      .slice(0, 8);
+  }
+
   export function filterBlogEvents(eventArray: Event[]) {
     const filteredEvents = eventArray.filter((e1: Event, index: number) => {
       if (e1.content === "") {
         return false;
       }
-      const title = getTagValues("subject", e1.tags);
+      const title = getTagValues("title", e1.tags);
       if (!title || title === "") {
         return false;
       }
-      return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+      // return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+      return true
     });
     return filteredEvents;
   }

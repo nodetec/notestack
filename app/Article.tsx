@@ -48,7 +48,7 @@ const Article: FC<NoteProps> = ({
 
   const npub = nip19.npubEncode(event.pubkey);
 
-  const title = getTagValues("subject", tags);
+  const title = getTagValues("title", tags);
   // const actualTags = getTagValues("tags", tags);
   const thumbnail = markdownImageContent(content);
 
@@ -63,7 +63,7 @@ const Article: FC<NoteProps> = ({
   // @ts-ignore
   const { setCachedEvent } = useContext(CachedEventContext);
 
-  const [picture, setPicture] = useState();
+  const [picture, setPicture] = useState(DUMMY_PROFILE_API(npub));
   const [name, setName] = useState();
 
   useEffect(() => {
@@ -81,6 +81,10 @@ const Article: FC<NoteProps> = ({
     if (profile && profile.content) {
       // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
+      if (profileContent.picture === "") {
+      return DUMMY_PROFILE_API(npub);
+      }
+
       return profileContent.picture || DUMMY_PROFILE_API(npub);
     }
 

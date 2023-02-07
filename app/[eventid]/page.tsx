@@ -38,7 +38,7 @@ export default function NotePage() {
       let sub = activeRelay.sub([
         {
           ids: [eventId],
-          kinds: [2222],
+          kinds: [30023],
         },
       ]);
       sub.on("event", (event: Event) => {
