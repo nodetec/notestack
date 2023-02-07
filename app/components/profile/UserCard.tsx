@@ -135,9 +135,9 @@ export default function UserCard({ npub }: any) {
       <Followers npub={npub} />
       <div className="font-semibold">
         {nip05 && (
-          <div className="text-sm text-gray mb-2">
+          <div className="text-sm text-gray mb-2 ">
             <div className="flex items-center gap-1">
-              <span>{nip05}</span>
+              <span className="max-w-[8rem] overflow-scroll">{nip05}</span>
               <BsPatchCheckFill className="text-blue-500" size="14" />
             </div>
           </div>
