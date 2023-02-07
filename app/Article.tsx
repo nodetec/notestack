@@ -125,7 +125,7 @@ const Article: FC<NoteProps> = ({
                         src={picture}
                         alt={""}
                       />
-                      <span className="group-hover:underline">{name}</span>
+                      <span className="group-hover:underline text-xs">{name}</span>
                     </Item>
                   )}
                 </Link>
@@ -135,7 +135,7 @@ const Article: FC<NoteProps> = ({
             <DatePosted timestamp={createdAt} />
             <span>·</span>
             {/* @ts-ignore */}
-            <span className="text-gray">{event.relayUrl}</span>
+            <span className="text-gray text-xs">{event.relayUrl}</span>
           </div>
         </div>
         <DeleteBlog event={event} />
@@ -145,11 +145,11 @@ const Article: FC<NoteProps> = ({
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
-              <h2 className="text-2xl font-bold text-black twolines mb-2">
+              <h2 className="text-sm sm:text-2xl font-bold text-black twolines mb-2">
                 {title}
               </h2>
             ) : null}
-            <p className="text-gray text-sm leading-6">
+            <p className="text-gray text-sm leading-6 hidden sm:block">
               {content.length > 250 ? content.slice(0, 250) + "..." : content}
             </p>
           </div>
@@ -157,7 +157,7 @@ const Article: FC<NoteProps> = ({
           {thumbnail ? (
             <div>
               <img
-                className="w-32 h-32 object-contain"
+                className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
                 src={thumbnail.groups?.filename}
                 alt={thumbnail.groups?.title}
               />
@@ -200,7 +200,7 @@ export const DatePosted = ({ timestamp }: { timestamp: number }) => {
   };
 
   return (
-    <Item className="text-gray text-sm">{timeStampToDate(timestamp)}</Item>
+    <Item className="text-gray text-xs sm:text-sm">{timeStampToDate(timestamp)}</Item>
   );
 };
 

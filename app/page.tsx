@@ -205,7 +205,7 @@ export default function HomePage() {
           />
         )}
       </Content>
-      <Aside>
+      <Aside className="hidden md:flex">
         {followingEvents.length > 0 && (
           <RecommendedEvents
             title="Recommended Blogs"
