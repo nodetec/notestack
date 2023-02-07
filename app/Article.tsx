@@ -58,10 +58,18 @@ const Article: FC<NoteProps> = ({
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
-  const { profiles } = useContext(ProfilesContext);
+  const { profiles, reload } = useContext(ProfilesContext);
 
   // @ts-ignore
   const { setCachedEvent } = useContext(CachedEventContext);
+
+  const [picture, setPicture] = useState();
+  const [name, setName] = useState();
+
+  useEffect(() => {
+    setName(getName(event));
+    setPicture(getPicture(event));
+  }, [activeRelay, reload]);
 
   const getPicture = (event: Event) => {
     if (!activeRelay) return DUMMY_PROFILE_API(npub);
@@ -114,12 +122,10 @@ const Article: FC<NoteProps> = ({
                     <Item className="text-gray-hover">
                       <img
                         className="rounded-full w-6 h-6 object-cover"
-                        src={getPicture(event)}
+                        src={picture}
                         alt={""}
                       />
-                      <span className="group-hover:underline">
-                        {getName(event)}
-                      </span>
+                      <span className="group-hover:underline">{name}</span>
                     </Item>
                   )}
                 </Link>

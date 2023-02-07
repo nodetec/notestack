@@ -4,10 +4,9 @@ import { IoChevronDown } from "react-icons/io5";
 import Button from "./Button";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import ProfileMenu from "./ProfileMenu";
-import type { Event, Relay } from "nostr-tools";
+import type { Event } from "nostr-tools";
 import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
-import { NostrService } from "./lib/nostr";
 import { FollowingContext } from "./context/following-provider";
 
 interface AccountButtonProps {

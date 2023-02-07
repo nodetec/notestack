@@ -105,7 +105,7 @@ export default function HomePage() {
       const followingEvents = following[followingKey];
       let followingPublicKeys: string[] = [];
 
-      if (followingEvents) {
+      if (followingEvents && following[followingKey][0]) {
         const contacts = following[followingKey][0].tags;
 
         followingPublicKeys = contacts.map((contact: any) => {

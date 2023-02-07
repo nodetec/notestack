@@ -28,9 +28,6 @@ export default function RecommendedEvents({
   const { activeRelay, isLoading } = useContext(RelayContext);
   // const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
 
-  // @ts-ignore
-  const { feed, setFeed } = useContext(FeedContext);
-
   // useEffect(() => {
   //   if (!activeRelay) return;
   //   // if (!feed) return;

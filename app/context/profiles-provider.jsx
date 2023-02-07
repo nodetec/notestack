@@ -38,6 +38,7 @@ export default function ProfilesProvider({ children }) {
             // setProfiles([...profiles]);
             const newProfiles = profiles
             setProfiles(newProfiles);
+            setReload(!reload);
           });
         }
         sub.unsub();
