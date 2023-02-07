@@ -38,7 +38,7 @@ export default function RecommendedEvents({
             noteId={event.id!}
             event={event}
             pubkey={showProfile ? event.pubkey : undefined}
-            title={getTagValues("subject", event.tags)}
+            title={getTagValues("title", event.tags)}
             thumbnail={
               showThumbnail
                 ? markdownImageContent(event.content) || undefined
