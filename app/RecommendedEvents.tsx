@@ -15,6 +15,7 @@ interface RecommendedEventsProps {
   title: string;
   showProfile?: boolean;
   showThumbnail?: boolean;
+  className?: string;
 }
 
 export default function RecommendedEvents({
@@ -22,13 +23,14 @@ export default function RecommendedEvents({
   title,
   showProfile = false,
   showThumbnail = false,
+  className = ""
 }: RecommendedEventsProps) {
   // let recommendedEvents: Event[] = [];
 
   // const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
 
   return (
-    <AsideSection title={title}>
+    <AsideSection title={title} className={className}>
       <ul className="flex flex-col gap-2">
         {events.map((event: any) => (
           <Event

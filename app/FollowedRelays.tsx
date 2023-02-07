@@ -38,8 +38,8 @@ export default function FollowedRelays() {
                 onClick={() => handleRelayClick(relay)}
                 className={
                   activeRelay && activeRelay.url === "wss://" + relay
-                    ? "border border-black bg-black text-white rounded-full p-2"
-                    : "border border-black rounded-full p-2"
+                    ? "border border-black bg-black text-white text-xs sm:text-base rounded-full p-1 sm:p-2"
+                    : "border border-black rounded-full text-xs sm:text-base p-1 sm:p-2"
                 }
               >
                 {relay}

@@ -54,7 +54,7 @@
   "resolved" "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.20.14.tgz"
   "version" "7.20.14"
 
-"@babel/core@*", "@babel/core@^7.0.0", "@babel/core@^7.0.0-0", "@babel/core@^7.14.3":
+"@babel/core@^7.0.0", "@babel/core@^7.0.0-0", "@babel/core@^7.14.3":
   "integrity" "sha512-XsMfHovsUYHFMdrIHkZphTN/2Hzzi78R08NuHfDBehym2VsPDL6Zn/JAD/JQdnRvbSsbQc4mVaU1m6JgtTEElg=="
   "resolved" "https://registry.npmjs.org/@babel/core/-/core-7.20.12.tgz"
   "version" "7.20.12"
@@ -207,7 +207,7 @@
   dependencies:
     "regenerator-runtime" "^0.13.11"
 
-"@babel/template@*", "@babel/template@^7.18.10", "@babel/template@^7.20.7":
+"@babel/template@^7.18.10", "@babel/template@^7.20.7":
   "integrity" "sha512-8SegXApWe6VoNw0r9JHpSteLKTpTiLZ4rMlGIm9JQ18KiCtyQiAMEazujAHrUS5flrcqYZa75ukev3P6QmUwUw=="
   "resolved" "https://registry.npmjs.org/@babel/template/-/template-7.20.7.tgz"
   "version" "7.20.7"
@@ -450,9 +450,9 @@
   "resolved" "https://registry.npmjs.org/@next/font/-/font-13.1.5.tgz"
   "version" "13.1.5"
 
-"@next/swc-darwin-arm64@13.1.1":
-  "integrity" "sha512-9zRJSSIwER5tu9ADDkPw5rIZ+Np44HTXpYMr0rkM656IvssowPxmhK0rTreC1gpUCYwFsRbxarUJnJsTWiutPg=="
-  "resolved" "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-13.1.1.tgz"
+"@next/swc-darwin-x64@13.1.1":
+  "integrity" "sha512-qWr9qEn5nrnlhB0rtjSdR00RRZEtxg4EGvicIipqZWEyayPxhUu6NwKiG8wZiYZCLfJ5KWr66PGSNeDMGlNaiA=="
+  "resolved" "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-13.1.1.tgz"
   "version" "13.1.1"
 
 "@noble/hashes@^0.5.7":
@@ -2781,11 +2781,6 @@
     "merge-stream" "^2.0.0"
     "supports-color" "^8.0.0"
 
-"jotai@^1.12.1":
-  "integrity" "sha512-RUmH1S4vLsG3V6fbGlKzGJnLrDcC/HNb5gH2AeA9DzuJknoVxSGvvg8OBB7lke+gDc4oXmdVsaKn/xDUhWZ0vw=="
-  "resolved" "https://registry.npmjs.org/jotai/-/jotai-1.13.1.tgz"
-  "version" "1.13.1"
-
 "js-sdsl@^4.1.4":
   "integrity" "sha512-mifzlm2+5nZ+lEcLJMoBK0/IH/bDg8XnJfd/Wq6IP+xoCjLZsTOnV2QpxlVbX9bMnkl5PdEjNtBJ9Cj1NjifhQ=="
   "resolved" "https://registry.npmjs.org/js-sdsl/-/js-sdsl-4.3.0.tgz"
@@ -3160,15 +3155,7 @@
   "resolved" "https://registry.npmjs.org/normalize-range/-/normalize-range-0.1.2.tgz"
   "version" "0.1.2"
 
-"nostr-react@^0.6.4":
-  "integrity" "sha512-esRgmhTP5kPQ8ufs8cFAQxxJtMmzuba/k2QfXevG/ejHP3IMa41pb82qi8V0aPzY3KJ0Nr54x0OSa39d2InKzA=="
-  "resolved" "https://registry.npmjs.org/nostr-react/-/nostr-react-0.6.4.tgz"
-  "version" "0.6.4"
-  dependencies:
-    "jotai" "^1.12.1"
-    "nostr-tools" "^1.1.0"
-
-"nostr-tools@^1.1.0", "nostr-tools@^1.2.1":
+"nostr-tools@^1.2.1":
   "integrity" "sha512-SL0sst29mrQ7oUPGQn+NMH4yuTe69a8S4bliNpYB2IG0fDl3Cx+xSLnuCTb4nZiNalatYsA5l+751wQiDGA3+A=="
   "resolved" "https://registry.npmjs.org/nostr-tools/-/nostr-tools-1.2.1.tgz"
   "version" "1.2.1"
@@ -3590,7 +3577,7 @@
     "loose-envify" "^1.4.0"
     "prop-types" "^15.6.2"
 
-"react@*", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^18.2.0", "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", "react@>=16", "react@>=16.6.0", "react@>=16.8", "react@>=16.8.0", "react@>=16.9.0", "react@18.2.0":
+"react@*", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^18.2.0", "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", "react@>=16.6.0", "react@>=16.8.0", "react@>=16.9.0", "react@18.2.0":
   "integrity" "sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ=="
   "resolved" "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   "version" "18.2.0"
