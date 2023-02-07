@@ -12,7 +12,7 @@ const Header = () => {
             <Logo />
             <Search />
           </div>
-          <div className="flex gap-4 items-center">
+          <div className="hidden sm:flex gap-4 items-center">
             <WriteButton />
             <Login />
           </div>
