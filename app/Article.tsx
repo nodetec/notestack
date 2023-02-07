@@ -125,7 +125,7 @@ const Article: FC<NoteProps> = ({
                         src={picture}
                         alt={""}
                       />
-                      <span className="group-hover:underline text-xs">{name}</span>
+                      <span className="group-hover:underline text-xs md:text-sm">{name}</span>
                     </Item>
                   )}
                 </Link>
@@ -135,7 +135,7 @@ const Article: FC<NoteProps> = ({
             <DatePosted timestamp={createdAt} />
             <span>·</span>
             {/* @ts-ignore */}
-            <span className="text-gray text-xs">{event.relayUrl}</span>
+            <span className="text-gray text-xs md:text-sm">{event.relayUrl}</span>
           </div>
         </div>
         <DeleteBlog event={event} />
