@@ -156,7 +156,7 @@ export default function HomePage() {
           if (filteredEvents.length > 0) {
             setFollowingEvents(filteredEvents);
           } else {
-            setExploreEvents([]);
+            setFollowingEvents([]);
           }
           sub.unsub();
         });
@@ -194,11 +194,13 @@ export default function HomePage() {
         )}
       </Content>
       <Aside>
-        <RecommendedEvents
-          title="Recommended Blogs"
-          showProfile
-          events={followingEvents.slice(0, 3)}
-        />
+        {followingEvents.length > 0 && (
+          <RecommendedEvents
+            title="Recommended Blogs"
+            showProfile
+            events={followingEvents.slice(0, 3)}
+          />
+        )}
         <Topics
           title="Recommended Topics"
           TOPICS={[
