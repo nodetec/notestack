@@ -19,16 +19,30 @@ export default function Login() {
 
     const getConnected = async (shouldReconnect: string) => {
       let enabled = false;
+
+      // @ts-ignore
+      if (typeof window.nostr === "undefined") {
+        return;
+      }
+
+      if (shouldReconnect === "true") {
+        // @ts-ignore
+        const publicKey = await nostr.getPublicKey();
+        // console.log("public key", publicKey);
+        setKeys({ privateKey: "", publicKey: publicKey });
+      }
+
+      // @ts-ignore
+      if (typeof window.webln === "undefined") {
+        return;
+      }
+
       // @ts-ignore
       if (shouldReconnect === "true" && !webln.executing) {
         try {
           // @ts-ignore
           enabled = await window.webln.enable();
           setIsLightningConnected(true);
-          // @ts-ignore
-          const publicKey = await nostr.getPublicKey();
-          // console.log("public key", publicKey);
-          setKeys({ privateKey: "", publicKey: publicKey });
         } catch (e: any) {
           console.log(e.message);
         }
@@ -43,13 +57,18 @@ export default function Login() {
 
   const loginHandler = async () => {
     // @ts-ignore
+    if (typeof window.nostr !== "undefined") {
+      // @ts-ignore
+      const publicKey = await nostr.getPublicKey();
+      // console.log("public key", publicKey);
+      setKeys({ privateKey: "", publicKey: publicKey });
+      localStorage.setItem("shouldReconnect", "true");
+    }
+
+    // @ts-ignore
     if (typeof window.webln !== "undefined") {
       // @ts-ignore
       await window.webln.enable();
-      // @ts-ignore
-      const publicKey = await nostr.getPublicKey();
-      setKeys({ private: "", publicKey: publicKey });
-      localStorage.setItem("shouldReconnect", "true");
     }
     console.log("connected ");
     setIsLightningConnected(true);
