@@ -100,17 +100,23 @@ export default function HomePage() {
     if (activeRelay) {
       setFollowingEvents([]);
       let relayUrl = activeRelay.url.replace("wss://", "");
+      console.log("RELAY URL:", relayUrl);
 
       let followingKey = `following_${relayUrl}_${keys.publicKey}`;
+      console.log("FOLLOWING KEY:", followingKey);
+      
       const followingEvents = following[followingKey];
+      console.log("FOLLOWING EVENTS:", followingEvents);
       let followingPublicKeys: string[] = [];
 
       if (followingEvents && following[followingKey][0]) {
         const contacts = following[followingKey][0].tags;
+        console.log("CONTACTS:", contacts);
 
         followingPublicKeys = contacts.map((contact: any) => {
           return contact[1];
         });
+        console.log("FOLLOWING PUBLIC KEYS:", followingPublicKeys);
       }
 
       if (followingPublicKeys.length === 0) {
@@ -123,11 +129,14 @@ export default function HomePage() {
         until: undefined,
       };
 
+      console.log("NEW FOLLOWING FILTER:", newfollowingFilter);
+
       setFollowingFilter(newfollowingFilter);
 
       let followingFeedKey = `following_${relayUrl}`;
       if (feed[followingFeedKey]) {
         // console.log("Cached events from context");
+        console.log("FOLLOWING EVENTS:", feed[followingKey])
         setFollowingEvents(feed[followingFeedKey]);
       } else {
         let sub = activeRelay.sub([newfollowingFilter]);
@@ -141,10 +150,13 @@ export default function HomePage() {
           pubkeysSet.add(event.pubkey);
         });
         sub.on("eose", () => {
-          // console.log("EOSE initial latest events from", activeRelay.url);
+          console.log("EOSE initial latest events from", activeRelay.url);
           const filteredEvents = NostrService.filterBlogEvents(events);
+          console.log("FILTERED EVENTS:", filteredEvents)
           const feedKey = `following_${relayUrl}`;
+          console.log("FEED KEY:", feedKey)
           feed[feedKey] = filteredEvents;
+          console.log("FEED:", feed)
           setFeed(feed);
 
           if (pubkeysSet.size > 0) {
@@ -164,7 +176,7 @@ export default function HomePage() {
     } else {
       setFollowingEvents([]);
     }
-  }, [followingReload]);
+  }, [activeRelay, followingReload]);
 
   return (
     <Main>
