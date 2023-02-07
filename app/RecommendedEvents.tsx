@@ -10,14 +10,14 @@ import { RelayContext } from "./context/relay-provider";
 import { FeedContext } from "./context/feed-provider";
 
 interface RecommendedEventsProps {
-  // EVENTS: [];
+  events: Event[];
   title: string;
   showProfile?: boolean;
   showThumbnail?: boolean;
 }
 
 export default function RecommendedEvents({
-  // EVENTS,
+  events,
   title,
   showProfile = false,
   showThumbnail = false,
@@ -26,7 +26,7 @@ export default function RecommendedEvents({
 
   // @ts-ignore
   const { activeRelay, isLoading } = useContext(RelayContext);
-  const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
+  // const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -57,29 +57,19 @@ export default function RecommendedEvents({
   return (
     <AsideSection title={title}>
       <ul className="flex flex-col gap-2">
-        {isLoading ? (
-          <span>Loading...</span>
-        ) : (
-          activeRelay &&
-          feed &&
-          feed[`latest_${activeRelay.url.replace("wss://", "")}`] &&
-          Array.from(feed[`latest_${activeRelay.url.replace("wss://", "")}`])
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 3)
-            .map((event: any) => (
-              <Event
-                key={event.id}
-                noteId={event.id!}
-                pubkey={showProfile ? event.pubkey : undefined}
-                title={getTagValues("subject", event.tags)}
-                thumbnail={
-                  showThumbnail
-                    ? markdownImageContent(event.content) || undefined
-                    : undefined
-                }
-              />
-            ))
-        )}
+        {events.map((event: any) => (
+          <Event
+            key={event.id}
+            noteId={event.id!}
+            pubkey={showProfile ? event.pubkey : undefined}
+            title={getTagValues("subject", event.tags)}
+            thumbnail={
+              showThumbnail
+                ? markdownImageContent(event.content) || undefined
+                : undefined
+            }
+          />
+        ))}
       </ul>
     </AsideSection>
   );
