@@ -150,7 +150,7 @@ export default function UserCard({ npub }: any) {
           </div>
         )}
       </div>
-      <p className="text-sm mb-4 text-gray">{about}</p>
+      <p className="text-sm mb-4 text-gray max-w-[12rem] overflow-scroll">{about}</p>
       {keys.publicKey &&
         (keys.publicKey === profilePubkey ? (
           <Buttons>
