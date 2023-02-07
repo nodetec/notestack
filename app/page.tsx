@@ -14,10 +14,11 @@ import { RelayContext } from "./context/relay-provider";
 import FollowedRelays from "./FollowedRelays";
 import { FeedContext } from "./context/feed-provider";
 import { ProfilesContext } from "./context/profiles-provider";
+import { FollowingContext } from "./context/following-provider";
 
 export default function HomePage() {
   // @ts-ignore
-  const { keys: loggedInUserKeys } = useContext(KeysContext);
+  const { keys } = useContext(KeysContext);
   const exploreFilter = {
     kinds: [2222],
     limit: 50,
@@ -25,12 +26,14 @@ export default function HomePage() {
     until: undefined,
   };
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
-  const [exploreIsLoading, setExploreIsLoading] = useState<boolean>(true);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
   // const [pubkeys, setpubkeys] = useState<string[]>();
   const TABS = ["Explore", "Following"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
+
+  // @ts-ignore
+  const { following, followingReload } = useContext(FollowingContext);
 
   // @ts-ignore
   const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
@@ -91,78 +94,78 @@ export default function HomePage() {
         });
       }
     }
+  }, [activeRelay]);
 
+  useEffect(() => {
+    let pubkeysSet = new Set<string>();
     if (activeRelay) {
       setFollowingEvents([]);
       let relayUrl = activeRelay.url.replace("wss://", "");
-      let followedAuthors: string[];
 
-      let follow_sub = activeRelay.sub([
-        {
-          authors: [loggedInUserKeys.publicKey],
-          kinds: [3],
-          limit: 50,
-        },
-      ]);
-      follow_sub.on("event", (event: Event) => {
-        followedAuthors = event.tags.map((pair: string[]) => pair[1]);
-      });
+      let followingKey = `following_${relayUrl}_${keys.publicKey}`;
+      const followingEvents = following[followingKey];
+      let followingPublicKeys: string[] = [];
 
-      follow_sub.on("eose", () => {
-        // console.log("EOSE top 50 followed users from", activeRelay.url);
-        if (followedAuthors) {
-          const newfollowingFilter = {
-            kinds: [2222],
-            limit: 50,
-            authors: followedAuthors,
-            until: undefined,
-          };
+      if (followingEvents) {
+        const contacts = following[followingKey][0].tags;
 
-          setFollowingFilter(newfollowingFilter);
+        followingPublicKeys = contacts.map((contact: any) => {
+          return contact[1];
+        });
+      }
 
-          let followingFeedKey = `following_${relayUrl}`;
-          if (feed[followingFeedKey]) {
-            // console.log("Cached events from context");
-            setFollowingEvents(feed[followingFeedKey]);
-          } else {
-            let sub = activeRelay.sub([newfollowingFilter]);
-            // console.log("SUBSCRIBING TO FOLLOWING FILTER", newfollowingFilter);
-            let events: Event[] = [];
-            sub.on("event", (event: Event) => {
-              // console.log("FOLLOWING: getting event", event, "from relay:", activeRelay.url);
-              // @ts-ignore
-              event.relayUrl = relayUrl;
-              events.push(event);
-              pubkeysSet.add(event.pubkey);
-            });
-            sub.on("eose", () => {
-              // console.log("EOSE initial latest events from", activeRelay.url);
-              const filteredEvents = NostrService.filterBlogEvents(events);
-              const feedKey = `following_${relayUrl}`;
-              feed[feedKey] = filteredEvents;
-              setFeed(feed);
+      if (followingPublicKeys.length === 0) {
+        return;
+      }
+      const newfollowingFilter = {
+        kinds: [2222],
+        limit: 50,
+        authors: followingPublicKeys,
+        until: undefined,
+      };
 
-              if (pubkeysSet.size > 0) {
-                // setpubkeys(...pubkeys, [Array.from(pubkeysSet)]);
-                setpubkeys(Array.from(pubkeysSet));
-              }
+      setFollowingFilter(newfollowingFilter);
 
-              // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
-              if (filteredEvents.length > 0) {
-                setFollowingEvents(filteredEvents);
-              } else {
-                setExploreEvents([]);
-              }
-              sub.unsub();
-            });
+      let followingFeedKey = `following_${relayUrl}`;
+      if (feed[followingFeedKey]) {
+        // console.log("Cached events from context");
+        setFollowingEvents(feed[followingFeedKey]);
+      } else {
+        let sub = activeRelay.sub([newfollowingFilter]);
+        // console.log("SUBSCRIBING TO FOLLOWING FILTER", newfollowingFilter);
+        let events: Event[] = [];
+        sub.on("event", (event: Event) => {
+          // console.log("FOLLOWING: getting event", event, "from relay:", activeRelay.url);
+          // @ts-ignore
+          event.relayUrl = relayUrl;
+          events.push(event);
+          pubkeysSet.add(event.pubkey);
+        });
+        sub.on("eose", () => {
+          // console.log("EOSE initial latest events from", activeRelay.url);
+          const filteredEvents = NostrService.filterBlogEvents(events);
+          const feedKey = `following_${relayUrl}`;
+          feed[feedKey] = filteredEvents;
+          setFeed(feed);
+
+          if (pubkeysSet.size > 0) {
+            // setpubkeys(...pubkeys, [Array.from(pubkeysSet)]);
+            setpubkeys(Array.from(pubkeysSet));
           }
-        } else {
-          setFollowingEvents([]);
-        }
-        follow_sub.unsub();
-      });
+
+          // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
+          if (filteredEvents.length > 0) {
+            setFollowingEvents(filteredEvents);
+          } else {
+            setExploreEvents([]);
+          }
+          sub.unsub();
+        });
+      }
+    } else {
+      setFollowingEvents([]);
     }
-  }, [activeRelay]);
+  }, [followingReload]);
 
   return (
     <Main>

@@ -7,6 +7,8 @@ import ProfileMenu from "./ProfileMenu";
 import type { Event, Relay } from "nostr-tools";
 import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
+import { NostrService } from "./lib/nostr";
+import { FollowingContext } from "./context/following-provider";
 
 interface AccountButtonProps {
   pubkey: string;
@@ -22,12 +24,18 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
 
+  // @ts-ignore
+  const { following, setFollowing, followingReload, setFollowingReload } =
+    useContext(FollowingContext);
+
   useEffect(() => {
     if (activeRelay) {
       let relayUrl = activeRelay.url.replace("wss://", "");
+      let kinds = [0, 3];
 
       let userKey = `user_${relayUrl}`;
       if (user[userKey]) {
+        kinds = kinds.filter((kind) => kind !== 3);
         // console.log("Cached events from context");
         const content = user[userKey].content;
         if (content) {
@@ -36,37 +44,57 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
             setPicture(contentObj.picture);
           }
         }
-      } else {
-        let sub = activeRelay.sub([
-          {
-            kinds: [0],
-            authors: [pubkey],
-          },
-        ]);
-        let events: Event[] = [];
+      }
 
-        sub.on("event", (event: Event) => {
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-        });
+      let followingKey = `following_${relayUrl}_${pubkey}`;
 
-        sub.on("eose", () => {
-          if (events.length !== 0) {
-            const profileMetadata = events[0];
-            user[userKey] = profileMetadata;
-            setUser(user);
-            const content = events[0].content;
-            if (content) {
-              const contentObj = JSON.parse(content);
-              if (contentObj.picture) {
-                setPicture(contentObj.picture);
-              }
+      if (following[followingKey]) {
+        kinds = kinds.filter((kind) => kind !== 0);
+      }
+
+      if (kinds.length === 0) {
+        return;
+      }
+
+      let sub = activeRelay.sub([
+        {
+          kinds,
+          authors: [pubkey],
+        },
+      ]);
+      let events: Event[] = [];
+
+      sub.on("event", (event: Event) => {
+        // @ts-ignore
+        event.relayUrl = relayUrl;
+        events.push(event);
+        if (event.kind === 0) {
+          const profileMetadata = event;
+          user[userKey] = profileMetadata;
+          setUser(user);
+          const content = event.content;
+          if (content) {
+            const contentObj = JSON.parse(content);
+            if (contentObj.picture) {
+              setPicture(contentObj.picture);
             }
           }
+        }
+      });
+
+      sub.on("eose", () => {
+        if (events.length !== 0) {
+          // filter through events for kind 3
+          const followingEvents = events.filter((event) => event.kind === 3);
+          let followingKey = `following_${relayUrl}_${pubkey}`;
+          following[followingKey] = followingEvents;
+          const newFollowing = following;
+          setFollowing(newFollowing);
+          setFollowingReload(!followingReload);
+
           sub.unsub();
-        });
-      }
+        }
+      });
     }
   }, [activeRelay]);
 
