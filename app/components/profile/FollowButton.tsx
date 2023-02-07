@@ -60,7 +60,7 @@ export default function FollowButton({ profilePublicKey }: any) {
 
   const handleFollow = async (e: any) => {
     e.preventDefault();
-    console.log("follow button clicked");
+    // console.log("follow button clicked");
 
     let newContactList: any;
 
