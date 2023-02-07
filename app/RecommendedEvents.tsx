@@ -8,6 +8,7 @@ import { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
 import { FeedContext } from "./context/feed-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 
 interface RecommendedEventsProps {
   events: Event[];
@@ -24,32 +25,7 @@ export default function RecommendedEvents({
 }: RecommendedEventsProps) {
   // let recommendedEvents: Event[] = [];
 
-  // @ts-ignore
-  const { activeRelay, isLoading } = useContext(RelayContext);
   // const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
-
-  // useEffect(() => {
-  //   if (!activeRelay) return;
-  //   // if (!feed) return;
-  //   // setRecommendedEvents([]);
-  //   let relayUrl = activeRelay.url.replace("wss://", "");
-  //   let feedKey = `latest_${relayUrl}`;
-
-  //   if (feed[feedKey]) {
-  //     // console.log("Cached events from context");
-
-  //     if (feed[feedKey].length > 3) {
-  //       const randomEvents = feed[feedKey]
-  //         .sort(() => 0.5 - Math.random())
-  //         .slice(0, 3);
-  //       setRecommendedEvents(randomEvents);
-  //     } else {
-  //       setRecommendedEvents(feed[feedKey].slice(0, 3));
-  //     }
-  //   }
-  // }, [feed, activeRelay]);
-
-  // if (EVENTS.length === 0) return null;
 
   return (
     <AsideSection title={title}>
@@ -58,6 +34,7 @@ export default function RecommendedEvents({
           <Event
             key={event.id}
             noteId={event.id!}
+            event={event}
             pubkey={showProfile ? event.pubkey : undefined}
             title={getTagValues("subject", event.tags)}
             thumbnail={
@@ -74,34 +51,80 @@ export default function RecommendedEvents({
 
 const Event = ({
   noteId,
+  event,
   pubkey = "",
   thumbnail,
   title,
 }: {
   noteId: string;
+  event: Event;
   pubkey?: string;
   thumbnail?: RegExpExecArray;
   title: string;
 }) => {
-  const profileNpub = nip19.npubEncode(pubkey);
+  const npub = nip19.npubEncode(pubkey);
   const noteNpub = nip19.noteEncode(noteId);
+
+  // @ts-ignore
+  const { activeRelay, isLoading } = useContext(RelayContext);
+
+  // @ts-ignore
+  const { profiles, reload } = useContext(ProfilesContext);
+
+  const [picture, setPicture] = useState();
+  const [name, setName] = useState();
+
+  useEffect(() => {
+    setName(getName(event));
+    setPicture(getPicture(event));
+  }, [activeRelay, reload]);
+
+  const getPicture = (event: Event) => {
+    if (!activeRelay) return DUMMY_PROFILE_API(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content) {
+      // TODO: check if this exists
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.picture || DUMMY_PROFILE_API(npub);
+    }
+
+    return DUMMY_PROFILE_API(npub);
+  };
+
+  const getName = (event: Event) => {
+    if (!activeRelay) return shortenHash(npub);
+
+    const relayUrl = activeRelay.url.replace("wss://", "");
+    const profileKey = `profile_${relayUrl}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+
+    if (profile && profile.content) {
+      const profileContent = JSON.parse(profile.content);
+      return profileContent.name || shortenHash(npub);
+    }
+
+    return shortenHash(npub);
+  };
 
   return (
     <li>
       {pubkey ? (
-        <Link
-          href={`u/${profileNpub}`}
-          className="flex items-center gap-2 py-2 group"
-        >
+        <Link href={`u/${npub}`} className="flex items-center gap-2 py-2 group">
           <img
             className="w-5 h-5 bg-gray rounded-full object-cover"
             // src={data?.picture || DUMMY_PROFILE_API(profileNpub)}
-            src={DUMMY_PROFILE_API(profileNpub)}
+            // src={DUMMY_PROFILE_API(npub)}
+            src={picture || DUMMY_PROFILE_API(npub)}
             alt=""
           />
           <span className="text-xs font-medium group-hover:underline">
             {/* {data?.name || shortenHash(pubkey)} */}
-            {shortenHash(pubkey)}
+            {/* {shortenHash(pubkey)} */}
+            {name || shortenHash(pubkey)}
           </span>
         </Link>
       ) : null}
