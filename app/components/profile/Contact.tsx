@@ -12,12 +12,13 @@ export default function Contact({ contact, followingsCount }: any) {
   let name;
   let about;
   let picture;
+  let npub: any = "";
 
   const pubkey = contact.pubkey;
-  const npub = shortenHash(nip19.npubEncode(contact.pubkey));
   const [showTooltip, setShowTooltip] = useState(false);
 
   try {
+    npub = shortenHash(nip19.npubEncode(contact.pubkey));
     const content = contact?.content;
     contentObj = JSON.parse(content);
     name = contentObj?.name;

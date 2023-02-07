@@ -28,7 +28,6 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
-  // const [pubkeys, setpubkeys] = useState<string[]>();
   const TABS = ["Explore", "Following"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
