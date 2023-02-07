@@ -8,7 +8,7 @@ interface AsideSectionProps
 
 const AsideSection: React.FC<AsideSectionProps> = ({ title, children }) => (
   <div>
-    <h2 className="text-base font-medium mb-4">{title}</h2>
+    <h2 className="text-base font-medium my-4">{title}</h2>
     {children}
   </div>
 );
