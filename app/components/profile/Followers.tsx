@@ -3,6 +3,7 @@ import { Event, nip19 } from "nostr-tools";
 import { RelayContext } from "@/app/context/relay-provider";
 import { FollowersContext } from "@/app/context/followers-provider";
 import { NostrService } from "@/app/lib/nostr";
+import FollowersPopup from "./FollowersPopup";
 
 export default function Followers({ npub }: any) {
   // @ts-ignore
@@ -12,6 +13,8 @@ export default function Followers({ npub }: any) {
   const { followers, setFollowers } = useContext(FollowersContext);
 
   const [localFollowers, setLocalFollowers] = useState<Event[]>([]);
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!activeRelay) return;
@@ -58,15 +61,19 @@ export default function Followers({ npub }: any) {
   }, [activeRelay]);
 
   return (
-    <div
-      // className="text-base text-gray hover:text-gray-hover my-2"
-      className="text-base text-gray my-2"
-      // href={`/u/${npub}`}
-    >
-      {localFollowers && localFollowers.length > 100
-        ? "100+"
-        : localFollowers.length}{" "}
-      Followers
-    </div>
+    <>
+      <div
+        className="cursor-pointer text-base text-gray hover:text-gray-hover my-2"
+        // className="text-base text-gray my-2"
+        // href={`/u/${npub}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {localFollowers && localFollowers.length > 100
+          ? "100+"
+          : localFollowers.length}{" "}
+        Followers
+      </div>
+      <FollowersPopup localFollowers={localFollowers} isOpen={isOpen} setIsOpen={setIsOpen} />
+    </>
   );
 }
