@@ -37,6 +37,16 @@ any) => {
     setTitle(blog.title);
     setText(blog.content);
     setIdentifier(blog.identifier);
+    return () => {
+      setBlog({
+        title: null,
+        summary: null,
+        content: null,
+        image: null,
+        identifier: null,
+        publishedAt: null,
+      });
+    };
   }, []);
 
   const previewRef = useRef(null);

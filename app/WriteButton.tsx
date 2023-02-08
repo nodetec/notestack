@@ -44,10 +44,16 @@ const WriteButton = () => {
   //     .filter((t) => t.length <= 20);
   // }
 
+
   useEffect(() => {
-    setSummary(blog.summary);
-    setImage(blog.image);
+    let mounted = true;
+
+    if (mounted) {
+      setSummary(blog.summary);
+      setImage(blog.image);
+    }
   }, [blog]);
+
 
   const setNoOptionsMessage = () => {
     return "No Options";
