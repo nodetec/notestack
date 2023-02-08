@@ -18,6 +18,7 @@ import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
+import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
@@ -149,7 +150,6 @@ const Article: FC<NoteProps> = ({
             </span>
           </div>
         </div>
-        <DeleteBlog event={event} />
       </div>
 
       <div className="cursor-pointer" onClick={routeCachedEvent}>
@@ -187,18 +187,21 @@ const Article: FC<NoteProps> = ({
           ) : null}
         </div>
       </div>
-      <ul className="flex items-center gap-2 text-sm flex-wrap mt-4">
-        {tValues.map((topic) => (
-          <li key={topic}>
-            <Link
-              className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
-              href={`/tag/${topic.replace(" ", "-")}`}
-            >
-              {topic}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-row gap-8 items-center mt-4">
+        <ul className="flex items-center gap-2 text-sm flex-wrap">
+          {tValues.map((topic) => (
+            <li key={topic}>
+              <Link
+                className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
+                href={`/tag/${topic.replace(" ", "-")}`}
+              >
+                {topic}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <DeleteBlog event={event} />
+      </div>
     </article>
   );
 };
