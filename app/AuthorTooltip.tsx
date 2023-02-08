@@ -36,7 +36,7 @@ const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
   }, [isCopied, isError, setNotifyMessage]);
 
   useEffect(() => {
-    console.log("event", event);
+    // console.log("event", event);
   }, [showTooltip, event]);
 
   const handleEdit = (event: Event) => {

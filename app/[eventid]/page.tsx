@@ -25,7 +25,7 @@ export default function NotePage() {
   // todo cache
   useEffect(() => {
     if (cachedEvent) {
-      console.log("Using cached event", cachedEvent);
+      // console.log("Using cached event", cachedEvent);
       setEvents([cachedEvent]);
       setCachedEvent(undefined);
       return;
