@@ -10,7 +10,7 @@ import { CachedEventContext } from "../context/cached-event-provider";
 export default function NotePage() {
   const pathname = usePathname();
   let eventId: string = "";
-  if (pathname) {
+  if (pathname && pathname.length > 60) {
     eventId = pathname.split("/").pop() || "";
     eventId = nip19.decode(eventId).data.toString();
   }

@@ -38,7 +38,7 @@ export default function ProfilePage() {
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>("");
 
-  if (pathname) {
+  if (pathname && pathname.length > 60) {
     const npub = pathname.split("/").pop() || "";
     const profilePubkey = nip19.decode(npub).data.toString();
     const filter = {
