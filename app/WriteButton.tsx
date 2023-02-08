@@ -4,7 +4,7 @@ import { SlNote } from "react-icons/sl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BlogContext } from "./context/blog-provider";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
 import { useRouter } from "next/navigation";
 import { NostrService } from "./lib/nostr";
@@ -22,12 +22,11 @@ const WriteButton = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [summary, setSummary] = useState(blog.summary);
-  const [image, setImage] = useState(blog.image);
+  const [summary, setSummary] = useState("");
+  const [image, setImage] = useState("");
   const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
     []
   );
-
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -37,6 +36,18 @@ const WriteButton = () => {
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
+
+  // function getTValues(tags: string[][]) {
+  //   return tags
+  //     .filter((subTags) => subTags[0] === "t")
+  //     .map((subTags) => subTags[1])
+  //     .filter((t) => t.length <= 20);
+  // }
+
+  useEffect(() => {
+    setSummary(blog.summary);
+    setImage(blog.image);
+  }, [blog]);
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -139,7 +150,7 @@ const WriteButton = () => {
           <Button size="sm" color="green" onClick={handlePublish}>
             Publish
           </Button>
-          <Popup title="Add Tags" isOpen={isOpen} setIsOpen={setIsOpen}>
+          <Popup title="" isOpen={isOpen} setIsOpen={setIsOpen}>
             <PopupInput
               value={summary}
               onChange={(evn) => setSummary(evn.target.value)}
