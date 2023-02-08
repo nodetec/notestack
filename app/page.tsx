@@ -144,13 +144,9 @@ export default function HomePage() {
           pubkeysSet.add(event.pubkey);
         });
         sub.on("eose", () => {
-          console.log("EOSE initial latest events from", activeRelay.url);
           const filteredEvents = NostrService.filterBlogEvents(events);
-          console.log("FILTERED EVENTS:", filteredEvents);
           const feedKey = `following_${relayUrl}`;
-          console.log("FEED KEY:", feedKey);
           feed[feedKey] = filteredEvents;
-          console.log("FEED:", feed);
           setFeed(feed);
 
           if (pubkeysSet.size > 0) {
