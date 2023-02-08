@@ -8,7 +8,7 @@ export const BlogContext = createContext({
   content: null,
   image: null,
   identifier: null,
-  createdAt: null,
+  publishedAt: null,
 });
 
 export default function BlogProvider({ children }) {
@@ -18,7 +18,7 @@ export default function BlogProvider({ children }) {
     content: null,
     image: null,
     identifier: null,
-    createdAt: null,
+    publishedAt: null,
   });
 
   return (

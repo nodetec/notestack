@@ -49,6 +49,7 @@ const Article: FC<NoteProps> = ({
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("title", tags);
+  const publishedAt = parseInt(getTagValues("published_at", tags));
   // const actualTags = getTagValues("tags", tags);
   const thumbnail = markdownImageContent(content);
 
@@ -82,7 +83,7 @@ const Article: FC<NoteProps> = ({
       // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
       if (profileContent.picture === "") {
-      return DUMMY_PROFILE_API(npub);
+        return DUMMY_PROFILE_API(npub);
       }
 
       return profileContent.picture || DUMMY_PROFILE_API(npub);
@@ -129,17 +130,21 @@ const Article: FC<NoteProps> = ({
                         src={picture}
                         alt={""}
                       />
-                      <span className="group-hover:underline text-xs md:text-sm">{name}</span>
+                      <span className="group-hover:underline text-xs md:text-sm">
+                        {name}
+                      </span>
                     </Item>
                   )}
                 </Link>
                 <span>·</span>
               </div>
             ) : null}
-            <DatePosted timestamp={createdAt} />
+            <DatePosted timestamp={publishedAt || createdAt} />
             <span>·</span>
-            {/* @ts-ignore */}
-            <span className="text-gray text-xs md:text-sm">{event.relayUrl}</span>
+            <span className="text-gray text-xs md:text-sm">
+              {/* @ts-ignore */}
+              {event.relayUrl}
+            </span>
           </div>
         </div>
         <DeleteBlog event={event} />
@@ -204,7 +209,9 @@ export const DatePosted = ({ timestamp }: { timestamp: number }) => {
   };
 
   return (
-    <Item className="text-gray text-xs sm:text-sm">{timeStampToDate(timestamp)}</Item>
+    <Item className="text-gray text-xs sm:text-sm">
+      {timeStampToDate(timestamp)}
+    </Item>
   );
 };
 

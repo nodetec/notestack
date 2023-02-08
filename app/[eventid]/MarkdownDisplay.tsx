@@ -65,6 +65,7 @@ const MarkdownDisplay = ({
   const tags = event.tags;
   const pathname = usePathname();
   const title = getTagValues("title", tags);
+  const publishedAt = parseInt(getTagValues("published_at", tags));
   const content = event.content;
   const npub = nip19.npubEncode(event.pubkey);
   const { copyToClipboard, isCopied, isError } = useCopy();
@@ -163,12 +164,12 @@ const MarkdownDisplay = ({
                       {name || shortenHash(npub)}
                     </span>
                   </Link>
-                  <DatePosted timestamp={event.created_at} />
+                  <DatePosted timestamp={publishedAt || event.created_at} />
                 </div>
               </>
             ) : (
               <div className="flex flex-col gap-1">
-                <DatePosted timestamp={event.created_at} />
+                <DatePosted timestamp={publishedAt || event.created_at} />
               </div>
             )}
           </div>

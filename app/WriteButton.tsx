@@ -71,11 +71,11 @@ const WriteButton = () => {
       tags.push(["d", NostrService.randomId()]);
     }
 
-    // let createdAt = null;
-
-    // if (blog.createdAt) {
-    //   createdAt = blog.createdAt;
-    // }
+    if (blog.publishedAt && blog.publishedAt > 0) {
+      tags.push(["published_at", blog.publishedAt]);
+    } else {
+      tags.push(["published_at", Math.floor(Date.now() / 1000)]);
+    }
 
     let event = NostrService.createEvent(
       30023,
@@ -112,7 +112,7 @@ const WriteButton = () => {
         content: null,
         image: null,
         identifier: null,
-        createdAt: null,
+        publishedAt: null,
       });
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `latest_${relayUrl}`;
