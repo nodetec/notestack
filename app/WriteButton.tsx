@@ -23,7 +23,7 @@ const WriteButton = () => {
   );
 
   // @ts-ignore
-  const { blog } = useContext(BlogContext);
+  const { blog, setBlog } = useContext(BlogContext);
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -52,7 +52,6 @@ const WriteButton = () => {
     const tags = [
       ["client", "blogstack.io"],
       ["title", title],
-      ["d", NostrService.randomId()],
     ];
 
     if (image && image !== "") tags.push(["image", image]);
@@ -60,6 +59,12 @@ const WriteButton = () => {
 
     for (let tagValue of tagsList) {
       tags.push(["t", tagValue.value]);
+    }
+
+    if (blog.identifier && blog.identifier !== "") {
+      tags.push(["d", blog.identifier]);
+    } else {
+      tags.push(["d", NostrService.randomId()]);
     }
 
     let event = NostrService.createEvent(30023, publicKey, content, tags);
@@ -73,6 +78,8 @@ const WriteButton = () => {
     let eventId: any = null;
     eventId = event?.id;
 
+    console.log("EVENT TO PUBLISH!!!:", event);
+
     if (!activeRelay) {
       // console.log("relay not active!");
       return;
@@ -84,6 +91,14 @@ const WriteButton = () => {
     });
     pub.on("seen", () => {
       // console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+      setBlog({
+        title: null,
+        summary: null,
+        content: null,
+        image: null,
+        identifier: null,
+      });
+
       router.push("/u/" + nip19.npubEncode(publicKey));
     });
     pub.on("failed", (reason: string) => {

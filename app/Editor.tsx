@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import "@uiw/react-textarea-code-editor/dist.css";
 import Button from "./Button";
-import { Fragment, useContext, useRef, useState } from "react";
+import { Fragment, useContext, useEffect, useRef, useState } from "react";
 import { AiFillEdit, AiFillEye } from "react-icons/ai";
 import { RiLayoutColumnFill } from "react-icons/ri";
 // import CreatePostButton from "./CreatePostButton";
@@ -29,8 +29,15 @@ any) => {
   const [textValid, setTextValid] = useState(true);
   const [text, setText] = useState("");
   const [title, setTitle] = useState("");
+  const [identifer, setIdentifier] = useState();
   // @ts-ignore
   const { blog, setBlog } = useContext(BlogContext);
+
+  useEffect(() => {
+    setTitle(blog.title);
+    setText(blog.content);
+    setIdentifier(blog.identifier);
+  }, []);
 
   const previewRef = useRef(null);
 
@@ -77,7 +84,11 @@ any) => {
 
   return (
     //state for mx-0
-    <div className={`h-full ${mdPreviewMode === "split" ? "mx-0" : "lg:mx-80 md:mx-3"}`}>
+    <div
+      className={`h-full ${
+        mdPreviewMode === "split" ? "mx-0" : "lg:mx-80 md:mx-3"
+      }`}
+    >
       <div className="bg-secondary p-2 flex items-center justify-between">
         <div className="flex gap-2">
           <Fragment>

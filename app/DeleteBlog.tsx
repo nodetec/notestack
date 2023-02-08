@@ -3,6 +3,7 @@ import { Event, Relay } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { RiDeleteBin2Line } from "react-icons/ri";
 import { KeysContext } from "./context/keys-provider";
+import { NotifyContext } from "./context/notify-provider";
 import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 
@@ -16,6 +17,7 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
+  const { setNotifyMessage } = useContext(NotifyContext);
 
   useEffect(() => {
     setEventToDelete(event);
@@ -32,7 +34,6 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
       "",
       tags
     );
-
     try {
       deleteEvent = await NostrService.addEventData(deleteEvent);
       if (activeRelay) {
@@ -44,6 +45,7 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
           // console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
         });
         pub.on("failed", (reason: string) => {
+          setNotifyMessage("Delete failed!");
           // console.log(
           //   `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
           // );

@@ -13,11 +13,6 @@ interface NoteProps {
 }
 
 export default function Note({ event }: NoteProps) {
-  const [profileInfo, setProfileInfo] = useState({
-    name: "",
-    about: "",
-    picture: "",
-  });
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
   const tagsTags = tags
@@ -59,7 +54,7 @@ export default function Note({ event }: NoteProps) {
       </Content>
       {zenMode ? null : (
         <Aside>
-          <Profile npub={npub} setProfileInfo={setProfileInfo} />
+          <Profile npub={npub} />
           {/* <RecommendedEvents */}
           {/*   title="More from the author" */}
           {/*   EVENTS={events.map((event: Event) => event.id!) || []} */}

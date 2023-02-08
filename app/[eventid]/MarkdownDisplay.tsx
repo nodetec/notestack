@@ -210,7 +210,7 @@ const MarkdownDisplay = ({
           >
             Copy link
           </Tooltip>
-          <AuthorTooltip npub={npub} />
+          <AuthorTooltip npub={npub} event={event} />
           <Tooltip
             showOnHover
             color="black"

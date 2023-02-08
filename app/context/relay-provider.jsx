@@ -1,13 +1,15 @@
 "use client";
 
-import { createContext, useState, useCallback, useEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { RELAYS } from "../lib/constants";
 import { relayInit } from "nostr-tools";
 import { uniqBy } from "../lib/utils";
+import { NotifyContext } from "./notify-provider";
 
 export const RelayContext = createContext({});
 
 export default function RelayProvider({ children }) {
+  const { setNotifyMessage } = useContext(NotifyContext);
   const [allRelays, setAllRelays] = useState(RELAYS);
   const [pendingActiveRelayUrl, setPendingActiveRelayUrl] = useState(RELAYS[0]);
   const [activeRelay, setActiveRelay] = useState();
@@ -57,6 +59,7 @@ export default function RelayProvider({ children }) {
           "error",
           `❌ nostr (${pendingActiveRelayUrl}): Connection error!`
         );
+        setNotifyMessage(`Unable to connect to ${pendingActiveRelayUrl}`);
       });
     }
   }, [pendingActiveRelayUrl]);
