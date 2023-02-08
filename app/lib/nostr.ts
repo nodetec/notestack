@@ -101,12 +101,18 @@ export namespace NostrService {
     kind: number,
     publicKey: string,
     content: string,
-    tags: string[][]
+    tags: string[][],
+    createdAt?: number
   ) {
+    if (!createdAt) {
+      createdAt = Math.floor(Date.now() / 1000);
+    }
+    console.log("DID the DATE THING WORK:", createdAt)
+
     const event: Event = {
       kind: kind,
       pubkey: publicKey,
-      created_at: Math.floor(Date.now() / 1000),
+      created_at: createdAt,
       content: content,
       tags: tags,
     };
@@ -181,7 +187,7 @@ export namespace NostrService {
         return false;
       }
       // return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
-      return true
+      return true;
     });
     return filteredEvents;
   }

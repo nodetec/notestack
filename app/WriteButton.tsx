@@ -71,7 +71,18 @@ const WriteButton = () => {
       tags.push(["d", NostrService.randomId()]);
     }
 
-    let event = NostrService.createEvent(30023, publicKey, content, tags);
+    // let createdAt = null;
+
+    // if (blog.createdAt) {
+    //   createdAt = blog.createdAt;
+    // }
+
+    let event = NostrService.createEvent(
+      30023,
+      publicKey,
+      content,
+      tags,
+    );
 
     try {
       event = await NostrService.addEventData(event);
@@ -91,16 +102,17 @@ const WriteButton = () => {
     }
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
-      // console.log(`DELETE EVENT WAS ACCEPTED by ${activeRelay.url}`);
+      console.log(`PUBLISH EVENT WAS ACCEPTED by ${activeRelay.url}`);
     });
     pub.on("seen", () => {
-      // console.log(`DELETE EVENT WAS SEEN ON ${activeRelay.url}`);
+      console.log(`PUBLISH EVENT WAS SEEN ON ${activeRelay.url}`);
       setBlog({
         title: null,
         summary: null,
         content: null,
         image: null,
         identifier: null,
+        createdAt: null,
       });
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `latest_${relayUrl}`;
@@ -109,9 +121,9 @@ const WriteButton = () => {
       router.push("/u/" + nip19.npubEncode(publicKey));
     });
     pub.on("failed", (reason: string) => {
-      // console.log(
-      //   `OUR DELETE EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-      // );
+      console.log(
+        `OUR PUBLISH EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
+      );
     });
   };
 
