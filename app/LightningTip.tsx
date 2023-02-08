@@ -119,7 +119,7 @@ export default function LightningTip({
         isOpen={isTipSuccessOpen}
         setIsOpen={setIsTipSuccessOpen}
       >
-        <h4 className="text-lg text-green-500 text-center pb-4">{`You sent ${name} ${tippedAmount} sat(s)!`}</h4>
+        <h4 className="text-lg text-green-500 text-center pb-4">{`You sent ${tippedAmount} sat(s)!`}</h4>
         <h5 className="text overflow-x-scroll rounded-md text-center p-4">
           <div className="cursor-text flex justify-start whitespace-nowrap items-center">
             <div className="mr-2">{"Payment Hash:"}</div>
