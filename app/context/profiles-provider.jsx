@@ -15,6 +15,8 @@ export default function ProfilesProvider({ children }) {
   // TODO: set entire profile not just content
   useEffect(() => {
     if (activeRelay) {
+      console.log("Profiles:", profiles)
+      console.log("Pubkeys:", pubkeys)
       let relayUrl = activeRelay.url.replace("wss://", "");
       let sub = activeRelay.sub([
         {
@@ -24,11 +26,13 @@ export default function ProfilesProvider({ children }) {
       ]);
       let events = [];
       sub.on("event", (event) => {
+        console.log("Looking up profile EVENT:", event);
         // @ts-ignore
         event.relayUrl = relayUrl;
         events.push(event);
       });
       sub.on("eose", () => {
+        console.log("DONE Looking up profile EVENT:");
         if (events.length !== 0) {
           // console.log("WE HAVE PROFILES:", events);
           events.forEach((event) => {

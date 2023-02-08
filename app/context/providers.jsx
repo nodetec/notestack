@@ -6,6 +6,7 @@ import BlogProvider from "./blog-provider.jsx";
 import UserProvider from "./user-provider.jsx";
 import NotifyProvider from "./notify-provider";
 import ProfilesProvider from "./profiles-provider";
+import ProfileProvider from "./profile-provider";
 import FeedProvider from "./feed-provider";
 import FollowersProvider from "./followers-provider";
 import FollowingProvider from "./following-provider";
@@ -21,9 +22,11 @@ export default function Providers({ children }) {
               <CachedEventProvider>
                 <FeedProvider>
                   <ProfilesProvider>
-                    <NotifyProvider>
-                      <KeysProvider>{children}</KeysProvider>
-                    </NotifyProvider>
+                    <ProfileProvider>
+                      <NotifyProvider>
+                        <KeysProvider>{children}</KeysProvider>
+                      </NotifyProvider>
+                    </ProfileProvider>
                   </ProfilesProvider>
                 </FeedProvider>
               </CachedEventProvider>

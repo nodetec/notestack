@@ -14,12 +14,15 @@ import { Event, nip19 } from "nostr-tools";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
+import { ProfileContext } from "@/app/context/profile-provider";
 
 export default function UserCard({ npub }: any) {
   // @ts-ignore
   const { activeRelay, isLoading } = useContext(RelayContext);
   // @ts-ignore
   const { keys } = useContext(KeysContext);
+
+  const { setProfile } = useContext(ProfileContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
@@ -54,6 +57,7 @@ export default function UserCard({ npub }: any) {
       const profileContent = JSON.parse(cachedProfile.content);
       setName(profileContent.name);
       setAbout(profileContent.about);
+      setProfile(profileContent);
 
       if (profileContent.picture) {
         setPicture(profileContent.picture);
@@ -93,6 +97,7 @@ export default function UserCard({ npub }: any) {
           const contentObj = JSON.parse(event.content);
           setName(contentObj.name);
           setAbout(contentObj.about);
+          setProfile(contentObj);
           if (contentObj.picture) {
             setPicture(contentObj.picture);
           } else {
@@ -111,6 +116,9 @@ export default function UserCard({ npub }: any) {
 
   useEffect(() => {
     setLoggedInPubkey(keys.publicKey);
+    return () => {
+      setProfile({ name: "", about: "", picture: "" });
+    };
   }, []);
 
   const handleClick = async () => {
@@ -150,7 +158,9 @@ export default function UserCard({ npub }: any) {
           </div>
         )}
       </div>
-      <p className="text-sm mb-4 text-gray max-w-[12rem] overflow-scroll">{about}</p>
+      <p className="text-sm mb-4 text-gray max-w-[12rem] overflow-scroll">
+        {about}
+      </p>
       {keys.publicKey &&
         (keys.publicKey === profilePubkey ? (
           <Buttons>
