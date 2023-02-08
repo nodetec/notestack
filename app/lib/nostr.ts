@@ -101,18 +101,12 @@ export namespace NostrService {
     kind: number,
     publicKey: string,
     content: string,
-    tags: string[][],
-    createdAt?: number
+    tags: string[][]
   ) {
-    if (!createdAt) {
-      createdAt = Math.floor(Date.now() / 1000);
-    }
-    console.log("DID the DATE THING WORK:", createdAt)
-
     const event: Event = {
       kind: kind,
       pubkey: publicKey,
-      created_at: createdAt,
+      created_at: Math.floor(Date.now() / 1000),
       content: content,
       tags: tags,
     };
