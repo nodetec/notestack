@@ -123,14 +123,12 @@ export default function HomePage() {
         until: undefined,
       };
 
-      console.log("NEW FOLLOWING FILTER:", newfollowingFilter);
 
       setFollowingFilter(newfollowingFilter);
 
       let followingFeedKey = `following_${relayUrl}`;
       if (feed[followingFeedKey]) {
         // console.log("Cached events from context");
-        console.log("FOLLOWING EVENTS:", feed[followingKey]);
         setFollowingEvents(feed[followingFeedKey]);
       } else {
         let sub = activeRelay.sub([newfollowingFilter]);
