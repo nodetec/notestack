@@ -49,6 +49,13 @@ const WriteButton = () => {
     setTagsList(list);
   };
 
+  const validateTags = (e: any) => {
+    if (!e.key.match(/^[0-9a-zA-Z]+$/)) {
+      e.preventDefault();
+      return;
+    }
+  };
+
   const handlePublish = async () => {
     setIsOpen(true);
   };
@@ -151,8 +158,8 @@ const WriteButton = () => {
               isOptionDisabled={() => tagsList.length >= 5}
               options={[]}
               onChange={handleSetTagsList}
+              onKeyDown={validateTags}
             />
-            ;
             <Button size="sm" color="green" onClick={submitPublish}>
               Publish Now
             </Button>
