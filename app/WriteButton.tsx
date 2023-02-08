@@ -14,17 +14,20 @@ import Button from "./Button";
 import Popup from "./Popup";
 import CreatableSelect from "react-select/creatable";
 import { FeedContext } from "./context/feed-provider";
+import PopupInput from "./PopupInput";
 
 const WriteButton = () => {
+  // @ts-ignore
+  const { blog, setBlog } = useContext(BlogContext);
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [summary, setSummary] = useState(blog.summary);
+  const [image, setImage] = useState(blog.image);
   const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
     []
   );
 
-  // @ts-ignore
-  const { blog, setBlog } = useContext(BlogContext);
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -51,7 +54,7 @@ const WriteButton = () => {
   };
 
   const submitPublish = async () => {
-    const { title, summary, content, image, indentifier } = blog;
+    const { title, content, indentifier } = blog;
 
     const tags = [
       ["client", "blogstack.io"],
@@ -72,17 +75,12 @@ const WriteButton = () => {
     }
 
     if (blog.publishedAt && blog.publishedAt > 0) {
-      tags.push(["published_at", blog.publishedAt]);
+      tags.push(["published_at", blog.publishedAt.toString()]);
     } else {
-      tags.push(["published_at", Math.floor(Date.now() / 1000)]);
+      tags.push(["published_at", Math.floor(Date.now() / 1000).toString()]);
     }
 
-    let event = NostrService.createEvent(
-      30023,
-      publicKey,
-      content,
-      tags,
-    );
+    let event = NostrService.createEvent(30023, publicKey, content, tags);
 
     try {
       event = await NostrService.addEventData(event);
@@ -135,6 +133,16 @@ const WriteButton = () => {
             Publish
           </Button>
           <Popup title="Add Tags" isOpen={isOpen} setIsOpen={setIsOpen}>
+            <PopupInput
+              value={summary}
+              onChange={(evn) => setSummary(evn.target.value)}
+              label="Summary"
+            />
+            <PopupInput
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              label="Hero Image"
+            />
             <small>Add topics (up to 5)</small>
             <CreatableSelect
               isMulti

@@ -49,6 +49,8 @@ const Article: FC<NoteProps> = ({
   const npub = nip19.npubEncode(event.pubkey);
 
   const title = getTagValues("title", tags);
+  const image = getTagValues("image", tags);
+  const summary = getTagValues("summary", tags);
   const publishedAt = parseInt(getTagValues("published_at", tags));
   // const actualTags = getTagValues("tags", tags);
   const thumbnail = markdownImageContent(content);
@@ -163,11 +165,19 @@ const Article: FC<NoteProps> = ({
             </p>
           </div>
 
-          {thumbnail ? (
+          {image ? (
             <div>
               <img
                 className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
-                src={thumbnail.groups?.filename}
+                src={image}
+                alt={""}
+              />
+            </div>
+          ) : thumbnail ? (
+            <div>
+              <img
+                className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
+                src={image || thumbnail.groups?.filename}
                 alt={thumbnail.groups?.title}
               />
             </div>
