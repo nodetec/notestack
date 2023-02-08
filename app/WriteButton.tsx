@@ -13,6 +13,7 @@ import { nip19 } from "nostr-tools";
 import Button from "./Button";
 import Popup from "./Popup";
 import CreatableSelect from "react-select/creatable";
+import { FeedContext } from "./context/feed-provider";
 
 const WriteButton = () => {
   const pathname = usePathname();
@@ -30,6 +31,9 @@ const WriteButton = () => {
   const publicKey = keys?.publicKey;
   // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
+
+  // @ts-ignore
+  const { feed, setFeed } = useContext(FeedContext);
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -98,7 +102,10 @@ const WriteButton = () => {
         image: null,
         identifier: null,
       });
-
+      let relayUrl = activeRelay.url.replace("wss://", "");
+      let feedKey = `latest_${relayUrl}`;
+      feed[feedKey] = null;
+      setFeed(feed);
       router.push("/u/" + nip19.npubEncode(publicKey));
     });
     pub.on("failed", (reason: string) => {
