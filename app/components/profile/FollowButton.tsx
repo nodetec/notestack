@@ -27,6 +27,7 @@ export default function FollowButton({ profilePublicKey }: any) {
       const followingEvents = following[followingKey];
       let followingPublicKeys: string[] = [];
       if (followingEvents) {
+        if (!following[followingKey]) return;
         const contacts = following[followingKey][0].tags;
         setCurrentContacts(contacts);
 

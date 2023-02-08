@@ -66,7 +66,7 @@ export default function HomePage() {
       let events: Event[] = [];
 
       sub.on("event", (event: Event) => {
-        console.log("getting event", event, "from relay:", activeRelay.url);
+        // console.log("getting event", event, "from relay:", activeRelay.url);
         // @ts-ignore
         event.relayUrl = relayUrl;
         events.push(event);
@@ -99,23 +99,18 @@ export default function HomePage() {
     if (activeRelay) {
       setFollowingEvents([]);
       let relayUrl = activeRelay.url.replace("wss://", "");
-      console.log("RELAY URL:", relayUrl);
 
       let followingKey = `following_${relayUrl}_${keys.publicKey}`;
-      console.log("FOLLOWING KEY:", followingKey);
 
       const followingEvents = following[followingKey];
-      console.log("FOLLOWING EVENTS:", followingEvents);
       let followingPublicKeys: string[] = [];
 
       if (followingEvents && following[followingKey][0]) {
         const contacts = following[followingKey][0].tags;
-        console.log("CONTACTS:", contacts);
 
         followingPublicKeys = contacts.map((contact: any) => {
           return contact[1];
         });
-        console.log("FOLLOWING PUBLIC KEYS:", followingPublicKeys);
       }
 
       if (followingPublicKeys.length === 0) {
