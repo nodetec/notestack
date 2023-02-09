@@ -1,12 +1,13 @@
 import { Event, nip19 } from "nostr-tools";
 import { useState } from "react";
 import Aside from "../Aside";
-import Profile from "../components/profile/Profile";
 import Content from "../Content";
 import Main from "../Main";
 import RecommendedEvents from "../RecommendedEvents";
 import MarkdownDisplay from "./MarkdownDisplay";
 import Topics from "../Topics";
+import UserCard from "../components/profile/UserCard";
+import Following from "../components/profile/Following";
 
 interface NoteProps {
   event: Event;
@@ -37,7 +38,8 @@ export default function Note({ event }: NoteProps) {
       </Content>
       {zenMode ? null : (
         <Aside>
-          <Profile npub={npub} />
+          <UserCard npub={npub} />
+          <Following npub={npub} />
           {/* <RecommendedEvents */}
           {/*   title="More from the author" */}
           {/*   EVENTS={events.map((event: Event) => event.id!) || []} */}
