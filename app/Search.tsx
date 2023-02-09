@@ -91,7 +91,11 @@ const Search = () => {
           tags: searchTags,
         };
       });
-      setShowTooltip(true);
+      if (searchTags.length > 0 || searchPubkeys.length > 0) {
+        setShowTooltip(true);
+      } else {
+        setShowTooltip(false);
+      }
       // console.log("EOSE searched events from", activeRelay.url);
       sub.unsub();
     });
