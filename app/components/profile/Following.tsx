@@ -71,9 +71,9 @@ export default function Following({ npub }: any) {
           return contact[1];
         });
 
-        setFollowing(contactPublicKeys);
-        setFollowingPubkeys(contactPublicKeys);
-        addProfiles(contactPublicKeys);
+        setFollowing(contactPublicKeys.slice(5));
+        setFollowingPubkeys(contactPublicKeys.slice(5));
+        addProfiles(contactPublicKeys.slice(5));
 
         sub.unsub();
       });
