@@ -28,7 +28,8 @@ export default function HomePage() {
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
-  const TABS = ["Explore", "Following"];
+  // const TABS = ["Explore", "Following"];
+  const TABS = ["Explore"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
@@ -203,7 +204,7 @@ export default function HomePage() {
           <RecommendedEvents
             title="Recommended Blogs"
             showProfile
-            events={followingEvents.slice(0, 3)}
+            events={exploreEvents.slice(0, 3)}
           />
         )}
         <Topics

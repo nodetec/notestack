@@ -58,7 +58,7 @@ export default function ProfilesProvider({ children }) {
     ]);
     let events = [];
     sub.on("event", (event) => {
-      console.log("Looking up profile EVENT:", event.pubkey);
+      // console.log("Looking up profile EVENT:", event.pubkey);
       // @ts-ignore
       events.push(event);
     });
