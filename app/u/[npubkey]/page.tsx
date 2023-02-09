@@ -3,9 +3,7 @@
 import About from "@/app/About";
 import Aside from "@/app/Aside";
 import BlogFeed from "@/app/BlogFeed";
-import Profile from "@/app/components/profile/Profile";
 import Content from "@/app/Content";
-import { shortenHash } from "@/app/lib/utils";
 import type { Event } from "nostr-tools";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
