@@ -6,56 +6,63 @@ import { NostrService } from "@/app/lib/nostr";
 
 export default function Followers({ npub }: any) {
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
   const { followers, setFollowers } = useContext(FollowersContext);
 
   const [localFollowers, setLocalFollowers] = useState<Event[]>([]);
 
-  useEffect(() => {
-    if (!activeRelay) return;
+  const getFollowers = async () => {
     setLocalFollowers([]);
     const profilePubkey = nip19.decode(npub).data.toString();
-    let relayUrl = activeRelay.url.replace("wss://", "");
     let cachedFollowers;
+    let relayName = relayUrl.replace("wss://", "");
+    const followerKey = `followers_${relayName}_${profilePubkey}`;
 
     if (followers) {
-      cachedFollowers = followers[`followers_${relayUrl}_${profilePubkey}`];
+      cachedFollowers = followers[followerKey];
     }
 
     if (cachedFollowers) {
-      // console.log("GETTING FOLLOWERS FROM CACHE:", cachedFollowers);
       setLocalFollowers(cachedFollowers);
-    } else {
-      // console.log("GETTING FOLLOWERS FROM RELAY:");
-      let eventArray: Event[] = [];
-      let sub = activeRelay.sub([
-        {
-          kinds: [3],
-          "#p": [profilePubkey],
-          limit: 100,
-        },
-      ]);
-
-      sub.on("event", (event: Event) => {
-        eventArray.push(event);
-      });
-
-      sub.on("eose", () => {
-        // console.log("EOSE additional events from", activeRelay.url);
-        const filteredEvents = NostrService.filterEvents(eventArray);
-        if (filteredEvents.length > 0) {
-          setLocalFollowers(filteredEvents);
-          followers[`followers_${relayUrl}_${profilePubkey}`] = filteredEvents;
-          setFollowers(followers);
-        } else {
-          setLocalFollowers([]);
-        }
-        sub.unsub();
-      });
+      return;
     }
-  }, [activeRelay]);
+
+    const relay = await connect(relayUrl, activeRelay);
+    if (!relay) return;
+    let sub = relay.sub([
+      {
+        kinds: [3],
+        "#p": [profilePubkey],
+        limit: 10,
+      },
+    ]);
+
+    let eventArray: Event[] = [];
+
+    sub.on("event", (event: Event) => {
+      eventArray.push(event);
+    });
+
+    sub.on("eose", () => {
+      // console.log("EOSE additional events from", activeRelay.url);
+      const filteredEvents = NostrService.filterEvents(eventArray);
+      if (filteredEvents.length > 0) {
+        setLocalFollowers(filteredEvents);
+        followers[followerKey] = filteredEvents;
+        setFollowers(followers);
+      } else {
+        setLocalFollowers([]);
+      }
+      sub.unsub();
+    });
+  };
+
+  useEffect(() => {
+    getFollowers();
+
+  }, [relayUrl, activeRelay]);
 
   return (
     <div
@@ -63,9 +70,9 @@ export default function Followers({ npub }: any) {
       className="text-base text-gray my-2"
       // href={`/u/${npub}`}
     >
-      {localFollowers && localFollowers.length > 100
-        ? "100+"
-        : localFollowers.length}{" "}
+      {localFollowers && localFollowers.length > 9
+        ? " 10+"
+        : " " + localFollowers.length}
       Followers
     </div>
   );

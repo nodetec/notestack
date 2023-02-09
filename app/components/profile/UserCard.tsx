@@ -12,6 +12,7 @@ import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
 import FollowButton from "./FollowButton";
+import Followers from "./Followers";
 // import FollowButton from "./FollowButton";
 
 export default function UserCard({ npub }: any) {
