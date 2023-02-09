@@ -74,10 +74,10 @@ const MarkdownDisplay = ({
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
 
   // @ts-ignore
-  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+  const { relayUrl } = useContext(RelayContext);
 
   // @ts-ignore
-  const { profiles, setProfiles } = useContext(ProfilesContext);
+  const { profiles, reload, addProfiles } = useContext(ProfilesContext);
 
   const scrollToTop = () => {
     window.scrollTo(0, 0);
@@ -89,6 +89,29 @@ const MarkdownDisplay = ({
     return result;
   }
 
+  // clean this up as well
+  const getProfile = () => {
+    let relayName = relayUrl.replace("wss://", "");
+    const profileKey = `profile_${relayName}_${event.pubkey}`;
+    const profile = profiles[profileKey];
+    if (!profile) {
+      addProfiles([profileKey]);
+    }
+    if (profile && profile.content) {
+      const profileContent = JSON.parse(profile.content);
+      setName(profileContent.name);
+      if (!profileContent.picture || profileContent.picture === "") {
+        setPicture(DUMMY_PROFILE_API(npub));
+      } else {
+        setPicture(profileContent.picture);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, [relayUrl, reload]);
+
   const markdown = setupMarkdown(content);
 
   useEffect(() => {
@@ -99,50 +122,6 @@ const MarkdownDisplay = ({
       setNotifyMessage("Error copying link");
     }
   }, [isCopied, isError, setNotifyMessage]);
-
-  // TODO: this is copy pasted a few places needs to be cleaned up
-  useEffect(() => {
-    if (!activeRelay) return;
-    const profilePubkey = nip19.decode(npub).data.toString();
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
-    if (cachedProfile && cachedProfile.content) {
-      const profileContent = JSON.parse(cachedProfile.content);
-      setName(profileContent.name);
-      if (profileContent.picture) {
-        setPicture(profileContent.picture);
-      }
-    } else {
-      setName("");
-      setPicture(DUMMY_PROFILE_API(npub));
-      let sub = activeRelay.sub([
-        {
-          kinds: [0],
-          authors: [profilePubkey],
-        },
-      ]);
-      let events: Event[] = [];
-      sub.on("event", (event: Event) => {
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
-      });
-      sub.on("eose", () => {
-        if (events.length !== 0) {
-          let event = events[0];
-          let profileKey = `profile_${relayUrl}_${event.pubkey}`;
-          const contentObj = JSON.parse(event.content);
-          setName(contentObj.name);
-          if (contentObj.picture) {
-            setPicture(contentObj.picture);
-          }
-          profiles[profileKey] = event.content;
-          setProfiles(profiles);
-        }
-        sub.unsub();
-      });
-    }
-  }, [activeRelay]);
 
   return (
     <Fragment>

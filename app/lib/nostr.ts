@@ -32,26 +32,30 @@ export type Event = {
 };
 
 export namespace NostrService {
-  export async function connect(relayUrls: string[]) {
-    let relays: any = [];
+  export async function connect(relayUrl: string, activeRelay: Relay) {
+    if (activeRelay && activeRelay.url === relayUrl) {
+      return activeRelay;
+    }
 
-    for await (const relayUrl of relayUrls.map(async (relayUrl) => {
-      const relay = relayInit(relayUrl);
+    if (!relayUrl) return;
+    const relay = relayInit(relayUrl);
 
-      await relay.connect();
+    await relay.connect();
 
-      // console.log(relay);
+    relay.on("connect", () => {
+      console.log("info", `✅ nostr (${relayUrl}): Connected!`);
+      return relay;
+    });
 
-      relay.on("connect", () => {
-        // console.log(`connected to ${relay.url}`);
-        relays.push(relay);
-      });
+    relay.on("disconnect", () => {
+      console.log("warn", `🚪 nostr (${relayUrl}): Connection closed.`);
+    });
 
-      relay.on("error", () => {
-        // console.log(`failed to connect to ${relay.url}`);
-      });
-    }))
-      return relays;
+    relay.on("error", () => {
+      console.log("error", `❌ nostr (${relayUrl}): Connection error!`);
+    });
+
+    return relay;
   }
 
   export function genPrivateKey(): string {

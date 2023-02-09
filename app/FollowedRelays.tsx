@@ -5,7 +5,7 @@ import { ProfilesContext } from "./context/profiles-provider.jsx";
 
 export default function FollowedRelays() {
   // @ts-ignore
-  const { setPendingActiveRelayUrl, activeRelay, setActiveRelay, allRelays } =
+  const { relayUrl, setRelayUrl, activeRelay, setActiveRelay, allRelays } =
     useContext(RelayContext);
   // @ts-ignore
   const { reload, setReload } = useContext(ProfilesContext);
@@ -21,7 +21,7 @@ export default function FollowedRelays() {
   const handleRelayClick = (relay: string) => {
     // console.log("clicked relay:", relay);
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
-      setPendingActiveRelayUrl("wss://" + relay);
+      setRelayUrl("wss://" + relay);
       // setActiveRelay();
       setReload(!reload);
     }

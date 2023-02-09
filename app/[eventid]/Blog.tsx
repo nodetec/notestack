@@ -1,5 +1,5 @@
-import { Event, nip19, Relay } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { Event, nip19 } from "nostr-tools";
+import { useState } from "react";
 import Aside from "../Aside";
 import Profile from "../components/profile/Profile";
 import Content from "../Content";
@@ -19,25 +19,8 @@ export default function Note({ event }: NoteProps) {
     .filter((tag: string[]) => tag[0] === "t")
     .map((tag: string[]) => tag[1]);
   const npub = nip19.npubEncode(event.pubkey);
-  const [events, setEvents] = useState<Event[]>([]);
   // @ts-ignore
-  const profilePubkey = nip19.decode(npub).data.toString();
   const [zenMode, setZenMode] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    if (events.length === 0) {
-      const profileEventsString = sessionStorage.getItem(
-        profilePubkey + "_events"
-      );
-      if (profileEventsString) {
-        const cachedEvents = JSON.parse(profileEventsString);
-        setEvents(cachedEvents);
-        // console.log("using cached events for user:", npub);
-      }
-    }
-  }, []);
 
   return (
     <Main mode={zenMode ? "zen" : "normal"}>
