@@ -25,13 +25,13 @@ export default function TagPage() {
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
 
   // @ts-ignore
-  const { setpubkeys } = useContext(ProfilesContext);
+  const { addProfiles } = useContext(ProfilesContext);
 
   const filter = {
     kinds: [30023],
@@ -39,48 +39,52 @@ export default function TagPage() {
     "#t": [tagname],
   };
 
-  useEffect(() => {
+  const getTagEvents = async () => {
     let pubkeysSet = new Set<string>();
 
-    if (activeRelay) {
-      setEvents([]);
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let feedKey = `tag_${tagname}_${relayUrl}`;
+    setEvents([]);
+    let relayName = relayUrl.replace("wss://", "");
+    let feedKey = `tag_${tagname}_${relayName}`;
 
-      if (feed[feedKey]) {
-        setEvents(feed[feedKey]);
-      } else {
-        // console.log("Getting events from relay");
-        let sub = activeRelay.sub([filter]);
-
-        let events: Event[] = [];
-
-        sub.on("event", (event: Event) => {
-          // console.log("getting event", event, "from relay:", relay.url);
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-          pubkeysSet.add(event.pubkey);
-        });
-
-        sub.on("eose", () => {
-          const filteredEvents = NostrService.filterBlogEvents(events);
-          const feedKey = `tag_${tagname}_${relayUrl}`;
-          feed[feedKey] = filteredEvents;
-          setFeed(feed);
-          if (filteredEvents.length > 0) {
-            setEvents(filteredEvents);
-          } else {
-            setEvents([]);
-          }
-          if (pubkeysSet.size > 0) {
-            setpubkeys(Array.from(pubkeysSet));
-          }
-          sub.unsub();
-        });
-      }
+    if (feed[feedKey]) {
+      setEvents(feed[feedKey]);
+      return;
     }
-  }, [activeRelay]);
+
+    const relay = await connect(relayUrl, activeRelay);
+    if (!relay) return;
+    let sub = relay.sub([filter]);
+
+    let events: Event[] = [];
+
+    sub.on("event", (event: Event) => {
+      // console.log("getting event", event, "from relay:", relay.url);
+      // @ts-ignore
+      event.relayUrl = relayName;
+      events.push(event);
+      pubkeysSet.add(event.pubkey);
+    });
+
+    sub.on("eose", () => {
+      const filteredEvents = NostrService.filterBlogEvents(events);
+      const feedKey = `tag_${tagname}_${relayName}`;
+      feed[feedKey] = filteredEvents;
+      setFeed(feed);
+      if (filteredEvents.length > 0) {
+        setEvents(filteredEvents);
+      } else {
+        setEvents([]);
+      }
+      if (pubkeysSet.size > 0) {
+        addProfiles(Array.from(pubkeysSet));
+      }
+      sub.unsub();
+    });
+  };
+
+  useEffect(() => {
+    getTagEvents();
+  }, [relayUrl, activeRelay]);
 
   return (
     <Main>
