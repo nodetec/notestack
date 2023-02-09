@@ -28,58 +28,49 @@ export default function Following({ npub }: any) {
     let followingKey = `following_${relayName}_${profilePubkey}`;
 
     if (following[followingKey]) {
-      // console.log("Cached events from context");
-      setFollowingPubkeys(following[followingKey].slice(0, 5));
-    } else {
-      // console.log("Getting events from relay");
-
-      const relay = await connect(relayUrl, activeRelay);
-      if (!relay) return;
-      let sub = relay.sub([
-        {
-          kinds: [3],
-          authors: [profilePubkey],
-        },
-      ]);
-
-      let events: Event[] = [];
-
-      sub.on("event", (event: Event) => {
-        // console.log("getting event", event, "from relay:", activeRelay.url);
-        console.log("following event", event);
-        // @ts-ignore
-        event.relayUrl = relayName;
-        events.push(event);
-        pubkeysSet.add(event.pubkey);
-      });
-
-      sub.on("eose", () => {
-        // const filteredEvents = NostrService.filterEvents(events);
-        // console.log("filtered events", filteredEvents);
-
-        // console.log("FOLLOWING:", following);
-        // console.log("FILTERED EVENTS:", events);
-
-        if (events.length === 0) {
-          sub.unsub();
-          return;
-        }
-
-        const contacts = events[0].tags.slice(0, 5);
-        console.log("CONTACTS:", contacts);
-        const contactPublicKeys = contacts.map((contact: any) => {
-          return contact[1];
-        });
-        let followingKey = `following_${relayName}_${profilePubkey}`;
-        following[followingKey] = contactPublicKeys;
-
-        setFollowing(contactPublicKeys);
-        setFollowingPubkeys(following[followingKey]);
-        addProfiles(contactPublicKeys);
-
-        sub.unsub();
-      });
+      setFollowingPubkeys(following[followingKey]);
+      addProfiles(following[followingKey]);
+      return;
     }
+
+    const relay = await connect(relayUrl, activeRelay);
+    if (!relay) return;
+    let sub = relay.sub([
+      {
+        kinds: [3],
+        authors: [profilePubkey],
+      },
+    ]);
+
+    let events: Event[] = [];
+
+    sub.on("event", (event: Event) => {
+      // console.log("getting event", event, "from relay:", activeRelay.url);
+      // @ts-ignore
+      event.relayUrl = relayName;
+      events.push(event);
+      pubkeysSet.add(event.pubkey);
+    });
+
+    sub.on("eose", () => {
+      if (events.length === 0) {
+        sub.unsub();
+        return;
+      }
+
+      const contacts = events[0].tags;
+      const contactPublicKeys = contacts.map((contact: any) => {
+        return contact[1];
+      });
+
+      following[followingKey] = contactPublicKeys;
+
+      setFollowing(following);
+      setFollowingPubkeys(contactPublicKeys);
+      addProfiles(contactPublicKeys.slice(0, 5));
+
+      sub.unsub();
+    });
   };
 
   useEffect(() => {

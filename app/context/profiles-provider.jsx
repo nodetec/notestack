@@ -8,6 +8,7 @@ export const ProfilesContext = createContext([]);
 
 export default function ProfilesProvider({ children }) {
   const [profiles, setProfiles] = useState({});
+  const [allPubkeys, setAllPubkeys] = useState([]);
   const [reload, setReload] = useState(false);
   // @ts-ignore
   const { activeRelay, relayUrl } = useContext(RelayContext);
@@ -18,6 +19,36 @@ export default function ProfilesProvider({ children }) {
     const relay = await NostrService.connect(relayUrl, activeRelay);
     if (!relay) return;
 
+    // console.log("Looking up profiles:", pubkeys);
+    // console.log("allPubkeys:", allPubkeys);
+
+
+    // const filteredEvents = eventArray.filter((e1: Event, index: number) => {
+    //   if (e1.content === "") {
+    //     return false;
+    //   }
+    //   return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+    // });
+
+    // const unseenPubkeys = pubkeys.filter((pubkey) => {
+    //   if (allPubkeys.includes(pubkey)) {
+    //     return false;
+    //   } else {
+    //     return true;
+    //   }
+
+    // })
+    // let pubkeysSet = new Set([...allPubkeys, ...pubkeys]);
+
+
+    // setAllPubkeys(Array.from(pubkeysSet));
+
+    // if (unseenPubkeys.length === 0) {
+    //   setReload(!reload);
+    // }
+
+    // console.log("filtered pubkeys:", unseenPubkeys);
+
     let relayName = relayUrl.replace("wss://", "");
     let sub = relay.sub([
       {
@@ -27,9 +58,8 @@ export default function ProfilesProvider({ children }) {
     ]);
     let events = [];
     sub.on("event", (event) => {
-      // console.log("Looking up profile EVENT:", event.pubkey);
+      console.log("Looking up profile EVENT:", event.pubkey);
       // @ts-ignore
-      event.relayUrl = relayName;
       events.push(event);
     });
     sub.on("eose", () => {
@@ -43,6 +73,7 @@ export default function ProfilesProvider({ children }) {
           setReload(!reload);
         });
       }
+      // console.log("profiles:", profiles);
       // console.log("DONE Looking up profiles EVENT:", events);
     });
   };

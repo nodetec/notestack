@@ -10,6 +10,7 @@ import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { shortenHash } from "../../lib/utils";
 
 export default function Contact({ pubkey }: any) {
+  // console.log("PUBKEY CONTACT", pubkey)
   let npub = nip19.npubEncode(pubkey);
 
   const [name, setName] = useState<string>();
@@ -49,7 +50,7 @@ export default function Contact({ pubkey }: any) {
 
   useEffect(() => {
     getProfile();
-  }, [relayUrl, reload]);
+  }, [reload, relayUrl, activeRelay]);
 
   return (
     <li className="flex items-center justify-between gap-2">

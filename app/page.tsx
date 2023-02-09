@@ -165,7 +165,7 @@ export default function HomePage() {
 
   useEffect(() => {
     getExploreEvents();
-  }, [relayUrl]);
+  }, [relayUrl, activeRelay]);
 
   // useEffect(() => {
   //   getFollowingEvents();

@@ -128,7 +128,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     getProfile();
-  }, [relayUrl, reload]);
+  }, [reload, relayUrl]);
 
 
   return (
@@ -155,7 +155,7 @@ export default function ProfilePage() {
       </Content>
       <Aside>
         <UserCard npub={npub} profile={profile} />
-        {/* <Following npub={npub} /> */}
+        <Following npub={npub} />
       </Aside>
     </Main>
   );

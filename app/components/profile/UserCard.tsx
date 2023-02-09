@@ -12,6 +12,7 @@ import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
 import FollowButton from "./FollowButton";
+// import FollowButton from "./FollowButton";
 
 export default function UserCard({ npub }: any) {
   // @ts-ignore
@@ -63,7 +64,7 @@ export default function UserCard({ npub }: any) {
 
   useEffect(() => {
     getProfile();
-  }, [relayUrl, reload]);
+  }, [reload, relayUrl, activeRelay]);
 
   const handleClick = async () => {
     setIsOpen(!isOpen);
@@ -119,10 +120,10 @@ export default function UserCard({ npub }: any) {
           </Buttons>
         ) : (
           <div className="flex items-center gap-2">
-            {/* <FollowButton */}
-            {/*   loggedInUserPublicKey={keys.publicKey} */}
-            {/*   profilePublicKey={profilePubkey} */}
-            {/* /> */}
+            <FollowButton
+              loggedInUserPublicKey={keys.publicKey}
+              profilePublicKey={profilePubkey}
+            />
             {(lud06 || lud16) && (
               <Button
                 color="red"
