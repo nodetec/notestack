@@ -200,7 +200,7 @@ export default function HomePage() {
         {/* )} */}
       </Content>
       <Aside className="hidden md:flex">
-        {followingEvents.length > 0 && (
+        {exploreEvents.length > 0 && (
           <RecommendedEvents
             title="Recommended Blogs"
             showProfile
