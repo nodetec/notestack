@@ -18,7 +18,7 @@ export default function NotePage() {
   }
 
   // @ts-ignore
-  const { relayUrl, activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   const [event, setEvent] = useState<Event>();
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
@@ -32,7 +32,7 @@ export default function NotePage() {
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
-    const relay = await NostrService.connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl, activeRelay);
     if (!relay) return;
     let sub = relay.sub([
       {

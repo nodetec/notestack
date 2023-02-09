@@ -88,8 +88,8 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
           let followingKey = `following_${relayUrl}_${pubkey}`;
           following[followingKey] = followingEvents;
           const newFollowing = following;
-          setFollowing(newFollowing);
-          setFollowingReload(!followingReload);
+          // setFollowing(newFollowing);
+          // setFollowingReload(!followingReload);
 
           sub.unsub();
         }

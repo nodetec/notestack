@@ -9,7 +9,7 @@ import Contact from "./Contact";
 
 export default function Following({ npub }: any) {
   // @ts-ignore
-  const { relayUrl, activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
   const { following, setFollowing } = useContext(FollowingContext);
@@ -27,13 +27,13 @@ export default function Following({ npub }: any) {
     let relayName = relayUrl.replace("wss://", "");
     let followingKey = `following_${relayName}_${profilePubkey}`;
 
-    if (following[followingKey] && following[followingKey].length >= 5) {
+    if (following[followingKey]) {
       // console.log("Cached events from context");
-      setFollowingPubkeys(following[followingKey].slice(5));
+      setFollowingPubkeys(following[followingKey].slice(0, 5));
     } else {
       // console.log("Getting events from relay");
 
-      const relay = await NostrService.connect(relayUrl, activeRelay);
+      const relay = await connect(relayUrl, activeRelay);
       if (!relay) return;
       let sub = relay.sub([
         {
@@ -48,32 +48,34 @@ export default function Following({ npub }: any) {
         // console.log("getting event", event, "from relay:", activeRelay.url);
         console.log("following event", event);
         // @ts-ignore
-        event.relayUrl = relayUrl;
+        event.relayUrl = relayName;
         events.push(event);
         pubkeysSet.add(event.pubkey);
       });
 
       sub.on("eose", () => {
-        const filteredEvents = NostrService.filterEvents(events);
+        // const filteredEvents = NostrService.filterEvents(events);
         // console.log("filtered events", filteredEvents);
 
-        let followingKey = `following_${relayName}_${profilePubkey}`;
-        following[followingKey] = filteredEvents;
-        console.log("FOLLOWING:", following);
-        console.log("FILTERED EVENTS:", filteredEvents);
+        // console.log("FOLLOWING:", following);
+        // console.log("FILTERED EVENTS:", events);
 
-        if (filteredEvents.length === 0) {
+        if (events.length === 0) {
           sub.unsub();
           return;
         }
-        const contacts = filteredEvents[0].tags.slice(5);
+
+        const contacts = events[0].tags.slice(0, 5);
+        console.log("CONTACTS:", contacts);
         const contactPublicKeys = contacts.map((contact: any) => {
           return contact[1];
         });
+        let followingKey = `following_${relayName}_${profilePubkey}`;
+        following[followingKey] = contactPublicKeys;
 
-        setFollowing(contactPublicKeys.slice(5));
-        setFollowingPubkeys(contactPublicKeys.slice(5));
-        addProfiles(contactPublicKeys.slice(5));
+        setFollowing(contactPublicKeys);
+        setFollowingPubkeys(following[followingKey]);
+        addProfiles(contactPublicKeys);
 
         sub.unsub();
       });
@@ -89,6 +91,7 @@ export default function Following({ npub }: any) {
       <h4 className="text-sm font-bold">Following</h4>
       <ul className="flex flex-col gap-2">
         {followingPubkeys &&
+          followingPubkeys.length > 0 &&
           followingPubkeys.slice(0, 5).map((pubkey: any) => (
             <Contact
               key={pubkey}

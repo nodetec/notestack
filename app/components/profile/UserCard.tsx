@@ -119,10 +119,10 @@ export default function UserCard({ npub }: any) {
           </Buttons>
         ) : (
           <div className="flex items-center gap-2">
-            <FollowButton
-              loggedInUserPublicKey={keys.publicKey}
-              profilePublicKey={profilePubkey}
-            />
+            {/* <FollowButton */}
+            {/*   loggedInUserPublicKey={keys.publicKey} */}
+            {/*   profilePublicKey={profilePubkey} */}
+            {/* /> */}
             {(lud06 || lud16) && (
               <Button
                 color="red"

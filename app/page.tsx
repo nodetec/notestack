@@ -35,7 +35,7 @@ export default function HomePage() {
   const { following, followingReload } = useContext(FollowingContext);
 
   // @ts-ignore
-  const { activeRelay, relayUrl } = useContext(RelayContext);
+  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
@@ -59,7 +59,7 @@ export default function HomePage() {
       return;
     }
 
-    const relay = await NostrService.connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl, activeRelay);
     if (!relay) return;
     let sub = relay.sub([exploreFilter]);
 
@@ -67,7 +67,7 @@ export default function HomePage() {
 
     sub.on("event", (event: Event) => {
       // @ts-ignore
-      event.relayName = relayName;
+      event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
     });

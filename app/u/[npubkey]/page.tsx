@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const { addProfiles, profiles, reload } = useContext(ProfilesContext);
   // const { profile } = useContext(ProfileContext);
   // @ts-ignore
-  const { activeRelay, relayUrl } = useContext(RelayContext);
+  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
 
   // const [name, setName] = useState<string>();
@@ -76,7 +76,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const relay = await NostrService.connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl, activeRelay);
     if (!relay) return;
     let sub = relay.sub([filter]);
 
@@ -84,7 +84,7 @@ export default function ProfilePage() {
 
     sub.on("event", (event: Event) => {
       // @ts-ignore
-      event.relayName = relayName;
+      event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
     });
@@ -155,7 +155,7 @@ export default function ProfilePage() {
       </Content>
       <Aside>
         <UserCard npub={npub} profile={profile} />
-        <Following npub={npub} />
+        {/* <Following npub={npub} /> */}
       </Aside>
     </Main>
   );

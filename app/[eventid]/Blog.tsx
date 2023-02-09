@@ -39,7 +39,7 @@ export default function Note({ event }: NoteProps) {
       {zenMode ? null : (
         <Aside>
           <UserCard npub={npub} />
-          <Following npub={npub} />
+          {/* <Following npub={npub} /> */}
           {/* <RecommendedEvents */}
           {/*   title="More from the author" */}
           {/*   EVENTS={events.map((event: Event) => event.id!) || []} */}

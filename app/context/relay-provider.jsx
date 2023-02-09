@@ -41,6 +41,36 @@ export default function RelayProvider({ children }) {
     });
   }, [relayUrl]);
 
+  const connect = async (newRelayUrl, oldActiveRelay) => {
+    if (oldActiveRelay && oldActiveRelay.url === newRelayUrl) {
+      return oldActiveRelay;
+    }
+
+    if (!newRelayUrl) return;
+    const relay = relayInit(newRelayUrl);
+
+    await relay.connect();
+
+    relay.on("connect", () => {
+      console.log("info", `✅ nostr (${newRelayUrl}): Connected!`);
+      if (relayUrl === relay.url) {
+        console.log("NEW ACTIVE RELAY IS:", activeRelay);
+        setActiveRelay(relay);
+      }
+    });
+
+    relay.on("disconnect", () => {
+      console.log("warn", `🚪 nostr (${newRelayUrl}): Connection closed.`);
+    });
+
+    relay.on("error", () => {
+      console.log("error", `❌ nostr (${newRelayUrl}): Connection error!`);
+      setNotifyMessage(`Unable to connect to ${relayUrl}`);
+    });
+
+    return relay;
+  };
+
   return (
     <RelayContext.Provider
       value={{
@@ -53,6 +83,7 @@ export default function RelayProvider({ children }) {
         setIsReady,
         relayUrl,
         setRelayUrl,
+        connect,
       }}
     >
       {children}
