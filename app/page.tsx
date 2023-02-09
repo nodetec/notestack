@@ -26,6 +26,7 @@ export default function HomePage() {
     until: undefined,
   };
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
+  const [exploreTags, setExploreTags] = useState<string[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
   // const TABS = ["Explore", "Following"];
@@ -48,8 +49,16 @@ export default function HomePage() {
     window.scrollTo(0, 0);
   }, []);
 
+  function getTValues(tags: string[][]) {
+    return tags
+      .filter((subTags) => subTags[0] === "t")
+      .map((subTags) => subTags[1])
+      .filter((t) => t.length <= 20);
+  }
+
   const getExploreEvents = async () => {
     let pubkeysSet = new Set<string>();
+    let exploreTagsSet = new Set<string>();
 
     setExploreEvents([]);
     let relayName = relayUrl.replace("wss://", "");
@@ -57,6 +66,13 @@ export default function HomePage() {
 
     if (feed[feedKey]) {
       setExploreEvents(feed[feedKey]);
+      const events = feed[feedKey];
+      events.forEach((event: Event) => {
+        const tValues = getTValues(event.tags);
+        tValues.forEach((t) => exploreTagsSet.add(t));
+      });
+      setExploreTags(Array.from(exploreTagsSet).slice(0, 7));
+
       return;
     }
 
@@ -71,12 +87,15 @@ export default function HomePage() {
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
+      const tValues = getTValues(event.tags);
+      tValues.forEach((t) => exploreTagsSet.add(t));
     });
 
     sub.on("eose", () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `latest_${relayName}`;
       feed[feedKey] = filteredEvents;
+      setExploreTags(Array.from(exploreTagsSet));
       setFeed(feed);
       if (filteredEvents.length > 0) {
         setExploreEvents(filteredEvents);
@@ -209,14 +228,7 @@ export default function HomePage() {
         )}
         <Topics
           title="Recommended Topics"
-          TOPICS={[
-            "nostr",
-            "lightning",
-            "bitcoin",
-            "taproot",
-            "tailwindcss",
-            "chess",
-          ]}
+          TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
         />
       </Aside>
     </Main>

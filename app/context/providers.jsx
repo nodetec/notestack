@@ -11,6 +11,7 @@ import FeedProvider from "./feed-provider";
 import FollowersProvider from "./followers-provider";
 import FollowingProvider from "./following-provider";
 import CachedEventProvider from "./cached-event-provider";
+// import TagsProvider from "./tags-provider";
 
 export default function Providers({ children }) {
   return (
@@ -24,7 +25,9 @@ export default function Providers({ children }) {
                   <ProfilesProvider>
                     <ProfileProvider>
                       <NotifyProvider>
-                        <KeysProvider>{children}</KeysProvider>
+                        {/* <TagsProvider> */}
+                          <KeysProvider>{children}</KeysProvider>
+                        {/* </TagsProvider> */}
                       </NotifyProvider>
                     </ProfileProvider>
                   </ProfilesProvider>
