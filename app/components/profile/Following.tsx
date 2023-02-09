@@ -1,11 +1,11 @@
 import { FollowingContext } from "@/app/context/following-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { RelayContext } from "@/app/context/relay-provider";
-import { NostrService } from "@/app/lib/nostr";
 import Link from "next/link";
 import { Event, nip19 } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Contact from "./Contact";
+import FollowingPopup from "./FollowingPopup";
 
 export default function Following({ npub }: any) {
   // @ts-ignore
@@ -19,6 +19,10 @@ export default function Following({ npub }: any) {
 
   const [followingPubkeys, setFollowingPubkeys] = useState<string[]>();
 
+  const [followingCount, setFollowingCount] = useState<number>();
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const getFollowingEvents = async () => {
     let pubkeysSet = new Set<string>();
 
@@ -30,6 +34,8 @@ export default function Following({ npub }: any) {
     if (following[followingKey]) {
       setFollowingPubkeys(following[followingKey]);
       addProfiles(following[followingKey]);
+      const size = following[followingKey].length;
+      setFollowingCount(size);
       return;
     }
 
@@ -59,6 +65,7 @@ export default function Following({ npub }: any) {
       }
 
       const contacts = events[0].tags;
+      const size = contacts.length;
       const contactPublicKeys = contacts.map((contact: any) => {
         return contact[1];
       });
@@ -67,6 +74,7 @@ export default function Following({ npub }: any) {
 
       setFollowing(following);
       setFollowingPubkeys(contactPublicKeys);
+      setFollowingCount(size);
       addProfiles(contactPublicKeys.slice(0, 5));
 
       sub.unsub();
@@ -83,20 +91,25 @@ export default function Following({ npub }: any) {
       <ul className="flex flex-col gap-2">
         {followingPubkeys &&
           followingPubkeys.length > 0 &&
-          followingPubkeys.slice(0, 5).map((pubkey: any) => (
-            <Contact
-              key={pubkey}
-              // followingsCount={followingsCount}
-              pubkey={pubkey}
-            />
-          ))}
+          followingPubkeys
+            .slice(0, 5)
+            .map((pubkey: any) => <Contact key={pubkey} pubkey={pubkey} />)}
       </ul>
-      {/* <Link */}
-      {/*   href={`/${npub}/following`} */}
-      {/*   className="text-gray hover:text-gray-hover text-xs" */}
-      {/* > */}
-      {/*   See all ({followingsCount}) */}
-      {/* </Link> */}
+      {followingCount && (
+        <>
+          <div
+            className="cursor-pointer text-gray hover:text-gray-hover text-xs"
+            onClick={() => setIsOpen(true)}
+          >
+            See all ({followingCount})
+          </div>
+          <FollowingPopup
+            pubkeys={followingPubkeys}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        </>
+      )}
     </div>
   );
 }
