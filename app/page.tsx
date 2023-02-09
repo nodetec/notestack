@@ -35,10 +35,10 @@ export default function HomePage() {
   const { following, followingReload } = useContext(FollowingContext);
 
   // @ts-ignore
-  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
   // @ts-ignore
-  const { setpubkeys } = useContext(ProfilesContext);
+  const { addProfiles } = useContext(ProfilesContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -47,124 +47,129 @@ export default function HomePage() {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
+  const getExploreEvents = async () => {
     let pubkeysSet = new Set<string>();
-    if (!activeRelay) return;
 
     setExploreEvents([]);
-    // console.log("ACTIVERELAY", activeRelay);
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    let feedKey = `latest_${relayUrl}`;
+    let relayName = relayUrl.replace("wss://", "");
+    let feedKey = `latest_${relayName}`;
 
     if (feed[feedKey]) {
-      // console.log("Cached events from context");
       setExploreEvents(feed[feedKey]);
-    } else {
-      // console.log("Getting events from relay");
-      let sub = activeRelay.sub([exploreFilter]);
-
-      let events: Event[] = [];
-
-      sub.on("event", (event: Event) => {
-        // console.log("getting event", event, "from relay:", activeRelay.url);
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
-        pubkeysSet.add(event.pubkey);
-      });
-
-      sub.on("eose", () => {
-        // console.log("PUBKEYS ARE:", pubkeysSet);
-        // console.log("EOSE initial latest events from", activeRelay.url);
-        const filteredEvents = NostrService.filterBlogEvents(events);
-        const feedKey = `latest_${relayUrl}`;
-        feed[feedKey] = filteredEvents;
-        setFeed(feed);
-        // console.log("FILTERED____EVENTS", filteredEvents);
-        if (filteredEvents.length > 0) {
-          setExploreEvents(filteredEvents);
-        } else {
-          setExploreEvents([]);
-        }
-        if (pubkeysSet.size > 0) {
-          setpubkeys(Array.from(pubkeysSet));
-        }
-        sub.unsub();
-      });
+      return;
     }
-  }, [activeRelay]);
+
+    const relay = await connect(relayUrl, activeRelay);
+    if (!relay) return;
+    let sub = relay.sub([exploreFilter]);
+
+    let events: Event[] = [];
+
+    sub.on("event", (event: Event) => {
+      // @ts-ignore
+      event.relayUrl = relayName;
+      events.push(event);
+      pubkeysSet.add(event.pubkey);
+    });
+
+    sub.on("eose", () => {
+      const filteredEvents = NostrService.filterBlogEvents(events);
+      const feedKey = `latest_${relayName}`;
+      feed[feedKey] = filteredEvents;
+      setFeed(feed);
+      if (filteredEvents.length > 0) {
+        setExploreEvents(filteredEvents);
+      } else {
+        setExploreEvents([]);
+      }
+      if (pubkeysSet.size > 0) {
+        addProfiles(Array.from(pubkeysSet));
+      }
+      sub.unsub();
+    });
+  };
+
+  // const getFollowingEvents = async () => {
+  //   let pubkeysSet = new Set<string>();
+
+  //   setFollowingEvents([]);
+  //   let relayName = relayUrl.replace("wss://", "");
+
+  //   let followingKey = `following_${relayName}_${keys.publicKey}`;
+
+  //   const followingEvents = following[followingKey];
+  //   let followingPublicKeys: string[] = [];
+
+  //   if (followingEvents && following[followingKey][0]) {
+  //     const contacts = following[followingKey][0].tags;
+
+  //     followingPublicKeys = contacts.map((contact: any) => {
+  //       return contact[1];
+  //     });
+  //   }
+
+  //   if (followingPublicKeys.length === 0) {
+  //     return;
+  //   }
+  //   const newfollowingFilter = {
+  //     kinds: [30023],
+  //     limit: 50,
+  //     authors: followingPublicKeys,
+  //     until: undefined,
+  //   };
+
+  //   setFollowingFilter(newfollowingFilter);
+
+  //   let followingFeedKey = `following_${relayName}`;
+  //   if (feed[followingFeedKey]) {
+  //     setFollowingEvents(feed[followingFeedKey]);
+  //     // return;
+  //   }
+  //   console.log("MADE IT 1");
+
+  //   let events: Event[] = [];
+
+  //   const relay = await NostrService.connect(relayUrl);
+  //   if (!relay) return;
+  //   let sub = relay.sub([newfollowingFilter]);
+  //   console.log("MADE IT 2");
+
+  //   sub.on("event", (event: Event) => {
+  //     console.log("following event:", event);
+  //     // @ts-ignore
+  //     event.relayUrl = relayName;
+  //     events.push(event);
+  //     pubkeysSet.add(event.pubkey);
+  //   });
+
+  //   console.log("MADE IT 3");
+
+  //   sub.on("eose", () => {
+  //     const filteredEvents = NostrService.filterBlogEvents(events);
+  //     const feedKey = `following_${relayName}`;
+  //     feed[feedKey] = filteredEvents;
+  //     setFeed(feed);
+
+  //     if (pubkeysSet.size > 0) {
+  //       setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
+  //     }
+
+  //     if (filteredEvents.length > 0) {
+  //       setFollowingEvents(filteredEvents);
+  //     } else {
+  //       setFollowingEvents([]);
+  //     }
+  //     sub.unsub();
+  //   });
+  // };
 
   useEffect(() => {
-    let pubkeysSet = new Set<string>();
-    if (activeRelay) {
-      setFollowingEvents([]);
-      let relayUrl = activeRelay.url.replace("wss://", "");
+    getExploreEvents();
+  }, [relayUrl, activeRelay]);
 
-      let followingKey = `following_${relayUrl}_${keys.publicKey}`;
-
-      const followingEvents = following[followingKey];
-      let followingPublicKeys: string[] = [];
-
-      if (followingEvents && following[followingKey][0]) {
-        const contacts = following[followingKey][0].tags;
-
-        followingPublicKeys = contacts.map((contact: any) => {
-          return contact[1];
-        });
-      }
-
-      if (followingPublicKeys.length === 0) {
-        return;
-      }
-      const newfollowingFilter = {
-        kinds: [30023],
-        limit: 50,
-        authors: followingPublicKeys,
-        until: undefined,
-      };
-
-
-      setFollowingFilter(newfollowingFilter);
-
-      let followingFeedKey = `following_${relayUrl}`;
-      if (feed[followingFeedKey]) {
-        // console.log("Cached events from context");
-        setFollowingEvents(feed[followingFeedKey]);
-      } else {
-        let sub = activeRelay.sub([newfollowingFilter]);
-        // console.log("SUBSCRIBING TO FOLLOWING FILTER", newfollowingFilter);
-        let events: Event[] = [];
-        sub.on("event", (event: Event) => {
-          // console.log("FOLLOWING: getting event", event, "from relay:", activeRelay.url);
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-          pubkeysSet.add(event.pubkey);
-        });
-        sub.on("eose", () => {
-          const filteredEvents = NostrService.filterBlogEvents(events);
-          const feedKey = `following_${relayUrl}`;
-          feed[feedKey] = filteredEvents;
-          setFeed(feed);
-
-          if (pubkeysSet.size > 0) {
-            // setpubkeys(...pubkeys, [Array.from(pubkeysSet)]);
-            setpubkeys(Array.from(pubkeysSet));
-          }
-
-          // console.log("FILTERED____EVENTS FOLLOWING", filteredEvents);
-          if (filteredEvents.length > 0) {
-            setFollowingEvents(filteredEvents);
-          } else {
-            setFollowingEvents([]);
-          }
-          sub.unsub();
-        });
-      }
-    } else {
-      setFollowingEvents([]);
-    }
-  }, [activeRelay, followingReload]);
+  // useEffect(() => {
+  //   getFollowingEvents();
+  // }, [relayUrl, followingReload]);
 
   return (
     <Main>
@@ -184,14 +189,14 @@ export default function HomePage() {
             profile={true}
           />
         )}
-        {activeTab === "Following" && (
-          <BlogFeed
-            events={followingEvents}
-            setEvents={setFollowingEvents}
-            filter={followingFilter}
-            profile={true}
-          />
-        )}
+        {/* {activeTab === "Following" && ( */}
+        {/*   <BlogFeed */}
+        {/*     events={followingEvents} */}
+        {/*     setEvents={setFollowingEvents} */}
+        {/*     filter={followingFilter} */}
+        {/*     profile={true} */}
+        {/*   /> */}
+        {/* )} */}
       </Content>
       <Aside className="hidden md:flex">
         {followingEvents.length > 0 && (

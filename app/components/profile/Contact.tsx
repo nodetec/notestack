@@ -1,51 +1,70 @@
 import Button from "@/app/Button";
+import { ProfilesContext } from "@/app/context/profiles-provider";
+import { RelayContext } from "@/app/context/relay-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import Tooltip from "@/app/Tooltip";
 import Link from "next/link";
 import { nip19 } from "nostr-tools";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { shortenHash } from "../../lib/utils";
 
-export default function Contact({ contact, followingsCount }: any) {
-  let contentObj;
-  let name;
-  let about;
-  let picture;
-  let npub: any = "";
+export default function Contact({ pubkey }: any) {
+  // console.log("PUBKEY CONTACT", pubkey)
+  let npub = nip19.npubEncode(pubkey);
 
-  const pubkey = contact.pubkey;
+  const [name, setName] = useState<string>();
+  const [about, setAbout] = useState<string>();
+  const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
+  const [nip05, setNip05] = useState<string>();
+  const [lud06, setLud06] = useState<string>();
+  const [lud16, setLud16] = useState<string>();
+
+  // const pubkey = contact.pubkey;
   const [showTooltip, setShowTooltip] = useState(false);
 
-  try {
-    npub = shortenHash(nip19.npubEncode(contact.pubkey));
-    const content = contact?.content;
-    contentObj = JSON.parse(content);
-    name = contentObj?.name;
-    about = contentObj?.about;
-    picture = contentObj?.picture;
-  } catch (e) {
-    // console.log("Error parsing content");
-  }
+  // @ts-ignore
+  const { activeRelay, relayUrl } = useContext(RelayContext);
 
-  const scrollToTop = () => {
-    window.scrollTo(0, 0);
+  // @ts-ignore
+  const { profiles, reload, addProfiles } = useContext(ProfilesContext);
+
+  const getProfile = () => {
+    let relayName = relayUrl.replace("wss://", "");
+    const profileKey = `profile_${relayName}_${pubkey}`;
+    const profile = profiles[profileKey];
+    if (!profile) {
+      addProfiles([pubkey]);
+    }
+    if (profile && profile.content) {
+      const profileContent = JSON.parse(profile.content);
+      setName(profileContent.name);
+      setAbout(profileContent.about);
+      if (!profileContent.picture || profileContent.picture === "") {
+        setPicture(DUMMY_PROFILE_API(npub));
+      } else {
+        setPicture(profileContent.picture);
+      }
+    }
   };
+
+  useEffect(() => {
+    getProfile();
+  }, [reload, relayUrl, activeRelay]);
 
   return (
     <li className="flex items-center justify-between gap-2">
       <Link
         href={`/u/${nip19.npubEncode(pubkey)}`}
         className="text-sm flex items-center gap-4 py-1"
-        onClick={scrollToTop}
       >
         <img
           className="rounded-full w-5 h-5 object-cover bg-light-gray"
-          src={contentObj?.picture || DUMMY_PROFILE_API(npub!)}
+          src={picture || DUMMY_PROFILE_API(npub!)}
           alt=""
         />
         <span className="text-gray hover:text-gray-hover hover:underline">
-          {name || npub}
+          {name || shortenHash(npub)}
         </span>
       </Link>
       <Tooltip
@@ -64,17 +83,16 @@ export default function Contact({ contact, followingsCount }: any) {
           <Link
             href={`/u/${nip19.npubEncode(pubkey)}`}
             className="text-sm flex items-center gap-2 pb-3"
-            onClick={scrollToTop}
           >
             <img
               className="rounded-full w-7 h-7 object-cover bg-light-gray"
-              src={contentObj?.picture || DUMMY_PROFILE_API(npub!)}
+              src={picture || DUMMY_PROFILE_API(npub)}
               alt=""
             />
             <h3 className="text-black font-medium text-lg">{name || npub}</h3>
           </Link>
           <p className="text-sm text-gray-hover pb-2 border-b border-b-light-gray">
-            {contentObj?.about}
+            {about}
           </p>
           {/* <div className="flex items-center gap-2 justify-between pt-2"> */}
           {/* <span className="text-gray font-xs"> */}

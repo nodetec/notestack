@@ -10,38 +10,30 @@ import Button from "../../Button";
 export default function FollowButton({ profilePublicKey }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followButtonText, setFollowButtonText] = useState("Follow");
-  const [currentContacts, setCurrentContacts] = useState([]);
+  const [followingPubkeys, setFollowingPubkeys] = useState<string[]>([]);
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   // @ts-ignore
-  const { following, setFollowing, followingReload, setFollowingReload } =
+  const { following, setFollowing, followingReload } =
     useContext(FollowingContext);
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
 
   useEffect(() => {
-    if (activeRelay) {
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let followingKey = `following_${relayUrl}_${keys.publicKey}`;
-      const followingEvents = following[followingKey];
-      let followingPublicKeys: string[] = [];
-      if (followingEvents) {
-        if (!following[followingKey]) return;
-        const contacts = following[followingKey][0].tags;
-        setCurrentContacts(contacts);
+    let relayName = relayUrl.replace("wss://", "");
+    let followingKey = `following_${relayName}_${keys.publicKey}`;
+    const followingEvents = following[followingKey];
 
-        followingPublicKeys = contacts.map((contact: any) => {
-          return contact[1];
-        });
-
-        if (followingPublicKeys.includes(profilePublicKey)) {
-          setFollowButtonText("Following");
-          setIsFollowing(true);
-        }
-      }
+    if (!followingEvents) return;
+    if (!following[followingKey]) return;
+    const contacts = following[followingKey];
+    setFollowingPubkeys(contacts);
+    if (contacts.includes(profilePublicKey)) {
+      setFollowButtonText("Following");
+      setIsFollowing(true);
     }
-  }, [activeRelay, followingReload]);
+  }, [relayUrl, followingReload, activeRelay]);
 
   const handleHover = async (e: any) => {
     e.preventDefault();
@@ -68,42 +60,52 @@ export default function FollowButton({ profilePublicKey }: any) {
     let action = "";
 
     if (isFollowing) {
-      newContactList = currentContacts.filter(
-        (pair: string) => pair[1] !== profilePublicKey
+      const unfollowedList = followingPubkeys.filter(
+        (pubkey) => pubkey !== profilePublicKey
       );
+
+      newContactList = unfollowedList.map((pubkey) => ["p", pubkey]);
+
       action = "unfollowed";
     } else {
+      const currentContacts = followingPubkeys.map((pubkey) => ["p", pubkey]);
+
       newContactList = [...currentContacts, ["p", profilePublicKey]];
       action = "followed";
     }
 
     let event = NostrService.createEvent(3, keys.publicKey, "", newContactList);
 
-    console.log("event", event);
-
     try {
       event = await NostrService.addEventData(event);
     } catch (err: any) {
+      console.log("error", err);
       return;
     }
 
-    if (!activeRelay) {
-      // console.log("relay not active!");
-      return;
-      // TODO: handle this
-    }
-    let pub = activeRelay.publish(event);
+    const relay = await connect(relayUrl, activeRelay);
+    if (!relay) return;
+
+    let pub = relay.publish(event);
     pub.on("ok", () => {
       // console.log("OUR EVENT WAS ACCEPTED");
     });
     pub.on("seen", () => {
       // console.log("OUR EVENT WAS SEEN");
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let followingKey = `following_${relayUrl}_${keys.publicKey}`;
-      following[followingKey] = [event];
+      let relayName = relayUrl.replace("wss://", "");
+      let followingKey = `following_${relayName}_${keys.publicKey}`;
+
+      const contacts = event.tags;
+      const contactPublicKeys: string[] = contacts.map((contact: any) => {
+        return contact[1];
+      });
+
+      setFollowingPubkeys(contactPublicKeys);
+
+      following[followingKey] = contactPublicKeys;
+
       const newFollowing = following;
       setFollowing(newFollowing);
-      setCurrentContacts(newContactList);
       if (action === "unfollowed") {
         setFollowButtonText("Follow");
         setIsFollowing(false);

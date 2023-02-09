@@ -25,7 +25,7 @@ export default function TagPage() {
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   // @ts-ignore
-  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -42,7 +42,7 @@ export default function TagPage() {
   useEffect(() => {
     let pubkeysSet = new Set<string>();
 
-    if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
+    if (activeRelay) {
       setEvents([]);
       let relayUrl = activeRelay.url.replace("wss://", "");
       let feedKey = `tag_${tagname}_${relayUrl}`;
