@@ -66,7 +66,7 @@ export default function Following({ npub }: any) {
           sub.unsub();
           return;
         }
-        const contacts = filteredEvents[0].tags;
+        const contacts = filteredEvents[0].tags.slice(5);
         const contactPublicKeys = contacts.map((contact: any) => {
           return contact[1];
         });
