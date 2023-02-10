@@ -22,37 +22,38 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
     const currentEvents = events;
     let pubkeysSet = new Set<string>(pubkeys);
 
-    if (currentEvents.length < 0) return;
-    const lastEvent = currentEvents.slice(-1)[0];
-    let newEvents: Event[] = [];
+    if (currentEvents.length > 0) {
+      const lastEvent = currentEvents.slice(-1)[0];
+      let newEvents: Event[] = [];
 
-    filter.until = lastEvent.created_at;
+      filter.until = lastEvent.created_at;
 
-    const relay = await connect(relayUrl, activeRelay);
-    if (!relay) return;
-    let sub = relay.sub([filter]);
+      const relay = await connect(relayUrl, activeRelay);
+      if (!relay) return;
+      let sub = relay.sub([filter]);
 
-    sub.on("event", (event: Event) => {
-      // console.log("getting event", event, "from relay:", relay.url);
-      // @ts-ignore
-      event.relayUrl = relayName;
-      newEvents.push(event);
-      pubkeysSet.add(event.pubkey);
-    });
-    sub.on("eose", () => {
-      // console.log("EOSE initial latest events from", activeRelay.url);
-      const concatEvents = currentEvents.concat(newEvents);
-      const filteredEvents = NostrService.filterBlogEvents(concatEvents);
-      if (filteredEvents.length > 0) {
-        setEvents(filteredEvents);
-      }
+      sub.on("event", (event: Event) => {
+        // console.log("getting event", event, "from relay:", relay.url);
+        // @ts-ignore
+        event.relayUrl = relayName;
+        newEvents.push(event);
+        pubkeysSet.add(event.pubkey);
+      });
+      sub.on("eose", () => {
+        // console.log("EOSE initial latest events from", activeRelay.url);
+        const concatEvents = currentEvents.concat(newEvents);
+        const filteredEvents = NostrService.filterBlogEvents(concatEvents);
+        if (filteredEvents.length > 0) {
+          setEvents(filteredEvents);
+        }
 
-      if (pubkeysSet.size > 0) {
-        setpubkeys(Array.from(pubkeysSet));
-      }
+        if (pubkeysSet.size > 0) {
+          setpubkeys(Array.from(pubkeysSet));
+        }
 
-      sub.unsub();
-    });
+        sub.unsub();
+      });
+    }
   };
 
   // fetch initial 100 events for filter
