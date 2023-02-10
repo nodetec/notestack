@@ -102,6 +102,33 @@ export default function RelayProvider({ children }) {
     }
   };
 
+  const subToRelay = async (url, filter, onEvent, onEOSE) => {
+    const relay = relayInit(url);
+    await relay.connect();
+
+    relay.on("connect", () => {
+      console.log(`connected to ${relay.url}`);
+    });
+
+    relay.on("error", () => {
+      console.log(`failed to connect to ${relay.url}`);
+    });
+
+    let sub = relay.sub([filter]);
+
+    sub.on("event", (event) => {
+      // console.log("we got the event we wanted:", event);
+      onEvent(event);
+    });
+
+    sub.on("eose", () => {
+      // console.log("we've reached the end");
+      onEOSE();
+      sub.unsub();
+      relay.close();
+    });
+  };
+
   return (
     <RelayContext.Provider
       value={{
@@ -116,6 +143,7 @@ export default function RelayProvider({ children }) {
         setRelayUrl,
         connect,
         publishToRelays,
+        subToRelay,
       }}
     >
       {children}
