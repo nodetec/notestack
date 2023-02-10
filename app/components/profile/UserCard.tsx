@@ -40,6 +40,13 @@ export default function UserCard({ npub }: any) {
   // if we don't look up the user
   const profilePubkey = nip19.decode(npub).data.toString();
 
+  function removeUnderscoreAt(nip05: string) {
+    if (nip05.startsWith("_@")) {
+      return nip05.slice(2);
+    }
+    return nip05;
+  }
+
   const getProfile = () => {
     let relayName = relayUrl.replace("wss://", "");
     const profileKey = `profile_${relayName}_${profilePubkey}`;
@@ -57,7 +64,8 @@ export default function UserCard({ npub }: any) {
       } else {
         setPicture(profileContent.picture);
       }
-      setNip05(profileContent.nip05);
+
+      setNip05(removeUnderscoreAt(profileContent.nip05));
       setLud06(profileContent.lud06);
       setLud16(profileContent.lud16);
     }
