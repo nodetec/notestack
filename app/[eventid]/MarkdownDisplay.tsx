@@ -85,7 +85,7 @@ const MarkdownDisplay = ({
 
   function setupMarkdown(content: string) {
     var md = require("markdown-it")();
-    var result = md.render(content);
+    var result = md.render(content || "");
     return result;
   }
 
