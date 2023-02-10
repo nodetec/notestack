@@ -29,8 +29,8 @@ export default function HomePage() {
   const [exploreTags, setExploreTags] = useState<string[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
   const [followingFilter, setFollowingFilter] = useState<Filter>();
-  // const TABS = ["Explore", "Following"];
-  const TABS = ["Explore"];
+  const TABS = ["Explore", "Following"];
+  // const TABS = ["Explore"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   // @ts-ignore
@@ -109,87 +109,74 @@ export default function HomePage() {
     });
   };
 
-  // const getFollowingEvents = async () => {
-  //   let pubkeysSet = new Set<string>();
+  const getFollowingEvents = async () => {
+    setFollowingEvents([]);
+    let relayName = relayUrl.replace("wss://", "");
 
-  //   setFollowingEvents([]);
-  //   let relayName = relayUrl.replace("wss://", "");
+    let followingKey = `following_${relayName}_${keys.publicKey}`;
 
-  //   let followingKey = `following_${relayName}_${keys.publicKey}`;
+    const followingEvents = following[followingKey];
+    let followingPublicKeys: string[] = [];
 
-  //   const followingEvents = following[followingKey];
-  //   let followingPublicKeys: string[] = [];
+    if (followingEvents && following[followingKey]) {
+      const contacts = following[followingKey];
 
-  //   if (followingEvents && following[followingKey][0]) {
-  //     const contacts = following[followingKey][0].tags;
+      followingPublicKeys = contacts;
+    }
 
-  //     followingPublicKeys = contacts.map((contact: any) => {
-  //       return contact[1];
-  //     });
-  //   }
+    if (followingPublicKeys.length === 0) {
+      return;
+    }
+    const newfollowingFilter = {
+      kinds: [30023],
+      limit: 50,
+      authors: followingPublicKeys,
+      until: undefined,
+    };
 
-  //   if (followingPublicKeys.length === 0) {
-  //     return;
-  //   }
-  //   const newfollowingFilter = {
-  //     kinds: [30023],
-  //     limit: 50,
-  //     authors: followingPublicKeys,
-  //     until: undefined,
-  //   };
+    setFollowingFilter(newfollowingFilter);
 
-  //   setFollowingFilter(newfollowingFilter);
+    let followingFeedKey = `following_${relayName}`;
+    if (feed[followingFeedKey]) {
+      setFollowingEvents(feed[followingFeedKey]);
+      return;
+    }
 
-  //   let followingFeedKey = `following_${relayName}`;
-  //   if (feed[followingFeedKey]) {
-  //     setFollowingEvents(feed[followingFeedKey]);
-  //     // return;
-  //   }
-  //   console.log("MADE IT 1");
+    let events: Event[] = [];
 
-  //   let events: Event[] = [];
+    const relay = await connect(relayUrl);
+    if (!relay) return;
+    let sub = relay.sub([newfollowingFilter]);
 
-  //   const relay = await NostrService.connect(relayUrl);
-  //   if (!relay) return;
-  //   let sub = relay.sub([newfollowingFilter]);
-  //   console.log("MADE IT 2");
+    sub.on("event", (event: Event) => {
+      // console.log("following event:", event);
+      // @ts-ignore
+      event.relayUrl = relayName;
+      events.push(event);
+    });
 
-  //   sub.on("event", (event: Event) => {
-  //     console.log("following event:", event);
-  //     // @ts-ignore
-  //     event.relayUrl = relayName;
-  //     events.push(event);
-  //     pubkeysSet.add(event.pubkey);
-  //   });
+    sub.on("eose", () => {
+      const filteredEvents = NostrService.filterBlogEvents(events);
+      const feedKey = `following_${relayName}`;
+      feed[feedKey] = filteredEvents;
+      setFeed(feed);
 
-  //   console.log("MADE IT 3");
-
-  //   sub.on("eose", () => {
-  //     const filteredEvents = NostrService.filterBlogEvents(events);
-  //     const feedKey = `following_${relayName}`;
-  //     feed[feedKey] = filteredEvents;
-  //     setFeed(feed);
-
-  //     if (pubkeysSet.size > 0) {
-  //       setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
-  //     }
-
-  //     if (filteredEvents.length > 0) {
-  //       setFollowingEvents(filteredEvents);
-  //     } else {
-  //       setFollowingEvents([]);
-  //     }
-  //     sub.unsub();
-  //   });
-  // };
+      if (filteredEvents.length > 0) {
+        setFollowingEvents(filteredEvents);
+      } else {
+        setFollowingEvents([]);
+      }
+      sub.unsub();
+    });
+  };
 
   useEffect(() => {
     getExploreEvents();
   }, [relayUrl, activeRelay]);
 
-  // useEffect(() => {
-  //   getFollowingEvents();
-  // }, [relayUrl, followingReload]);
+  useEffect(() => {
+    getFollowingEvents();
+  }, [relayUrl, activeRelay, followingReload]);
 
   return (
     <Main>
@@ -209,14 +196,14 @@ export default function HomePage() {
             profile={true}
           />
         )}
-        {/* {activeTab === "Following" && ( */}
-        {/*   <BlogFeed */}
-        {/*     events={followingEvents} */}
-        {/*     setEvents={setFollowingEvents} */}
-        {/*     filter={followingFilter} */}
-        {/*     profile={true} */}
-        {/*   /> */}
-        {/* )} */}
+        {activeTab === "Following" && (
+          <BlogFeed
+            events={followingEvents}
+            setEvents={setFollowingEvents}
+            filter={followingFilter}
+            profile={true}
+          />
+        )}
       </Content>
       <Aside className="hidden md:flex">
         {exploreEvents.length > 0 && (
