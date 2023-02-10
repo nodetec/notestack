@@ -32,7 +32,6 @@ export default function ProfilePage() {
   // @ts-ignore
   const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
-
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
 
@@ -46,6 +45,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState({
     name: "",
     about: "",
+    banner: "",
   });
   let profilePubkey = "";
   try {
@@ -130,14 +130,18 @@ export default function ProfilePage() {
     getProfile();
   }, [reload, relayUrl]);
 
-
   return (
     <Main>
       <Content>
+        {profile.banner && profile.banner !== "" && (
+          <img
+            className="rounded-md w-full h-full object-cover my-4"
+            src={profile.banner}
+            alt={""}
+          />
+        )}
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-5xl font-medium my-12">
-            {profile.name}
-          </h1>
+          <h1 className="text-5xl font-medium my-12">{profile.name}</h1>
           <AuthorTooltip npub={npub} />
         </div>
         <FollowedRelays />
