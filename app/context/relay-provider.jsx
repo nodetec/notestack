@@ -71,6 +71,37 @@ export default function RelayProvider({ children }) {
     return relay;
   };
 
+  const publishToRelays = async (relays, event, onOk, onSeen, onFailed) => {
+    console.log("publishing to relays:", relays);
+    for (const url of relays) {
+      const relay = relayInit(url);
+      await relay.connect();
+
+      relay.on("connect", () => {
+        console.log(`connected to ${relay.url}`);
+      });
+      relay.on("error", () => {
+        console.log(`failed to connect to ${relay.url}`);
+      });
+      //publish event
+      let pub = relay.publish(event);
+      pub.on("ok", () => {
+        console.log(`${relay.url} has accepted our event`);
+        onOk();
+      });
+      pub.on("seen", () => {
+        console.log(`we saw the event on ${relay.url}`);
+        onSeen();
+        relay.close();
+      });
+      pub.on("failed", (reason) => {
+        console.log(`failed to publish to ${relay.url}: ${reason}`);
+        onFailed();
+        relay.close();
+      });
+    }
+  };
+
   return (
     <RelayContext.Provider
       value={{
@@ -84,6 +115,7 @@ export default function RelayProvider({ children }) {
         relayUrl,
         setRelayUrl,
         connect,
+        publishToRelays,
       }}
     >
       {children}

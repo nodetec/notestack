@@ -34,7 +34,7 @@ const WriteButton = () => {
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
   // @ts-ignore
-  const { activeRelay, allRelays } = useContext(RelayContext);
+  const { activeRelay, allRelays, publishToRelays } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -46,7 +46,6 @@ const WriteButton = () => {
   //     .filter((t) => t.length <= 20);
   // }
 
-
   useEffect(() => {
     let mounted = true;
 
@@ -55,7 +54,6 @@ const WriteButton = () => {
       setImage(blog.image);
     }
   }, [blog]);
-
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -81,13 +79,34 @@ const WriteButton = () => {
 
   const toggleRelay = (e: any) => {
     let relays = toggledRelays;
-    if(e.target.checked){
+    if (e.target.checked) {
       relays.push(e.target.value);
-    }else{
+    } else {
       relays = relays.filter((relay) => relay !== e.target.value);
     }
     setToggledRelays(relays);
-  }
+  };
+
+  const onOk = async () => {};
+
+  const onSeen = async () => {
+    console.log(`PUBLISH EVENT WAS SEEN ON ${activeRelay.url}`);
+    setBlog({
+      title: null,
+      summary: null,
+      content: null,
+      image: null,
+      identifier: null,
+      publishedAt: null,
+    });
+    let relayUrl = activeRelay.url.replace("wss://", "");
+    let feedKey = `latest_${relayUrl}`;
+    feed[feedKey] = null;
+    setFeed(feed);
+    router.push("/u/" + nip19.npubEncode(publicKey));
+  };
+
+  const onFailed = async () => {};
 
   const submitPublish = async () => {
     const { title, content, indentifier } = blog;
@@ -127,38 +146,7 @@ const WriteButton = () => {
     let eventId: any = null;
     eventId = event?.id;
 
-    console.log("EVENT TO PUBLISH!!!:", event);
-
-    if (!activeRelay) {
-      // console.log("relay not active!");
-      return;
-      // TODO: handle this
-    }
-    let pub = activeRelay.publish(event);
-    pub.on("ok", () => {
-      console.log(`PUBLISH EVENT WAS ACCEPTED by ${activeRelay.url}`);
-    });
-    pub.on("seen", () => {
-      console.log(`PUBLISH EVENT WAS SEEN ON ${activeRelay.url}`);
-      setBlog({
-        title: null,
-        summary: null,
-        content: null,
-        image: null,
-        identifier: null,
-        publishedAt: null,
-      });
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let feedKey = `latest_${relayUrl}`;
-      feed[feedKey] = null;
-      setFeed(feed);
-      router.push("/u/" + nip19.npubEncode(publicKey));
-    });
-    pub.on("failed", (reason: string) => {
-      console.log(
-        `OUR PUBLISH EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-      );
-    });
+    publishToRelays(toggledRelays, event, onOk, onSeen, onFailed);
   };
 
   return (
@@ -168,14 +156,19 @@ const WriteButton = () => {
           <Button size="sm" color="green" onClick={handlePublish}>
             Publish
           </Button>
-          <PublishPopup title="" isOpen={isOpen} setIsOpen={setIsOpen} className="h-1/2 max-h-192 opacity-70 inset-0 overflow-auto scroll-smooth border-none">
+          <PublishPopup
+            title=""
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            className="h-1/2 max-h-192 opacity-70 inset-0 overflow-auto scroll-smooth border-none"
+          >
             <PublishPopupInput
-              value={summary ?? ''}
+              value={summary ?? ""}
               onChange={(evn) => setSummary(evn.target.value)}
               label="Summary"
             />
             <PublishPopupInput
-              value={image ?? ''}
+              value={image ?? ""}
               onChange={(e) => setImage(e.target.value)}
               label="Hero Image"
             />
@@ -195,12 +188,22 @@ const WriteButton = () => {
             <div className="row-span-2 justify-self-center">
               <div>
                 {allRelays.map((relay: string) => (
-                  <PopupCheckbox key={relay} label={relay} value={relay} onClick={toggleRelay}></PopupCheckbox>
+                  <PopupCheckbox
+                    key={relay}
+                    label={relay}
+                    value={relay}
+                    onClick={toggleRelay}
+                  ></PopupCheckbox>
                 ))}
               </div>
             </div>
             <div className="justify-self-center self-center pt-3">
-              <Button size="sm" color="green" onClick={submitPublish} className="w-[8rem]">
+              <Button
+                size="sm"
+                color="green"
+                onClick={submitPublish}
+                className="w-[8rem]"
+              >
                 Publish Now
               </Button>
             </div>
