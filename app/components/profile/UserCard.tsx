@@ -65,7 +65,9 @@ export default function UserCard({ npub }: any) {
         setPicture(profileContent.picture);
       }
 
-      setNip05(removeUnderscoreAt(profileContent.nip05));
+      if (profileContent.nip05) {
+        setNip05(removeUnderscoreAt(profileContent.nip05));
+      }
       setLud06(profileContent.lud06);
       setLud16(profileContent.lud16);
     }
