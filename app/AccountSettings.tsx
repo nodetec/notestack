@@ -15,6 +15,7 @@ export default function AccountSettings({
   nip05,
   about,
   picture,
+  banner,
   loggedInPubkey,
   lud06,
   lud16,
@@ -24,6 +25,7 @@ export default function AccountSettings({
   const [newName, setNewName] = useState<string>(name);
   const [newAbout, setNewAbout] = useState<string>(about);
   const [newPicture, setNewPicture] = useState<string>(picture);
+  const [newBanner, setNewBanner] = useState<string>(banner);
   const [newNip05, setNewNip05] = useState<string>(nip05);
   const [newLud06, setNewLud06] = useState<string>(lud06);
   const [newLud16, setNewLud16] = useState<string>(lud16);
@@ -54,6 +56,7 @@ export default function AccountSettings({
     // console.log("NAMEYNAMENAME:", name);
     setNewAbout(about);
     setNewPicture(picture);
+    setNewBanner(banner);
     setNewNip05(nip05);
     setNewLud06(lud06);
     setNewLud16(lud16);
@@ -109,6 +112,7 @@ export default function AccountSettings({
       name: newName,
       about: newAbout,
       picture: newPicture,
+      banner: newBanner,
       nip05: newNip05,
       lud06: newLud06,
       lud16: newLud16,
@@ -172,6 +176,11 @@ export default function AccountSettings({
         value={newPicture}
         onChange={(e) => setNewPicture(e.target.value)}
         label="Profile Image Url"
+      />
+      <PopupInput
+        value={newBanner}
+        onChange={(e) => setNewBanner(e.target.value)}
+        label="Banner Image Url"
       />
       <PopupInput
         value={newAbout}

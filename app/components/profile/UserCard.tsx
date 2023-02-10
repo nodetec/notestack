@@ -30,6 +30,7 @@ export default function UserCard({ npub }: any) {
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
+  const [banner, setBanner] = useState<string>();
   const [nip05, setNip05] = useState<string>();
   const [lud06, setLud06] = useState<string>();
   const [lud16, setLud16] = useState<string>();
@@ -152,6 +153,7 @@ export default function UserCard({ npub }: any) {
           nip05={nip05}
           about={about}
           picture={picture}
+          banner={banner}
           loggedInPubkey={keys.publicKey}
           lud06={lud06}
           lud16={lud16}
