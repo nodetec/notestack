@@ -15,7 +15,7 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
     useContext(ProfilesContext);
 
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
   // fetch initial 100 events for filter
   useEffect(() => {
@@ -25,7 +25,6 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
 
       if (events.length > 0) {
         if (activeRelay) {
-          let relayUrl = activeRelay.url.replace("wss://", "");
           const lastEvent = currentEvents.slice(-1)[0];
           let events: Event[] = [];
 
