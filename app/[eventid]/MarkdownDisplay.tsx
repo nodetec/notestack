@@ -65,6 +65,7 @@ const MarkdownDisplay = ({
   const tags = event.tags;
   const pathname = usePathname();
   const title = getTagValues("title", tags);
+  const heroImage = getTagValues("image", tags);
   const publishedAt = parseInt(getTagValues("published_at", tags));
   const content = event.content;
   const npub = nip19.npubEncode(event.pubkey);
@@ -218,6 +219,11 @@ const MarkdownDisplay = ({
 
       <div className="prose prose-lg mt-12">
         <h1 className="text-4xl font-extrabold">{title}</h1>
+        <img
+          // className="rounded-full w-24 h-24 object-cover mb-4"
+          src={heroImage}
+          alt={""}
+        />
         <div
           className="rounded-md mx-auto bg-secondary w-full h-full"
           dangerouslySetInnerHTML={{ __html: markdown }}
