@@ -11,10 +11,11 @@ import { NostrService } from "./lib/nostr";
 import { KeysContext } from "./context/keys-provider.jsx";
 import { nip19 } from "nostr-tools";
 import Button from "./Button";
-import Popup from "./Popup";
+import PublishPopup from "./PublishPopup";
 import CreatableSelect from "react-select/creatable";
 import { FeedContext } from "./context/feed-provider";
-import PopupInput from "./PopupInput";
+import PublishPopupInput from "./PublishPopupInput";
+import PopupCheckbox from "./PopupCheckbox";
 
 const WriteButton = () => {
   // @ts-ignore
@@ -24,6 +25,7 @@ const WriteButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [summary, setSummary] = useState("");
   const [image, setImage] = useState("");
+  const [toggledRelays, setToggledRelays] = useState<string[]>([]);
   const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -32,7 +34,7 @@ const WriteButton = () => {
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { activeRelay, allRelays } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -76,6 +78,16 @@ const WriteButton = () => {
   const handlePublish = async () => {
     setIsOpen(true);
   };
+
+  const toggleRelay = (e: any) => {
+    let relays = toggledRelays;
+    if(e.target.checked){
+      relays.push(e.target.value);
+    }else{
+      relays = relays.filter((relay) => relay !== e.target.value);
+    }
+    setToggledRelays(relays);
+  }
 
   const submitPublish = async () => {
     const { title, content, indentifier } = blog;
@@ -156,31 +168,43 @@ const WriteButton = () => {
           <Button size="sm" color="green" onClick={handlePublish}>
             Publish
           </Button>
-          <Popup title="" isOpen={isOpen} setIsOpen={setIsOpen}>
-            <PopupInput
-              value={summary}
+          <PublishPopup title="" isOpen={isOpen} setIsOpen={setIsOpen} className="h-1/2 max-h-192 opacity-70 inset-0 overflow-auto scroll-smooth border-none">
+            <PublishPopupInput
+              value={summary ?? ''}
               onChange={(evn) => setSummary(evn.target.value)}
               label="Summary"
             />
-            <PopupInput
-              value={image}
+            <PublishPopupInput
+              value={image ?? ''}
               onChange={(e) => setImage(e.target.value)}
               label="Hero Image"
             />
-            <small>Add topics (up to 5)</small>
-            <CreatableSelect
-              isMulti
-              noOptionsMessage={setNoOptionsMessage}
-              value={tagsList}
-              isOptionDisabled={() => tagsList.length >= 5}
-              options={[]}
-              onChange={handleSetTagsList}
-              onKeyDown={validateTags}
-            />
-            <Button size="sm" color="green" onClick={submitPublish}>
-              Publish Now
-            </Button>
-          </Popup>
+            <div>
+              <small>Add topics (up to 5)</small>
+              <CreatableSelect
+                isMulti
+                noOptionsMessage={setNoOptionsMessage}
+                value={tagsList}
+                isOptionDisabled={() => tagsList.length >= 5}
+                options={[]}
+                onChange={handleSetTagsList}
+                onKeyDown={validateTags}
+              />
+            </div>
+            <div></div>
+            <div className="row-span-2 justify-self-center">
+              <div>
+                {allRelays.map((relay: string) => (
+                  <PopupCheckbox label={relay} value={relay} onClick={toggleRelay}></PopupCheckbox>
+                ))}
+              </div>
+            </div>
+            <div className="justify-self-center self-center pt-3">
+              <Button size="sm" color="green" onClick={submitPublish} className="w-[8rem]">
+                Publish Now
+              </Button>
+            </div>
+          </PublishPopup>
         </>
       ) : (
         <Link

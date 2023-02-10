@@ -2,7 +2,7 @@ import { Fragment, ReactNode, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
 import Button from "./Button";
 
-export interface PopupProps {
+export interface PublishPopupProps {
   title: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -10,13 +10,12 @@ export interface PopupProps {
   children?: ReactNode;
 }
 
-const Popup = ({
-  title,
+const PublishPopup = ({
   isOpen,
   setIsOpen,
   className,
   children,
-}: PopupProps) => {
+}: PublishPopupProps) => {
   useEffect(() => {
     const handleKeyup = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -44,7 +43,7 @@ const Popup = ({
   return (
     <Fragment>
       <div
-        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[32rem] border-2 bg-white/100 rounded-md ${className}`}
+        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[64rem] border-2 bg-white/100 rounded-md ${className}`}
       >
         <Button
           icon={<IoMdClose size={24} />}
@@ -53,8 +52,7 @@ const Popup = ({
           className="absolute w-fit right-0 top-0 opacity-70 hover:opacity-100"
           onClick={() => setIsOpen(false)}
         />
-        <div className="flex flex-col justify-center items-stretch gap-4 p-10">
-          <h3 className="text-xl text-center pb-4">{title}</h3>
+        <div className="grid grid-rows-5 grid-flow-col gap-4 p-10">
           {children}
         </div>
       </div>
@@ -66,4 +64,4 @@ const Popup = ({
   );
 };
 
-export default Popup;
+export default PublishPopup;
