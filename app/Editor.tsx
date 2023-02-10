@@ -53,7 +53,7 @@ any) => {
 
   const setupMarkdown = (text: string) => {
     const md = require("markdown-it")();
-    const result = md.render(text);
+    const result = md.render(text || "");
     return result;
   };
 
