@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="main-font overflow-x-hidden" data-color-mode="light">
+    <html lang="en" id="blogstack-html" className="main-font overflow-x-hidden" data-color-mode="light">
       <head />
       <body className="font-main overflow-x-hidden">
         <Providers>
