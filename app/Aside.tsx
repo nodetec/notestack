@@ -14,7 +14,7 @@ const Aside: React.FC<AsideProps> = ({
     className={`md:pl-10 md:border-l md:border-l-light-gray items-stretch h-full ${className}`}
     {...props}
   >
-    <div className="hidden sticky top-20 md:flex flex-col gap-8">{children}</div>
+    <div className="hidden sticky top-0 md:flex flex-col gap-8">{children}</div>
   </aside>
 );
 

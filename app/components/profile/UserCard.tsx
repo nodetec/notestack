@@ -88,7 +88,7 @@ export default function UserCard({ npub }: any) {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mt-6">
       <Link href={`/u/${npub}`}>
         <img
           className="rounded-full w-24 h-24 object-cover mb-4"
