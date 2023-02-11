@@ -30,7 +30,7 @@ export default function FollowedRelays() {
   return (
     <div className="my-3">
       {relayNames && (
-        <div className="flex whitespace-nowrap flex-row gap-4 overflow-x-scroll">
+        <div className="flex whitespace-nowrap flex-row gap-2 overflow-x-scroll">
           {relayNames.map((relay: string) => {
             return (
               <button
@@ -38,8 +38,8 @@ export default function FollowedRelays() {
                 onClick={() => handleRelayClick(relay)}
                 className={
                   activeRelay && activeRelay.url === "wss://" + relay
-                    ? "border border-black bg-black text-white text-xs sm:text-base rounded-full p-1 sm:p-2"
-                    : "border border-black rounded-full text-xs sm:text-base p-1 sm:p-2"
+                    ? "border border-black bg-black text-white text-xs sm:text-base rounded-full px-4 py-2"
+                    : "border border-black rounded-full text-xs sm:text-base px-4 py-2"
                 }
               >
                 {relay}
