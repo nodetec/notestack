@@ -143,11 +143,13 @@ const Article: FC<NoteProps> = ({
               </div>
             ) : null}
             <DatePosted timestamp={publishedAt || createdAt} />
-            <span>·</span>
-            <span className="text-gray text-xs md:text-sm">
-              {/* @ts-ignore */}
-              {event.relayUrl}
-            </span>
+            <div className="hidden md:block">
+              <span>·</span>
+              <span className="text-gray text-xs md:text-sm">
+                {/* @ts-ignore */}
+                {event.relayUrl}
+              </span>
+            </div>
           </div>
         </div>
       </div>
