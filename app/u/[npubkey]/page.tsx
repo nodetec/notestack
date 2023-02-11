@@ -18,6 +18,7 @@ import { FeedContext } from "@/app/context/feed-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import UserCard from "@/app/components/profile/UserCard";
 import Following from "@/app/components/profile/Following";
+import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 
 export default function ProfilePage() {
   const TABS = ["Home", "About"];
@@ -42,9 +43,11 @@ export default function ProfilePage() {
   const npub = pathname!.split("/").pop() || "";
   // const [name, setName] = useState();
   // const [about, setAbout] = useState();
+  const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
   const [profile, setProfile] = useState({
     name: "",
     about: "",
+    picture: "",
     banner: "",
   });
   let profilePubkey = "";
@@ -117,6 +120,11 @@ export default function ProfilePage() {
     if (profile && profile.content) {
       const profileContent = JSON.parse(profile.content);
       setProfile(profileContent);
+      if (!profileContent.picture || profileContent.picture === "") {
+        setPicture(DUMMY_PROFILE_API(npub));
+      } else {
+        setPicture(profileContent.picture);
+      }
     }
   };
 
@@ -141,8 +149,17 @@ export default function ProfilePage() {
           />
         )}
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-5xl font-medium my-12">{profile.name}</h1>
-          <AuthorTooltip npub={npub} />
+          <div className="flex flex-row items-center gap-2">
+            <img
+              className="rounded-full w-11 h-11 object-cover md:hidden"
+              src={picture}
+              alt={""}
+            />
+            <h1 className="md:text-5xl font-medium my-8 md:my-12">{profile.name}</h1>
+          </div>
+          <div className="hidden md:flex">
+            <AuthorTooltip npub={npub} />
+          </div>
         </div>
         <FollowedRelays />
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
