@@ -187,12 +187,13 @@ const WriteButton = () => {
             <div></div>
             <div className="row-span-2 justify-self-center">
               <div>
-                {allRelays.map((relay: string) => (
+                {allRelays.map((relay: string, index: number) => (
                   <PopupCheckbox
                     key={relay}
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
+                    checked={index == 0 ? true: false}
                   ></PopupCheckbox>
                 ))}
               </div>
