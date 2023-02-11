@@ -33,12 +33,12 @@ const Popup = ({
 
   if (!isOpen){
     if(typeof document !== "undefined"){
-      document.body.className = "font-main";
+      document.getElementById('blogstack-html')?.classList.remove("overflow-y-hidden");
     }
     return null;
   }
   if(typeof document !== "undefined"){
-    document.body.className = "overflow-hidden font-main";
+    document.getElementById('blogstack-html')?.classList.add("overflow-y-hidden");
   }
 
   return (
