@@ -103,7 +103,7 @@ export default function UserCard({ npub }: any) {
         {nip05 && (
           <div className="text-sm text-gray mb-2 ">
             <div className="flex items-center gap-1">
-              <span className="max-w-[12rem] overflow-scroll scrollable-element">{nip05}</span>
+              <span className="max-w-[12rem] whitespace-nowrap overflow-scroll scrollable-element">{nip05}</span>
               <BsPatchCheckFill className="text-blue-500" size="14" />
             </div>
           </div>
