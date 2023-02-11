@@ -94,7 +94,6 @@ export default function Login() {
           className="w-full"
           onClick={loginHandler}
           size="sm"
-          icon={<BsLightningChargeFill />}
         >
           {isLightningConnected ? "connected" : "Login with Extension"}
         </Button>
