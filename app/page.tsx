@@ -183,7 +183,7 @@ export default function HomePage() {
       <Content className="mt-8">
         <FollowedRelays />
         <Tabs
-          className="sticky top-16 bg-white"
+          className="sticky top-0 bg-white"
           TABS={TABS}
           activeTab={activeTab}
           setActiveTab={setActiveTab}

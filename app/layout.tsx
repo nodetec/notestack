@@ -16,9 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" id="blogstack-html" className="main-font overflow-x-hidden" data-color-mode="light">
+    <html lang="en" id="blogstack-html" className="main-font" data-color-mode="light">
       <head />
-      <body className="font-main overflow-x-hidden">
+      <body className="font-main">
         <Providers>
           <Header />
           <div className="container relative flex flex-col px-4 mx-auto min-h-screen">
