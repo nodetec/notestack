@@ -33,14 +33,24 @@ export default function TagPage() {
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
 
+  const [eventTags, setEventTags] = useState<string[]>([]);
+
   const filter = {
     kinds: [30023],
     limit: 100,
     "#t": [tagname],
   };
 
+  function getTValues(tags: string[][]) {
+    return tags
+      .filter((subTags) => subTags[0] === "t")
+      .map((subTags) => subTags[1])
+      .filter((t) => t.length <= 20);
+  }
+
   const getTagEvents = async () => {
     let pubkeysSet = new Set<string>();
+    let eventTagsSet = new Set<string>();
 
     setEvents([]);
     let relayName = relayUrl.replace("wss://", "");
@@ -48,6 +58,12 @@ export default function TagPage() {
 
     if (feed[feedKey]) {
       setEvents(feed[feedKey]);
+      const events = feed[feedKey];
+      events.forEach((event: Event) => {
+        const tValues = getTValues(event.tags);
+        tValues.forEach((t) => eventTagsSet.add(t));
+      });
+      setEventTags(Array.from(eventTagsSet).slice(0, 7));
       return;
     }
 
@@ -63,12 +79,15 @@ export default function TagPage() {
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
+      const tValues = getTValues(event.tags);
+      tValues.forEach((t) => eventTagsSet.add(t));
     });
 
     sub.on("eose", () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `tag_${tagname}_${relayName}`;
       feed[feedKey] = filteredEvents;
+      setEventTags(Array.from(eventTagsSet));
       setFeed(feed);
       if (filteredEvents.length > 0) {
         setEvents(filteredEvents);
@@ -105,25 +124,17 @@ export default function TagPage() {
         ) : null}
       </Content>
       <Aside>
-        {/* <RecommendedEvents */}
-        {/*   title="Recommended Blogs" */}
-        {/*   showProfile */}
-        {/*   EVENTS={[ */}
-        {/*     "0d4dfa8b61c059d2f9a670f4a75c78db823fe48bb9999781bc9c204c46790019", */}
-        {/*     "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27", */}
-        {/*     "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79", */}
-        {/*   ]} */}
-        {/* /> */}
+        {events.length > 0 && (
+          <RecommendedEvents
+            title="Recommended Blogs"
+            showProfile
+            events={events.slice(0, 3)}
+          />
+        )}
+
         <Topics
           title="Recommended Topics"
-          TOPICS={[
-            "nostr",
-            "lightning",
-            "bitcoin",
-            "taproot",
-            "tailwindcss",
-            "chess",
-          ]}
+          TOPICS={eventTags.length > 0 ? eventTags.slice(0, 7) : []}
         />
       </Aside>
     </Main>
