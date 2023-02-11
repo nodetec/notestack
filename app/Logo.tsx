@@ -7,7 +7,7 @@ const Logo: FC = () => (
   <Link className="text-xl font-bold" href="/">
     <div className="flex flex-row gap-2">
       <FaBlog size="25" />
-      <span>
+      <span className="hidden md:flex">
         blog<span className="text-orange-600">stack</span>
       </span>
     </div>
