@@ -19,19 +19,26 @@
 }
 
 img[src=""] {
-  display:none;
+  display: none;
 }
 
 .scrollable-element {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
 
-  .scrollable-element::-webkit-scrollbar {
-    height: 0.2em;
-    background-color: transparent;
-  }
+.scrollable-element::-webkit-scrollbar {
+  height: 0.2em;
+  background-color: transparent;
+}
 
-  .scrollable-element::-webkit-scrollbar-thumb {
-    background-color: transparent;
-  }
+.scrollable-element::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  scrollbar-width: none;
+}
+
+.scrollable-element::-moz-scrollbar {
+  width: 0;
+  background-color: transparent;
+}
