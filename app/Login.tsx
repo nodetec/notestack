@@ -96,7 +96,7 @@ export default function Login() {
           size="sm"
           icon={<BsLightningChargeFill />}
         >
-          {isLightningConnected ? "connected" : "Login with NIP-07 Extension"}
+          {isLightningConnected ? "connected" : "Login with Extension"}
         </Button>
       </Popup>
     </>
