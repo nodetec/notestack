@@ -30,7 +30,7 @@ export default function FollowedRelays() {
   return (
     <div className="my-3">
       {relayNames && (
-        <div className="flex whitespace-nowrap flex-row gap-2 overflow-x-scroll">
+        <div className="flex whitespace-nowrap scrollable-element flex-row gap-2 overflow-x-scroll">
           {relayNames.map((relay: string) => {
             return (
               <button

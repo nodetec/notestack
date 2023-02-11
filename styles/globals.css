@@ -21,3 +21,17 @@
 img[src=""] {
   display:none;
 }
+
+.scrollable-element {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scrollable-element::-webkit-scrollbar {
+    height: 0.2em;
+    background-color: transparent;
+  }
+
+  .scrollable-element::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
