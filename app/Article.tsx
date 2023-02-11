@@ -143,7 +143,7 @@ const Article: FC<NoteProps> = ({
               </div>
             ) : null}
             <DatePosted timestamp={publishedAt || createdAt} />
-            <div className="hidden md:block">
+            <div className="hidden md:flex md:flex-row md:gap-2 md:items-center">
               <span>·</span>
               <span className="text-gray text-xs md:text-sm">
                 {/* @ts-ignore */}
