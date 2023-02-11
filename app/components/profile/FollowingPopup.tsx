@@ -23,7 +23,7 @@ export default function FollowingPopup({ pubkeys, isOpen, setIsOpen }: any) {
       title="Following"
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      className="h-3/4 max-h-192 opacity-70 inset-0 overflow-auto scroll-smooth border-none"
+      className="h-3/4 max-h-192 opacity-70 inset-0 overflow-x-hidden scroll-smooth border-none"
     >
       <ul>
         {pubkeys &&
