@@ -101,11 +101,11 @@ export default function UserCard({ npub }: any) {
       {/* <Followers npub={npub} /> */}
       <div className="font-semibold">
         {nip05 && (
-          <div className="text-sm text-gray mb-2 ">
-            <div className="flex items-center gap-1">
-              <span className="max-w-[12rem] whitespace-nowrap overflow-scroll scrollable-element">{nip05}</span>
+          <div className="text-sm text-gray mb-2">
+            <span className="flex items-center flex-row gap-1">
+              <span className="max-w-[12rem] whitespace-nowrap overflow-scroll scrollable-element leading-none">{nip05}</span>
               <BsPatchCheckFill className="text-blue-500" size="14" />
-            </div>
+            </span>
           </div>
         )}
         {lud16 && utils.isLightningAddress(lud16) && (
