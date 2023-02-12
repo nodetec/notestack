@@ -11,7 +11,7 @@ export default function FollowButton({ profilePublicKey }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followButtonText, setFollowButtonText] = useState("Follow");
   const [followingPubkeys, setFollowingPubkeys] = useState<string[]>([]);
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, publish } = useContext(RelayContext);
   // @ts-ignore
   const { following, setFollowing, followingReload, setFollowingReload } =
     useContext(FollowingContext);
@@ -50,13 +50,16 @@ export default function FollowButton({ profilePublicKey }: any) {
     }
   };
 
+  const onOk = async () => {};
+
+  const onFailed = async () => {};
+
   const handleFollow = async (e: any) => {
     e.preventDefault();
     // console.log("follow button clicked");
 
     let newContactList: any;
-
-    let action = "";
+    let action: string;
 
     if (isFollowing) {
       const unfollowedList = followingPubkeys.filter(
@@ -82,14 +85,9 @@ export default function FollowButton({ profilePublicKey }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
+    const onSeen = async () => {
+      if (!activeRelay) return;
 
-    let pub = relay.publish(event);
-    pub.on("ok", () => {
-      // console.log("OUR EVENT WAS ACCEPTED");
-    });
-    pub.on("seen", () => {
       // console.log("OUR EVENT WAS SEEN");
       let relayName = relayUrl.replace("wss://", "");
       let followingKey = `following_${relayName}_${keys.publicKey}`;
@@ -114,10 +112,9 @@ export default function FollowButton({ profilePublicKey }: any) {
         setIsFollowing(true);
       }
       setFollowingReload(!followingReload);
-    });
-    pub.on("failed", (reason: string) => {
-      // console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
-    });
+    };
+
+    publish([relayUrl], event, onOk, onSeen, onFailed);
   };
 
   return (

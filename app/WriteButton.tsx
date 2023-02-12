@@ -33,7 +33,7 @@ const WriteButton = () => {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
-  const { activeRelay, allRelays, publishToRelays } = useContext(RelayContext);
+  const { activeRelay, allRelays, publish } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -146,7 +146,7 @@ const WriteButton = () => {
     let eventId: any = null;
     eventId = event?.id;
 
-    publishToRelays(toggledRelays, event, onOk, onSeen, onFailed);
+    publish(toggledRelays, event, onOk, onSeen, onFailed);
   };
 
   return (

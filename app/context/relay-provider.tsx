@@ -15,7 +15,7 @@ interface IRelayContext {
   connect: (newRelayUrl: string) => Promise<any>;
   connectedRelays: Set<Relay>;
   setConnectedRelays: React.Dispatch<React.SetStateAction<Set<Relay>>>;
-  publishToRelays: (
+  publish: (
     relays: string[],
     event: any,
     onOk: () => void,
@@ -40,7 +40,7 @@ export const RelayContext = createContext<IRelayContext>({
   connect: () => Promise.resolve(),
   connectedRelays: new Set<Relay>(),
   setConnectedRelays: () => {},
-  publishToRelays: () => {},
+  publish: () => {},
   subToRelay: () => {},
 });
 
@@ -117,7 +117,7 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     return relay;
   };
 
-  const publishToRelays = async (
+  const publish = async (
     relays: string[],
     event: any,
     onOk: () => void,
@@ -126,30 +126,24 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     console.log("publishing to relays:", relays);
     for (const url of relays) {
-      const relay = relayInit(url);
-      await relay.connect();
+      const relay = await connect(url);
 
-      relay.on("connect", () => {
-        console.log(`connected to ${relay.url}`);
-      });
-      relay.on("error", () => {
-        console.log(`failed to connect to ${relay.url}`);
-      });
-      //publish event
+      if (!relay) return;
+
       let pub = relay.publish(event);
       pub.on("ok", () => {
-        console.log(`${relay.url} has accepted our event`);
+        console.log(`${url} has accepted our event`);
         onOk();
       });
       pub.on("seen", () => {
-        console.log(`we saw the event on ${relay.url}`);
+        console.log(`we saw the event on ${url}`);
         onSeen();
-        relay.close();
+        // relay.close();
       });
       pub.on("failed", (reason: any) => {
-        console.log(`failed to publish to ${relay.url}: ${reason}`);
+        console.log(`failed to publish to ${url}: ${reason}`);
         onFailed();
-        relay.close();
+        // relay.close();
       });
     }
   };
@@ -198,7 +192,7 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
         connect,
         connectedRelays,
         setConnectedRelays,
-        publishToRelays,
+        publish,
         subToRelay,
       }}
     >
