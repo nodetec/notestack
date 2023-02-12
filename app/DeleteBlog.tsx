@@ -44,8 +44,6 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
       setNotifyMessage("Delete failed!");
     };
 
-    console.log("DELETE EVENT:", deleteEvent);
-
     publish([relayUrl], deleteEvent, onOk, onSeen, onFailed);
   };
 

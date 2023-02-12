@@ -32,7 +32,7 @@ export default function AccountSettings({
   const [newLnAddress, setNewLnAddress] = useState<any>(lud16);
   const [convertedAddress, setConvertedAddress] = useState<any>();
   // const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, publish } = useContext(RelayContext);
   // @ts-ignore
   const { setUser } = useContext(UserContext);
   // @ts-ignore
@@ -128,28 +128,22 @@ export default function AccountSettings({
 
     event = await NostrService.signEvent(event);
 
-    if (!activeRelay) return;
-    let pub = activeRelay.publish(event);
-    pub.on("ok", () => {
-      // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);
-    });
-    pub.on("seen", () => {
-      setUser(event);
-      // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      profiles[`profile_${relayUrl}_${event.pubkey}`] = event;
+    const onOk = async () => {};
 
+    const onSeen = async () => {
+      setUser(event);
+      let relayName = relayUrl.replace("wss://", "");
+      profiles[`profile_${relayName}_${event.pubkey}`] = event;
       setReload(!reload);
       setProfiles(profiles);
       setIsOpen(!isOpen);
-    });
-    pub.on("failed", (reason: string) => {
-      // console.log(
-      //   `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
-      // );
+    };
+
+    const onFailed = async () => {
       setIsOpen(!isOpen);
-      // TODO: add error notification
-    });
+    };
+
+    publish([relayUrl], event, onOk, onSeen, onFailed);
   };
 
   return (
