@@ -2,21 +2,18 @@
 
 import { createContext, useState, useContext, useEffect } from "react";
 import { RelayContext } from "./relay-provider";
-import { NostrService } from "../lib/nostr";
 
 export const ProfilesContext = createContext([]);
 
 export default function ProfilesProvider({ children }) {
   const [profiles, setProfiles] = useState({});
-  const [allPubkeys, setAllPubkeys] = useState([]);
   const [reload, setReload] = useState(false);
-  // @ts-ignore
-  const { activeRelay, relayUrl } = useContext(RelayContext);
+  const { relayUrl, connect } = useContext(RelayContext);
 
   const addProfiles = async (pubkeys) => {
     if (!relayUrl) return;
 
-    const relay = await NostrService.connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
 
     // console.log("Looking up profiles:", pubkeys);

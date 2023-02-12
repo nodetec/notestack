@@ -1,12 +1,10 @@
 "use client";
-import { RelayContext } from "./context/relay-provider.jsx";
+import { RelayContext } from "./context/relay-provider";
 import { useContext, useEffect, useState } from "react";
 import { ProfilesContext } from "./context/profiles-provider.jsx";
 
 export default function FollowedRelays() {
-  // @ts-ignore
-  const { relayUrl, setRelayUrl, activeRelay, setActiveRelay, allRelays } =
-    useContext(RelayContext);
+  const { setRelayUrl, activeRelay, allRelays } = useContext(RelayContext);
   // @ts-ignore
   const { reload, setReload } = useContext(ProfilesContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);

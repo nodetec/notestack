@@ -23,7 +23,6 @@ export default function Contact({ pubkey }: any) {
   // const pubkey = contact.pubkey;
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // @ts-ignore
   const { activeRelay, relayUrl } = useContext(RelayContext);
 
   // @ts-ignore

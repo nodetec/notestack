@@ -14,7 +14,6 @@ interface DeleteBlogProps {
 export default function DeleteBlog({ event }: DeleteBlogProps) {
   // @ts-ignore
   const { keys: loggedInUserKeys } = useContext(KeysContext);
-  // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
   const { setNotifyMessage } = useContext(NotifyContext);

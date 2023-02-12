@@ -35,8 +35,6 @@ export default function HomePage() {
 
   // @ts-ignore
   const { following, followingReload } = useContext(FollowingContext);
-
-  // @ts-ignore
   const { activeRelay, relayUrl, connect } = useContext(RelayContext);
 
   // @ts-ignore
@@ -76,7 +74,7 @@ export default function HomePage() {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([exploreFilter]);
 

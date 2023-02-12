@@ -11,7 +11,6 @@ export default function FollowButton({ profilePublicKey }: any) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followButtonText, setFollowButtonText] = useState("Follow");
   const [followingPubkeys, setFollowingPubkeys] = useState<string[]>([]);
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   // @ts-ignore
   const { following, setFollowing, followingReload, setFollowingReload } =
@@ -83,7 +82,7 @@ export default function FollowButton({ profilePublicKey }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
 
     let pub = relay.publish(event);

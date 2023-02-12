@@ -16,7 +16,6 @@ import Followers from "./Followers";
 // import FollowButton from "./FollowButton";
 
 export default function UserCard({ npub }: any) {
-  // @ts-ignore
   const { activeRelay, relayUrl } = useContext(RelayContext);
   // @ts-ignore
   const { keys } = useContext(KeysContext);

@@ -9,13 +9,10 @@ import Posts from "./Posts";
 
 export default function BlogFeed({ events, setEvents, filter, profile }: any) {
   const [addedPosts, setAddedPosts] = useState<number>(10);
-  const [pubkeysReady, setpubkeysReady] = useState<boolean>(false);
   // @ts-ignore
-  const { profiles, setProfiles, pubkeys, setpubkeys } =
-    useContext(ProfilesContext);
+  const { pubkeys, setpubkeys } = useContext(ProfilesContext);
 
-  // @ts-ignore
-  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
+  const { activeRelay, relayUrl } = useContext(RelayContext);
 
   // fetch initial 100 events for filter
   useEffect(() => {
@@ -56,7 +53,6 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
       }
     }
   }, [addedPosts]);
-
 
   useEffect(() => {
     const handleScroll = () => {

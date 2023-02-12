@@ -24,7 +24,6 @@ export default function TagPage() {
 
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
@@ -67,7 +66,7 @@ export default function TagPage() {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([filter]);
 

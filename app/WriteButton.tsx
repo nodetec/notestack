@@ -33,7 +33,6 @@ const WriteButton = () => {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
-  // @ts-ignore
   const { activeRelay, allRelays, publishToRelays } = useContext(RelayContext);
 
   // @ts-ignore

@@ -18,7 +18,6 @@ const TopProfile = ({ event }: TopProfileProps) => {
   const [name, setName] = useState<string>();
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
 
-  // @ts-ignore
   const { relayUrl } = useContext(RelayContext);
 
   // @ts-ignore

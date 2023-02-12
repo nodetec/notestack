@@ -32,12 +32,11 @@ export default function AccountSettings({
   const [newLnAddress, setNewLnAddress] = useState<any>(lud16);
   const [convertedAddress, setConvertedAddress] = useState<any>();
   // const [loggedInPubkey, setLoggedInPubkey] = useState<any>();
-  // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   // @ts-ignore
-  const { setpubkeys, profiles, setProfiles, setReload, reload } =
+  const { profiles, setProfiles, setReload, reload } =
     useContext(ProfilesContext);
 
   useEffect(() => {

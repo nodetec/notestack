@@ -1,15 +1,13 @@
 import { FollowingContext } from "@/app/context/following-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { RelayContext } from "@/app/context/relay-provider";
-import Link from "next/link";
 import { Event, nip19 } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Contact from "./Contact";
 import FollowingPopup from "./FollowingPopup";
 
 export default function Following({ npub }: any) {
-  // @ts-ignore
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, connect } = useContext(RelayContext);
 
   // @ts-ignore
   const { following, setFollowing } = useContext(FollowingContext);
@@ -39,7 +37,7 @@ export default function Following({ npub }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([
       {

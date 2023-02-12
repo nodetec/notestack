@@ -22,7 +22,7 @@ export default function RecommendedEvents({
   title,
   showProfile = false,
   showThumbnail = false,
-  className = ""
+  className = "",
 }: RecommendedEventsProps) {
   // let recommendedEvents: Event[] = [];
 
@@ -66,8 +66,7 @@ const Event = ({
   const npub = nip19.npubEncode(pubkey);
   const noteNpub = nip19.noteEncode(noteId);
 
-  // @ts-ignore
-  const { activeRelay, isLoading } = useContext(RelayContext);
+  const { activeRelay } = useContext(RelayContext);
 
   // @ts-ignore
   const { profiles, reload } = useContext(ProfilesContext);

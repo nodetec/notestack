@@ -30,8 +30,7 @@ export default function ProfilePage() {
   // @ts-ignore
   const { addProfiles, profiles, reload } = useContext(ProfilesContext);
   // const { profile } = useContext(ProfileContext);
-  // @ts-ignore
-  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
+  const { relayUrl, connect } = useContext(RelayContext);
 
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
@@ -79,7 +78,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([filter]);
 
@@ -155,7 +154,9 @@ export default function ProfilePage() {
               src={picture}
               alt={""}
             />
-            <h1 className="md:text-5xl font-medium my-8 md:my-12">{profile.name}</h1>
+            <h1 className="md:text-5xl font-medium my-8 md:my-12">
+              {profile.name}
+            </h1>
           </div>
           <div className="hidden md:flex">
             <AuthorTooltip npub={npub} />

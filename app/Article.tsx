@@ -59,7 +59,6 @@ const Article: FC<NoteProps> = ({
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
-  // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { profiles, reload } = useContext(ProfilesContext);

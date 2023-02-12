@@ -17,7 +17,6 @@ export default function NotePage() {
     eventId = nip19.decode(eventId).data.toString();
   }
 
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   const [event, setEvent] = useState<Event>();
   // @ts-ignore
@@ -32,7 +31,7 @@ export default function NotePage() {
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([
       {

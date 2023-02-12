@@ -5,7 +5,6 @@ import { FollowersContext } from "@/app/context/followers-provider";
 import { NostrService } from "@/app/lib/nostr";
 
 export default function Followers({ npub }: any) {
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
@@ -29,7 +28,7 @@ export default function Followers({ npub }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([
       {

@@ -24,7 +24,6 @@ type ResultType = {
 };
 
 const Search = () => {
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
@@ -67,7 +66,7 @@ const Search = () => {
     let searchTagsSet = new Set<string>();
     let pubkeysSet = new Set<string>();
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
     let sub = relay.sub([
       {
@@ -179,7 +178,6 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
 
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
   const npub = nip19.npubEncode(pubkey);
-  // @ts-ignore
   const { relayUrl, activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { profiles, addProfiles, reload } = useContext(ProfilesContext);

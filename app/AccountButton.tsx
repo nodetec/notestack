@@ -22,11 +22,11 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
 
-  // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
-  const { following, setFollowing, followingReload, setFollowingReload } = useContext(FollowingContext);
+  const { following, setFollowing, followingReload, setFollowingReload } =
+    useContext(FollowingContext);
 
   const getEvents = async () => {
     let kinds = [0, 3];
@@ -56,7 +56,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
 
     let relayName = relayUrl.replace("wss://", "");
 
-    const relay = await connect(relayUrl, activeRelay);
+    const relay = await connect(relayUrl);
     if (!relay) return;
 
     let sub = relay.sub([

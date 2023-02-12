@@ -1,7 +1,7 @@
 "use client";
 
 import KeysProvider from "./keys-provider.jsx";
-import RelayProvider from "./relay-provider.jsx";
+import RelayProvider from "./relay-provider";
 import BlogProvider from "./blog-provider.jsx";
 import UserProvider from "./user-provider.jsx";
 import NotifyProvider from "./notify-provider";
