@@ -136,15 +136,7 @@ const WriteButton = () => {
     }
 
     let event = NostrService.createEvent(30023, publicKey, content, tags);
-
-    try {
-      event = await NostrService.addEventData(event);
-    } catch (err: any) {
-      return;
-    }
-
-    let eventId: any = null;
-    eventId = event?.id;
+    event = await NostrService.signEvent(event);
 
     publish(toggledRelays, event, onOk, onSeen, onFailed);
   };
@@ -193,7 +185,7 @@ const WriteButton = () => {
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
-                    checked={index == 0 ? true: false}
+                    checked={index == 0 ? true : false}
                   ></PopupCheckbox>
                 ))}
               </div>

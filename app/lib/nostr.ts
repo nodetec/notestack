@@ -114,6 +114,7 @@ export namespace NostrService {
       content: content,
       tags: tags,
     };
+    event.id = getEventHash(event);
 
     return event;
   }
@@ -133,11 +134,13 @@ export namespace NostrService {
     return sha256(serializeEvent(event)).toString(Hex);
   }
 
-  export async function addEventData(event: Event) {
-    event.id = getEventHash(event);
-    // @ts-ignore
-    event = await window.nostr.signEvent(event);
-    // console.log("signed event", event);
+  export async function signEvent(event: Event) {
+    try {
+      // @ts-ignore
+      event = await window.nostr.signEvent(event);
+    } catch (err: any) {
+      console.error("signing event failed");
+    }
     return event;
   }
 

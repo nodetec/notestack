@@ -77,13 +77,7 @@ export default function FollowButton({ profilePublicKey }: any) {
     }
 
     let event = NostrService.createEvent(3, keys.publicKey, "", newContactList);
-
-    try {
-      event = await NostrService.addEventData(event);
-    } catch (err: any) {
-      console.log("error", err);
-      return;
-    }
+    event = await NostrService.signEvent(event);
 
     const onSeen = async () => {
       if (!activeRelay) return;

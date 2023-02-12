@@ -126,19 +126,15 @@ export default function AccountSettings({
       []
     );
 
-    try {
-      event = await NostrService.addEventData(event);
-    } catch (err: any) {
-      return;
-    }
+    event = await NostrService.signEvent(event);
 
     if (!activeRelay) return;
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
       // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);
-      setUser(event);
     });
     pub.on("seen", () => {
+      setUser(event);
       // console.log(`EVENT WAS SEEN ON ${activeRelay.url}`);
       let relayUrl = activeRelay.url.replace("wss://", "");
       profiles[`profile_${relayUrl}_${event.pubkey}`] = event;
@@ -152,6 +148,7 @@ export default function AccountSettings({
       //   `OUR EVENT HAS FAILED WITH REASON: ${activeRelay.url}: ${reason}`
       // );
       setIsOpen(!isOpen);
+      // TODO: add error notification
     });
   };
 
