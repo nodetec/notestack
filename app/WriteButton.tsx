@@ -89,6 +89,7 @@ const WriteButton = () => {
   const onOk = async () => {};
 
   const onSeen = async () => {
+    if (!activeRelay) return;
     console.log(`PUBLISH EVENT WAS SEEN ON ${activeRelay.url}`);
     setBlog({
       title: null,

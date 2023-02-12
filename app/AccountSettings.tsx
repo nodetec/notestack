@@ -132,6 +132,7 @@ export default function AccountSettings({
       return;
     }
 
+    if (!activeRelay) return;
     let pub = activeRelay.publish(event);
     pub.on("ok", () => {
       // console.log(`EVENT WAS ACCEPTED by ${activeRelay.url}`);

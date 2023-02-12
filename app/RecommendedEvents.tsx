@@ -80,6 +80,7 @@ const Event = ({
   }, [activeRelay, reload]);
 
   const getPicture = (event: Event) => {
+    if (!activeRelay) return;
     const relayUrl = activeRelay.url.replace("wss://", "");
     const profileKey = `profile_${relayUrl}_${event.pubkey}`;
     const profile = profiles[profileKey];
@@ -94,6 +95,7 @@ const Event = ({
   };
 
   const getName = (event: Event) => {
+    if (!activeRelay) return;
     const relayUrl = activeRelay.url.replace("wss://", "");
     const profileKey = `profile_${relayUrl}_${event.pubkey}`;
     const profile = profiles[profileKey];
