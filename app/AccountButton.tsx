@@ -26,7 +26,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
 
   // @ts-ignore
-  const { following, setFollowing } = useContext(FollowingContext);
+  const { following, setFollowing, followingReload, setFollowingReload } = useContext(FollowingContext);
 
   const getEvents = async () => {
     let kinds = [0, 3];
@@ -100,7 +100,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         following[followingKey] = contactPublicKeys;
         setFollowing(following);
         // addProfiles(contactPublicKeys.slice(0, 5));
-        // setFollowingReload(!followingReload);
+        setFollowingReload(!followingReload);
         sub.unsub();
       }
     });

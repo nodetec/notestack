@@ -14,7 +14,7 @@ export default function FollowButton({ profilePublicKey }: any) {
   // @ts-ignore
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
   // @ts-ignore
-  const { following, setFollowing, followingReload } =
+  const { following, setFollowing, followingReload, setFollowingReload } =
     useContext(FollowingContext);
 
   // @ts-ignore
@@ -114,6 +114,7 @@ export default function FollowButton({ profilePublicKey }: any) {
         setFollowButtonText("Following");
         setIsFollowing(true);
       }
+      setFollowingReload(!followingReload);
     });
     pub.on("failed", (reason: string) => {
       // console.log("OUR EVENT HAS FAILED BECAUSE:", reason);
