@@ -22,7 +22,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
 
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { following, setFollowing, followingReload, setFollowingReload } =
@@ -56,19 +56,15 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
 
     let relayName = relayUrl.replace("wss://", "");
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
+    const filter = {
+      kinds,
+      authors: [pubkey],
+      limit: 5,
+    };
 
-    let sub = relay.sub([
-      {
-        kinds,
-        authors: [pubkey],
-        limit: 5,
-      },
-    ]);
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayUrl;
       events.push(event);
@@ -84,9 +80,9 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
           }
         }
       }
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       if (events.length !== 0) {
         // filter through events for kind 3
         const followingEvents = events.filter((event) => event.kind === 3);
@@ -101,9 +97,10 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         setFollowing(following);
         // addProfiles(contactPublicKeys.slice(0, 5));
         setFollowingReload(!followingReload);
-        sub.unsub();
       }
-    });
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   useEffect(() => {
