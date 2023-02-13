@@ -97,7 +97,7 @@ export default function UserCard({ npub }: any) {
         <span>{name}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
-      <Followers npub={npub} />
+      {/* <Followers npub={npub} /> */}
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">
