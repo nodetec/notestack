@@ -6,7 +6,6 @@ import { nip19 } from "nostr-tools";
 import Blog from "./Blog";
 import { RelayContext } from "../context/relay-provider";
 import { CachedEventContext } from "../context/cached-event-provider";
-import { NostrService } from "../lib/nostr";
 import { ProfilesContext } from "../context/profiles-provider";
 
 export default function NotePage() {
@@ -17,7 +16,7 @@ export default function NotePage() {
     eventId = nip19.decode(eventId).data.toString();
   }
 
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
   const [event, setEvent] = useState<Event>();
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
@@ -31,33 +30,30 @@ export default function NotePage() {
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([
-      {
-        ids: [eventId],
-        kinds: [30023],
-      },
-    ]);
+    const filter = {
+      ids: [eventId],
+      kinds: [30023],
+    };
 
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayName = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       if (events.length > 0) {
         setEvent(events[0]);
       }
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
       }
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   // todo cache
