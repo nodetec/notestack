@@ -82,7 +82,7 @@ export default function Followers({ npub }: any) {
         className="text-base text-gray my-2"
       >
         {followerPubkeys && followerPubkeys.length}
-        {followerPubkeys && followerPubkeys.length > 10 && "+"}
+        {followerPubkeys && followerPubkeys.length >= 10 && "+"}
         {" "}
         Followers
       </div>
