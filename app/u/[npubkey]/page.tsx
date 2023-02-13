@@ -30,7 +30,7 @@ export default function ProfilePage() {
   // @ts-ignore
   const { addProfiles, profiles, reload } = useContext(ProfilesContext);
   // const { profile } = useContext(ProfileContext);
-  const { relayUrl, connect } = useContext(RelayContext);
+  const { relayUrl, subscribe } = useContext(RelayContext);
 
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
@@ -78,20 +78,16 @@ export default function ProfilePage() {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([filter]);
-
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
       feed[feedKey] = filteredEvents;
@@ -105,8 +101,9 @@ export default function ProfilePage() {
         // setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
         addProfiles(Array.from(pubkeysSet));
       }
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   const getProfile = () => {
