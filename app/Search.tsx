@@ -10,7 +10,7 @@ import {
 } from "react";
 import { BsSearch } from "react-icons/bs";
 import Tooltip from "./Tooltip";
-import { Event, nip19, Relay } from "nostr-tools";
+import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
@@ -24,7 +24,7 @@ type ResultType = {
 };
 
 const Search = () => {
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const [{ tags, pubkeys }, setResults] = useState<ResultType>({
@@ -66,21 +66,18 @@ const Search = () => {
     let searchTagsSet = new Set<string>();
     let pubkeysSet = new Set<string>();
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([
-      {
-        kinds: [30023],
-        "#t": [searchTerm],
-      },
-    ]);
+    const filter = {
+      kinds: [30023],
+      "#t": [searchTerm],
+    };
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       const tValues = getTValues(event.tags);
       tValues.forEach((t) => searchTagsSet.add(t));
       pubkeysSet.add(event.pubkey);
-    });
-    sub.on("eose", () => {
+    };
+
+    const onEOSE = () => {
       const searchTags = Array.from(searchTagsSet).slice(0, 3);
       const searchPubkeys = Array.from(pubkeysSet).slice(0, 3);
       setResults((current: ResultType) => {
@@ -95,9 +92,9 @@ const Search = () => {
       } else {
         setShowTooltip(false);
       }
-      // console.log("EOSE searched events from", activeRelay.url);
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   // TODO: fix this
