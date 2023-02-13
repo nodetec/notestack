@@ -3,6 +3,8 @@ import { Event, nip19 } from "nostr-tools";
 import { RelayContext } from "@/app/context/relay-provider";
 import { FollowersContext } from "@/app/context/followers-provider";
 import { NostrService } from "@/app/lib/nostr";
+import FollowingPopup from "./FollowingPopup";
+import { ProfilesContext } from "@/app/context/profiles-provider";
 
 export default function Followers({ npub }: any) {
   const { relayUrl, activeRelay, connect } = useContext(RelayContext);
@@ -10,9 +12,15 @@ export default function Followers({ npub }: any) {
   // @ts-ignore
   const { followers, setFollowers } = useContext(FollowersContext);
 
+  // @ts-ignore
+  const { addProfiles } = useContext(ProfilesContext);
+
   const [localFollowers, setLocalFollowers] = useState<Event[]>([]);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [followerPubkeys, setFollowerPubkeys] = useState<string[]>();
 
   const getFollowers = async () => {
+    let pubkeysSet = new Set<string>();
     setLocalFollowers([]);
     const profilePubkey = nip19.decode(npub).data.toString();
     let cachedFollowers;
@@ -42,37 +50,47 @@ export default function Followers({ npub }: any) {
 
     sub.on("event", (event: Event) => {
       eventArray.push(event);
+      pubkeysSet.add(event.pubkey);
     });
 
     sub.on("eose", () => {
-      // console.log("EOSE additional events from", activeRelay.url);
-      const filteredEvents = NostrService.filterEvents(eventArray);
-      if (filteredEvents.length > 0) {
-        setLocalFollowers(filteredEvents);
-        followers[followerKey] = filteredEvents;
-        setFollowers(followers);
-      } else {
-        setLocalFollowers([]);
+      if (eventArray.length === 0) {
+        sub.unsub();
+        return;
       }
+
+      const contactPublicKeys = Array.from(pubkeysSet);
+
+      followers[followerKey] = contactPublicKeys;
+      setFollowers(followers);
+      setFollowerPubkeys(contactPublicKeys);
+      addProfiles(contactPublicKeys.slice(0, 5));
+
       sub.unsub();
     });
   };
 
   useEffect(() => {
     getFollowers();
-
   }, [relayUrl, activeRelay]);
 
   return (
-    <div
-      // className="text-base text-gray hover:text-gray-hover my-2"
-      className="text-base text-gray my-2"
-      // href={`/u/${npub}`}
-    >
-      {localFollowers && localFollowers.length > 9
-        ? " 10+"
-        : " " + localFollowers.length}
-      Followers
-    </div>
+    <>
+      <div
+        // className="cursor-pointer text-base text-gray hover:text-gray-hover my-2"
+        // onClick={() => setIsOpen(true)}
+        className="text-base text-gray my-2"
+      >
+        {followerPubkeys && followerPubkeys.length}
+        {followerPubkeys && followerPubkeys.length > 10 && "+"}
+        {" "}
+        Followers
+      </div>
+      <FollowingPopup
+        pubkeys={followerPubkeys}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+      />
+    </>
   );
 }
