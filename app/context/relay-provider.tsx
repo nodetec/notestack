@@ -22,8 +22,8 @@ interface IRelayContext {
     onSeen: () => void,
     onFailed: () => void
   ) => void;
-  subToRelay: (
-    url: string,
+  subscribe: (
+    relays: string[],
     filter: any,
     onEvent: (event: any) => void,
     onEOSE: () => void
@@ -41,7 +41,7 @@ export const RelayContext = createContext<IRelayContext>({
   connectedRelays: new Set<Relay>(),
   setConnectedRelays: () => {},
   publish: () => {},
-  subToRelay: () => {},
+  subscribe: () => {},
 });
 
 const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -131,15 +131,18 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!relay) return;
 
       let pub = relay.publish(event);
+
       pub.on("ok", () => {
         console.log(`${url} has accepted our event`);
         onOk();
       });
+
       pub.on("seen", () => {
         console.log(`we saw the event on ${url}`);
         onSeen();
         // relay.close();
       });
+
       pub.on("failed", (reason: any) => {
         console.log(`failed to publish to ${url}: ${reason}`);
         onFailed();
@@ -148,36 +151,31 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const subToRelay = async (
-    url: string,
+  const subscribe = async (
+    relays: string[],
     filter: any,
     onEvent: (event: any) => void,
     onEOSE: () => void
   ) => {
-    const relay = relayInit(url);
-    await relay.connect();
+    for (const url of relays) {
+      const relay = await connect(url);
 
-    relay.on("connect", () => {
-      console.log(`connected to ${relay.url}`);
-    });
+      if (!relay) return;
 
-    relay.on("error", () => {
-      console.log(`failed to connect to ${relay.url}`);
-    });
+      let sub = relay.sub([filter]);
 
-    let sub = relay.sub([filter]);
+      sub.on("event", (event: any) => {
+        // console.log("we got the event we wanted:", event);
+        onEvent(event);
+      });
 
-    sub.on("event", (event: any) => {
-      // console.log("we got the event we wanted:", event);
-      onEvent(event);
-    });
-
-    sub.on("eose", () => {
-      // console.log("we've reached the end");
-      onEOSE();
-      sub.unsub();
-      relay.close();
-    });
+      sub.on("eose", () => {
+        // console.log("we've reached the end:");
+        onEOSE();
+        sub.unsub();
+        // relay.close();
+      });
+    }
   };
 
   return (
@@ -193,7 +191,7 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
         connectedRelays,
         setConnectedRelays,
         publish,
-        subToRelay,
+        subscribe,
       }}
     >
       {children}

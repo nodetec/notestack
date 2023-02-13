@@ -1,6 +1,6 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import type { Event, Filter, Relay } from "nostr-tools";
+import type { Event, Filter } from "nostr-tools";
 import Aside from "./Aside";
 import BlogFeed from "./BlogFeed";
 import Content from "./Content";
@@ -35,7 +35,7 @@ export default function HomePage() {
 
   // @ts-ignore
   const { following, followingReload } = useContext(FollowingContext);
-  const { activeRelay, relayUrl, connect } = useContext(RelayContext);
+  const { activeRelay, relayUrl, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
@@ -74,22 +74,18 @@ export default function HomePage() {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([exploreFilter]);
-
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
       const tValues = getTValues(event.tags);
       tValues.forEach((t) => exploreTagsSet.add(t));
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `latest_${relayName}`;
       feed[feedKey] = filteredEvents;
@@ -103,8 +99,9 @@ export default function HomePage() {
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
       }
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], exploreFilter, onEvent, onEOSE);
   };
 
   const getFollowingEvents = async () => {
@@ -142,18 +139,13 @@ export default function HomePage() {
 
     let events: Event[] = [];
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([newfollowingFilter]);
-
-    sub.on("event", (event: Event) => {
-      // console.log("following event:", event);
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `following_${relayName}`;
       feed[feedKey] = filteredEvents;
@@ -164,8 +156,9 @@ export default function HomePage() {
       } else {
         setFollowingEvents([]);
       }
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], newfollowingFilter, onEvent, onEOSE);
   };
 
   useEffect(() => {
