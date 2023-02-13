@@ -1,4 +1,6 @@
 import { getTagValues, shortenHash } from "../lib/utils";
+// @ts-ignore
+import { NoComment } from "react-nocomment";
 import { Event, nip19 } from "nostr-tools";
 import {
   Dispatch,
@@ -122,6 +124,9 @@ const MarkdownDisplay = ({
           dangerouslySetInnerHTML={{ __html: markdown }}
         />
       </div>
+      <div className="border border-zinc-200 my-4"/>
+
+      <NoComment className="outline-none" relays={[relayUrl]} />
     </>
   );
 };
