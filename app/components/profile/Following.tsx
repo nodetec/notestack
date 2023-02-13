@@ -7,7 +7,7 @@ import Contact from "./Contact";
 import FollowingPopup from "./FollowingPopup";
 
 export default function Following({ npub }: any) {
-  const { relayUrl, connect } = useContext(RelayContext);
+  const { relayUrl, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { following, setFollowing } = useContext(FollowingContext);
@@ -37,28 +37,22 @@ export default function Following({ npub }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([
-      {
-        kinds: [3],
-        authors: [profilePubkey],
-      },
-    ]);
+    const filter = {
+      kinds: [3],
+      authors: [profilePubkey],
+    };
 
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
-      // console.log("getting event", event, "from relay:", activeRelay.url);
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       if (events.length === 0) {
-        sub.unsub();
         return;
       }
 
@@ -74,9 +68,9 @@ export default function Following({ npub }: any) {
       setFollowingPubkeys(contactPublicKeys);
       setFollowingCount(size);
       addProfiles(contactPublicKeys.slice(0, 5));
+    };
 
-      sub.unsub();
-    });
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   useEffect(() => {
