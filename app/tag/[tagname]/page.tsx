@@ -24,7 +24,7 @@ export default function TagPage() {
 
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -66,23 +66,18 @@ export default function TagPage() {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([filter]);
-
     let events: Event[] = [];
 
-    sub.on("event", (event: Event) => {
-      // console.log("getting event", event, "from relay:", relay.url);
+    const onEvent = (event: any) => {
       // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
       const tValues = getTValues(event.tags);
       tValues.forEach((t) => eventTagsSet.add(t));
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `tag_${tagname}_${relayName}`;
       feed[feedKey] = filteredEvents;
@@ -96,8 +91,9 @@ export default function TagPage() {
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
       }
-      sub.unsub();
-    });
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   useEffect(() => {
