@@ -171,8 +171,8 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
 
       sub.on("eose", () => {
         // console.log("we've reached the end:");
-        onEOSE();
         sub.unsub();
+        onEOSE();
         // relay.close();
       });
     }
