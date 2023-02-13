@@ -24,6 +24,10 @@ export default function NotePage() {
   // @ts-ignore
   const { cachedEvent, setCachedEvent } = useContext(CachedEventContext);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 

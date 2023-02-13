@@ -68,6 +68,10 @@ const MarkdownDisplay = ({
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     getProfile();
   }, [relayUrl, reload]);
 
@@ -124,7 +128,7 @@ const MarkdownDisplay = ({
           dangerouslySetInnerHTML={{ __html: markdown }}
         />
       </div>
-      <div className="border border-zinc-200 my-4"/>
+      <div className="border border-zinc-200 my-4" />
 
       <NoComment className="outline-none" relays={[relayUrl]} />
     </>
