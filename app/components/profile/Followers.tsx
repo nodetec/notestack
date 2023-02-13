@@ -2,12 +2,11 @@ import { useContext, useEffect, useState } from "react";
 import { Event, nip19 } from "nostr-tools";
 import { RelayContext } from "@/app/context/relay-provider";
 import { FollowersContext } from "@/app/context/followers-provider";
-import { NostrService } from "@/app/lib/nostr";
 import FollowingPopup from "./FollowingPopup";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 
 export default function Followers({ npub }: any) {
-  const { relayUrl, activeRelay, connect } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { followers, setFollowers } = useContext(FollowersContext);
@@ -36,26 +35,21 @@ export default function Followers({ npub }: any) {
       return;
     }
 
-    const relay = await connect(relayUrl);
-    if (!relay) return;
-    let sub = relay.sub([
-      {
-        kinds: [3],
-        "#p": [profilePubkey],
-        limit: 10,
-      },
-    ]);
+    const filter = {
+      kinds: [3],
+      "#p": [profilePubkey],
+      limit: 10,
+    };
 
     let eventArray: Event[] = [];
 
-    sub.on("event", (event: Event) => {
+    const onEvent = (event: any) => {
       eventArray.push(event);
       pubkeysSet.add(event.pubkey);
-    });
+    };
 
-    sub.on("eose", () => {
+    const onEOSE = () => {
       if (eventArray.length === 0) {
-        sub.unsub();
         return;
       }
 
@@ -65,9 +59,9 @@ export default function Followers({ npub }: any) {
       setFollowers(followers);
       setFollowerPubkeys(contactPublicKeys);
       addProfiles(contactPublicKeys.slice(0, 5));
+    };
 
-      sub.unsub();
-    });
+    subscribe([relayUrl], filter, onEvent, onEOSE);
   };
 
   useEffect(() => {
@@ -82,9 +76,7 @@ export default function Followers({ npub }: any) {
         className="text-base text-gray my-2"
       >
         {followerPubkeys && followerPubkeys.length}
-        {followerPubkeys && followerPubkeys.length >= 10 && "+"}
-        {" "}
-        Followers
+        {followerPubkeys && followerPubkeys.length >= 10 && "+"} Followers
       </div>
       <FollowingPopup
         pubkeys={followerPubkeys}
