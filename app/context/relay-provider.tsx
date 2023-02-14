@@ -80,7 +80,9 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     if (existingRelay) {
       console.log("info", `✅ nostr (${newRelayUrl}): Already connected!`);
       relay = existingRelay;
-      setActiveRelay(relay);
+      if (relayUrl === relay.url) {
+        setActiveRelay(relay);
+      }
     } else {
       console.log("NEWING UP A RELAY");
       relay = relayInit(newRelayUrl);
