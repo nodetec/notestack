@@ -185,7 +185,7 @@ const WriteButton = () => {
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
-                    checked={index == 0 ? true : false}
+                    defaultChecked={index == 0 ? true : false}
                   ></PopupCheckbox>
                 ))}
               </div>
