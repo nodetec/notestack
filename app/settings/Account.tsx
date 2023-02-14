@@ -21,13 +21,13 @@ const Account = () => {
     lud06: "",
     lud16: "",
     banner: "",
-    convertedAddress: "",
   };
   const [profileInfo, setProfileInfo] = useState(initialProfileInfo);
   const [popup, setPopup] = useState("");
   const { name, about, picture, banner, nip05, lud06 } = profileInfo;
   const [newProfile, setNewProfile] = useState(profileInfo);
   const { relayUrl, publish, activeRelay } = useContext(RelayContext);
+  const [convertedAddress, setConvertedAddress] = useState<string>("");
 
   // @ts-ignore
   const { profiles, setProfiles, addProfiles, setReload, reload } =
@@ -138,20 +138,19 @@ const Account = () => {
             setNewProfile({
               ...newProfile,
               lud06: newLnAddress,
-              convertedAddress: newConvertedAddress,
             });
+            setConvertedAddress(newConvertedAddress);
             // console.log(newConvertedAddress); // chrisatmachine@getalby.com
           }
 
           if (utils.isLightningAddress(newLnAddress)) {
             let words = bech32.toWords(Buffer.from(url, "utf8"));
-            let newConvertedAddress = "";
-            newConvertedAddress = bech32.encode("lnurl", words, 2000);
+            let newConvertedAddress = bech32.encode("lnurl", words, 2000);
             setNewProfile({
               ...newProfile,
               lud06: newLnAddress,
-              convertedAddress: newConvertedAddress,
             });
+            setConvertedAddress(newConvertedAddress);
           }
         } catch (error) {
           console.log(error);
@@ -284,9 +283,9 @@ const Account = () => {
                 setNewProfile({ ...newProfile, lud16: e.target.value })
               }
             />
-            {newProfile.convertedAddress ? (
+            {convertedAddress ? (
               <p className="w-full overflow-x-scroll mt-2 py-2">
-                {newProfile.convertedAddress}
+                {convertedAddress}
               </p>
             ) : null}
           </Fragment>
