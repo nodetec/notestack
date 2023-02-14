@@ -49,8 +49,8 @@ const SOCIALS: ISocialLink[] = [
 ];
 
 const Footer = () => (
-  <footer className="mt-36 mx-auto">
-    <ul className="container items-center justify-center self-end flex gap-3 flex-wrap">
+  <footer className="mt-48 bottom-0 mx-auto">
+    <ul className="items-center justify-start flex gap-3 flex-wrap">
       {SOCIALS.map((social) => (
         <li key={social.url}>
           <a

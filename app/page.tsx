@@ -198,19 +198,21 @@ export default function HomePage() {
         )}
       </Content>
       <Aside>
-        {exploreEvents.length > 0 && (
-          <RecommendedEvents
-            title="Recommended Blogs"
-            showProfile
-            events={exploreEvents.slice(0, 3)}
+        {/* <div className="flex flex-col items-stretch justify-between"> */}
+          {exploreEvents.length > 0 && (
+            <RecommendedEvents
+              title="Recommended Blogs"
+              showProfile
+              events={exploreEvents.slice(0, 3)}
+            />
+          )}
+          <Topics
+            title="Recommended Topics"
+            TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
           />
-        )}
-        <Topics
-          title="Recommended Topics"
-          TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
-        />
 
-        <Footer />
+          <Footer />
+        {/* </div> */}
       </Aside>
     </Main>
   );
