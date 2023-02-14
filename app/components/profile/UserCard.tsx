@@ -3,8 +3,6 @@ import Button from "../../Button";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { utils } from "lnurl-pay";
 import Link from "next/link";
-import Buttons from "@/app/Buttons";
-import AccountSettings from "@/app/AccountSettings";
 import { RelayContext } from "@/app/context/relay-provider";
 import LightningTip from "@/app/LightningTip";
 import { nip19 } from "nostr-tools";
@@ -12,7 +10,7 @@ import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
 import FollowButton from "./FollowButton";
-import Followers from "./Followers";
+// import Followers from "./Followers";
 // import FollowButton from "./FollowButton";
 
 export default function UserCard({ npub }: any) {
@@ -20,7 +18,6 @@ export default function UserCard({ npub }: any) {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
 
-  const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
 
   // @ts-ignore
@@ -29,7 +26,7 @@ export default function UserCard({ npub }: any) {
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
-  const [banner, setBanner] = useState<string>();
+  const [, setBanner] = useState<string>();
   const [nip05, setNip05] = useState<string>();
   const [lud06, setLud06] = useState<string>();
   const [lud16, setLud16] = useState<string>();
@@ -55,7 +52,7 @@ export default function UserCard({ npub }: any) {
     setNip05(undefined);
     setLud06(undefined);
     setLud16(undefined);
-  }
+  };
 
   const getProfile = () => {
     resetProfile();
@@ -89,10 +86,6 @@ export default function UserCard({ npub }: any) {
     getProfile();
   }, [reload, relayUrl, activeRelay]);
 
-  const handleClick = async () => {
-    setIsOpen(!isOpen);
-  };
-
   const handleTipClick = async () => {
     setIsTipOpen(!isTipOpen);
   };
@@ -113,7 +106,9 @@ export default function UserCard({ npub }: any) {
         {nip05 && (
           <div className="text-sm text-gray mb-2">
             <span className="flex items-center flex-row gap-1">
-              <span className="max-w-[12rem] whitespace-nowrap overflow-x-scroll scrollable-element leading-none">{nip05}</span>
+              <span className="max-w-[12rem] whitespace-nowrap overflow-x-scroll scrollable-element leading-none">
+                {nip05}
+              </span>
               <BsPatchCheckFill className="text-blue-500" size="14" />
             </span>
           </div>
@@ -131,16 +126,12 @@ export default function UserCard({ npub }: any) {
       </p>
       {keys.publicKey &&
         (keys.publicKey === profilePubkey ? (
-          <Buttons>
-            <Button
-              color="green"
-              variant="ghost"
-              onClick={handleClick}
-              size="xs"
-            >
-              Edit profile
-            </Button>
-          </Buttons>
+          <Link
+            href="/settings"
+            className="text-green hover:text-green-hover text-sm"
+          >
+            Edit profile
+          </Link>
         ) : (
           <div className="flex items-center gap-2">
             <FollowButton
@@ -158,20 +149,7 @@ export default function UserCard({ npub }: any) {
             )}
           </div>
         ))}
-      {activeRelay && name && keys.publicKey === profilePubkey ? (
-        <AccountSettings
-          name={name}
-          nip05={nip05}
-          about={about}
-          picture={picture}
-          banner={banner}
-          loggedInPubkey={keys.publicKey}
-          lud06={lud06}
-          lud16={lud16}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        />
-      ) : (
+      {activeRelay && name && keys.publicKey === profilePubkey ? null : (
         <LightningTip
           lud06={lud06}
           lud16={lud16}
