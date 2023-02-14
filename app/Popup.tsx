@@ -44,7 +44,7 @@ const Popup = ({
   return (
     <Fragment>
       <div
-        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[32rem] border-2 bg-white/100 rounded-md ${className}`}
+        className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[32rem] border-2 bg-white/0 rounded-md ${className}`}
       >
         <Button
           icon={<IoMdClose size={24} />}
@@ -59,7 +59,7 @@ const Popup = ({
         </div>
       </div>
       <div
-        className="z-40 fixed top-0 left-0 w-full h-full bg-white/90"
+        className="z-40 fixed top-0 left-0 w-full h-full bg-white/[.97]"
         onClick={() => setIsOpen(false)}
       />
     </Fragment>
