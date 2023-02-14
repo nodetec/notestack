@@ -99,6 +99,7 @@ export default function Following({ npub }: any) {
             pubkeys={followingPubkeys}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
+            followingCount={followingCount}
           />
         </>
       )}

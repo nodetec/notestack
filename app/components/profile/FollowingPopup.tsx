@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Contact from "./Contact";
 import Button from "@/app/Button";
 
-export default function FollowingPopup({ pubkeys, isOpen, setIsOpen }: any) {
+export default function FollowingPopup({ pubkeys, isOpen, setIsOpen, followingCount }: any) {
   useEffect(() => {
     console.log("FOLLOWING:", pubkeys);
     return () => {
@@ -20,16 +20,16 @@ export default function FollowingPopup({ pubkeys, isOpen, setIsOpen }: any) {
 
   return (
     <Popup
-      title="Following"
+      title={`${followingCount} Following`}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      className="h-3/4 max-h-192 opacity-70 inset-0 overflow-x-hidden scroll-smooth border-none"
+      className="max-w-[40rem] h-full max-h-192 inset-0 overflow-x-hidden scroll-smooth border-none scrollbar-hide"
     >
       <ul>
         {pubkeys &&
           pubkeys
             .slice(0, numFollowing)
-            .map((pubkey: any) => <Contact key={pubkey} pubkey={pubkey} />)}
+            .map((pubkey: any) => <Contact key={pubkey} pubkey={pubkey} isPopup={true} />)}
       </ul>
 
       {pubkeys && pubkeys.length > numFollowing && (

@@ -113,7 +113,7 @@ export default function FollowButton({ profilePublicKey }: any) {
 
   return (
     <Button
-      color="red"
+      color="green"
       variant={isFollowing ? "outline" : "solid"}
       size="sm"
       onClick={handleFollow}
