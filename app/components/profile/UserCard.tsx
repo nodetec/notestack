@@ -47,7 +47,18 @@ export default function UserCard({ npub }: any) {
     return nip05;
   }
 
+  const resetProfile = () => {
+    setName(undefined);
+    setAbout(undefined);
+    setPicture(DUMMY_PROFILE_API(npub));
+    setBanner(undefined);
+    setNip05(undefined);
+    setLud06(undefined);
+    setLud16(undefined);
+  }
+
   const getProfile = () => {
+    resetProfile();
     let relayName = relayUrl.replace("wss://", "");
     const profileKey = `profile_${relayName}_${profilePubkey}`;
 

@@ -49,6 +49,16 @@ export default function ProfilePage() {
     picture: "",
     banner: "",
   });
+
+  const resetProfile = () => {
+    setProfile({
+      name: "",
+      about: "",
+      picture: "",
+      banner: "",
+    });
+  };
+
   let profilePubkey = "";
   try {
     profilePubkey = nip19.decode(npub).data.toString();
@@ -67,6 +77,7 @@ export default function ProfilePage() {
   }, []);
 
   const getProfileEvents = async () => {
+    resetProfile();
     let pubkeysSet = new Set<string>();
 
     setEvents([]);
