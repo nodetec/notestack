@@ -24,10 +24,10 @@ const Account = () => {
   };
   const [profileInfo, setProfileInfo] = useState(initialProfileInfo);
   const [popup, setPopup] = useState("");
-  const { name, about, picture, banner, nip05, lud06 } = profileInfo;
   const [newProfile, setNewProfile] = useState(profileInfo);
   const { relayUrl, publish, activeRelay } = useContext(RelayContext);
   const [convertedAddress, setConvertedAddress] = useState<string>("");
+  const [noChanges, setNoChanges] = useState(true);
 
   // @ts-ignore
   const { profiles, setProfiles, addProfiles, setReload, reload } =
@@ -77,9 +77,20 @@ const Account = () => {
 
   useEffect(() => {
     setNewProfile(profileInfo);
-  }, [profileInfo, popup]);
+  }, [profileInfo]);
 
   useEffect(getProfile, [reload, relayUrl, activeRelay]);
+
+  useEffect(() => {
+    let isDifferent = false;
+    Object.keys(newProfile).forEach((key) => {
+      // @ts-ignore
+      if (profileInfo[key] !== newProfile[key]) {
+        isDifferent = true;
+      }
+    });
+    setNoChanges(!isDifferent);
+  }, [newProfile, profileInfo]);
 
   const handleSubmitNewProfile = async (e: any) => {
     e.preventDefault();
@@ -171,28 +182,52 @@ const Account = () => {
   return (
     <Fragment>
       <div className="flex flex-col gap-6">
-        <Item title="Name" value={name} onClick={() => setPopup("Name")} />
+        <Item
+          title="Name"
+          value={newProfile.name}
+          onClick={() => setPopup("Name")}
+        />
         <Item
           title="NIP-05 ID"
-          value={nip05}
+          value={newProfile.nip05}
           onClick={() => setPopup("NIP-05 ID")}
         />
-        <Item title="About" value={about} onClick={() => setPopup("About")} />
+        <Item
+          title="About"
+          value={newProfile.about}
+          onClick={() => setPopup("About")}
+        />
         <Item
           title="Picture"
-          value={picture}
+          value={newProfile.picture}
           onClick={() => setPopup("Picture")}
         />
         <Item
           title="Banner"
-          value={banner}
+          value={newProfile.banner}
           onClick={() => setPopup("Banner")}
         />
         <Item
           title="Lightning Tips"
-          value={lud06}
+          value={newProfile.lud06}
           onClick={() => setPopup("Lightning Tips")}
         />
+
+        {noChanges ? null : (
+          <div className="flex gap-2 justify-end items-center mt-4">
+            <Button
+              color="green"
+              size="sm"
+              variant="outline"
+              onClick={() => setNewProfile(profileInfo)}
+            >
+              Reset
+            </Button>
+            <Button color="green" size="sm" onClick={handleSubmitNewProfile}>
+              Save
+            </Button>
+          </div>
+        )}
       </div>
       <Popup title={popup} isOpen={!!popup} setIsOpen={() => setPopup("")}>
         {popup === "Name" ? (
@@ -290,19 +325,6 @@ const Account = () => {
             ) : null}
           </Fragment>
         ) : null}
-        <div className="flex items-center mt-2 gap-2 justify-end">
-          <Button
-            color="green"
-            size="sm"
-            variant="outline"
-            onClick={() => setPopup("")}
-          >
-            Cancel
-          </Button>
-          <Button color="green" size="sm" onClick={handleSubmitNewProfile}>
-            Save
-          </Button>
-        </div>
       </Popup>
     </Fragment>
   );
