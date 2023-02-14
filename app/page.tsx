@@ -15,6 +15,7 @@ import FollowedRelays from "./FollowedRelays";
 import { FeedContext } from "./context/feed-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 import { FollowingContext } from "./context/following-provider";
+import Footer from "./Footer";
 
 export default function HomePage() {
   // @ts-ignore
@@ -208,6 +209,8 @@ export default function HomePage() {
           title="Recommended Topics"
           TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
         />
+
+        <Footer />
       </Aside>
     </Main>
   );
