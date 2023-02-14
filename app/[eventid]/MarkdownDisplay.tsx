@@ -130,7 +130,7 @@ const MarkdownDisplay = ({
       </div>
       <div className="border border-zinc-200 my-4" />
 
-      <NoComment className="outline-none" relays={[relayUrl]} />
+      {event && <NoComment className="outline-none" relays={[relayUrl]} />}
     </>
   );
 };

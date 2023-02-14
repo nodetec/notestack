@@ -24,10 +24,6 @@ export default function NotePage() {
   // @ts-ignore
   const { cachedEvent, setCachedEvent } = useContext(CachedEventContext);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 
@@ -69,10 +65,6 @@ export default function NotePage() {
       return;
     }
     getEvents();
-  }, [activeRelay]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
   }, []);
 
   if (event) {

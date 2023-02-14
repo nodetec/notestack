@@ -1,5 +1,5 @@
 import { Event, nip19 } from "nostr-tools";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Aside from "../Aside";
 import Content from "../Content";
 import Main from "../Main";
