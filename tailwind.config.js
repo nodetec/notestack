@@ -15,6 +15,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        error: "rgb(201, 74, 74)",
         red: "rgb(247, 0, 0)",
         "red-hover": "rgb(210, 19, 7)",
         green: "rgb(26, 137, 23)",
@@ -29,6 +30,7 @@ module.exports = {
       },
       boxShadow: {
         "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",
+        popup: "rgba(0, 0, 0, 0.15) 0px 2px 10px",
       },
       maxHeight: {
         192: "48rem",
