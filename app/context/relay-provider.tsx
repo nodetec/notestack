@@ -75,8 +75,8 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     setAllRelays(RELAYS);
   };
   // add custom relay
-  const addRelay = (relay: string) => {
-    if (relay === "") return;
+  const addRelay = (relay?: string) => {
+    if (!relay) return;
     if (allRelays.includes(relay)) return;
     const newRelays = [...allRelays, relay];
     setAllRelays(newRelays);
