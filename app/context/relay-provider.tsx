@@ -2,13 +2,13 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { RELAYS } from "../lib/constants";
 import { relayInit } from "nostr-tools";
-import type { Relay, Event } from "nostr-tools";
+import type { Relay } from "nostr-tools";
 import { NotifyContext } from "./notify-provider";
 
 interface IRelayContext {
   allRelays: string[];
   setAllRelays: React.Dispatch<React.SetStateAction<string[]>>;
-  addRelay: (relay: string) => void;
+  addRelay: (relay?: string) => void;
   removeRelay: (relay: string) => void;
   resetRelays: () => void;
   activeRelay: Relay | undefined;
@@ -76,6 +76,8 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
   };
   // add custom relay
   const addRelay = (relay: string) => {
+    if (relay === "") return;
+    if (allRelays.includes(relay)) return;
     const newRelays = [...allRelays, relay];
     setAllRelays(newRelays);
   };

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Event, nip19, Relay } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import {
   DetailedHTMLProps,
   FC,
@@ -18,7 +18,7 @@ import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
-import AuthorTooltip from "./AuthorTooltip";
+// import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
@@ -33,7 +33,7 @@ const Article: FC<NoteProps> = ({
   dateOnly = false,
   ...props
 }) => {
-  const { tags, created_at: createdAt, id: noteId } = event;
+  const { tags, created_at: createdAt /* , id: noteId  */ } = event;
   let { content } = event;
 
   function getTValues(tags: string[][]) {

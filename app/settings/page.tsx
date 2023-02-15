@@ -9,9 +9,10 @@ import Tabs from "../Tabs";
 import Account from "./Account";
 import Notifications from "./Notifications";
 import Publishing from "./Publishing";
+import Relays from "./Relyas";
 
 const SettingsPage = () => {
-  const TABS = ["Account" /* , "Publishing", "Notifications" */];
+  const TABS = ["Account", "Relays" /* , "Publishing", "Notifications" */];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   return (
@@ -21,6 +22,7 @@ const SettingsPage = () => {
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="mt-12">
           {activeTab === "Account" && <Account />}
+          {activeTab === "Relays" && <Relays />}
           {activeTab === "Publishing" && <Publishing />}
           {activeTab === "Notifications" && <Notifications />}
         </div>
