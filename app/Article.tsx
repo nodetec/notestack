@@ -175,10 +175,6 @@ const Article: FC<NoteProps> = ({
                 className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
                 src={image}
                 alt={""}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).onerror = null;
-                  (e.target as HTMLImageElement).src = "";
-                }}
               />
             </div>
           ) : thumbnail ? (
@@ -187,10 +183,6 @@ const Article: FC<NoteProps> = ({
                 className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
                 src={image || thumbnail.groups?.filename}
                 alt={thumbnail.groups?.title}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).onerror = null;
-                  (e.target as HTMLImageElement).src = "";
-                }}
               />
             </div>
           ) : null}
