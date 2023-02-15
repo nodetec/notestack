@@ -209,10 +209,9 @@ const Account = () => {
         />
         <Item
           title="Lightning Tips"
-          value={newProfile.lud06}
+          value={newProfile.lud16}
           onClick={() => setPopup("Lightning Tips")}
         />
-
         {noChanges ? null : (
           <div className="flex gap-2 justify-end items-center mt-4">
             <Button
