@@ -7,8 +7,8 @@ export const RELAYS = [
   // "wss://nostr.bitcoiner.social",
   // "wss://nostr.onsats.org",
   // "wss://nostr-relay.wlvs.space",
-  "wss://nostr.zebedee.cloud",
-  "wss://relay.nostr.info",
+  // "wss://nostr.zebedee.cloud",
+  // "wss://relay.nostr.info",
 ];
 
 export const PRESET_AMOUNTS = [
