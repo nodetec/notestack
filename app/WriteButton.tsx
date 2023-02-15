@@ -25,7 +25,6 @@ const WriteButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [summary, setSummary] = useState("");
   const [image, setImage] = useState("");
-  const [toggledRelays, setToggledRelays] = useState<string[]>([]);
   const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -34,6 +33,8 @@ const WriteButton = () => {
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
   const { activeRelay, allRelays, publish } = useContext(RelayContext);
+  const initalRelay = activeRelay ? activeRelay.url : "";
+  const [toggledRelays, setToggledRelays] = useState<string[]>([initalRelay]);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -46,12 +47,8 @@ const WriteButton = () => {
   // }
 
   useEffect(() => {
-    let mounted = true;
-
-    if (mounted) {
-      setSummary(blog.summary);
-      setImage(blog.image);
-    }
+    setSummary(blog.summary);
+    setImage(blog.image);
   }, [blog]);
 
   const setNoOptionsMessage = () => {
@@ -185,7 +182,7 @@ const WriteButton = () => {
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
-                    defaultChecked={index == 0 ? true : false}
+                    defaultChecked={relay === activeRelay?.url ? true : false}
                   ></PopupCheckbox>
                 ))}
               </div>
