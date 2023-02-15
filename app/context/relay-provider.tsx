@@ -78,7 +78,7 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
   const addRelay = (relay?: string) => {
     if (!relay) return;
     if (allRelays.includes(relay)) return;
-    const newRelays = [...allRelays, relay];
+    const newRelays = [...allRelays, relay.trim()];
     setAllRelays(newRelays);
   };
   // remove relay
