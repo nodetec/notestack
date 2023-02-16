@@ -32,9 +32,8 @@ const WriteButton = () => {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
-  const { activeRelay, allRelays, publish } = useContext(RelayContext);
-  const initalRelay = activeRelay ? activeRelay.url : "";
-  const [toggledRelays, setToggledRelays] = useState<string[]>([initalRelay]);
+  const { activeRelay, allRelays, relayUrl, publish } = useContext(RelayContext);
+  const [toggledRelays, setToggledRelays] = useState<string[]>([relayUrl]);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -182,7 +181,7 @@ const WriteButton = () => {
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
-                    defaultChecked={relay === activeRelay?.url ? true : false}
+                    defaultChecked={relay === relayUrl ? true : false}
                   ></PopupCheckbox>
                 ))}
               </div>
