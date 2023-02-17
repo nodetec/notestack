@@ -164,11 +164,11 @@ export default function HomePage() {
 
   useEffect(() => {
     getExploreEvents();
-  }, [relayUrl, activeRelay]);
+  }, [activeRelay]);
 
   useEffect(() => {
     getFollowingEvents();
-  }, [relayUrl, activeRelay, followingReload]);
+  }, [activeRelay, followingReload]);
 
   return (
     <Main>
