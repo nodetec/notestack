@@ -118,9 +118,13 @@ const WriteButton = () => {
   const toggleRelay = (e: any) => {
     let relays = toggledRelays;
     if (e.target.checked) {
-      relays.push(e.target.value);
+      if (!relays.includes(e.target.value)) {
+        relays.push(e.target.value);
+      }
     } else {
-      relays = relays.filter((relay) => relay !== e.target.value);
+      if (relays.includes(e.target.value)) {
+        relays = relays.filter((relay) => relay !== e.target.value);
+      }
     }
     setToggledRelays(relays);
   };
