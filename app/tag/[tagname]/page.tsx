@@ -78,12 +78,14 @@ export default function TagPage() {
     };
 
     const onEOSE = () => {
+      // @ts-ignore
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `tag_${tagname}_${relayName}`;
       feed[feedKey] = filteredEvents;
       setEventTags(Array.from(eventTagsSet));
       setFeed(feed);
       if (filteredEvents.length > 0) {
+        // @ts-ignore
         setEvents(filteredEvents);
       } else {
         setEvents([]);
