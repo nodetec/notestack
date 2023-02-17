@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+textarea:invalid[titlefocused="true"] ~ span,
+textarea[titlevalid="false"] ~ span {
+  display: block;
+}
+
+div:has(textarea:invalid[bodyfocused="true"]) + span,
+div:has(textarea[bodyvalid="false"]) + span {
+  display: block;
+}
+
+.w-tc-editor.min-h-full {
+  min-height: auto;
+  overflow: auto !important;
+}
+
+div.md-preview-note-wrapper > p {
+  overflow-wrap: break-word;
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  padding: 24px;
+}
+
 .twolines {
   overflow: hidden;
   text-overflow: ellipsis;

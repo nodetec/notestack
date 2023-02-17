@@ -23,7 +23,7 @@ const WriteButton = () => {
   );
 
   // @ts-ignore
-  const { blog } = useContext(BlogContext);
+  const { blog, setBlog } = useContext(BlogContext);
 
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -42,8 +42,31 @@ const WriteButton = () => {
     setTagsList(list);
   };
 
+  const validateBlog = () => {
+    const validations = { title: true, body: true };
+
+    if (blog.title.trim().length)  {
+      validations.title = true;
+    } else {
+      validations.title = false;
+    }
+
+    if (blog.body.trim().length)  {
+      validations.body = true;
+    } else {
+      validations.body = false;
+    }
+
+    return validations;
+  };
+
   const handlePublish = async () => {
-    setIsOpen(true);
+    const validations = validateBlog();
+
+    setBlog({ ...blog, titleValid: validations.title, bodyValid: validations.body });
+    if (validations.title && validations.body) {
+      setIsOpen(true);
+    }
   };
 
   const submitPublish = async () => {

@@ -3,14 +3,18 @@
 import { createContext, useState } from "react";
 
 export const BlogContext = createContext({
-  title: null,
-  body: null,
+  title: "",
+  body: "",
+  titleValid: true,
+  bodyValid: true,
 });
 
 export default function BlogProvider({ children }) {
   const [blog, setBlog] = useState({
-    title: null,
-    body: null,
+    title: "",
+    body: "",
+    titleValid: true,
+    bodyValid: true,
   });
 
   return (

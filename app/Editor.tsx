@@ -1,42 +1,53 @@
-// import { VALIDATION } from "./utils/constants";
+import { VALIDATION } from "./lib/constants";
 import dynamic from "next/dynamic";
 import "@uiw/react-textarea-code-editor/dist.css";
 import Button from "./Button";
-import { Fragment, useContext, useRef, useState } from "react";
+import { Fragment, useContext, useRef, useState, useEffect } from "react";
 import { AiFillEdit, AiFillEye } from "react-icons/ai";
 import { RiLayoutColumnFill } from "react-icons/ri";
-// import CreatePostButton from "./CreatePostButton";
 import { BlogContext } from "./context/blog-provider";
+import { usePathname } from "next/navigation";
 
 const CodeEditor = dynamic(
   () => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
   { ssr: true }
 );
 
-const Editor = ({}: //   text,
-//   setText,
-//   title,
-//   setTitle,
-any) => {
+const Editor = ({}: any) => {
   const [mdPreviewMode, setMdPreviewMode] = useState<
     "off" | "preview" | "split"
   >("off");
 
-  const [titleFocused, setTitleFocused] = useState(false);
-  const [textFocused, setTextFocused] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
   const [titleValid, setTitleValid] = useState(true);
-  const [textValid, setTextValid] = useState(true);
-  const [text, setText] = useState("");
-  const [title, setTitle] = useState("");
+  const [bodyValid, setBodyValid] = useState(true);
+
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [bodyFocused, setBodyFocused] = useState(false);
+
   // @ts-ignore
   const { blog, setBlog } = useContext(BlogContext);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setBlog({ ...blog, title: "", body: "", titleValid: true, bodyValid: true });
+  }, [pathname]);
+
+  useEffect(() => {
+    setTitleValid(blog.titleValid);
+  }, [blog.titleValid]);
+
+  useEffect(() => {
+    setBodyValid(blog.bodyValid);
+  }, [blog.bodyValid]);
 
   const previewRef = useRef(null);
 
-  const setupMarkdown = (text: string) => {
+  const setupMarkdown = (body: string) => {
     const md = require("markdown-it")();
-    const result = md.render(text);
+    const result = md.render(body);
     return result;
   };
 
@@ -45,8 +56,8 @@ any) => {
     previewRef.current?.scrollTo(
       0,
       (e.target.scrollTop / e.target.scrollTopMax) *
-        /* @ts-ignore */
-        previewRef.current.scrollTopMax
+      /* @ts-ignore */
+      previewRef.current.scrollTopMax
     );
   };
 
@@ -54,30 +65,25 @@ any) => {
     setTitleFocused(true);
   };
 
-  const handleTextFocus = () => {
-    setTextFocused(true);
-  };
-
-  const onPostSubmit = (validations: { title: boolean; text: boolean }) => {
-    setTitleValid(validations.title);
-    setTextValid(validations.text);
+  const handleBodyFocus = () => {
+    setBodyFocused(true);
   };
 
   const handleTitleChange = (evn: any) => {
     setTitle(evn.target.value);
     setTitleValid(true);
-    setBlog({ ...blog, title: evn.target.value });
+    setBlog({ ...blog, title: evn.target.value, titleValid: true });
   };
 
-  const handleTextChange = (evn: any) => {
-    setText(evn.target.value);
-    setTextValid(true);
-    setBlog({ ...blog, text: evn.target.value });
+  const handleBodyChange = (evn: any) => {
+    setBody(evn.target.value);
+    setBodyValid(true);
+    setBlog({ ...blog, body: evn.target.value, bodyValid: true });
   };
 
   return (
     //state for mx-0
-    <div className={`h-full ${mdPreviewMode === "split" ? "mx-0" : "lg:mx-80 md:mx-3"}`}>
+    <div className={`flex flex-col h-full ${mdPreviewMode === "split" ? "mx-0" : "lg:mx-80 md:mx-3"}`}>
       <div className="bg-secondary p-2 flex items-center justify-between">
         <div className="flex gap-2">
           <Fragment>
@@ -116,88 +122,87 @@ any) => {
           </Fragment>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row h-[calc(100vh-34px)]">
-        {mdPreviewMode !== "preview" && (
-          <div className="flex flex-col w-full h-full " onScroll={scrollView}>
-            <div className="flex flex-col grow min-h-full">
-              <div>
-                <textarea
-                  title={title}
-                  required
-                  rows={1}
-                  className="text-black border-none focus:border-none resize-none font-medium text-4xl px-6 pt-6 pb-0 w-full 
-                  focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent overflow-hidden outline-none"
-                  value={title}
-                  placeholder="Title..."
-                  onChange={handleTitleChange}
-                  onBlur={handleTitleFocus}
-                  /* @ts-ignore */
-                  titlefocused={titleFocused.toString()}
-                  titlevalid={titleValid.toString()}
-                />
-                {/* <span className="px-6 pt-0.5 text-xs text-red-500 hidden">
-                  {VALIDATION.required}
-                </span> */}
-              </div>
-              <div className="flex flex-col grow">
-                <CodeEditor
-                  required
-                  className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
-                  value={text}
-                  language="markdown"
-                  placeholder="Enter your note..."
-                  autoCapitalize="none"
-                  onChange={handleTextChange}
-                  onBlur={handleTextFocus}
-                  /* @ts-ignore */
-                  textfocused={textFocused.toString()}
-                  textvalid={textValid.toString()}
-                  padding={24}
-                  style={{
-                    color: "#000",
-                  }}
-                />
-                {/* <span className="px-6 pt-0.5 pb-6 text-xs text-red-500 hidden">
+        <div className="flex flex-col md:flex-row h-full overflow-auto">
+          {mdPreviewMode !== "preview" && (
+            <div className="flex flex-col w-full overflow-auto" onScroll={scrollView}>
+              <div className="flex flex-col overflow-auto">
+                <div className="mb-3">
+                  <div style={{ height: "5.625rem" }}>
+                    <textarea
+                      title={title}
+                      required
+                      rows={1}
+                      className="text-black border-none focus:border-none resize-none text-4xl font-medium leading-normal px-6 pt-6 pb-0 w-full focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent outline-none"
+                      style={{ height: "4.875rem" }}
+                      value={title}
+                      placeholder="Title..."
+                      onChange={handleTitleChange}
+                      onBlur={handleTitleFocus}
+                      /* @ts-ignore */
+                      titlefocused={titleFocused.toString()}
+                      titlevalid={titleValid.toString()}
+                    />
+                    <span className="px-6 pt-0.5 text-xs text-red hidden">
+                      {VALIDATION.required}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col overflow-auto">
+                  <CodeEditor
+                    required
+                    className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
+                    value={body}
+                    language="markdown"
+                    placeholder="Enter your note..."
+                    autoCapitalize="none"
+                    onChange={handleBodyChange}
+                    /* @ts-ignore */
+                    onBlur={handleBodyFocus}
+                    /* @ts-ignore */
+                    bodyfocused={bodyFocused.toString()}
+                    bodyvalid={bodyValid.toString()}
+                    padding={24}
+                    style={{
+                      color: "#000",
+                    }}
+                  />
+                  <span className="px-6 pt-0.5 text-xs text-red hidden">
                     {VALIDATION.required}
-                </span> */}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        {mdPreviewMode !== "off" && (
-          <div
-            ref={previewRef}
-            className={`w-full h-full prose
-                ${
-                  mdPreviewMode === "preview"
-                    ? "min-w-full"
-                    : mdPreviewMode === "split"
-                    ? "border-t-2 md:border-l-2 md:border-t-0 border-secondary pl-7"
+          )}
+          {mdPreviewMode !== "off" && (
+            <div
+              ref={previewRef}
+              className={`flex flex-col w-full overflow-auto prose
+                ${mdPreviewMode === "preview"
+                  ? "min-w-full"
+                  : mdPreviewMode === "split"
+                    ? "border-t-2 md:border-l-2 md:border-t-0 border-secondary"
                     : ""
                 }`}
-          >
-            <h1
-              className="text-black text-5xl font-medium py-6"
-              style={{ paddingBottom: "0.375rem" }}
             >
-              {title}
-            </h1>
-            <div
-              className="md-preview-note-wrapper text-black"
-              dangerouslySetInnerHTML={{ __html: setupMarkdown(text) }}
-            ></div>
-          </div>
-        )}
-      </div>
-      {/* <div className="rounded-b-md border-x-2 border-b-2 border-secondary p-1 pt-2 -mt-1 flex items-center justify-between gap-4">
-        <CreatePostButton
-          filetype="markdown"
-          text={text}
-          title={title}
-          tagsList={tagsList}
-          onSubmit={onPostSubmit}
-        />
-      </div> */}
+              <div className="mb-3">
+                <div style={{ height: "5.625rem" }}>
+                  <div className="overflow-auto">
+                    <h1
+                      className="pt-6 px-6 text-black text-4xl font-medium mb-0 leading-normal break-words"
+                      style={{ height: "4.875rem" }}
+                    >
+                      {title}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="h-full md-preview-note-wrapper overflow-auto text-black"
+                dangerouslySetInnerHTML={{ __html: setupMarkdown(body) }}
+              ></div>
+            </div>
+          )}
+        </div>
     </div>
   );
 };
