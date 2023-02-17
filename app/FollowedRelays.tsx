@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { ProfilesContext } from "./context/profiles-provider.jsx";
 
 export default function FollowedRelays() {
-  const { setRelayUrl, activeRelay, allRelays } = useContext(RelayContext);
+  const { setRelayUrl, activeRelay, allRelays, connect } = useContext(RelayContext);
   // @ts-ignore
   const { reload, setReload } = useContext(ProfilesContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);
@@ -16,9 +16,10 @@ export default function FollowedRelays() {
     setRelayNames(mappedRelayNames);
   }, [allRelays]);
 
-  const handleRelayClick = (relay: string) => {
+  const handleRelayClick = async (relay: string) => {
     // console.log("clicked relay:", relay);
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
+      await connect("wss://" + relay);
       setRelayUrl("wss://" + relay);
       // setActiveRelay();
       setReload(!reload);
