@@ -170,13 +170,8 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
 
       pub.on("ok", () => {
         console.log(`${url} has accepted our event`);
-        onOk();
-      });
-
-      pub.on("seen", () => {
-        console.log(`we saw the event on ${url}`);
         onSeen(url);
-        // relay.close();
+        // onOk();
       });
 
       pub.on("failed", (reason: any) => {
