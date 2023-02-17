@@ -7,8 +7,8 @@ textarea[titlevalid="false"] ~ span {
   display: block;
 }
 
-div:has(textarea:invalid[bodyfocused="true"]) + span,
-div:has(textarea[bodyvalid="false"]) + span {
+div:has(textarea:invalid[contentfocused="true"]) + span,
+div:has(textarea[contentvalid="false"]) + span {
   display: block;
 }
 
