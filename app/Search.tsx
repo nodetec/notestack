@@ -10,12 +10,13 @@ import {
 } from "react";
 import { BsSearch } from "react-icons/bs";
 import Tooltip from "./Tooltip";
-import { Event, nip19, Relay } from "nostr-tools";
+import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
 import { AiFillTag } from "react-icons/ai";
 import { RelayContext } from "./context/relay-provider";
+import { ProfilesContext } from "./context/profiles-provider";
 
 type ResultType = {
   pubkeys: string[];
@@ -23,8 +24,7 @@ type ResultType = {
 };
 
 const Search = () => {
-  // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
   const [{ tags, pubkeys }, setResults] = useState<ResultType>({
@@ -41,8 +41,17 @@ const Search = () => {
     setShowTooltip((current) => !current);
   };
 
-  // TODO: fix this
-  useEffect(() => {
+  function getTValues(tags: string[][]) {
+    return tags
+      .filter((subTags) => subTags[0] === "t")
+      .map((subTags) => subTags[1])
+      .filter((t) => t.length <= 20);
+  }
+
+  // TODO: change filter check if begins with npub, note otherwise just search tags
+  // TODO: add title and link to article as well
+  // TODO: cache searches
+  const getSearchEvents = async () => {
     if (searchTerm.length === 0) {
       setResults({ tags: [], pubkeys: [] });
       setShowTooltip(false);
@@ -50,33 +59,48 @@ const Search = () => {
     }
     if (!activeRelay) {
       setResults({ tags: [], pubkeys: [] });
-      // setShowTooltip(false);
+      setShowTooltip(false);
       return;
     }
-    if (searchTerm.length > 0) {
-      let sub = activeRelay.sub([
-        {
-          kinds: [2222],
-          "#t": [searchTerm],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        // console.log("we got the event we wanted:", event);
-        setResults((current: ResultType) => {
-          return {
-            ...current,
-            pubkeys: [event.pubkey],
-            tags: event.tags.filter((tag) => tag[0] === "t")[0].slice(1),
-          };
-        });
+
+    let searchTagsSet = new Set<string>();
+    let pubkeysSet = new Set<string>();
+
+    const filter = {
+      kinds: [30023],
+      "#t": [searchTerm],
+    };
+
+    const onEvent = (event: any) => {
+      const tValues = getTValues(event.tags);
+      tValues.forEach((t) => searchTagsSet.add(t));
+      pubkeysSet.add(event.pubkey);
+    };
+
+    const onEOSE = () => {
+      const searchTags = Array.from(searchTagsSet).slice(0, 3);
+      const searchPubkeys = Array.from(pubkeysSet).slice(0, 3);
+      setResults((current: ResultType) => {
+        return {
+          ...current,
+          pubkeys: searchPubkeys,
+          tags: searchTags,
+        };
+      });
+      if (searchTags.length > 0 || searchPubkeys.length > 0) {
         setShowTooltip(true);
-      });
-      sub.on("eose", () => {
-        // console.log("EOSE searched events from", activeRelay.url);
-        sub.unsub();
-      });
-    }
-  }, [searchTerm, activeRelay]);
+      } else {
+        setShowTooltip(false);
+      }
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
+  };
+
+  // TODO: fix this
+  useEffect(() => {
+    getSearchEvents();
+  }, [searchTerm, relayUrl, activeRelay]);
 
   return (
     <Tooltip
@@ -88,15 +112,27 @@ const Search = () => {
       <div className="w-[20rem]">
         {pubkeys.length > 0 ? (
           <SearchGroup title="People">
-            {pubkeys.map((id: string) => (
-              <Profile key={id} pubkey={id} />
+            {pubkeys.map((pubkey: string) => (
+              <Link
+                href={"/u/" + nip19.npubEncode(pubkey)}
+                onClick={() => handleToggle()}
+                className="flex items-center gap-2 py-2"
+              >
+                <Profile key={pubkey} pubkey={pubkey} />
+              </Link>
             ))}
           </SearchGroup>
         ) : null}
         {tags.length > 0 ? (
           <SearchGroup title="Tags">
             {tags.map((tag: string) => (
-              <Tag key={tag} tag={tag} />
+              <Link
+                className="flex items-center gap-4 text-gray-hover pt-2"
+                onClick={() => handleToggle()}
+                href={`/tag/${tag}`}
+              >
+                <Tag key={tag} tag={tag} />
+              </Link>
             ))}
           </SearchGroup>
         ) : null}
@@ -139,30 +175,54 @@ const SearchGroup: FC<SearchGroupProps> = ({ title, children }) => {
 
 const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
   const npub = nip19.npubEncode(pubkey);
+  const { relayUrl, activeRelay } = useContext(RelayContext);
+  // @ts-ignore
+  const { profiles, addProfiles, reload } = useContext(ProfilesContext);
+
+  const [name, setName] = useState<string>("");
+  const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
+
+  const getProfile = () => {
+    let relayName = relayUrl.replace("wss://", "");
+    const profileKey = `profile_${relayName}_${pubkey}`;
+
+    const profile = profiles[profileKey];
+    if (!profile) {
+      addProfiles([pubkey]);
+    }
+    if (profile && profile.content) {
+      const profileContent = JSON.parse(profile.content);
+      setName(profileContent.name);
+      if (!profileContent.picture || profileContent.picture === "") {
+        setPicture(DUMMY_PROFILE_API(npub));
+      } else {
+        setPicture(profileContent.picture);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, [reload, relayUrl, activeRelay]);
 
   return (
-    <Link href={"/u/" + npub} className="flex items-center gap-2 py-2">
+    <>
       <img
         className="w-5 h-5 bg-light-gray rounded-full object-cover"
-        // src={data?.picture || DUMMY_PROFILE_API(npub)}
-        src={DUMMY_PROFILE_API(npub)}
+        src={picture}
         alt=""
       />
-      {/* <span>{data?.name || shortenHash(npub)}</span> */}
-      <span>{shortenHash(npub)}</span>
-    </Link>
+      <span>{name || shortenHash(npub)}</span>
+    </>
   );
 };
 
 const Tag: FC<{ tag: string }> = ({ tag }) => {
   return (
-    <Link
-      className="flex items-center gap-4 text-gray-hover pt-2"
-      href={`/tag/${tag}`}
-    >
+    <>
       <AiFillTag size="20" className="text-gray" />
       <span>{tag}</span>
-    </Link>
+    </>
   );
 };
 

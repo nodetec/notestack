@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Event, nip19, Relay } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import {
   DetailedHTMLProps,
   FC,
@@ -18,6 +18,7 @@ import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
+// import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
   extends DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement> {
@@ -32,7 +33,7 @@ const Article: FC<NoteProps> = ({
   dateOnly = false,
   ...props
 }) => {
-  const { tags, created_at: createdAt, id: noteId } = event;
+  const { tags, created_at: createdAt /* , id: noteId  */ } = event;
   let { content } = event;
 
   function getTValues(tags: string[][]) {
@@ -48,20 +49,30 @@ const Article: FC<NoteProps> = ({
 
   const npub = nip19.npubEncode(event.pubkey);
 
-  const title = getTagValues("subject", tags);
+  const title = getTagValues("title", tags);
+  const image = getTagValues("image", tags);
+  const summary = getTagValues("summary", tags);
+  const publishedAt = parseInt(getTagValues("published_at", tags));
   // const actualTags = getTagValues("tags", tags);
   const thumbnail = markdownImageContent(content);
 
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
-  // @ts-ignore
   const { activeRelay } = useContext(RelayContext);
   // @ts-ignore
-  const { profiles } = useContext(ProfilesContext);
+  const { profiles, reload } = useContext(ProfilesContext);
 
   // @ts-ignore
   const { setCachedEvent } = useContext(CachedEventContext);
+
+  const [picture, setPicture] = useState(DUMMY_PROFILE_API(npub));
+  const [name, setName] = useState();
+
+  useEffect(() => {
+    setName(getName(event));
+    setPicture(getPicture(event));
+  }, [activeRelay, reload]);
 
   const getPicture = (event: Event) => {
     if (!activeRelay) return DUMMY_PROFILE_API(npub);
@@ -73,6 +84,10 @@ const Article: FC<NoteProps> = ({
     if (profile && profile.content) {
       // TODO: check if this exists
       const profileContent = JSON.parse(profile.content);
+      if (profileContent.picture === "") {
+        return DUMMY_PROFILE_API(npub);
+      }
+
       return profileContent.picture || DUMMY_PROFILE_API(npub);
     }
 
@@ -114,11 +129,11 @@ const Article: FC<NoteProps> = ({
                     <Item className="text-gray-hover">
                       <img
                         className="rounded-full w-6 h-6 object-cover"
-                        src={getPicture(event)}
+                        src={picture}
                         alt={""}
                       />
-                      <span className="group-hover:underline">
-                        {getName(event)}
+                      <span className="group-hover:underline text-xs md:text-sm">
+                        {name}
                       </span>
                     </Item>
                   )}
@@ -126,51 +141,68 @@ const Article: FC<NoteProps> = ({
                 <span>·</span>
               </div>
             ) : null}
-            <DatePosted timestamp={createdAt} />
-            <span>·</span>
-            {/* @ts-ignore */}
-            <span className="text-gray">{event.relayUrl}</span>
+            <DatePosted timestamp={publishedAt || createdAt} />
+            <div className="hidden md:flex md:flex-row md:gap-2 md:items-center">
+              <span>·</span>
+              <span className="text-gray text-xs md:text-sm">
+                {/* @ts-ignore */}
+                {event.relayUrl}
+              </span>
+            </div>
           </div>
         </div>
-        <DeleteBlog event={event} />
       </div>
 
       <div className="cursor-pointer" onClick={routeCachedEvent}>
         <div className="flex gap-12">
           <div className="flex-1">
             {title ? (
-              <h2 className="text-2xl font-bold text-black twolines mb-2">
+              <h2 className="text-sm sm:text-2xl font-bold text-black twolines mb-2">
                 {title}
               </h2>
             ) : null}
-            <p className="text-gray text-sm leading-6">
-              {content.length > 250 ? content.slice(0, 250) + "..." : content}
+            <p className="text-gray text-sm leading-6 hidden sm:block">
+              {summary ||
+                (content.length > 250
+                  ? content.slice(0, 250) + "..."
+                  : content)}
             </p>
           </div>
 
-          {thumbnail ? (
+          {image ? (
             <div>
               <img
-                className="w-32 h-32 object-contain"
-                src={thumbnail.groups?.filename}
+                className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
+                src={image}
+                alt={""}
+              />
+            </div>
+          ) : thumbnail ? (
+            <div>
+              <img
+                className="w-16 h-16 sm:w-32 sm:h-32 object-contain"
+                src={image || thumbnail.groups?.filename}
                 alt={thumbnail.groups?.title}
               />
             </div>
           ) : null}
         </div>
       </div>
-      <ul className="flex items-center gap-2 text-sm flex-wrap mt-4">
-        {tValues.map((topic) => (
-          <li key={topic}>
-            <Link
-              className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
-              href={`/tag/${topic.replace(" ", "-")}`}
-            >
-              {topic}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-row gap-8 items-center mt-4">
+        <ul className="flex items-center gap-2 text-sm flex-wrap">
+          {tValues.map((topic) => (
+            <li key={topic}>
+              <Link
+                className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
+                href={`/tag/${topic.replace(" ", "-")}`}
+              >
+                {topic}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <DeleteBlog event={event} />
+      </div>
     </article>
   );
 };
@@ -194,7 +226,9 @@ export const DatePosted = ({ timestamp }: { timestamp: number }) => {
   };
 
   return (
-    <Item className="text-gray text-sm">{timeStampToDate(timestamp)}</Item>
+    <Item className="text-gray text-xs sm:text-sm">
+      {timeStampToDate(timestamp)}
+    </Item>
   );
 };
 

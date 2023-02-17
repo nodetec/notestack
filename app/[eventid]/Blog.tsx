@@ -1,48 +1,27 @@
-import { Event, nip19, Relay } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import { useEffect, useState } from "react";
 import Aside from "../Aside";
-import Profile from "../components/profile/Profile";
 import Content from "../Content";
 import Main from "../Main";
 import RecommendedEvents from "../RecommendedEvents";
 import MarkdownDisplay from "./MarkdownDisplay";
 import Topics from "../Topics";
+import UserCard from "../components/profile/UserCard";
+import Following from "../components/profile/Following";
 
 interface NoteProps {
   event: Event;
 }
 
 export default function Note({ event }: NoteProps) {
-  const [profileInfo, setProfileInfo] = useState({
-    name: "",
-    about: "",
-    picture: "",
-  });
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
   const tagsTags = tags
     .filter((tag: string[]) => tag[0] === "t")
     .map((tag: string[]) => tag[1]);
   const npub = nip19.npubEncode(event.pubkey);
-  const [events, setEvents] = useState<Event[]>([]);
   // @ts-ignore
-  const profilePubkey = nip19.decode(npub).data.toString();
   const [zenMode, setZenMode] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    if (events.length === 0) {
-      const profileEventsString = sessionStorage.getItem(
-        profilePubkey + "_events"
-      );
-      if (profileEventsString) {
-        const cachedEvents = JSON.parse(profileEventsString);
-        setEvents(cachedEvents);
-        // console.log("using cached events for user:", npub);
-      }
-    }
-  }, []);
 
   return (
     <Main mode={zenMode ? "zen" : "normal"}>
@@ -59,7 +38,8 @@ export default function Note({ event }: NoteProps) {
       </Content>
       {zenMode ? null : (
         <Aside>
-          <Profile npub={npub} setProfileInfo={setProfileInfo} />
+          <UserCard npub={npub} />
+          {/* <Following npub={npub} /> */}
           {/* <RecommendedEvents */}
           {/*   title="More from the author" */}
           {/*   EVENTS={events.map((event: Event) => event.id!) || []} */}

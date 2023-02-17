@@ -19,35 +19,55 @@ const Editor = ({}: any) => {
   >("off");
 
   const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [content, setContent] = useState("");
 
   const [titleValid, setTitleValid] = useState(true);
-  const [bodyValid, setBodyValid] = useState(true);
+  const [contentValid, setContentValid] = useState(true);
 
   const [titleFocused, setTitleFocused] = useState(false);
-  const [bodyFocused, setBodyFocused] = useState(false);
+  const [contentFocused, setContentFocused] = useState(false);
+
+  const [identifer, setIdentifier] = useState();
 
   // @ts-ignore
   const { blog, setBlog } = useContext(BlogContext);
   const pathname = usePathname();
 
+  // useEffect(() => {
+  //   setBlog({ ...blog, title: "", content: "", titleValid: true, contentValid: true });
+  // }, [pathname]);
+
   useEffect(() => {
-    setBlog({ ...blog, title: "", body: "", titleValid: true, bodyValid: true });
-  }, [pathname]);
+    // setTitle(blog.title);
+    // setContent(blog.content);
+    setIdentifier(blog.identifier);
+    return () => {
+      setBlog({
+        title: "",
+        summary: null,
+        content: "",
+        image: null,
+        identifier: null,
+        publishedAt: null,
+        titleValid: true,
+        contentValid: true,
+      });
+    };
+  }, []);
 
   useEffect(() => {
     setTitleValid(blog.titleValid);
   }, [blog.titleValid]);
 
   useEffect(() => {
-    setBodyValid(blog.bodyValid);
-  }, [blog.bodyValid]);
+    setContentValid(blog.contentValid);
+  }, [blog.contentValid]);
 
   const previewRef = useRef(null);
 
-  const setupMarkdown = (body: string) => {
+  const setupMarkdown = (content: string) => {
     const md = require("markdown-it")();
-    const result = md.render(body);
+    const result = md.render(content || "");
     return result;
   };
 
@@ -65,8 +85,8 @@ const Editor = ({}: any) => {
     setTitleFocused(true);
   };
 
-  const handleBodyFocus = () => {
-    setBodyFocused(true);
+  const handleContentFocus = () => {
+    setContentFocused(true);
   };
 
   const handleTitleChange = (evn: any) => {
@@ -75,10 +95,10 @@ const Editor = ({}: any) => {
     setBlog({ ...blog, title: evn.target.value, titleValid: true });
   };
 
-  const handleBodyChange = (evn: any) => {
-    setBody(evn.target.value);
-    setBodyValid(true);
-    setBlog({ ...blog, body: evn.target.value, bodyValid: true });
+  const handleContentChange = (evn: any) => {
+    setContent(evn.target.value);
+    setContentValid(true);
+    setBlog({ ...blog, content: evn.target.value, contentValid: true });
   };
 
   return (
@@ -129,12 +149,12 @@ const Editor = ({}: any) => {
                 <div className="mb-3">
                   <div style={{ height: "5.625rem" }}>
                     <textarea
-                      title={title}
+                      title={title ?? ''}
                       required
                       rows={1}
                       className="text-black border-none focus:border-none resize-none text-4xl font-medium leading-normal px-6 pt-6 pb-0 w-full focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent outline-none"
                       style={{ height: "4.875rem" }}
-                      value={title}
+                      value={title ?? ''}
                       placeholder="Title..."
                       onChange={handleTitleChange}
                       onBlur={handleTitleFocus}
@@ -151,16 +171,16 @@ const Editor = ({}: any) => {
                   <CodeEditor
                     required
                     className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
-                    value={body}
+                    value={content ?? ''}
                     language="markdown"
                     placeholder="Enter your note..."
                     autoCapitalize="none"
-                    onChange={handleBodyChange}
+                    onChange={handleContentChange}
                     /* @ts-ignore */
-                    onBlur={handleBodyFocus}
+                    onBlur={handleContentFocus}
                     /* @ts-ignore */
-                    bodyfocused={bodyFocused.toString()}
-                    bodyvalid={bodyValid.toString()}
+                    contentfocused={contentFocused.toString()}
+                    contentvalid={contentValid.toString()}
                     padding={24}
                     style={{
                       color: "#000",
@@ -198,7 +218,7 @@ const Editor = ({}: any) => {
               </div>
               <div
                 className="h-full md-preview-note-wrapper overflow-auto text-black"
-                dangerouslySetInnerHTML={{ __html: setupMarkdown(body) }}
+                dangerouslySetInnerHTML={{ __html: setupMarkdown(content) }}
               ></div>
             </div>
           )}

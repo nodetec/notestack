@@ -1,12 +1,10 @@
 "use client";
-import { RelayContext } from "./context/relay-provider.jsx";
+import { RelayContext } from "./context/relay-provider";
 import { useContext, useEffect, useState } from "react";
 import { ProfilesContext } from "./context/profiles-provider.jsx";
 
 export default function FollowedRelays() {
-  // @ts-ignore
-  const { setPendingActiveRelayUrl, activeRelay, setActiveRelay, allRelays } =
-    useContext(RelayContext);
+  const { setRelayUrl, activeRelay, allRelays } = useContext(RelayContext);
   // @ts-ignore
   const { reload, setReload } = useContext(ProfilesContext);
   const [relayNames, setRelayNames] = useState<string[]>([]);
@@ -21,7 +19,7 @@ export default function FollowedRelays() {
   const handleRelayClick = (relay: string) => {
     // console.log("clicked relay:", relay);
     if (activeRelay && activeRelay.url !== "wss://" + relay) {
-      setPendingActiveRelayUrl("wss://" + relay);
+      setRelayUrl("wss://" + relay);
       // setActiveRelay();
       setReload(!reload);
     }
@@ -30,7 +28,7 @@ export default function FollowedRelays() {
   return (
     <div className="my-3">
       {relayNames && (
-        <div className="flex whitespace-nowrap flex-row gap-4 overflow-x-scroll">
+        <div className="flex whitespace-nowrap scrollable-element flex-row gap-2 overflow-x-scroll">
           {relayNames.map((relay: string) => {
             return (
               <button
@@ -38,8 +36,8 @@ export default function FollowedRelays() {
                 onClick={() => handleRelayClick(relay)}
                 className={
                   activeRelay && activeRelay.url === "wss://" + relay
-                    ? "border border-black bg-black text-white rounded-full p-2"
-                    : "border border-black rounded-full p-2"
+                    ? "border border-black bg-black text-white text-xs sm:text-base rounded-full px-4 py-2"
+                    : "border border-black rounded-full text-xs sm:text-base px-4 py-2"
                 }
               >
                 {relay}

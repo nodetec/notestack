@@ -1,3 +1,4 @@
+const plugin = require('tailwindcss/plugin')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -14,6 +15,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        error: "rgb(201, 74, 74)",
         red: "rgb(247, 0, 0)",
         "red-hover": "rgb(210, 19, 7)",
         green: "rgb(26, 137, 23)",
@@ -24,10 +26,11 @@ module.exports = {
         "medium-gray": "rgb(168, 168, 168)",
       },
       gridTemplateColumns: {
-        "content-porfile": "5fr 2fr",
+        "content-profile": "5fr 2fr",
       },
       boxShadow: {
         "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",
+        popup: "rgba(0, 0, 0, 0.15) 0px 2px 10px",
       },
       maxHeight: {
         192: "48rem",
@@ -37,5 +40,22 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("@tailwindcss/typography"),
+  plugin(function ({ addUtilities }) {
+    addUtilities({
+      '.scrollbar-hide': {
+        /* IE and Edge */
+        '-ms-overflow-style': 'none',
+
+        /* Firefox */
+        'scrollbar-width': 'none',
+
+        /* Safari and Chrome */
+        '&::-webkit-scrollbar': {
+          display: 'none'
+        }
+      }
+    }
+    )
+  })],
 };

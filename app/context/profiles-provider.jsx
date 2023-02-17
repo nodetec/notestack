@@ -7,47 +7,43 @@ export const ProfilesContext = createContext([]);
 
 export default function ProfilesProvider({ children }) {
   const [profiles, setProfiles] = useState({});
-  const [pubkeys, setpubkeys] = useState([]);
   const [reload, setReload] = useState(false);
-  // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, subscribe } = useContext(RelayContext);
 
-  // TODO: set entire profile not just content
-  useEffect(() => {
-    if (activeRelay) {
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let sub = activeRelay.sub([
-        {
-          kinds: [0],
-          authors: pubkeys,
-        },
-      ]);
-      let events = [];
-      sub.on("event", (event) => {
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
-      });
-      sub.on("eose", () => {
-        if (events.length !== 0) {
-          // console.log("WE HAVE PROFILES:", events);
-          events.forEach((event) => {
-            let profileKey = `profile_${relayUrl}_${event.pubkey}`;
-            // const contentObj = JSON.parse(event.content);
-            profiles[profileKey] = event;
-            // setProfiles([...profiles]);
-            const newProfiles = profiles
-            setProfiles(newProfiles);
-          });
-        }
-        sub.unsub();
-      });
-    }
-  }, [pubkeys]);
+  const addProfiles = async (pubkeys) => {
+    if (!relayUrl) return;
+
+    let relayName = relayUrl.replace("wss://", "");
+
+    const filter = {
+      kinds: [0],
+      authors: pubkeys,
+    };
+
+    let events = [];
+
+    const onEvent = (event) => {
+      events.push(event);
+    };
+
+    const onEOSE = () => {
+      if (events.length !== 0) {
+        events.forEach((event) => {
+          let profileKey = `profile_${relayName}_${event.pubkey}`;
+          profiles[profileKey] = event;
+          const newProfiles = profiles;
+          setProfiles(newProfiles);
+          setReload(!reload);
+        });
+      }
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
+  };
 
   return (
     <ProfilesContext.Provider
-      value={{ profiles, setProfiles, pubkeys, setpubkeys, reload, setReload }}
+      value={{ addProfiles, profiles, setProfiles, reload, setReload }}
     >
       {children}
     </ProfilesContext.Provider>

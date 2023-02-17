@@ -32,27 +32,31 @@ export type Event = {
 };
 
 export namespace NostrService {
-  export async function connect(relayUrls: string[]) {
-    let relays: any = [];
+  // export async function connect(relayUrl: string, activeRelay: Relay) {
+  //   if (activeRelay && activeRelay.url === relayUrl) {
+  //     return activeRelay;
+  //   }
 
-    for await (const relayUrl of relayUrls.map(async (relayUrl) => {
-      const relay = relayInit(relayUrl);
+  //   if (!relayUrl) return;
+  //   const relay = relayInit(relayUrl);
 
-      await relay.connect();
+  //   await relay.connect();
 
-      // console.log(relay);
+  //   relay.on("connect", () => {
+  //     console.log("info", `✅ nostr (${relayUrl}): Connected!`);
+  //     return relay;
+  //   });
 
-      relay.on("connect", () => {
-        // console.log(`connected to ${relay.url}`);
-        relays.push(relay);
-      });
+  //   relay.on("disconnect", () => {
+  //     console.log("warn", `🚪 nostr (${relayUrl}): Connection closed.`);
+  //   });
 
-      relay.on("error", () => {
-        // console.log(`failed to connect to ${relay.url}`);
-      });
-    }))
-      return relays;
-  }
+  //   relay.on("error", () => {
+  //     console.log("error", `❌ nostr (${relayUrl}): Connection error!`);
+  //   });
+
+  //   return relay;
+  // }
 
   export function genPrivateKey(): string {
     return generatePrivateKey();
@@ -110,6 +114,7 @@ export namespace NostrService {
       content: content,
       tags: tags,
     };
+    event.id = getEventHash(event);
 
     return event;
   }
@@ -129,11 +134,13 @@ export namespace NostrService {
     return sha256(serializeEvent(event)).toString(Hex);
   }
 
-  export async function addEventData(event: Event) {
-    event.id = getEventHash(event);
-    // @ts-ignore
-    event = await window.nostr.signEvent(event);
-    // console.log("signed event", event);
+  export async function signEvent(event: Event) {
+    try {
+      // @ts-ignore
+      event = await window.nostr.signEvent(event);
+    } catch (err: any) {
+      console.error("signing event failed");
+    }
     return event;
   }
 
@@ -159,16 +166,29 @@ export namespace NostrService {
     return filteredEvents;
   }
 
+  export function randomId() {
+    // @ts-ignore
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11)
+      .replace(/[018]/g, (c: any) =>
+        (
+          c ^
+          (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+        ).toString(16)
+      )
+      .slice(0, 8);
+  }
+
   export function filterBlogEvents(eventArray: Event[]) {
     const filteredEvents = eventArray.filter((e1: Event, index: number) => {
       if (e1.content === "") {
         return false;
       }
-      const title = getTagValues("subject", e1.tags);
+      const title = getTagValues("title", e1.tags);
       if (!title || title === "") {
         return false;
       }
-      return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+      // return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
+      return true;
     });
     return filteredEvents;
   }

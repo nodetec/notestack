@@ -24,63 +24,81 @@ export default function TagPage() {
 
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
-  // @ts-ignore
-  const { activeRelay, pendingActiveRelayUrl } = useContext(RelayContext);
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
 
   // @ts-ignore
-  const { setpubkeys } = useContext(ProfilesContext);
+  const { addProfiles } = useContext(ProfilesContext);
+
+  const [eventTags, setEventTags] = useState<string[]>([]);
 
   const filter = {
-    kinds: [2222],
+    kinds: [30023],
     limit: 100,
     "#t": [tagname],
   };
 
-  useEffect(() => {
+  function getTValues(tags: string[][]) {
+    return tags
+      .filter((subTags) => subTags[0] === "t")
+      .map((subTags) => subTags[1])
+      .filter((t) => t.length <= 20);
+  }
+
+  const getTagEvents = async () => {
     let pubkeysSet = new Set<string>();
+    let eventTagsSet = new Set<string>();
 
-    if (activeRelay && pendingActiveRelayUrl === activeRelay.url) {
-      setEvents([]);
-      let relayUrl = activeRelay.url.replace("wss://", "");
-      let feedKey = `tag_${tagname}_${relayUrl}`;
+    setEvents([]);
+    let relayName = relayUrl.replace("wss://", "");
+    let feedKey = `tag_${tagname}_${relayName}`;
 
-      if (feed[feedKey]) {
-        setEvents(feed[feedKey]);
-      } else {
-        // console.log("Getting events from relay");
-        let sub = activeRelay.sub([filter]);
-
-        let events: Event[] = [];
-
-        sub.on("event", (event: Event) => {
-          // console.log("getting event", event, "from relay:", relay.url);
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-          pubkeysSet.add(event.pubkey);
-        });
-
-        sub.on("eose", () => {
-          const filteredEvents = NostrService.filterBlogEvents(events);
-          const feedKey = `tag_${tagname}_${relayUrl}`;
-          feed[feedKey] = filteredEvents;
-          setFeed(feed);
-          if (filteredEvents.length > 0) {
-            setEvents(filteredEvents);
-          } else {
-            setEvents([]);
-          }
-          if (pubkeysSet.size > 0) {
-            setpubkeys(Array.from(pubkeysSet));
-          }
-          sub.unsub();
-        });
-      }
+    if (feed[feedKey]) {
+      setEvents(feed[feedKey]);
+      const events = feed[feedKey];
+      events.forEach((event: Event) => {
+        const tValues = getTValues(event.tags);
+        tValues.forEach((t) => eventTagsSet.add(t));
+      });
+      setEventTags(Array.from(eventTagsSet).slice(0, 7));
+      return;
     }
-  }, [activeRelay]);
+
+    let events: Event[] = [];
+
+    const onEvent = (event: any) => {
+      // @ts-ignore
+      event.relayUrl = relayName;
+      events.push(event);
+      pubkeysSet.add(event.pubkey);
+      const tValues = getTValues(event.tags);
+      tValues.forEach((t) => eventTagsSet.add(t));
+    };
+
+    const onEOSE = () => {
+      const filteredEvents = NostrService.filterBlogEvents(events);
+      const feedKey = `tag_${tagname}_${relayName}`;
+      feed[feedKey] = filteredEvents;
+      setEventTags(Array.from(eventTagsSet));
+      setFeed(feed);
+      if (filteredEvents.length > 0) {
+        setEvents(filteredEvents);
+      } else {
+        setEvents([]);
+      }
+      if (pubkeysSet.size > 0) {
+        addProfiles(Array.from(pubkeysSet));
+      }
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
+  };
+
+  useEffect(() => {
+    getTagEvents();
+  }, [relayUrl, activeRelay]);
 
   return (
     <Main>
@@ -101,25 +119,17 @@ export default function TagPage() {
         ) : null}
       </Content>
       <Aside>
-        {/* <RecommendedEvents */}
-        {/*   title="Recommended Blogs" */}
-        {/*   showProfile */}
-        {/*   EVENTS={[ */}
-        {/*     "0d4dfa8b61c059d2f9a670f4a75c78db823fe48bb9999781bc9c204c46790019", */}
-        {/*     "112f5761e3206b90fc2a5d35b0dd8a667be2ce62721e565f6b1285205d5a8e27", */}
-        {/*     "f09bb957509a5bcf902e3aa0d8ba6dacfb365595ddcc9a28bc895f0b93be4f79", */}
-        {/*   ]} */}
-        {/* /> */}
+        {events.length > 0 && (
+          <RecommendedEvents
+            title="Recommended Blogs"
+            showProfile
+            events={events.slice(0, 3)}
+          />
+        )}
+
         <Topics
           title="Recommended Topics"
-          TOPICS={[
-            "nostr",
-            "lightning",
-            "bitcoin",
-            "taproot",
-            "tailwindcss",
-            "chess",
-          ]}
+          TOPICS={eventTags.length > 0 ? eventTags.slice(0, 7) : []}
         />
       </Aside>
     </Main>

@@ -3,38 +3,30 @@ import Button from "../../Button";
 import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { utils } from "lnurl-pay";
 import Link from "next/link";
-import Buttons from "@/app/Buttons";
-import FollowButton from "./FollowButton";
-import AccountSettings from "@/app/AccountSettings";
-import { UserContext } from "@/app/context/user-provider";
 import { RelayContext } from "@/app/context/relay-provider";
-import Followers from "./Followers";
 import LightningTip from "@/app/LightningTip";
-import { Event, nip19 } from "nostr-tools";
+import { nip19 } from "nostr-tools";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
+import FollowButton from "./FollowButton";
+// import Followers from "./Followers";
+// import FollowButton from "./FollowButton";
 
 export default function UserCard({ npub }: any) {
-  // @ts-ignore
-  const { activeRelay, isLoading } = useContext(RelayContext);
+  const { activeRelay, relayUrl } = useContext(RelayContext);
   // @ts-ignore
   const { keys } = useContext(KeysContext);
 
-  const [isOpen, setIsOpen] = useState(false);
   const [isTipOpen, setIsTipOpen] = useState(false);
 
   // @ts-ignore
-  const { user } = useContext(UserContext);
-
-  const [loggedInPubkey, setLoggedInPubkey] = useState<string>();
-
-  // @ts-ignore
-  const { profiles, setProfiles, reload } = useContext(ProfilesContext);
+  const { profiles, reload, addProfiles } = useContext(ProfilesContext);
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
-  const [picture, setPicture] = useState<string>();
+  const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
+  const [, setBanner] = useState<string>();
   const [nip05, setNip05] = useState<string>();
   const [lud06, setLud06] = useState<string>();
   const [lud16, setLud16] = useState<string>();
@@ -45,84 +37,61 @@ export default function UserCard({ npub }: any) {
   // if we don't look up the user
   const profilePubkey = nip19.decode(npub).data.toString();
 
-  useEffect(() => {
-    if (!activeRelay) return;
-    // console.log("HIIIIIIIIII!!!!!!!!!!!");
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    const cachedProfile = profiles[`profile_${relayUrl}_${profilePubkey}`];
-    if (cachedProfile && cachedProfile.content) {
-      const profileContent = JSON.parse(cachedProfile.content);
+  function removeUnderscoreAt(nip05: string) {
+    if (nip05.startsWith("_@")) {
+      return nip05.slice(2);
+    }
+    return nip05;
+  }
+
+  const resetProfile = () => {
+    setName(undefined);
+    setAbout(undefined);
+    setPicture(DUMMY_PROFILE_API(npub));
+    setBanner(undefined);
+    setNip05(undefined);
+    setLud06(undefined);
+    setLud16(undefined);
+  };
+
+  const getProfile = () => {
+    resetProfile();
+    let relayName = relayUrl.replace("wss://", "");
+    const profileKey = `profile_${relayName}_${profilePubkey}`;
+
+    const profile = profiles[profileKey];
+    if (!profile) {
+      addProfiles([profilePubkey]);
+    }
+    if (profile && profile.content) {
+      const profileContent = JSON.parse(profile.content);
       setName(profileContent.name);
       setAbout(profileContent.about);
-
-      if (profileContent.picture) {
-        setPicture(profileContent.picture);
-      } else {
+      if (!profileContent.picture || profileContent.picture === "") {
         setPicture(DUMMY_PROFILE_API(npub));
+      } else {
+        setPicture(profileContent.picture);
       }
-      setNip05(profileContent.nip05);
+      setBanner(profileContent.banner);
+
+      if (profileContent.nip05) {
+        setNip05(removeUnderscoreAt(profileContent.nip05));
+      }
       setLud06(profileContent.lud06);
       setLud16(profileContent.lud16);
-    } else {
-      setName("");
-      setAbout("");
-      if ("") {
-        setPicture("");
-      } else {
-        setPicture(DUMMY_PROFILE_API(npub));
-      }
-      setNip05("");
-      setLud06("");
-      setLud16("");
-      let sub = activeRelay.sub([
-        {
-          kinds: [0],
-          authors: [profilePubkey],
-        },
-      ]);
-      let events: Event[] = [];
-      sub.on("event", (event: Event) => {
-        // @ts-ignore
-        event.relayUrl = relayUrl;
-        events.push(event);
-      });
-      sub.on("eose", () => {
-        if (events.length !== 0) {
-          let event = events[0];
-          let profileKey = `profile_${relayUrl}_${event.pubkey}`;
-          const contentObj = JSON.parse(event.content);
-          setName(contentObj.name);
-          setAbout(contentObj.about);
-          if (contentObj.picture) {
-            setPicture(contentObj.picture);
-          } else {
-            setPicture(DUMMY_PROFILE_API(npub));
-          }
-          setNip05(contentObj.nip05);
-          setLud06(contentObj.lud06);
-          setLud16(contentObj.lud16);
-          profiles[profileKey] = event.content;
-          setProfiles(profiles);
-        }
-        sub.unsub();
-      });
     }
-  }, [activeRelay, profiles, reload]);
+  };
 
   useEffect(() => {
-    setLoggedInPubkey(keys.publicKey);
-  }, []);
-
-  const handleClick = async () => {
-    setIsOpen(!isOpen);
-  };
+    getProfile();
+  }, [reload, relayUrl, activeRelay]);
 
   const handleTipClick = async () => {
     setIsTipOpen(!isTipOpen);
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mt-6">
       <Link href={`/u/${npub}`}>
         <img
           className="rounded-full w-24 h-24 object-cover mb-4"
@@ -132,14 +101,16 @@ export default function UserCard({ npub }: any) {
         <span>{name}</span>
       </Link>
       {/* TODO: we can do a overlay popup for this */}
-      <Followers npub={npub} />
+      {/* <Followers npub={npub} /> */}
       <div className="font-semibold">
         {nip05 && (
           <div className="text-sm text-gray mb-2">
-            <div className="flex items-center gap-1">
-              <span>{nip05}</span>
+            <span className="flex items-center flex-row gap-1">
+              <span className="max-w-[12rem] whitespace-nowrap overflow-x-scroll scrollable-element leading-none">
+                {nip05}
+              </span>
               <BsPatchCheckFill className="text-blue-500" size="14" />
-            </div>
+            </span>
           </div>
         )}
         {lud16 && utils.isLightningAddress(lud16) && (
@@ -150,25 +121,23 @@ export default function UserCard({ npub }: any) {
           </div>
         )}
       </div>
-      <p className="text-sm mb-4 text-gray">{about}</p>
+      <p className="text-sm mb-4 text-gray max-w-[12rem] overflow-scroll">
+        {about}
+      </p>
       {keys.publicKey &&
         (keys.publicKey === profilePubkey ? (
-          <Buttons>
-            <Button
-              color="green"
-              variant="ghost"
-              onClick={handleClick}
-              size="xs"
-            >
-              Edit profile
-            </Button>
-          </Buttons>
+          <Link
+            href="/settings"
+            className="text-green hover:text-green-hover text-sm"
+          >
+            Edit profile
+          </Link>
         ) : (
           <div className="flex items-center gap-2">
-            {/* <FollowButton */}
-            {/*   loggedInUserPublicKey={loggedInPubkey} */}
-            {/*   profilePublicKey={profilePubkey} */}
-            {/* /> */}
+            <FollowButton
+              loggedInUserPublicKey={keys.publicKey}
+              profilePublicKey={profilePubkey}
+            />
             {(lud06 || lud16) && (
               <Button
                 color="red"
@@ -180,19 +149,7 @@ export default function UserCard({ npub }: any) {
             )}
           </div>
         ))}
-      {activeRelay && name && keys.publicKey === profilePubkey ? (
-        <AccountSettings
-          name={name}
-          nip05={nip05}
-          about={about}
-          picture={picture}
-          loggedInPubkey={keys.publicKey}
-          lud06={lud06}
-          lud16={lud16}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        />
-      ) : (
+      {activeRelay && name && keys.publicKey === profilePubkey ? null : (
         <LightningTip
           lud06={lud06}
           lud16={lud16}

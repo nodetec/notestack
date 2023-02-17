@@ -4,9 +4,10 @@ import { IoChevronDown } from "react-icons/io5";
 import Button from "./Button";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import ProfileMenu from "./ProfileMenu";
-import type { Event, Relay } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
+import { FollowingContext } from "./context/following-provider";
 
 interface AccountButtonProps {
   pubkey: string;
@@ -14,61 +15,97 @@ interface AccountButtonProps {
 
 export default function AccountButton({ pubkey }: AccountButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
-  const [picture, setPicture] = useState(DUMMY_PROFILE_API(pubkey));
+  const [picture, setPicture] = useState(
+    DUMMY_PROFILE_API(nip19.npubEncode(pubkey))
+  );
 
   // @ts-ignore
   const { user, setUser } = useContext(UserContext);
 
+  const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
+
   // @ts-ignore
-  const { activeRelay } = useContext(RelayContext);
+  const { following, setFollowing, followingReload, setFollowingReload } =
+    useContext(FollowingContext);
 
-  useEffect(() => {
-    if (activeRelay) {
-      let relayUrl = activeRelay.url.replace("wss://", "");
+  const getEvents = async () => {
+    let kinds = [0, 3];
 
-      let userKey = `user_${relayUrl}`;
-      if (user[userKey]) {
-        // console.log("Cached events from context");
-        const content = user[userKey].content;
+    let userKey = `user_${relayUrl}`;
+    if (user[userKey]) {
+      kinds = kinds.filter((kind) => kind !== 3);
+      // console.log("Cached events from context");
+      const content = user[userKey].content;
+      if (content) {
+        const contentObj = JSON.parse(content);
+        if (contentObj.picture) {
+          setPicture(contentObj.picture);
+        }
+      }
+    }
+
+    let followingKey = `following_${relayUrl}_${pubkey}`;
+
+    if (following[followingKey]) {
+      kinds = kinds.filter((kind) => kind !== 0);
+    }
+
+    if (kinds.length === 0) {
+      return;
+    }
+
+    let relayName = relayUrl.replace("wss://", "");
+
+    const filter = {
+      kinds,
+      authors: [pubkey],
+      limit: 5,
+    };
+
+    let events: Event[] = [];
+
+    const onEvent = (event: any) => {
+      // @ts-ignore
+      event.relayUrl = relayUrl;
+      events.push(event);
+      if (event.kind === 0) {
+        const profileMetadata = event;
+        user[userKey] = profileMetadata;
+        setUser(user);
+        const content = event.content;
         if (content) {
           const contentObj = JSON.parse(content);
           if (contentObj.picture) {
             setPicture(contentObj.picture);
           }
         }
-      } else {
-        let sub = activeRelay.sub([
-          {
-            kinds: [0],
-            authors: [pubkey],
-          },
-        ]);
-        let events: Event[] = [];
-
-        sub.on("event", (event: Event) => {
-          // @ts-ignore
-          event.relayUrl = relayUrl;
-          events.push(event);
-        });
-
-        sub.on("eose", () => {
-          if (events.length !== 0) {
-            const profileMetadata = events[0];
-            user[userKey] = profileMetadata;
-            setUser(user);
-            const content = events[0].content;
-            if (content) {
-              const contentObj = JSON.parse(content);
-              if (contentObj.picture) {
-                setPicture(contentObj.picture);
-              }
-            }
-          }
-          sub.unsub();
-        });
       }
-    }
-  }, [activeRelay]);
+    };
+
+    const onEOSE = () => {
+      if (events.length !== 0) {
+        // filter through events for kind 3
+        const followingEvents = events.filter((event) => event.kind === 3);
+        let followingKey = `following_${relayName}_${pubkey}`;
+
+        const contacts = followingEvents[0].tags;
+        const contactPublicKeys = contacts.map((contact: any) => {
+          return contact[1];
+        });
+
+        following[followingKey] = contactPublicKeys;
+        setFollowing(following);
+        // addProfiles(contactPublicKeys.slice(0, 5));
+        setFollowingReload(!followingReload);
+      }
+    };
+
+    subscribe([relayUrl], filter, onEvent, onEOSE);
+  };
+
+  useEffect(() => {
+    getEvents();
+  }, [relayUrl, activeRelay]);
 
   return (
     <div className="relative">
