@@ -55,9 +55,9 @@ const WriteButton = () => {
   useEffect(() => {
     return () => {
       setBlog({
-        title: null,
+        title: "",
         summary: null,
-        content: null,
+        content: "",
         image: null,
         identifier: null,
         publishedAt: null,
@@ -111,8 +111,31 @@ const WriteButton = () => {
     }
   };
 
+  const validateTitleAndContent = () => {
+    const validations = { title: true, content: true };
+
+    if (blog.title.trim().length)  {
+      validations.title = true;
+    } else {
+      validations.title = false;
+    }
+
+    if (blog.content.trim().length)  {
+      validations.content = true;
+    } else {
+      validations.content = false;
+    }
+
+    return validations;
+  }
+
   const handlePublish = async () => {
-    setIsOpen(true);
+    const validations = validateTitleAndContent();
+
+    setBlog({ ...blog, titleValid: validations.title, contentValid: validations.content });
+    if (validations.title && validations.content) {
+      setIsOpen(true);
+    }
   };
 
   const toggleRelay = (e: any) => {

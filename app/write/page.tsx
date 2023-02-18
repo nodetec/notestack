@@ -6,7 +6,11 @@ import Editor from "../Editor";
 const WritePage = () => {
   return (
     <Fragment>
-      <Editor></Editor>
+      <div style={{ height: "90vh" }}>
+        <div className="h-full">
+          <Editor></Editor>
+        </div>
+      </div>
     </Fragment>
   );
 };
