@@ -66,7 +66,7 @@ export default function Head() {
       />
       <meta name="twitter:url" content="https://blogstack.io/" />
       <meta name="twitter:site" content="@chrisatmachine" />
-      <meta name="twitter:image" content="/images/logos/blogstack-card.png" />
+      <meta name="twitter:image" content="/images/logos/blogstack-twitter-card.png" />
       <meta name="twitter:image:alt" content="blogstack logo" />
       <meta name="twitter:creator" content="@chrisatmachine" />
     </>
