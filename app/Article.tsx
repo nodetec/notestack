@@ -18,6 +18,7 @@ import { markdownImageContent, shortenHash } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
+import { AddressPointer } from "nostr-tools/nip19";
 // import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
@@ -59,7 +60,7 @@ const Article: FC<NoteProps> = ({
   const markdownImagePattern = /!\[.*\]\(.*\)/g;
   content = content.replace(markdownImagePattern, "");
 
-  const { activeRelay } = useContext(RelayContext);
+  const { relayUrl, activeRelay } = useContext(RelayContext);
   // @ts-ignore
   const { profiles, reload } = useContext(ProfilesContext);
 
@@ -111,7 +112,19 @@ const Article: FC<NoteProps> = ({
 
   const routeCachedEvent = () => {
     setCachedEvent(event);
-    router.push("/" + nip19.noteEncode(event.id!));
+
+    const identifier = getTagValues("d", tags);
+
+    // TODO: handle relays
+    const addressPointer: AddressPointer = {
+      identifier: identifier,
+      pubkey: event.pubkey,
+      kind: 30023,
+      relays: [relayUrl],
+    };
+
+    // router.push("/" + nip19.noteEncode(event.id!));
+    router.push("/" + nip19.naddrEncode(addressPointer));
   };
 
   return (

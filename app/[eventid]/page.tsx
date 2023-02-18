@@ -7,13 +7,15 @@ import Blog from "./Blog";
 import { RelayContext } from "../context/relay-provider";
 import { CachedEventContext } from "../context/cached-event-provider";
 import { ProfilesContext } from "../context/profiles-provider";
+// import { AddressPointer } from "nostr-tools/nip19";
 
 export default function NotePage() {
   const pathname = usePathname();
-  let eventId: string = "";
+  let naddrStr: string = "";
   if (pathname && pathname.length > 60) {
-    eventId = pathname.split("/").pop() || "";
-    eventId = nip19.decode(eventId).data.toString();
+    naddrStr = pathname.split("/").pop() || "";
+    // eventId = nip19.decode(eventId).data.toString();
+    // naddr = nip19.decode(naddr).data.toString();
   }
 
   const { relayUrl, activeRelay, subscribe } = useContext(RelayContext);
@@ -27,12 +29,15 @@ export default function NotePage() {
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 
+    const naddr: any = nip19.decode(naddrStr).data;
+
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
     const filter = {
-      ids: [eventId],
-      kinds: [30023],
+      kinds: [naddr.kind],
+      authors: [naddr.pubkey],
+      "#d": naddr.identifier,
     };
 
     let events: Event[] = [];
@@ -53,7 +58,7 @@ export default function NotePage() {
       }
     };
 
-    subscribe([relayUrl], filter, onEvent, onEOSE);
+    subscribe([naddr.relays[0]], filter, onEvent, onEOSE);
   };
 
   // todo cache
