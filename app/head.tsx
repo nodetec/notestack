@@ -47,7 +47,7 @@ export default function Head() {
 
       <meta property="og:title" content="blogstack" />
       <meta property="og:type" content="website" />
-      <meta property="og:image" content="/images/logos/blogstack-card.png?v=0" />
+      <meta property="og:image" content="/images/logos/blogstack-card.png?v=1" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content="blogstack logo" />
@@ -66,7 +66,7 @@ export default function Head() {
       />
       <meta name="twitter:url" content="https://blogstack.io/" />
       <meta name="twitter:site" content="@chrisatmachine" />
-      <meta name="twitter:image" content="/images/logos/blogstack-card.png?v=0" />
+      <meta name="twitter:image" content="/images/logos/blogstack-card.png?v=1" />
       <meta name="twitter:image:alt" content="blogstack logo" />
       <meta name="twitter:creator" content="@chrisatmachine" />
     </>
