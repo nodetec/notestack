@@ -87,12 +87,14 @@ export default function HomePage() {
     };
 
     const onEOSE = () => {
+      // @ts-ignore
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `latest_${relayName}`;
       feed[feedKey] = filteredEvents;
       setExploreTags(Array.from(exploreTagsSet));
       setFeed(feed);
       if (filteredEvents.length > 0) {
+        // @ts-ignore
         setExploreEvents(filteredEvents);
       } else {
         setExploreEvents([]);
@@ -147,12 +149,14 @@ export default function HomePage() {
     };
 
     const onEOSE = () => {
+      // @ts-ignore
       const filteredEvents = NostrService.filterBlogEvents(events);
       const feedKey = `following_${relayName}`;
       feed[feedKey] = filteredEvents;
       setFeed(feed);
 
       if (filteredEvents.length > 0) {
+      // @ts-ignore
         setFollowingEvents(filteredEvents);
       } else {
         setFollowingEvents([]);
@@ -164,11 +168,11 @@ export default function HomePage() {
 
   useEffect(() => {
     getExploreEvents();
-  }, [relayUrl, activeRelay]);
+  }, [activeRelay]);
 
   useEffect(() => {
     getFollowingEvents();
-  }, [relayUrl, activeRelay, followingReload]);
+  }, [activeRelay, followingReload]);
 
   return (
     <Main>

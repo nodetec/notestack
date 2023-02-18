@@ -3,9 +3,11 @@
 import { createContext, useState } from "react";
 
 export const BlogContext = createContext({
-  title: null,
+  title: "",
+  content: "",
+  titleValid: true,
+  contentValid: true,
   summary: null,
-  content: null,
   image: null,
   identifier: null,
   publishedAt: null,
@@ -13,9 +15,11 @@ export const BlogContext = createContext({
 
 export default function BlogProvider({ children }) {
   const [blog, setBlog] = useState({
-    title: null,
+    title: "",
+    content: "",
+    titleValid: true,
+    contentValid: true,
     summary: null,
-    content: null,
     image: null,
     identifier: null,
     publishedAt: null,

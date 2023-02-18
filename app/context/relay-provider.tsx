@@ -22,8 +22,8 @@ interface IRelayContext {
     relays: string[],
     event: any,
     onOk: () => void,
-    onSeen: () => void,
-    onFailed: () => void
+    onSeen: (url: string) => void,
+    onFailed: (url: string) => void
   ) => void;
   subscribe: (
     relays: string[],
@@ -157,8 +157,8 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     relays: string[],
     event: any,
     onOk: () => void,
-    onSeen: () => void,
-    onFailed: () => void
+    onSeen: (url: string) => void,
+    onFailed: (url: string) => void
   ) => {
     console.log("publishing to relays:", relays);
     for (const url of relays) {
@@ -170,18 +170,13 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
 
       pub.on("ok", () => {
         console.log(`${url} has accepted our event`);
-        onOk();
-      });
-
-      pub.on("seen", () => {
-        console.log(`we saw the event on ${url}`);
-        onSeen();
-        // relay.close();
+        onSeen(url);
+        // onOk();
       });
 
       pub.on("failed", (reason: any) => {
         console.log(`failed to publish to ${url}: ${reason}`);
-        onFailed();
+        onFailed(url);
         // relay.close();
       });
     }

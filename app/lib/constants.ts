@@ -47,3 +47,7 @@ export const DUMMY_PROFILE_API = (seed: string) => {
     | "pixel-art-neutral" = "identicon";
   return `https://api.dicebear.com/5.x/${style}/svg?seed=${seed}`;
 };
+
+export const VALIDATION = {
+  required: "Required",
+};

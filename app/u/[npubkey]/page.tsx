@@ -99,11 +99,13 @@ export default function ProfilePage() {
     };
 
     const onEOSE = () => {
+      // @ts-ignore
       const filteredEvents = NostrService.filterBlogEvents(events);
       let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
       feed[feedKey] = filteredEvents;
       setFeed(feed);
       if (filteredEvents.length > 0) {
+        // @ts-ignore
         setEvents(filteredEvents);
       } else {
         setEvents([]);

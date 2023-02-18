@@ -16,6 +16,7 @@ import CreatableSelect from "react-select/creatable";
 import { FeedContext } from "./context/feed-provider";
 import PublishPopupInput from "./PublishPopupInput";
 import PopupCheckbox from "./PopupCheckbox";
+import Popup from "./Popup";
 
 const WriteButton = () => {
   // @ts-ignore
@@ -25,7 +26,6 @@ const WriteButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [summary, setSummary] = useState("");
   const [image, setImage] = useState("");
-  const [toggledRelays, setToggledRelays] = useState<string[]>([]);
   const [tagsList, setTagsList] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -33,7 +33,14 @@ const WriteButton = () => {
   // @ts-ignore
   const { keys } = useContext(KeysContext);
   const publicKey = keys?.publicKey;
-  const { activeRelay, allRelays, publish } = useContext(RelayContext);
+  const { allRelays, relayUrl, publish } = useContext(RelayContext);
+  const [toggledRelays, setToggledRelays] = useState<string[]>([relayUrl]);
+  const [publishFailed, setPublishFailed] = useState<string[]>([]);
+  const [publishSuccess, setPublishSuccess] = useState<string[]>([]);
+  const [publishCount, setPublishCount] = useState<number>(0);
+  const [publishEvent, setPublishEvent] = useState<any>();
+  const [isRelayStatusOpen, setIsRelayStatusOpen] = useState<boolean>(false);
+  const [isPublishing, setIsPublishing] = useState<boolean>(false);
 
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
@@ -46,13 +53,45 @@ const WriteButton = () => {
   // }
 
   useEffect(() => {
-    let mounted = true;
+    return () => {
+      setBlog({
+        title: "",
+        summary: null,
+        content: "",
+        image: null,
+        identifier: null,
+        publishedAt: null,
+      });
+      setIsPublishing(false);
+    };
+  }, []);
 
-    if (mounted) {
-      setSummary(blog.summary);
-      setImage(blog.image);
-    }
+  useEffect(() => {
+    setSummary(blog.summary);
+    setImage(blog.image);
   }, [blog]);
+
+  useEffect(() => {
+    console.log("PUBLISH SUCCESS:", publishSuccess);
+    console.log("PUBLISH FAILED:", publishFailed);
+    console.log("PUBLISH TOGGLED:", toggledRelays);
+    console.log("PUBLISH SUCCESS LENGTH:", publishSuccess.length);
+    console.log("PUBLISH FAILED LENGTH:", publishFailed.length);
+    console.log("PUBLISH TOGGLED LENGTH:", toggledRelays.length);
+    if (publishSuccess.length + publishFailed.length < toggledRelays.length) {
+      if (publishEvent) {
+        publishToRelay(publishEvent);
+      }
+    }
+    console.log("PUBLISH COUNT:", publishCount);
+  }, [publishSuccess, publishFailed]);
+
+  useEffect(() => {
+    if (publishCount >= toggledRelays.length) {
+      setIsOpen(false);
+      setIsRelayStatusOpen(true);
+    }
+  }, [publishCount]);
 
   const setNoOptionsMessage = () => {
     return "No Options";
@@ -72,41 +111,70 @@ const WriteButton = () => {
     }
   };
 
+  const validateTitleAndContent = () => {
+    const validations = { title: true, content: true };
+
+    if (blog.title.trim().length)  {
+      validations.title = true;
+    } else {
+      validations.title = false;
+    }
+
+    if (blog.content.trim().length)  {
+      validations.content = true;
+    } else {
+      validations.content = false;
+    }
+
+    return validations;
+  }
+
   const handlePublish = async () => {
-    setIsOpen(true);
+    const validations = validateTitleAndContent();
+
+    setBlog({ ...blog, titleValid: validations.title, contentValid: validations.content });
+    if (validations.title && validations.content) {
+      setIsOpen(true);
+    }
   };
 
   const toggleRelay = (e: any) => {
     let relays = toggledRelays;
     if (e.target.checked) {
-      relays.push(e.target.value);
+      if (!relays.includes(e.target.value)) {
+        relays.push(e.target.value);
+      }
     } else {
-      relays = relays.filter((relay) => relay !== e.target.value);
+      if (relays.includes(e.target.value)) {
+        relays = relays.filter((relay) => relay !== e.target.value);
+      }
     }
     setToggledRelays(relays);
   };
 
-  const onOk = async () => {};
+  const publishToRelay = (event: any) => {
+    const onOk = async () => {};
 
-  const onSeen = async () => {
-    if (!activeRelay) return;
-    console.log(`PUBLISH EVENT WAS SEEN ON ${activeRelay.url}`);
-    setBlog({
-      title: null,
-      summary: null,
-      content: null,
-      image: null,
-      identifier: null,
-      publishedAt: null,
-    });
-    let relayUrl = activeRelay.url.replace("wss://", "");
-    let feedKey = `latest_${relayUrl}`;
-    feed[feedKey] = null;
-    setFeed(feed);
-    router.push("/u/" + nip19.npubEncode(publicKey));
+    const onSeen = async (url: string) => {
+      let relayUrl = url.replace("wss://", "");
+      let feedKey = `latest_${relayUrl}`;
+      feed[feedKey] = null;
+      let profileFeedKey = `profilefeed_${relayUrl}_${publicKey}`;
+      feed[profileFeedKey] = null;
+      setFeed(feed);
+      if (!publishSuccess.includes(url)) {
+        setPublishSuccess([...publishSuccess, url]);
+      }
+      setPublishCount(publishCount + 1);
+    };
+
+    const onFailed = async (url: string) => {
+      setPublishFailed([...publishFailed, url]);
+      setPublishCount(publishCount + 1);
+    };
+
+    publish([toggledRelays[publishCount]], event, onOk, onSeen, onFailed);
   };
-
-  const onFailed = async () => {};
 
   const submitPublish = async () => {
     const { title, content, indentifier } = blog;
@@ -138,7 +206,19 @@ const WriteButton = () => {
     let event = NostrService.createEvent(30023, publicKey, content, tags);
     event = await NostrService.signEvent(event);
 
-    publish(toggledRelays, event, onOk, onSeen, onFailed);
+    console.log("EVENT:", event);
+
+    console.log("PUBLISHING TO:", toggledRelays);
+
+    setPublishEvent(event);
+
+    setIsPublishing(true);
+    publishToRelay(event);
+  };
+
+  const handleDismiss = () => {
+    setIsRelayStatusOpen(false);
+    router.push("/u/" + nip19.npubEncode(publicKey));
   };
 
   return (
@@ -185,20 +265,24 @@ const WriteButton = () => {
                     label={relay}
                     value={relay}
                     onClick={toggleRelay}
-                    defaultChecked={index == 0 ? true : false}
+                    defaultChecked={relay === relayUrl ? true : false}
                   ></PopupCheckbox>
                 ))}
               </div>
             </div>
             <div className="justify-self-center self-center pt-3">
-              <Button
-                size="sm"
-                color="green"
-                onClick={submitPublish}
-                className="w-[8rem]"
-              >
-                Publish Now
-              </Button>
+              {!isPublishing ? (
+                <Button
+                  size="sm"
+                  color="green"
+                  onClick={submitPublish}
+                  className="w-[8rem]"
+                >
+                  Publish Now
+                </Button>
+              ) : (
+                <p>publishing...</p>
+              )}
             </div>
           </PublishPopup>
         </>
@@ -211,6 +295,39 @@ const WriteButton = () => {
           <span className="text-sm">Write</span>
         </Link>
       )}
+
+      <Popup
+        title="Relay Status"
+        isOpen={isRelayStatusOpen}
+        setIsOpen={setIsRelayStatusOpen}
+      >
+        {publishSuccess.length > 0 && (
+          <>
+            <h4 className="text-lg font-semibold pb-4">
+              Successful published to:
+            </h4>
+            <ul className="flex flex-col gap-2">
+              {publishSuccess.map((relay: string) => {
+                return <li>✅ {relay.replace("wss://", "")}</li>;
+              })}
+            </ul>
+          </>
+        )}
+        {publishFailed.length > 0 && (
+          <>
+            <h4 className="text-lg font-semibold pb-4">Failed to publish:</h4>
+            <ul className="flex flex-col gap-2">
+              {publishFailed.map((relay: string) => {
+                return <li>❌ {relay.replace("wss://", "")}</li>;
+              })}
+            </ul>
+          </>
+        )}
+
+        <Button color="green" variant="ghost" onClick={handleDismiss} size="xs">
+          Dismiss
+        </Button>
+      </Popup>
     </>
   );
 };
