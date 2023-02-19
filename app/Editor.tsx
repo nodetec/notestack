@@ -160,7 +160,7 @@ const Editor = ({}: any) => {
                       onBlur={handleTitleFocus}
                       /* @ts-ignore */
                       titlefocused={titleFocused.toString()}
-                      titlevalid={titleValid.toString()}
+                      titlevalid={titleValid !== undefined ? titleValid.toString() : true}
                     />
                     <span className="px-6 pt-0.5 text-xs text-red hidden">
                       {VALIDATION.required}
@@ -180,7 +180,7 @@ const Editor = ({}: any) => {
                     onBlur={handleContentFocus}
                     /* @ts-ignore */
                     contentfocused={contentFocused.toString()}
-                    contentvalid={contentValid.toString()}
+                    contentvalid={contentValid !== undefined ? contentValid.toString() : true}
                     padding={24}
                     style={{
                       color: "#000",
