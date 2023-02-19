@@ -8,6 +8,9 @@ import { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
+import { CachedEventContext } from "./context/cached-event-provider";
+import { AddressPointer } from "nostr-tools/nip19";
+import { useRouter } from "next/navigation";
 
 interface RecommendedEventsProps {
   events: Event[];
@@ -66,13 +69,16 @@ const Event = ({
   const npub = nip19.npubEncode(pubkey);
   const noteNpub = nip19.noteEncode(noteId);
 
-  const { activeRelay } = useContext(RelayContext);
+  const { tags } = event;
+  const { relayUrl, activeRelay } = useContext(RelayContext);
 
   // @ts-ignore
   const { profiles, reload } = useContext(ProfilesContext);
+  const { setCachedEvent } = useContext(CachedEventContext);
 
   const [picture, setPicture] = useState();
   const [name, setName] = useState();
+  const router = useRouter();
 
   useEffect(() => {
     setName(getName(event));
@@ -108,6 +114,23 @@ const Event = ({
     return shortenHash(npub);
   };
 
+  const routeCachedEvent = () => {
+    setCachedEvent(event);
+
+    const identifier = getTagValues("d", tags);
+
+    // TODO: handle relays
+    const addressPointer: AddressPointer = {
+      identifier: identifier,
+      pubkey: event.pubkey,
+      kind: 30023,
+      relays: [relayUrl],
+    };
+
+    // router.push("/" + nip19.noteEncode(event.id!));
+    router.push("/" + nip19.naddrEncode(addressPointer));
+  };
+
   return (
     <li>
       {pubkey ? (
@@ -122,9 +145,9 @@ const Event = ({
           </span>
         </Link>
       ) : null}
-      <Link
-        href={`/${noteNpub}`}
-        className={`flex gap-2 justify-between ${
+      <div
+        onClick={routeCachedEvent}
+        className={`cursor-pointer flex gap-2 justify-between ${
           pubkey ? "font-bold text-base" : ""
         }`}
       >
@@ -136,7 +159,7 @@ const Event = ({
             alt={thumbnail.groups?.title}
           />
         ) : null}
-      </Link>
+      </div>
     </li>
   );
 };
