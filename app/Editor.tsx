@@ -38,8 +38,8 @@ const Editor = ({}: any) => {
   // }, [pathname]);
 
   useEffect(() => {
-    // setTitle(blog.title);
-    // setContent(blog.content);
+    setTitle(blog.title);
+    setContent(blog.content);
     setIdentifier(blog.identifier);
     return () => {
       setBlog({

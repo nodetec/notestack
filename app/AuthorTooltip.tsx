@@ -52,6 +52,8 @@ const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
       image: image,
       identifier: identifier,
       createdAt: event.created_at,
+      titleValid: true,
+      contentValid: true,
     });
     router.push("/write");
   };
