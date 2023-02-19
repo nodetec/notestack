@@ -218,7 +218,7 @@ const Editor = ({}: any) => {
                 </div>
               </div>
               <div
-                className="h-full md-preview-note-wrapper overflow-auto text-black"
+                className="md:pl-3 h-full md-preview-note-wrapper overflow-auto text-black"
                 dangerouslySetInnerHTML={{ __html: setupMarkdown(content) }}
               ></div>
             </div>
