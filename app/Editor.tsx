@@ -142,11 +142,11 @@ const Editor = ({}: any) => {
           </Fragment>
         </div>
       </div>
-        <div className="flex flex-col md:flex-row h-[calc(100vh-34px)]">
+        <div className="flex flex-col md:flex-row h-full">
 
           {mdPreviewMode !== "preview" && (
-            <div className="flex flex-col w-full overflow-auto" onScroll={scrollView}>
-              <div className="flex flex-col overflow-auto">
+            <div className="h-full flex flex-col w-full overflow-auto" onScroll={scrollView}>
+              <div className="h-full flex flex-col overflow-auto">
                 <div className="mb-3">
                   <div style={{ height: "5.625rem" }}>
                     <textarea
@@ -168,10 +168,10 @@ const Editor = ({}: any) => {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col overflow-auto">
+                <div className="h-full flex flex-col overflow-auto">
                   <CodeEditor
                     required
-                    className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
+                    className="h-full w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
                     value={content ?? ''}
                     language="markdown"
                     placeholder="Enter your note..."
