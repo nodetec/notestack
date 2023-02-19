@@ -142,7 +142,8 @@ const Editor = ({}: any) => {
           </Fragment>
         </div>
       </div>
-        <div className="flex flex-col md:flex-row h-full overflow-auto">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-34px)]">
+
           {mdPreviewMode !== "preview" && (
             <div className="flex flex-col w-full overflow-auto" onScroll={scrollView}>
               <div className="flex flex-col overflow-auto">
