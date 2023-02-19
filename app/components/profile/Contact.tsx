@@ -12,8 +12,14 @@ import { shortenHash } from "../../lib/utils";
 import FollowButton from "./FollowButton";
 
 export default function Contact({ pubkey, isPopup = false }: any) {
-  // console.log("PUBKEY CONTACT", pubkey)
-  let npub = nip19.npubEncode(pubkey);
+  console.log("PUBKEY CONTACT", pubkey);
+  let npub: string = "";
+  try {
+    npub = nip19.npubEncode(pubkey);
+  } catch (e) {
+    console.log("INVALID PUBKEY:", pubkey);
+    return;
+  }
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
