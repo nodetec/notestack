@@ -142,18 +142,17 @@ const Editor = ({}: any) => {
           </Fragment>
         </div>
       </div>
-        <div className="flex flex-col md:flex-row h-[calc(100vh-34px)]">
-
+        <div className="flex flex-col md:flex-row h-[calc(100vh-34px)] overflow-auto">
           {mdPreviewMode !== "preview" && (
-            <div className="flex flex-col w-full overflow-auto" onScroll={scrollView}>
-              <div className="flex flex-col overflow-auto">
+            <div className="flex flex-col w-full h-full overflow-auto" onScroll={scrollView}>
+              <div className="flex flex-col grow min-h-full overflow-auto">
                 <div className="mb-3">
                   <div style={{ height: "5.625rem" }}>
                     <textarea
                       title={title ?? ''}
                       required
                       rows={1}
-                      className="text-black border-none focus:border-none resize-none text-4xl font-medium leading-normal px-6 pt-6 pb-0 w-full focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent outline-none"
+                      className="text-black border-none focus:border-none resize-none text-4xl font-medium leading-normal px-6 pt-6 pb-0 w-full h-full focus:ring-0 focus-visible:ring-0 focus-visible:border-none focus-visible:outline-transparent outline-none"
                       style={{ height: "4.875rem" }}
                       value={title ?? ''}
                       placeholder="Title..."
@@ -168,10 +167,10 @@ const Editor = ({}: any) => {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col overflow-auto">
+                <div className="flex flex-col grow overflow-auto">
                   <CodeEditor
                     required
-                    className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
+                    className="w-full grow focus:border focus:border-blue-500 p-3 outline-none min-h-full"
                     value={content ?? ''}
                     language="markdown"
                     placeholder="Enter your note..."
@@ -197,11 +196,11 @@ const Editor = ({}: any) => {
           {mdPreviewMode !== "off" && (
             <div
               ref={previewRef}
-              className={`flex flex-col w-full overflow-auto prose
+              className={`flex flex-col w-full h-full overflow-auto prose
                 ${mdPreviewMode === "preview"
                   ? "min-w-full"
                   : mdPreviewMode === "split"
-                    ? "border-t-2 md:border-l-2 md:border-t-0 border-secondary"
+                    ? "border-t-2 md:border-l-2 md:border-t-0 border-secondary pl-7"
                     : ""
                 }`}
             >
