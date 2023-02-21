@@ -174,10 +174,13 @@ const Article: FC<NoteProps> = ({
               </h2>
             ) : null}
             <p className="text-gray text-sm leading-6 hidden sm:block">
-              {summary ||
-                (content.length > 250
-                  ? content.slice(0, 250) + "..."
-                  : content)}
+              {summary
+                ? summary.length > 250
+                  ? summary.slice(0, 250) + "..."
+                  : summary
+                : content.length > 250
+                ? content.slice(0, 250) + "..."
+                : content}
             </p>
           </div>
 
