@@ -1,4 +1,4 @@
-const plugin = require('tailwindcss/plugin')
+const plugin = require("tailwindcss/plugin");
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -38,24 +38,36 @@ module.exports = {
       clipPath: {
         "clip-path": "rect(0px, 18px, 14px, -4px)",
       },
+      keyframes: {
+        "slide-down": {
+          from: {
+            opacity: 0,
+            transform: "translateY(1rem)",
+          },
+        },
+      },
+      animation: {
+        "slide-down": "slide-down 0.2s ease-out",
+      },
     },
   },
-  plugins: [require("@tailwindcss/typography"),
-  plugin(function ({ addUtilities }) {
-    addUtilities({
-      '.scrollbar-hide': {
-        /* IE and Edge */
-        '-ms-overflow-style': 'none',
+  plugins: [
+    require("@tailwindcss/typography"),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".scrollbar-hide": {
+          /* IE and Edge */
+          "-ms-overflow-style": "none",
 
-        /* Firefox */
-        'scrollbar-width': 'none',
+          /* Firefox */
+          "scrollbar-width": "none",
 
-        /* Safari and Chrome */
-        '&::-webkit-scrollbar': {
-          display: 'none'
-        }
-      }
-    }
-    )
-  })],
+          /* Safari and Chrome */
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
+        },
+      });
+    }),
+  ],
 };
