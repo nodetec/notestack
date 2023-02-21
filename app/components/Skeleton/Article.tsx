@@ -1,4 +1,4 @@
-import Skeleton from "./page";
+import Skeleton from "./Skeleton";
 
 const Article = () => {
   return (
