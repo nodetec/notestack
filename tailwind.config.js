@@ -45,6 +45,11 @@ module.exports = {
             transform: "translateY(1rem)",
           },
         },
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
       },
       animation: {
         "slide-down": "slide-down 0.2s ease-out",

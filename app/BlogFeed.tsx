@@ -2,6 +2,7 @@
 import type { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
 import Article from "./Article";
+import ArticleSkeleton from "@/app/components/Skeleton/Article";
 import { ProfilesContext } from "./context/profiles-provider";
 import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
@@ -68,9 +69,13 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
 
   return (
     <Posts title="Latest Posts" className="mx-auto mb-16">
-      {events.slice(0, addedPosts).map((event: Event) => {
-        return <Article key={event.id} event={event} profile={profile} />;
-      })}
+      {events.length
+        ? events
+            .slice(0, addedPosts)
+            .map((event: Event) => (
+              <Article key={event.id} event={event} profile={profile} />
+            ))
+        : Array.from(Array(5)).map((_, i) => <ArticleSkeleton key={i} />)}
     </Posts>
   );
 }
