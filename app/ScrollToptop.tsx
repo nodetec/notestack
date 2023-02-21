@@ -20,7 +20,7 @@ const ScrollToTop = () => {
     return () => document.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (!show) return;
+  if (!show) return null;
 
   return (
     <Button
