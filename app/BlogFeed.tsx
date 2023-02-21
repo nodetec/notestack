@@ -8,7 +8,13 @@ import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 import Posts from "./Posts";
 
-export default function BlogFeed({ events, setEvents, filter, profile }: any) {
+export default function BlogFeed({
+  events,
+  setEvents,
+  filter,
+  profile,
+  isEventsLoading,
+}: any) {
   const [addedPosts, setAddedPosts] = useState<number>(10);
   // @ts-ignore
   const { pubkeys, setpubkeys } = useContext(ProfilesContext);
@@ -69,13 +75,17 @@ export default function BlogFeed({ events, setEvents, filter, profile }: any) {
 
   return (
     <Posts title="Latest Posts" className="mx-auto mb-16">
-      {events.length
-        ? events
-            .slice(0, addedPosts)
-            .map((event: Event) => (
-              <Article key={event.id} event={event} profile={profile} />
-            ))
-        : Array.from(Array(5)).map((_, i) => <ArticleSkeleton key={i} />)}
+      {isEventsLoading ? (
+        Array.from(Array(5)).map((_, i) => <ArticleSkeleton key={i} />)
+      ) : events.length ? (
+        events
+          .slice(0, addedPosts)
+          .map((event: Event) => (
+            <Article key={event.id} event={event} profile={profile} />
+          ))
+      ) : (
+        <h1>no events</h1>
+      )}
     </Posts>
   );
 }

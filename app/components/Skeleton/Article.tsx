@@ -14,7 +14,7 @@ const Article = () => {
           <Skeleton className="h-3 rounded-sm" />
           <Skeleton className="h-3 w-1/2 rounded-sm" />
         </div>
-        <Skeleton className="h-16 sm:h-32 w-16 sm:w-32 rounded-md" />
+        <Skeleton className="h-16 sm:h-32 w-32 sm:w-64 rounded-md" />
       </div>
     </div>
   );

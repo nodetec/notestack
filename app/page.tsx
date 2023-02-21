@@ -26,6 +26,7 @@ export default function HomePage() {
     authors: undefined,
     until: undefined,
   };
+  const [isEventsLoading, setIsEventsLoading] = useState(true);
   const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
   const [exploreTags, setExploreTags] = useState<string[]>([]);
   const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
@@ -156,11 +157,13 @@ export default function HomePage() {
       setFeed(feed);
 
       if (filteredEvents.length > 0) {
-      // @ts-ignore
+        // @ts-ignore
         setFollowingEvents(filteredEvents);
       } else {
         setFollowingEvents([]);
       }
+
+      setIsEventsLoading(false);
     };
 
     subscribe([relayUrl], newfollowingFilter, onEvent, onEOSE);
@@ -190,6 +193,7 @@ export default function HomePage() {
             setEvents={setExploreEvents}
             filter={exploreFilter}
             profile={true}
+            isEventsLoading={isEventsLoading}
           />
         )}
         {activeTab === "Following" && (
@@ -198,24 +202,25 @@ export default function HomePage() {
             setEvents={setFollowingEvents}
             filter={followingFilter}
             profile={true}
+            isEventsLoading={isEventsLoading}
           />
         )}
       </Content>
       <Aside>
         {/* <div className="flex flex-col items-stretch justify-between"> */}
-          {exploreEvents.length > 0 && (
-            <RecommendedEvents
-              title="Recommended Blogs"
-              showProfile
-              events={exploreEvents.slice(0, 3)}
-            />
-          )}
-          <Topics
-            title="Recommended Topics"
-            TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
+        {exploreEvents.length > 0 && (
+          <RecommendedEvents
+            title="Recommended Blogs"
+            showProfile
+            events={exploreEvents.slice(0, 3)}
           />
+        )}
+        <Topics
+          title="Recommended Topics"
+          TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
+        />
 
-          <Footer />
+        <Footer />
         {/* </div> */}
       </Aside>
     </Main>
