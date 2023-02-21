@@ -64,7 +64,6 @@ const Article: FC<NoteProps> = ({
   // @ts-ignore
   const { profiles, reload } = useContext(ProfilesContext);
 
-  // @ts-ignore
   const { setCachedEvent } = useContext(CachedEventContext);
 
   const [picture, setPicture] = useState(DUMMY_PROFILE_API(npub));

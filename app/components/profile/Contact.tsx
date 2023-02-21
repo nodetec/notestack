@@ -12,8 +12,15 @@ import { shortenHash } from "../../lib/utils";
 import FollowButton from "./FollowButton";
 
 export default function Contact({ pubkey, isPopup = false }: any) {
-  // console.log("PUBKEY CONTACT", pubkey)
-  let npub = nip19.npubEncode(pubkey);
+  console.log("PUBKEY CONTACT", pubkey);
+  let npub: string = "";
+
+  if (pubkey.startsWith("npub")) {
+    npub = pubkey;
+  } else {
+    console.log("The string does not start with 'npub'");
+    npub = nip19.npubEncode(pubkey);
+  }
 
   const [name, setName] = useState<string>();
   const [about, setAbout] = useState<string>();
@@ -63,7 +70,7 @@ export default function Contact({ pubkey, isPopup = false }: any) {
         <li className="flex items-center justify-between gap-2 mb-5">
           <div className="flex-col">
             <Link
-              href={`/u/${nip19.npubEncode(pubkey)}`}
+              href={`/u/${npub}`}
               className="text-sm flex items-center gap-4 py-1"
             >
               <img
@@ -87,7 +94,7 @@ export default function Contact({ pubkey, isPopup = false }: any) {
       ) : (
         <li className="flex items-center justify-between gap-2">
           <Link
-            href={`/u/${nip19.npubEncode(pubkey)}`}
+            href={`/u/${npub}`}
             className="text-sm flex items-center gap-4 py-1"
           >
             <img
@@ -113,7 +120,7 @@ export default function Contact({ pubkey, isPopup = false }: any) {
           >
             <div className="w-[17rem]">
               <Link
-                href={`/u/${nip19.npubEncode(pubkey)}`}
+                href={`/u/${npub}`}
                 className="text-sm flex items-center gap-2 pb-3"
               >
                 <img

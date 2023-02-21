@@ -47,7 +47,7 @@ export default function Head() {
 
       <meta property="og:title" content="blogstack" />
       <meta property="og:type" content="website" />
-      <meta property="og:image" content="/images/logos/blogstack-card.png?v=0" />
+      <meta property="og:image" content="/images/logos/blogstack-card.png?v=1" />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content="blogstack logo" />
@@ -58,17 +58,17 @@ export default function Head() {
       />
       <meta property="og:site_name" content="blogstack" />
 
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:title" content="blogstack" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="blogstack" />
       <meta
-        property="twitter:description"
+        name="twitter:description"
         content="Decentralized blog posts using Nostr"
       />
-      <meta property="twitter:url" content="https://blogstack.io/" />
-      <meta property="twitter:site" content="@chrisatmachine" />
-      <meta property="twitter:image" content="/images/logos/blogstack-card.png?v=0" />
-      <meta property="twitter:image:alt" content="blogstack logo" />
-      <meta property="twitter:creator" content="@chrisatmachine" />
+      <meta name="twitter:url" content="https://blogstack.io/" />
+      <meta name="twitter:site" content="@chrisatmachine" />
+      <meta name="twitter:image" content="/images/logos/blogstack-twitter-card.png" />
+      <meta name="twitter:image:alt" content="blogstack logo" />
+      <meta name="twitter:creator" content="@chrisatmachine" />
     </>
   );
 }

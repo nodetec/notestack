@@ -38,8 +38,8 @@ const Editor = ({}: any) => {
   // }, [pathname]);
 
   useEffect(() => {
-    // setTitle(blog.title);
-    // setContent(blog.content);
+    setTitle(blog.title);
+    setContent(blog.content);
     setIdentifier(blog.identifier);
     return () => {
       setBlog({
@@ -142,10 +142,11 @@ const Editor = ({}: any) => {
           </Fragment>
         </div>
       </div>
-        <div className="flex flex-col md:flex-row h-full overflow-auto">
+        <div className="flex flex-col md:flex-row h-full">
+
           {mdPreviewMode !== "preview" && (
-            <div className="flex flex-col w-full overflow-auto" onScroll={scrollView}>
-              <div className="flex flex-col overflow-auto">
+            <div className="h-full flex flex-col w-full overflow-auto" onScroll={scrollView}>
+              <div className="h-full flex flex-col overflow-auto">
                 <div className="mb-3">
                   <div style={{ height: "5.625rem" }}>
                     <textarea
@@ -160,17 +161,17 @@ const Editor = ({}: any) => {
                       onBlur={handleTitleFocus}
                       /* @ts-ignore */
                       titlefocused={titleFocused.toString()}
-                      titlevalid={titleValid.toString()}
+                      titlevalid={titleValid !== undefined ? titleValid.toString() : true}
                     />
                     <span className="px-6 pt-0.5 text-xs text-red hidden">
                       {VALIDATION.required}
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col overflow-auto">
+                <div className="h-full flex flex-col overflow-auto">
                   <CodeEditor
                     required
-                    className="w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
+                    className="h-full w-full focus:border focus:border-blue-500 p-3 outline-none min-h-full"
                     value={content ?? ''}
                     language="markdown"
                     placeholder="Enter your note..."
@@ -180,7 +181,7 @@ const Editor = ({}: any) => {
                     onBlur={handleContentFocus}
                     /* @ts-ignore */
                     contentfocused={contentFocused.toString()}
-                    contentvalid={contentValid.toString()}
+                    contentvalid={contentValid !== undefined ? contentValid.toString() : true}
                     padding={24}
                     style={{
                       color: "#000",
@@ -217,7 +218,7 @@ const Editor = ({}: any) => {
                 </div>
               </div>
               <div
-                className="h-full md-preview-note-wrapper overflow-auto text-black"
+                className="md:pl-3 h-full md-preview-note-wrapper overflow-auto text-black"
                 dangerouslySetInnerHTML={{ __html: setupMarkdown(content) }}
               ></div>
             </div>
