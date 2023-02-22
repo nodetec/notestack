@@ -1,11 +1,9 @@
 import { DetailedHTMLProps, FC, HTMLAttributes } from "react";
 
 interface SkeletonProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-  delay?: number;
-}
+  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {}
 
-const Skeleton: FC<SkeletonProps> = ({ children, className, delay = 0 }) => {
+const Skeleton: FC<SkeletonProps> = ({ children, className, ...props }) => {
   return (
     <div
       className={`
@@ -21,7 +19,7 @@ const Skeleton: FC<SkeletonProps> = ({ children, className, delay = 0 }) => {
       overflow-hidden
       before:border-t before:border-white
       ${className}`}
-      style={{ animationDelay: `${delay}s` }}
+      {...props}
     >
       {children}
     </div>

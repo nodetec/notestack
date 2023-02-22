@@ -11,6 +11,7 @@ import { ProfilesContext } from "./context/profiles-provider";
 import { CachedEventContext } from "./context/cached-event-provider";
 import { AddressPointer } from "nostr-tools/nip19";
 import { useRouter } from "next/navigation";
+import RecommendedEventsSkeleton from "./components/Skeleton/RecommendedEvents";
 
 interface RecommendedEventsProps {
   events: Event[];
@@ -18,11 +19,13 @@ interface RecommendedEventsProps {
   showProfile?: boolean;
   showThumbnail?: boolean;
   className?: string;
+  isEventsLoading?: boolean;
 }
 
 export default function RecommendedEvents({
   events,
   title,
+  isEventsLoading = false,
   showProfile = false,
   showThumbnail = false,
   className = "",
@@ -34,20 +37,24 @@ export default function RecommendedEvents({
   return (
     <AsideSection title={title} className={className}>
       <ul className="flex flex-col gap-2">
-        {events.map((event: any) => (
-          <Event
-            key={event.id}
-            noteId={event.id!}
-            event={event}
-            pubkey={showProfile ? event.pubkey : undefined}
-            title={getTagValues("title", event.tags)}
-            thumbnail={
-              showThumbnail
-                ? markdownImageContent(event.content) || undefined
-                : undefined
-            }
-          />
-        ))}
+        {isEventsLoading
+          ? Array.from(Array(3)).map((_, i) => (
+              <RecommendedEventsSkeleton key={i} />
+            ))
+          : events.map((event: any) => (
+              <Event
+                key={event.id}
+                noteId={event.id!}
+                event={event}
+                pubkey={showProfile ? event.pubkey : undefined}
+                title={getTagValues("title", event.tags)}
+                thumbnail={
+                  showThumbnail
+                    ? markdownImageContent(event.content) || undefined
+                    : undefined
+                }
+              />
+            ))}
       </ul>
     </AsideSection>
   );
