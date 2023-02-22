@@ -12,7 +12,6 @@ export const getTagValues = (name: string, tags: string[][]) => {
   return item;
 };
 
-
 export const uniqBy = <T>(arr: T[], key: keyof T): T[] => {
   return Object.values(
     // @ts-ignore
@@ -21,20 +20,27 @@ export const uniqBy = <T>(arr: T[], key: keyof T): T[] => {
         ...map,
         [`${item[key]}`]: item,
       }),
-      {},
-    ),
-  )
-}
+      {}
+    )
+  );
+};
 
 export const uniqValues = (value: string, index: number, self: string[]) => {
-  return self.indexOf(value) === index
-}
+  return self.indexOf(value) === index;
+};
 
 export const dateToUnix = (_date?: Date) => {
-  const date = _date || new Date()
+  const date = _date || new Date();
 
-  return Math.floor(date.getTime() / 1000)
-}
+  return Math.floor(date.getTime() / 1000);
+};
 
 export const markdownImageContent = (content: string) =>
   /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<title>\".*\")?\)/g.exec(content);
+
+export const calculateEstimatedReadingTime = (text: string) => {
+  const wpm = 225;
+  const words = text.trim().split(/\s+/).length;
+  const estimatedReadingTime = Math.ceil(words / wpm);
+  return estimatedReadingTime;
+};

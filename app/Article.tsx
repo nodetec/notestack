@@ -3,6 +3,7 @@ import { Event, nip19 } from "nostr-tools";
 import {
   DetailedHTMLProps,
   FC,
+  Fragment,
   LiHTMLAttributes,
   ReactNode,
   useContext,
@@ -14,7 +15,11 @@ import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 import DeleteBlog from "./DeleteBlog";
 import { DUMMY_PROFILE_API } from "./lib/constants";
-import { markdownImageContent, shortenHash } from "./lib/utils";
+import {
+  calculateEstimatedReadingTime,
+  markdownImageContent,
+  shortenHash,
+} from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
@@ -183,7 +188,6 @@ const Article: FC<NoteProps> = ({
                 : content}
             </p>
           </div>
-
           {image ? (
             <div>
               <img
@@ -203,19 +207,25 @@ const Article: FC<NoteProps> = ({
           ) : null}
         </div>
       </div>
-      <div className="flex flex-row gap-8 items-center mt-4">
-        <ul className="flex items-center gap-2 text-sm flex-wrap">
-          {tValues.map((topic) => (
-            <li key={topic}>
-              <Link
-                className="rounded-full inline-block py-2 px-3 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
-                href={`/tag/${topic.replace(" ", "-")}`}
-              >
-                {topic}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <div className="flex flex-row gap-2 items-center mt-6 text-xs ">
+        {tValues.length > 0 ? (
+          <Fragment>
+            <ul className="flex items-center gap-2 flex-wrap">
+              <li>
+                <Link
+                  className="rounded-full inline-block py-1 px-2 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
+                  href={`/tag/${tValues[0].replace(" ", "-")}`}
+                >
+                  {tValues[0]}
+                </Link>
+              </li>
+            </ul>
+            <span>·</span>
+          </Fragment>
+        ) : null}
+        <span className="text-gray-hover font-normal">
+          {calculateEstimatedReadingTime(content)} min read
+        </span>
         <DeleteBlog event={event} />
       </div>
     </article>
