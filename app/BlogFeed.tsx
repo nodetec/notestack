@@ -7,6 +7,7 @@ import { ProfilesContext } from "./context/profiles-provider";
 import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 import Posts from "./Posts";
+import NoBlogs from "./NoBlogs";
 
 export default function BlogFeed({
   events,
@@ -84,7 +85,7 @@ export default function BlogFeed({
             <Article key={event.id} event={event} profile={profile} />
           ))
       ) : (
-        <h1>no events</h1>
+        <NoBlogs />
       )}
     </Posts>
   );

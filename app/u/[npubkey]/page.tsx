@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
   const [events, setEvents] = useState<Event[]>([]);
+  const [isEventsLoading, setIsEventsLoading] = useState(true);
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
   // @ts-ignore
@@ -77,6 +78,7 @@ export default function ProfilePage() {
   }, []);
 
   const getProfileEvents = async () => {
+    setIsEventsLoading(true);
     resetProfile();
     let pubkeysSet = new Set<string>();
 
@@ -86,6 +88,7 @@ export default function ProfilePage() {
 
     if (feed[feedKey]) {
       setEvents(feed[feedKey]);
+      setIsEventsLoading(false);
       return;
     }
 
@@ -110,6 +113,7 @@ export default function ProfilePage() {
       } else {
         setEvents([]);
       }
+      setIsEventsLoading(false);
       if (pubkeysSet.size > 0) {
         // setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
         addProfiles(Array.from(pubkeysSet));
@@ -180,6 +184,7 @@ export default function ProfilePage() {
             setEvents={setEvents}
             filter={filter}
             profile={false}
+            isEventsLoading={isEventsLoading}
           />
         ) : activeTab === "About" ? (
           <About about={profile.about} />
