@@ -57,6 +57,7 @@ export default function HomePage() {
   }
 
   const getExploreEvents = async () => {
+    setIsEventsLoading(true);
     let pubkeysSet = new Set<string>();
     let exploreTagsSet = new Set<string>();
 
@@ -72,6 +73,7 @@ export default function HomePage() {
         tValues.forEach((t) => exploreTagsSet.add(t));
       });
       setExploreTags(Array.from(exploreTagsSet).slice(0, 7));
+      setIsEventsLoading(false);
 
       return;
     }
@@ -109,6 +111,7 @@ export default function HomePage() {
   };
 
   const getFollowingEvents = async () => {
+    setIsEventsLoading(true);
     setFollowingEvents([]);
     let relayName = relayUrl.replace("wss://", "");
 
@@ -138,6 +141,7 @@ export default function HomePage() {
     let followingFeedKey = `following_${relayName}`;
     if (feed[followingFeedKey]) {
       setFollowingEvents(feed[followingFeedKey]);
+      setIsEventsLoading(false);
       return;
     }
 
