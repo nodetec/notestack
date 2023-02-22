@@ -15,7 +15,7 @@ const Topics: React.FC<TopicsProps> = ({
   isEventsLoading = false,
 }) => (
   <AsideSection title={title}>
-    <ul className="flex items-center gap-2 text-sm flex-wrap">
+    <ul className="flex items-center gap-2 text-sm flex-wrap pt-2">
       {isEventsLoading
         ? Array.from(Array(7)).map((_, i) => (
             <Skeleton
