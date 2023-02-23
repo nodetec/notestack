@@ -1,14 +1,9 @@
 "use client";
+import MarkdownEditor from "@uiw/react-markdown-editor";
 import "@uiw/react-markdown-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
-import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
 import { BlogContext } from "../context/blog-provider";
-
-const MarkdownEditor = dynamic(
-  () => import("@uiw/react-markdown-editor").then((mod) => mod.default),
-  { ssr: false }
-);
 
 const WritePage = () => {
   // @ts-ignore
