@@ -81,11 +81,11 @@ export default function ProfilePage() {
         )}
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-row items-center gap-2">
-            <img
-              className="rounded-full w-11 h-11 object-cover md:hidden"
-              src={picture}
-              alt={""}
-            />
+            {/* <img */}
+            {/*   className="rounded-full w-11 h-11 object-cover md:hidden" */}
+            {/*   src={picture} */}
+            {/*   alt={""} */}
+            {/* /> */}
             <h1 className="md:text-5xl font-medium my-8 md:my-12">
               {profile.name}
             </h1>
