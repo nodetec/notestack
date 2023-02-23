@@ -36,9 +36,6 @@ export default function ProfilePage() {
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
 
-  if (pathname && pathname.length < 60 && pathname !== null) {
-    return <p>Profile not found</p>;
-  }
 
   const npub = pathname!.split("/").pop() || "";
   // const [name, setName] = useState();
@@ -64,7 +61,7 @@ export default function ProfilePage() {
   try {
     profilePubkey = nip19.decode(npub).data.toString();
   } catch (e) {
-    return <p>Profile not found</p>;
+    // return <p>Profile not found</p>;
   }
   const filter = {
     kinds: [30023],
@@ -151,6 +148,10 @@ export default function ProfilePage() {
     getProfile();
   }, [reload, relayUrl]);
 
+  if (pathname && pathname.length < 60 && pathname !== null) {
+    return <p>Profile not found</p>;
+  }
+
   return (
     <Main>
       <Content>
@@ -198,3 +199,4 @@ export default function ProfilePage() {
     </Main>
   );
 }
+
