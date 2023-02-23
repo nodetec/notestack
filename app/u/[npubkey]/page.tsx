@@ -37,6 +37,10 @@ export default function ProfilePage() {
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
 
+  if (pathname && pathname.length < 60 && pathname !== null) {
+    return <p>Profile not found</p>;
+  }
+
   const npub = pathname!.split("/").pop() || "";
   // const [name, setName] = useState();
   // const [about, setAbout] = useState();
@@ -92,23 +96,23 @@ export default function ProfilePage() {
         </div>
         <FollowedRelays />
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
-        {activeTab === "Home" ? (
-          <BlogFeed
-            events={events}
-            setEvents={setEvents}
-            filter={filter}
-            profile={false}
-            isEventsLoading={isEventsLoading}
-            profilePublicKey={profilePubkey}
-          />
-        ) : activeTab === "About" ? (
-          <About about={profile.about} />
-        ) : null}
+      {/*   {activeTab === "Home" ? ( */}
+      {/*     <BlogFeed */}
+      {/*       events={events} */}
+      {/*       setEvents={setEvents} */}
+      {/*       filter={filter} */}
+      {/*       profile={false} */}
+      {/*       isEventsLoading={isEventsLoading} */}
+      {/*       profilePublicKey={profilePubkey} */}
+      {/*     /> */}
+      {/*   ) : activeTab === "About" ? ( */}
+      {/*     <About about={profile.about} /> */}
+      {/*   ) : null} */}
       </Content>
-      <Aside>
-        <UserCard npub={npub} profile={profile} />
-        <Following npub={npub} />
-      </Aside>
+      {/* <Aside> */}
+      {/*   <UserCard npub={npub} profile={profile} /> */}
+      {/*   <Following npub={npub} /> */}
+      {/* </Aside> */}
     </Main>
   );
 }
