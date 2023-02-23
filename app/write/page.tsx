@@ -1,10 +1,7 @@
 "use client";
 import MdEditor from "react-markdown-editor-lite";
-// import "@uiw/react-markdown-editor/markdown-editor.css";
-// import "@uiw/react-markdown-preview/markdown.css";
 import { useContext, useEffect } from "react";
 import { BlogContext } from "../context/blog-provider";
-// import MarkdownIt from 'markdown-it';
 import "react-markdown-editor-lite/lib/index.css";
 
 const WritePage = () => {
@@ -41,11 +38,11 @@ const WritePage = () => {
   };
 
   return (
-    <div className="mt-8 shadow-editor rounded-md overflow-hidden">
+    <div className="mt-8 rounded-md border border-[#e0e0e0] overflow-hidden">
       <input
         className="w-full p-4 text-lg font-bold focus:outline-none"
         placeholder="Title..."
-        style={{ backgroundColor: "#f6f8fa" }}
+        style={{ backgroundColor: "#f5f5f5" }}
         value={blog.title}
         onChange={handleTitleChange}
       />

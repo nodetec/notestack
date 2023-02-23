@@ -71,6 +71,7 @@ img[src=""] {
   background-color: transparent;
 }
 
-.md-editor {
-  box-shadow: none !important;
+.rc-md-editor,
+.rc-md-editor .editor-container > .section:nth-last-of-type {
+  border: none !important;
 }
