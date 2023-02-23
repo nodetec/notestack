@@ -148,9 +148,9 @@ export default function ProfilePage() {
     getProfile();
   }, [reload, relayUrl]);
 
-  if (pathname && pathname.length < 60 && pathname !== null) {
-    return <p>Profile not found</p>;
-  }
+  // if (pathname && pathname.length < 60 && pathname !== null) {
+  //   return <p>Profile not found</p>;
+  // }
 
   return (
     <div>hi</div>
