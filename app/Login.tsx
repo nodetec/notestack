@@ -1,6 +1,5 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import { BsLightningChargeFill } from "react-icons/bs";
 import Popup from "./Popup";
 
 import Button from "./Button";
@@ -90,11 +89,7 @@ export default function Login() {
       )}
 
       <Popup title="Generate Keys" isOpen={isOpen} setIsOpen={setIsOpen}>
-        <Button
-          className="w-full"
-          onClick={loginHandler}
-          size="sm"
-        >
+        <Button className="w-full" onClick={loginHandler} size="sm">
           {isLightningConnected ? "connected" : "Login with Extension"}
         </Button>
       </Popup>

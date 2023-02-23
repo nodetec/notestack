@@ -1,8 +1,10 @@
 import Link, { LinkProps } from "next/link";
-import { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
+import { DetailedHTMLProps, Fragment, HTMLAttributes, useContext } from "react";
 import { IconType } from "react-icons";
 import { HiOutlineUser, HiOutlineBookmark } from "react-icons/hi";
 import { nip19 } from "nostr-tools";
+import { shortenHash } from "./lib/utils";
+import { UserContext } from "./context/user-provider";
 
 interface ProfileMenuProps {
   pubkey: string;
@@ -11,6 +13,15 @@ interface ProfileMenuProps {
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
   const npub = nip19.npubEncode(pubkey);
+  // @ts-ignore
+  const { setUser } = useContext(UserContext);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("shouldReconnect");
+    setUser({});
+    window.location.reload();
+  };
+
   return (
     <Fragment>
       <div className="flex flex-col rounded-md bg-white shadow-profile-menu border border-light-gray absolute z-40 right-0 -bottom-4 translate-y-full text-sm min-w-max">
@@ -34,6 +45,15 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
             label="Settings"
             href="/settings"
           />
+        </GroupMenu>
+        <GroupMenu>
+          <button
+            className="px-6 py-2 cursor-pointer text-gray group flex flex-col gap-2 items-start"
+            onClick={handleSignOut}
+          >
+            <span className="group-hover:text-gray-hover">Sign out</span>
+            <span>{shortenHash(npub, 16)}</span>
+          </button>
         </GroupMenu>
       </div>
       <div className="fixed inset-0 z-30" onClick={() => toggleMenu(false)} />
