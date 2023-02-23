@@ -14,20 +14,20 @@ const WritePage = () => {
     return result;
   }
 
-  useEffect(() => {
-    return () => {
-      setBlog({
-        title: "",
-        summary: null,
-        content: "",
-        image: null,
-        identifier: null,
-        publishedAt: null,
-        titleValid: true,
-        contentValid: true,
-      });
-    };
-  }, [setBlog]);
+  // useEffect(() => {
+  //   return () => {
+  //     setBlog({
+  //       title: "",
+  //       summary: null,
+  //       content: "",
+  //       image: null,
+  //       identifier: null,
+  //       publishedAt: null,
+  //       titleValid: true,
+  //       contentValid: true,
+  //     });
+  //   };
+  // }, [setBlog]);
 
   const handleTitleChange = (evn: any) => {
     setBlog({ ...blog, title: evn.target.value, titleValid: true });
