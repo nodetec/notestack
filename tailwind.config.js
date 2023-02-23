@@ -31,6 +31,8 @@ module.exports = {
       boxShadow: {
         "profile-menu": "rgb(230, 230, 230) 0px 1px 4px",
         popup: "rgba(0, 0, 0, 0.15) 0px 2px 10px",
+        editor:
+          "0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgb(16 22 26 / 0%), 0 1px 1px rgb(16 22 26 / 20%)",
       },
       maxHeight: {
         192: "48rem",

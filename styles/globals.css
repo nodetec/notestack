@@ -70,3 +70,7 @@ img[src=""] {
   width: 0;
   background-color: transparent;
 }
+
+.md-editor {
+  box-shadow: none !important;
+}
