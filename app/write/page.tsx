@@ -38,22 +38,13 @@ const WritePage = () => {
   };
 
   return (
-    <div className="mt-8 rounded-md border border-[#e0e0e0] overflow-hidden">
-      <input
-        className="w-full p-4 text-lg font-bold focus:outline-none"
-        placeholder="Title..."
-        style={{ backgroundColor: "#f5f5f5" }}
-        value={blog.title}
-        onChange={handleTitleChange}
-      />
-      <MdEditor
-        style={{ border: "none" }}
-        className="h-[75vh]"
-        value={blog.content}
-        renderHTML={(text) => setupMarkdown(text)}
-        onChange={handleContentChange}
-      />
-    </div>
+    <input
+      className="w-full p-4 text-lg font-bold focus:outline-none"
+      placeholder="Title..."
+      style={{ backgroundColor: "#f5f5f5" }}
+      value={blog.title}
+      onChange={handleTitleChange}
+    />
   );
 };
 
