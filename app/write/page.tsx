@@ -2,7 +2,7 @@
 import "@uiw/react-markdown-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { BlogContext } from "../context/blog-provider";
 
 const MarkdownEditor = dynamic(
@@ -46,11 +46,13 @@ const WritePage = () => {
         value={blog.title}
         onChange={handleTitleChange}
       />
-      <MarkdownEditor
-        className="h-[75vh]"
-        value={blog.content}
-        onChange={handleContentChange}
-      />
+      <div className="h-[75vh]">
+        <MarkdownEditor
+          className="h-full"
+          value={blog.content}
+          onChange={handleContentChange}
+        />
+      </div>
     </div>
   );
 };
