@@ -7,11 +7,11 @@ import { NotifyContext } from "./context/notify-provider";
 import { RelayContext } from "./context/relay-provider";
 import { NostrService } from "./lib/nostr";
 
-interface DeleteBlogProps {
+interface BookmarkEventProps {
   event: Event;
 }
 
-const DeleteBlog = ({ event }: DeleteBlogProps) => {
+const BookmarkEvent = ({ event }: BookmarkEventProps) => {
   const { publicKey: loggedInUserPublicKey } = useContext(KeysContext);
   const { relayUrl, publish } = useContext(RelayContext);
   const { setNotifyMessage } = useContext(NotifyContext);
@@ -44,4 +44,4 @@ const DeleteBlog = ({ event }: DeleteBlogProps) => {
   return <Button onClick={handleBookmark}>bookmark</Button>;
 };
 
-export default DeleteBlog;
+export default BookmarkEvent;
