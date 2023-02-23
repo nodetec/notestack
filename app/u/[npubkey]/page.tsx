@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   let profilePubkey = "";
   // try {
-  //   profilePubkey = nip19.decode(npub).data.toString();
+    profilePubkey = nip19.decode(npub).data.toString();
   // } catch (e) {
   //   return <p>Profile not found</p>;
   // }
