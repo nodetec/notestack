@@ -37,10 +37,6 @@ export default function ProfilePage() {
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
 
-  if (pathname && pathname.length < 60 && pathname !== null) {
-    return <p>Profile not found</p>;
-  }
-
   const npub = pathname!.split("/").pop() || "";
   // const [name, setName] = useState();
   // const [about, setAbout] = useState();
