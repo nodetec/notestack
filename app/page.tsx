@@ -57,6 +57,7 @@ export default function HomePage() {
   }
 
   const getExploreEvents = async () => {
+    setIsEventsLoading(true);
     let pubkeysSet = new Set<string>();
     let exploreTagsSet = new Set<string>();
 
@@ -111,6 +112,7 @@ export default function HomePage() {
   };
 
   const getFollowingEvents = async () => {
+    setIsEventsLoading(true);
     setFollowingEvents([]);
     let relayName = relayUrl.replace("wss://", "");
 
