@@ -1,13 +1,21 @@
 "use client";
-import MarkdownEditor from "@uiw/react-markdown-editor";
-import "@uiw/react-markdown-editor/markdown-editor.css";
-import "@uiw/react-markdown-preview/markdown.css";
+import MdEditor from "react-markdown-editor-lite";
+// import "@uiw/react-markdown-editor/markdown-editor.css";
+// import "@uiw/react-markdown-preview/markdown.css";
 import { useContext, useEffect } from "react";
 import { BlogContext } from "../context/blog-provider";
+// import MarkdownIt from 'markdown-it';
+import "react-markdown-editor-lite/lib/index.css";
 
 const WritePage = () => {
   // @ts-ignore
   const { blog, setBlog } = useContext(BlogContext);
+
+  function setupMarkdown(content: string) {
+    var md = require("markdown-it")();
+    var result = md.render(content || "");
+    return result;
+  }
 
   useEffect(() => {
     return () => {
@@ -41,10 +49,11 @@ const WritePage = () => {
         value={blog.title}
         onChange={handleTitleChange}
       />
-      <div className="h-[75vh]">
-        <MarkdownEditor
-          className="h-full"
+      <div>
+        <MdEditor
+          className="h-[75vh]"
           value={blog.content}
+          renderHTML={(text) => setupMarkdown(text)}
           onChange={handleContentChange}
         />
       </div>
