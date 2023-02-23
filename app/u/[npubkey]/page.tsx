@@ -61,7 +61,7 @@ export default function ProfilePage() {
   try {
     profilePubkey = nip19.decode(npub).data.toString();
   } catch (e) {
-  //   return <p>Profile not found</p>;
+    // return <p>Profile not found</p>;
   }
   const filter = {
     kinds: [30023],
@@ -153,7 +153,50 @@ export default function ProfilePage() {
   }
 
   return (
-    <div>hi</div>
+    <Main>
+      <Content>
+        {profile.banner && profile.banner !== "" && (
+          <img
+            className="rounded-md w-full h-full object-cover my-4"
+            src={profile.banner}
+            alt={""}
+          />
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-row items-center gap-2">
+            <img
+              className="rounded-full w-11 h-11 object-cover md:hidden"
+              src={picture}
+              alt={""}
+            />
+            <h1 className="md:text-5xl font-medium my-8 md:my-12">
+              {profile.name}
+            </h1>
+          </div>
+          <div className="hidden md:flex">
+            <AuthorTooltip npub={npub} />
+          </div>
+        </div>
+        <FollowedRelays />
+        <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
+        {activeTab === "Home" ? (
+          <BlogFeed
+            events={events}
+            setEvents={setEvents}
+            filter={filter}
+            profile={false}
+            isEventsLoading={isEventsLoading}
+            profilePublicKey={profilePubkey}
+          />
+        ) : activeTab === "About" ? (
+          <About about={profile.about} />
+        ) : null}
+      </Content>
+      <Aside>
+        <UserCard npub={npub} profile={profile} />
+        <Following npub={npub} />
+      </Aside>
+    </Main>
   );
 }
 
