@@ -36,47 +36,6 @@ export default function ProfilePage() {
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
 
-  if (pathname && pathname.length < 60 && pathname !== null) {
-    return <p>Profile not found</p>;
-  }
-
-  const npub = pathname!.split("/").pop() || "";
-  // const [name, setName] = useState();
-  // const [about, setAbout] = useState();
-  const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
-  const [profile, setProfile] = useState({
-    name: "",
-    about: "",
-    picture: "",
-    banner: "",
-  });
-
-  const resetProfile = () => {
-    setProfile({
-      name: "",
-      about: "",
-      picture: "",
-      banner: "",
-    });
-  };
-
-  let profilePubkey = "";
-  try {
-    profilePubkey = nip19.decode(npub).data.toString();
-  } catch (e) {
-    // return <p>Profile not found</p>;
-  }
-  const filter = {
-    kinds: [30023],
-    authors: [profilePubkey],
-    limit: 50,
-    until: undefined,
-  };
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   // const getProfileEvents = async () => {
   //   setIsEventsLoading(true);
   //   resetProfile();
@@ -147,54 +106,13 @@ export default function ProfilePage() {
   //   getProfileEvents();
   // }, [relayUrl]);
 
-  useEffect(() => {
-    getProfile();
-  }, [reload, relayUrl]);
+  // useEffect(() => {
+  //   getProfile();
+  // }, [reload, relayUrl]);
 
   return (
     <Main>
-      <Content>
-        {profile.banner && profile.banner !== "" && (
-          <img
-            className="rounded-md w-full h-full object-cover my-4"
-            src={profile.banner}
-            alt={""}
-          />
-        )}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <img
-              className="rounded-full w-11 h-11 object-cover md:hidden"
-              src={picture}
-              alt={""}
-            />
-            <h1 className="md:text-5xl font-medium my-8 md:my-12">
-              {profile.name}
-            </h1>
-          </div>
-          <div className="hidden md:flex">
-            <AuthorTooltip npub={npub} />
-          </div>
-        </div>
-        <FollowedRelays />
-        <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
-        {activeTab === "Home" ? (
-          <BlogFeed
-            events={events}
-            setEvents={setEvents}
-            filter={filter}
-            profile={false}
-            isEventsLoading={isEventsLoading}
-            profilePublicKey={profilePubkey}
-          />
-        ) : activeTab === "About" ? (
-          <About about={profile.about} />
-        ) : null}
-      </Content>
-      <Aside>
-        <UserCard npub={npub} profile={profile} />
-        <Following npub={npub} />
-      </Aside>
+      <div>hi</div>
     </Main>
   );
 }
