@@ -11,7 +11,7 @@ interface BookmarkEventProps {
   event: Event;
 }
 
-const BookmarkEvent = ({ event }: BookmarkEventProps) => {
+const BookmarkBlog = ({ event }: BookmarkEventProps) => {
   const { publicKey: loggedInUserPublicKey } = useContext(KeysContext);
   const { relayUrl, publish } = useContext(RelayContext);
   const { setNotifyMessage } = useContext(NotifyContext);
@@ -44,4 +44,4 @@ const BookmarkEvent = ({ event }: BookmarkEventProps) => {
   return <Button onClick={handleBookmark}>bookmark</Button>;
 };
 
-export default BookmarkEvent;
+export default BookmarkBlog;
