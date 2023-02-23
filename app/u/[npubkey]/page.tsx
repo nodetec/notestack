@@ -77,51 +77,51 @@ export default function ProfilePage() {
     window.scrollTo(0, 0);
   }, []);
 
-  const getProfileEvents = async () => {
-    setIsEventsLoading(true);
-    resetProfile();
-    let pubkeysSet = new Set<string>();
+  // const getProfileEvents = async () => {
+  //   setIsEventsLoading(true);
+  //   resetProfile();
+  //   let pubkeysSet = new Set<string>();
 
-    setEvents([]);
-    let relayName = relayUrl.replace("wss://", "");
-    let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
+  //   setEvents([]);
+  //   let relayName = relayUrl.replace("wss://", "");
+  //   let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
 
-    if (feed[feedKey]) {
-      setEvents(feed[feedKey]);
-      setIsEventsLoading(false);
-      return;
-    }
+  //   if (feed[feedKey]) {
+  //     setEvents(feed[feedKey]);
+  //     setIsEventsLoading(false);
+  //     return;
+  //   }
 
-    let events: Event[] = [];
+  //   let events: Event[] = [];
 
-    const onEvent = (event: any) => {
-      // @ts-ignore
-      event.relayUrl = relayName;
-      events.push(event);
-      pubkeysSet.add(event.pubkey);
-    };
+  //   const onEvent = (event: any) => {
+  //     // @ts-ignore
+  //     event.relayUrl = relayName;
+  //     events.push(event);
+  //     pubkeysSet.add(event.pubkey);
+  //   };
 
-    const onEOSE = () => {
-      // @ts-ignore
-      const filteredEvents = NostrService.filterBlogEvents(events);
-      let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
-      feed[feedKey] = filteredEvents;
-      setFeed(feed);
-      if (filteredEvents.length > 0) {
-        // @ts-ignore
-        setEvents(filteredEvents);
-      } else {
-        setEvents([]);
-      }
-      setIsEventsLoading(false);
-      if (pubkeysSet.size > 0) {
-        // setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
-        addProfiles(Array.from(pubkeysSet));
-      }
-    };
+  //   const onEOSE = () => {
+  //     // @ts-ignore
+  //     const filteredEvents = NostrService.filterBlogEvents(events);
+  //     let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
+  //     feed[feedKey] = filteredEvents;
+  //     setFeed(feed);
+  //     if (filteredEvents.length > 0) {
+  //       // @ts-ignore
+  //       setEvents(filteredEvents);
+  //     } else {
+  //       setEvents([]);
+  //     }
+  //     setIsEventsLoading(false);
+  //     if (pubkeysSet.size > 0) {
+  //       // setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
+  //       addProfiles(Array.from(pubkeysSet));
+  //     }
+  //   };
 
-    subscribe([relayUrl], filter, onEvent, onEOSE);
-  };
+  //   subscribe([relayUrl], filter, onEvent, onEOSE);
+  // };
 
   const getProfile = () => {
     let relayName = relayUrl.replace("wss://", "");
@@ -143,9 +143,9 @@ export default function ProfilePage() {
 
   // look up blogs
   // look up profile
-  useEffect(() => {
-    getProfileEvents();
-  }, [relayUrl]);
+  // useEffect(() => {
+  //   getProfileEvents();
+  // }, [relayUrl]);
 
   useEffect(() => {
     getProfile();
