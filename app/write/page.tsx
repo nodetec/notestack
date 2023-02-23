@@ -37,7 +37,7 @@ const WritePage = () => {
   };
 
   const handleContentChange = (evn: any) => {
-    setBlog({ ...blog, content: evn, contentValid: true });
+    setBlog({ ...blog, content: evn.text, contentValid: true });
   };
 
   return (
