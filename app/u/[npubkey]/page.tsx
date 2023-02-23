@@ -185,6 +185,7 @@ export default function ProfilePage() {
             filter={filter}
             profile={false}
             isEventsLoading={isEventsLoading}
+            profilePublicKey={profilePubkey}
           />
         ) : activeTab === "About" ? (
           <About about={profile.about} />

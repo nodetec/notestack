@@ -15,6 +15,7 @@ export default function BlogFeed({
   filter,
   profile,
   isEventsLoading,
+  profilePublicKey,
 }: any) {
   const [addedPosts, setAddedPosts] = useState<number>(10);
   // @ts-ignore
@@ -85,7 +86,7 @@ export default function BlogFeed({
             <Article key={event.id} event={event} profile={profile} />
           ))
       ) : (
-        <NoBlogs />
+        <NoBlogs profilePublicKey={profilePublicKey} />
       )}
     </Posts>
   );
