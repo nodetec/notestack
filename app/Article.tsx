@@ -19,6 +19,7 @@ import {
   calculateEstimatedReadingTime,
   markdownImageContent,
   shortenHash,
+  getRelativeTime,
 } from "./lib/utils";
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
@@ -241,18 +242,9 @@ const Item = ({
 }) => <div className={`flex gap-2 items-center ${className}`}>{children}</div>;
 
 export const DatePosted = ({ timestamp }: { timestamp: number }) => {
-  const timeStampToDate = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   return (
     <Item className="text-gray text-xs sm:text-sm">
-      {timeStampToDate(timestamp)}
+      {getRelativeTime(timestamp)}
     </Item>
   );
 };
