@@ -49,7 +49,7 @@ export default function BlogFeed({
             const concatEvents = currentEvents.concat(events);
             const filteredEvents = NostrService.filterBlogEvents(concatEvents);
             if (filteredEvents.length > 0) {
-              setEvents(filteredEvents);
+              setEvents({ e: filteredEvents, isLoading: false });
             }
 
             if (pubkeysSet.size > 0) {
