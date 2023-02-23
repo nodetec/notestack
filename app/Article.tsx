@@ -25,6 +25,7 @@ import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
 import { AddressPointer } from "nostr-tools/nip19";
+import BookmarkBlog from "./BookmarkBlog";
 // import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
@@ -208,26 +209,31 @@ const Article: FC<NoteProps> = ({
           ) : null}
         </div>
       </div>
-      <div className="flex flex-row gap-2 items-center mt-6 text-xs ">
-        {tValues.length > 0 ? (
-          <Fragment>
-            <ul className="flex items-center gap-2 flex-wrap">
-              <li>
-                <Link
-                  className="rounded-full inline-block py-1 px-2 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
-                  href={`/tag/${tValues[0].replace(" ", "-")}`}
-                >
-                  {tValues[0]}
-                </Link>
-              </li>
-            </ul>
-            <span>·</span>
-          </Fragment>
-        ) : null}
-        <span className="text-gray-hover font-normal">
-          {calculateEstimatedReadingTime(content)} min read
-        </span>
-        <DeleteBlog event={event} />
+      <div className="flex items-center justify-between gap-2 mt-6">
+        <div className="flex flex-row gap-2 items-center text-xs ">
+          {tValues.length > 0 ? (
+            <Fragment>
+              <ul className="flex items-center gap-2 flex-wrap">
+                <li>
+                  <Link
+                    className="rounded-full inline-block py-1 px-2 bg-opacity-50 hover:bg-opacity-80 bg-light-gray text-gray-hover"
+                    href={`/tag/${tValues[0].replace(" ", "-")}`}
+                  >
+                    {tValues[0]}
+                  </Link>
+                </li>
+              </ul>
+              <span>·</span>
+            </Fragment>
+          ) : null}
+          <span className="text-gray-hover font-normal">
+            {calculateEstimatedReadingTime(content)} min read
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <BookmarkBlog event={event} />
+          <DeleteBlog event={event} />
+        </div>
       </div>
     </article>
   );
