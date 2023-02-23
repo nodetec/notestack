@@ -34,6 +34,7 @@ export default function HomePage() {
   const TABS = ["Explore", "Following"];
   // const TABS = ["Explore"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
+  console.log(exploreEvents);
 
   // @ts-ignore
   const { following, followingReload } = useContext(FollowingContext);
@@ -57,7 +58,6 @@ export default function HomePage() {
   }
 
   const getExploreEvents = async () => {
-    setIsEventsLoading(true);
     let pubkeysSet = new Set<string>();
     let exploreTagsSet = new Set<string>();
 
@@ -102,6 +102,7 @@ export default function HomePage() {
       } else {
         setExploreEvents([]);
       }
+      setIsEventsLoading(false);
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
       }
@@ -111,7 +112,6 @@ export default function HomePage() {
   };
 
   const getFollowingEvents = async () => {
-    setIsEventsLoading(true);
     setFollowingEvents([]);
     let relayName = relayUrl.replace("wss://", "");
 
