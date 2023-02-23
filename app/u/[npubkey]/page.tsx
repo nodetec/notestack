@@ -58,11 +58,11 @@ export default function ProfilePage() {
   };
 
   let profilePubkey = "";
-  // try {
+  try {
     profilePubkey = nip19.decode(npub).data.toString();
-  // } catch (e) {
+  } catch (e) {
   //   return <p>Profile not found</p>;
-  // }
+  }
   const filter = {
     kinds: [30023],
     authors: [profilePubkey],
