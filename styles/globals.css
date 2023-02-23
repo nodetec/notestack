@@ -70,8 +70,3 @@ img[src=""] {
   width: 0;
   background-color: transparent;
 }
-
-.rc-md-editor,
-.rc-md-editor .editor-container > .section:nth-last-of-type {
-  border: none !important;
-}

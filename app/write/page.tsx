@@ -46,14 +46,13 @@ const WritePage = () => {
         value={blog.title}
         onChange={handleTitleChange}
       />
-      <div>
-        <MdEditor
-          className="h-[75vh]"
-          value={blog.content}
-          renderHTML={(text) => setupMarkdown(text)}
-          onChange={handleContentChange}
-        />
-      </div>
+      <MdEditor
+        style={{ border: "none" }}
+        className="h-[75vh]"
+        value={blog.content}
+        renderHTML={(text) => setupMarkdown(text)}
+        onChange={handleContentChange}
+      />
     </div>
   );
 };
