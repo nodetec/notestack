@@ -34,7 +34,6 @@ export default function HomePage() {
   const TABS = ["Explore", "Following"];
   // const TABS = ["Explore"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
-  console.log(exploreEvents);
 
   // @ts-ignore
   const { following, followingReload } = useContext(FollowingContext);
