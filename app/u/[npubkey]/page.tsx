@@ -64,7 +64,7 @@ export default function ProfilePage() {
   try {
     profilePubkey = nip19.decode(npub).data.toString();
   } catch (e) {
-    return <p>Profile not found</p>;
+    // return <p>Profile not found</p>;
   }
   const filter = {
     kinds: [30023],
