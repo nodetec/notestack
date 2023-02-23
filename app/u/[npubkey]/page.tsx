@@ -144,13 +144,13 @@ export default function ProfilePage() {
 
   // look up blogs
   // look up profile
-  useEffect(() => {
-    getProfileEvents();
-  }, [relayUrl]);
+  // useEffect(() => {
+  //   getProfileEvents();
+  // }, [relayUrl]);
 
-  useEffect(() => {
-    getProfile();
-  }, [reload, relayUrl]);
+  // useEffect(() => {
+  //   getProfile();
+  // }, [reload, relayUrl]);
 
   return (
     <Main>
