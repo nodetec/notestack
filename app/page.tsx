@@ -26,10 +26,15 @@ export default function HomePage() {
     authors: undefined,
     until: undefined,
   };
-  const [isEventsLoading, setIsEventsLoading] = useState(true);
-  const [exploreEvents, setExploreEvents] = useState<Event[]>([]);
+  const [exploreEvents, setExploreEvents] = useState<{
+    e: Event[];
+    isLoading: boolean;
+  }>({ e: [], isLoading: true });
   const [exploreTags, setExploreTags] = useState<string[]>([]);
-  const [followingEvents, setFollowingEvents] = useState<Event[]>([]);
+  const [followingEvents, setFollowingEvents] = useState<{
+    e: Event[];
+    isLoading: boolean;
+  }>({ e: [], isLoading: true });
   const [followingFilter, setFollowingFilter] = useState<Filter>();
   const TABS = ["Explore", "Following"];
   // const TABS = ["Explore"];
@@ -60,20 +65,18 @@ export default function HomePage() {
     let pubkeysSet = new Set<string>();
     let exploreTagsSet = new Set<string>();
 
-    setExploreEvents([]);
+    setExploreEvents({ e: [], isLoading: true });
     let relayName = relayUrl.replace("wss://", "");
     let feedKey = `latest_${relayName}`;
 
     if (feed[feedKey]) {
-      setExploreEvents(feed[feedKey]);
+      setExploreEvents({ e: feed[feedKey], isLoading: false });
       const events = feed[feedKey];
       events.forEach((event: Event) => {
         const tValues = getTValues(event.tags);
         tValues.forEach((t) => exploreTagsSet.add(t));
       });
       setExploreTags(Array.from(exploreTagsSet).slice(0, 7));
-      setIsEventsLoading(false);
-
       return;
     }
 
@@ -97,11 +100,10 @@ export default function HomePage() {
       setFeed(feed);
       if (filteredEvents.length > 0) {
         // @ts-ignore
-        setExploreEvents(filteredEvents);
+        setExploreEvents({ e: filteredEvents, isLoading: false });
       } else {
-        setExploreEvents([]);
+        setExploreEvents({ e: [], isLoading: false });
       }
-      setIsEventsLoading(false);
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
       }
@@ -111,7 +113,7 @@ export default function HomePage() {
   };
 
   const getFollowingEvents = async () => {
-    setFollowingEvents([]);
+    setFollowingEvents({ e: [], isLoading: true });
     let relayName = relayUrl.replace("wss://", "");
 
     let followingKey = `following_${relayName}_${keys.publicKey}`;
@@ -139,8 +141,7 @@ export default function HomePage() {
 
     let followingFeedKey = `following_${relayName}`;
     if (feed[followingFeedKey]) {
-      setFollowingEvents(feed[followingFeedKey]);
-      setIsEventsLoading(false);
+      setFollowingEvents({ e: feed[followingFeedKey], isLoading: false });
       return;
     }
 
@@ -161,12 +162,10 @@ export default function HomePage() {
 
       if (filteredEvents.length > 0) {
         // @ts-ignore
-        setFollowingEvents(filteredEvents);
+        setFollowingEvents({ e: filteredEvents, isLoading: false });
       } else {
-        setFollowingEvents([]);
+        setFollowingEvents({ e: [], isLoading: false });
       }
-
-      setIsEventsLoading(false);
     };
 
     subscribe([relayUrl], newfollowingFilter, onEvent, onEOSE);
@@ -174,11 +173,12 @@ export default function HomePage() {
 
   useEffect(() => {
     getExploreEvents();
+    getFollowingEvents();
   }, [activeRelay]);
 
   useEffect(() => {
     getFollowingEvents();
-  }, [activeRelay, followingReload]);
+  }, [followingReload]);
 
   return (
     <Main>
@@ -192,20 +192,20 @@ export default function HomePage() {
         />
         {activeTab === "Explore" && (
           <BlogFeed
-            events={exploreEvents}
+            events={exploreEvents.e}
             setEvents={setExploreEvents}
             filter={exploreFilter}
             profile={true}
-            isEventsLoading={isEventsLoading}
+            isEventsLoading={exploreEvents.isLoading}
           />
         )}
         {activeTab === "Following" && (
           <BlogFeed
-            events={followingEvents}
+            events={followingEvents.e}
             setEvents={setFollowingEvents}
             filter={followingFilter}
             profile={true}
-            isEventsLoading={isEventsLoading}
+            isEventsLoading={followingEvents.isLoading}
           />
         )}
       </Content>
@@ -213,13 +213,13 @@ export default function HomePage() {
         <RecommendedEvents
           title="Recommended Blogs"
           showProfile
-          events={exploreEvents.slice(0, 3)}
-          isEventsLoading={isEventsLoading}
+          events={exploreEvents.e.slice(0, 3)}
+          isEventsLoading={exploreEvents.isLoading}
         />
         <Topics
           title="Recommended Topics"
           TOPICS={exploreTags.length > 0 ? exploreTags.slice(0, 7) : []}
-          isEventsLoading={isEventsLoading}
+          isEventsLoading={exploreEvents.isLoading}
         />
         <Footer />
       </Aside>
