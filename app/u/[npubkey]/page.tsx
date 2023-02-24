@@ -24,8 +24,10 @@ export default function ProfilePage() {
   const TABS = ["Home", "About"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
   const pathname = usePathname();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isEventsLoading, setIsEventsLoading] = useState(true);
+  const [events, setEvents] = useState<{ e: Event[]; isLoading: boolean }>({
+    e: [],
+    isLoading: true,
+  });
   // @ts-ignore
   const { feed, setFeed } = useContext(FeedContext);
   // @ts-ignore
@@ -35,7 +37,6 @@ export default function ProfilePage() {
 
   // const [name, setName] = useState<string>();
   // const [about, setAbout] = useState<string>("");
-
 
   const npub = pathname!.split("/").pop() || "";
   // const [name, setName] = useState();
@@ -75,17 +76,15 @@ export default function ProfilePage() {
   }, []);
 
   const getProfileEvents = async () => {
-    setIsEventsLoading(true);
     resetProfile();
     let pubkeysSet = new Set<string>();
 
-    setEvents([]);
+    setEvents({ e: [], isLoading: true });
     let relayName = relayUrl.replace("wss://", "");
     let feedKey = `profilefeed_${relayUrl}_${profilePubkey}`;
 
     if (feed[feedKey]) {
-      setEvents(feed[feedKey]);
-      setIsEventsLoading(false);
+      setEvents({ e: feed[feedKey], isLoading: false });
       return;
     }
 
@@ -106,11 +105,10 @@ export default function ProfilePage() {
       setFeed(feed);
       if (filteredEvents.length > 0) {
         // @ts-ignore
-        setEvents(filteredEvents);
+        setEvents({ e: filteredEvents, isLoading: false });
       } else {
-        setEvents([]);
+        setEvents({ e: [], isLoading: false });
       }
-      setIsEventsLoading(false);
       if (pubkeysSet.size > 0) {
         // setpubkeys([...Array.from(pubkeysSet), ...pubkeys]);
         addProfiles(Array.from(pubkeysSet));
@@ -181,11 +179,11 @@ export default function ProfilePage() {
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
         {activeTab === "Home" ? (
           <BlogFeed
-            events={events}
+            events={events.e}
             setEvents={setEvents}
             filter={filter}
             profile={false}
-            isEventsLoading={isEventsLoading}
+            isEventsLoading={events.isLoading}
             profilePublicKey={profilePubkey}
           />
         ) : activeTab === "About" ? (
@@ -199,4 +197,3 @@ export default function ProfilePage() {
     </Main>
   );
 }
-
