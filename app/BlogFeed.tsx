@@ -28,6 +28,7 @@ export default function BlogFeed({
     if (addedPosts > 0.8 * events.length) {
       const currentEvents = events;
       let pubkeysSet = new Set<string>(pubkeys);
+      let relayName = relayUrl.replace("wss://", "");
 
       if (events.length > 0) {
         if (activeRelay) {
@@ -40,7 +41,7 @@ export default function BlogFeed({
           sub.on("event", (event: Event) => {
             // console.log("getting event", event, "from relay:", relay.url);
             // @ts-ignore
-            event.relayUrl = relayUrl;
+            event.relayUrl = relayName;
             events.push(event);
             pubkeysSet.add(event.pubkey);
           });
