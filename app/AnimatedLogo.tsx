@@ -8,7 +8,7 @@ interface AnimatedLogoProps extends SVGProps<SVGSVGElement> {
 const AnimatedLogo: FC<AnimatedLogoProps> = ({ size = 24 }) => {
   const [showPathIndex, setShowPathIndex] = useState(0);
   const PATH_COUNT = 3;
-  const SPEED = 250;
+  const SPEED = 300;
 
   useEffect(() => {
     const signalEffect = () => {

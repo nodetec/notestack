@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps, ReactNode } from "react";
-import { ImSpinner9 } from "react-icons/im";
+import AnimatedLogo from "./AnimatedLogo";
 
 const sizes = {
   lg: "py-5 px-6 text-lg",
@@ -80,7 +80,7 @@ const Button: React.FC<Props> = ({
     >
       {loading || icon ? (
         <span className={iconAfter ? "order-2" : ""}>
-          {loading ? <ImSpinner9 className="animate-spin" /> : icon}
+          {loading ? <AnimatedLogo size={24} /> : icon}
         </span>
       ) : null}
       {children}
