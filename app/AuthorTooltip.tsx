@@ -17,7 +17,7 @@ interface AuthorTooltipProps {
 
 const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
   // @ts-ignore
-  const { blog, setBlog } = useContext(BlogContext);
+  const { setBlog } = useContext(BlogContext);
   const profilePubkey = nip19.decode(npub).data.toString();
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -40,6 +40,7 @@ const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
   }, [showTooltip, event]);
 
   const handleEdit = (event: Event) => {
+    setShowTooltip(false);
     const tags = event.tags;
     const title = getTagValues("title", tags);
     const image = getTagValues("image", tags);
@@ -81,7 +82,6 @@ const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
               size="xs"
               onClick={() => {
                 handleEdit(event);
-                setShowTooltip(false);
               }}
             >
               Edit
