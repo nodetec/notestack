@@ -114,25 +114,29 @@ const WriteButton = () => {
   const validateTitleAndContent = () => {
     const validations = { title: true, content: true };
 
-    if (blog.title.trim().length)  {
+    if (blog.title.trim().length) {
       validations.title = true;
     } else {
       validations.title = false;
     }
 
-    if (blog.content.trim().length)  {
+    if (blog.content.trim().length) {
       validations.content = true;
     } else {
       validations.content = false;
     }
 
     return validations;
-  }
+  };
 
   const handlePublish = async () => {
     const validations = validateTitleAndContent();
 
-    setBlog({ ...blog, titleValid: validations.title, contentValid: validations.content });
+    setBlog({
+      ...blog,
+      titleValid: validations.title,
+      contentValid: validations.content,
+    });
     if (validations.title && validations.content) {
       setIsOpen(true);
     }
@@ -308,7 +312,7 @@ const WriteButton = () => {
             </h4>
             <ul className="flex flex-col gap-2">
               {publishSuccess.map((relay: string) => {
-                return <li>✅ {relay.replace("wss://", "")}</li>;
+                return <li key={relay}>✅ {relay.replace("wss://", "")}</li>;
               })}
             </ul>
           </>
@@ -318,7 +322,7 @@ const WriteButton = () => {
             <h4 className="text-lg font-semibold pb-4">Failed to publish:</h4>
             <ul className="flex flex-col gap-2">
               {publishFailed.map((relay: string) => {
-                return <li>❌ {relay.replace("wss://", "")}</li>;
+                return <li key={relay}>❌ {relay.replace("wss://", "")}</li>;
               })}
             </ul>
           </>

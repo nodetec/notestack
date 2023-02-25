@@ -112,8 +112,9 @@ const Search = () => {
       <div className="w-[20rem]">
         {pubkeys.length > 0 ? (
           <SearchGroup title="People">
-            {pubkeys.map((pubkey: string) => (
+            {pubkeys.map((pubkey: string, index: number) => (
               <Link
+                key={index}
                 href={"/u/" + nip19.npubEncode(pubkey)}
                 onClick={() => handleToggle()}
                 className="flex items-center gap-2 py-2"
@@ -125,8 +126,9 @@ const Search = () => {
         ) : null}
         {tags.length > 0 ? (
           <SearchGroup title="Tags">
-            {tags.map((tag: string) => (
+            {tags.map((tag: string, index: number) => (
               <Link
+                key={index}
                 className="flex items-center gap-4 text-gray-hover pt-2"
                 onClick={() => handleToggle()}
                 href={`/tag/${tag}`}

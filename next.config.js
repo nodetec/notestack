@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
-
-const removeImports = require("next-remove-imports")();
-
-module.exports = removeImports({
+const nextConfig = {
   reactStrictMode: false,
   experimental: {
-    esmExternals: "loose",
     appDir: true,
+    esmExternals: "loose",
     fontLoaders: [
       { loader: "@next/font/google", options: { subsets: ["latin"] } },
     ],
   },
-});
+}
+
+module.exports = nextConfig
