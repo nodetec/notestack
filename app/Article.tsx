@@ -25,6 +25,7 @@ import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
 import { AddressPointer } from "nostr-tools/nip19";
+import Tooltip from "./Tooltip";
 // import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
@@ -242,9 +243,28 @@ const Item = ({
 }) => <div className={`flex gap-2 items-center ${className}`}>{children}</div>;
 
 export const DatePosted = ({ timestamp }: { timestamp: number }) => {
+  const timeStampToDate = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <Item className="text-gray text-xs sm:text-sm">
-      {getRelativeTime(timestamp)}
+      <Tooltip
+        direction="bottom"
+        color="black"
+        className="w-max"
+        showOnHover
+        Component={<span>{getRelativeTime(timestamp)}</span>}
+      >
+        {timeStampToDate(timestamp)}
+      </Tooltip>
     </Item>
   );
 };
