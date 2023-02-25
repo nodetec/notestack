@@ -1,7 +1,7 @@
 "use client";
 import Button from "@/app/Button";
+import { ChevronDown } from "@/app/icons";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { IoChevronDown } from "react-icons/io5";
 import { useMediaQuery } from "react-responsive";
 
 interface PaginationProps {
@@ -26,7 +26,7 @@ export default function Pagination({ numPages }: PaginationProps) {
     <div className="flex justify-between gap-2 mt-4">
       <Button
         variant="outline"
-        icon={<IoChevronDown className="rotate-90" />}
+        icon={<ChevronDown className="rotate-90" />}
         size="sm"
         title="Previous page"
         onClick={() => navigate(currentPage - 1)}

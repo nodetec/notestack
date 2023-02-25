@@ -1,12 +1,12 @@
-import { IconType } from "react-icons";
 import {
-  AiFillGithub,
-  AiFillHeart,
-  AiFillYoutube,
-} from "react-icons/ai";
-import { GiOstrich } from "react-icons/gi";
-import { MdExtension } from "react-icons/md";
-import { BsFillLightningChargeFill } from "react-icons/bs";
+  Extension,
+  GitHub,
+  Heart,
+  LightningCharge,
+  Ostrich,
+  YouTube,
+  IconType,
+} from "@/app/icons";
 
 interface ISocialLink {
   name: string;
@@ -18,32 +18,32 @@ const SOCIALS: ISocialLink[] = [
   {
     name: "YouTube",
     url: "https://www.youtube.com/@chrisatmachine",
-    Icon: AiFillYoutube,
+    Icon: YouTube,
   },
   {
     name: "Nostr",
     url: "https://blogstack.io/u/npub1ygzj9skr9val9yqxkf67yf9jshtyhvvl0x76jp5er09nsc0p3j6qr260k2",
-    Icon: GiOstrich,
+    Icon: Ostrich,
   },
   {
     name: "Donate",
     url: "https://getalby.com/chrisatmachine",
-    Icon: AiFillHeart,
+    Icon: Heart,
   },
   {
     name: "GitHub",
     url: "https://github.com/nodetec/blogstack",
-    Icon: AiFillGithub,
+    Icon: GitHub,
   },
   {
     name: "Nostr Extension",
     url: "https://github.com/fiatjaf/nos2x",
-    Icon: MdExtension,
+    Icon: Extension,
   },
   {
     name: "Lightning Wallet",
     url: "https://getalby.com",
-    Icon: BsFillLightningChargeFill,
+    Icon: LightningCharge,
   },
 ];
 
@@ -59,7 +59,7 @@ const Footer = () => (
             className="flex items-center gap-1 text-gray text-xs hover:text-accent text-center"
           >
             <span>
-              <social.Icon />
+              <social.Icon size={12} />
             </span>
             {social.name}
           </a>

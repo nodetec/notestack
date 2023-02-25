@@ -2,12 +2,12 @@ import Button from "@/app/Button";
 import { KeysContext } from "@/app/context/keys-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import { RelayContext } from "@/app/context/relay-provider";
+import { Dots } from "@/app/icons";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import Tooltip from "@/app/Tooltip";
 import Link from "next/link";
 import { nip19 } from "nostr-tools";
 import { Fragment, useContext, useEffect, useState } from "react";
-import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { shortenHash } from "../../lib/utils";
 import FollowButton from "./FollowButton";
 
@@ -114,7 +114,7 @@ export default function Contact({ pubkey, isPopup = false }: any) {
                 variant="solid"
                 color="transparent"
                 size="sm"
-                icon={<BiDotsHorizontalRounded size="18" />}
+                icon={<Dots size="18" />}
               />
             }
           >

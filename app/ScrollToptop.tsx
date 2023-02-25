@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { IoChevronUp } from "react-icons/io5";
 import Button from "./Button";
+import { ChevronUp } from "./icons";
 
 const ScrollToTop = () => {
   const [show, setShow] = useState(false);
@@ -25,7 +25,7 @@ const ScrollToTop = () => {
   return (
     <Button
       className="fixed bottom-4 right-4 animate-slide-down"
-      icon={<IoChevronUp />}
+      icon={<ChevronUp />}
       onClick={() => window.scrollTo(0, 0)}
     />
   );

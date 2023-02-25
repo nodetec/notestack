@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import Button from "../../Button";
-import { BsPatchCheckFill, BsLightningChargeFill } from "react-icons/bs";
 import { utils } from "lnurl-pay";
 import Link from "next/link";
 import { RelayContext } from "@/app/context/relay-provider";
@@ -10,6 +9,7 @@ import { ProfilesContext } from "@/app/context/profiles-provider";
 import { DUMMY_PROFILE_API } from "@/app/lib/constants";
 import { KeysContext } from "@/app/context/keys-provider";
 import FollowButton from "./FollowButton";
+import { LightningCharge, PatchCheck } from "@/app/icons";
 // import Followers from "./Followers";
 // import FollowButton from "./FollowButton";
 
@@ -109,7 +109,7 @@ export default function UserCard({ npub }: any) {
               <span className="max-w-[12rem] whitespace-nowrap overflow-x-scroll scrollable-element leading-none">
                 {nip05}
               </span>
-              <BsPatchCheckFill className="text-blue-500" size="14" />
+              <PatchCheck className="text-blue-500" size="14" />
             </span>
           </div>
         )}
@@ -143,7 +143,7 @@ export default function UserCard({ npub }: any) {
                 color="red"
                 variant="solid"
                 onClick={handleTipClick}
-                icon={<BsLightningChargeFill />}
+                icon={<LightningCharge />}
                 title="tip"
               />
             )}

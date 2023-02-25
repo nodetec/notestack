@@ -1,10 +1,9 @@
 import Link, { LinkProps } from "next/link";
 import { DetailedHTMLProps, Fragment, HTMLAttributes, useContext } from "react";
-import { IconType } from "react-icons";
-import { HiOutlineUser, HiOutlineBookmark } from "react-icons/hi";
 import { nip19 } from "nostr-tools";
 import { shortenHash } from "./lib/utils";
 import { UserContext } from "./context/user-provider";
+import { User, IconType, Bookmark } from "./icons";
 
 interface ProfileMenuProps {
   pubkey: string;
@@ -30,13 +29,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
             onClick={() => toggleMenu(false)}
             label="Profile"
             href={`/u/` + npub}
-            Icon={HiOutlineUser}
+            Icon={User}
           />
           <Item
             onClick={() => toggleMenu(false)}
             label="Bookmark"
             href={`/u/` + npub}
-            Icon={HiOutlineBookmark}
+            Icon={Bookmark}
           />
         </GroupMenu>
         <GroupMenu>

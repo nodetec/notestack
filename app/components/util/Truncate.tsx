@@ -1,13 +1,9 @@
 "use client";
-import {
-  HiOutlineClipboardCheck,
-  HiOutlineClipboardCopy,
-} from "react-icons/hi";
-import { TbClipboardX } from "react-icons/tb";
 import Button, { Props as IButtonProps } from "../../Button";
 import { Fragment } from "react";
 import { shortenHash } from "@/app/lib/utils";
 import useCopy from "@/app/hooks/useCopy";
+import { ClipboardCheck, ClipboardCopy, ClipboardX } from "@/app/icons";
 
 interface ITruncateProps extends IButtonProps {
   content: string;
@@ -40,11 +36,11 @@ const Truncate = ({
         className={color}
         icon={
           isCopied ? (
-            <HiOutlineClipboardCheck />
+            <ClipboardCheck />
           ) : isError ? (
-            <TbClipboardX />
+            <ClipboardX />
           ) : (
-            <HiOutlineClipboardCopy />
+            <ClipboardCopy />
           )
         }
         {...props}
