@@ -22,7 +22,6 @@
     "lnurl-pay": "^2.1.1",
     "markdown-it": "^13.0.1",
     "next": "^13.2.1",
-    "next-remove-imports": "^1.0.10",
     "nostr-tools": "^1.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
