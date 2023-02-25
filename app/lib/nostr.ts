@@ -1,7 +1,4 @@
-// Nostr Init
 import "websocket-polyfill";
-import { relayInit, generatePrivateKey, getPublicKey } from "nostr-tools";
-import type { Relay } from "nostr-tools";
 import sha256 from "crypto-js/sha256";
 import Hex from "crypto-js/enc-hex";
 import { getTagValues } from "./utils";
@@ -32,75 +29,6 @@ export type Event = {
 };
 
 export namespace NostrService {
-  // export async function connect(relayUrl: string, activeRelay: Relay) {
-  //   if (activeRelay && activeRelay.url === relayUrl) {
-  //     return activeRelay;
-  //   }
-
-  //   if (!relayUrl) return;
-  //   const relay = relayInit(relayUrl);
-
-  //   await relay.connect();
-
-  //   relay.on("connect", () => {
-  //     console.log("info", `✅ nostr (${relayUrl}): Connected!`);
-  //     return relay;
-  //   });
-
-  //   relay.on("disconnect", () => {
-  //     console.log("warn", `🚪 nostr (${relayUrl}): Connection closed.`);
-  //   });
-
-  //   relay.on("error", () => {
-  //     console.log("error", `❌ nostr (${relayUrl}): Connection error!`);
-  //   });
-
-  //   return relay;
-  // }
-
-  export function genPrivateKey(): string {
-    return generatePrivateKey();
-  }
-
-  export function genPublicKey(privateKey: string): string {
-    return getPublicKey(privateKey);
-  }
-
-  export async function getProfile(publicKey: string, relay: Relay) {
-    return new Promise<Event | null>((resolve) => {
-      let sub = relay.sub([
-        {
-          kinds: [0],
-          authors: [publicKey],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        // console.log("we got the event we wanted:", event);
-        resolve(event);
-      });
-      sub.on("eose", () => {
-        sub.unsub();
-      });
-    });
-  }
-
-  export async function getEvent(id: string, relay: Relay) {
-    return new Promise<Event | null>((resolve) => {
-      let sub = relay.sub([
-        {
-          ids: [id],
-        },
-      ]);
-      sub.on("event", (event: Event) => {
-        // console.log("we got the event we wanted:", event);
-        resolve(event);
-      });
-      sub.on("eose", () => {
-        sub.unsub();
-      });
-    });
-  }
-
   export function createEvent(
     kind: number,
     publicKey: string,
@@ -142,28 +70,6 @@ export namespace NostrService {
       console.error("signing event failed");
     }
     return event;
-  }
-
-  export function filterEvents(eventArray: Event[]) {
-    const filteredEvents = eventArray.filter((e1, index) => {
-      return eventArray.findIndex((e2) => e2.id === e1.id) === index;
-    });
-    return filteredEvents;
-  }
-
-  export function filterUserEvents(eventObj: { [fieldName: string]: any }) {
-    const eventArray = Object.values(eventObj).reduce(
-      (acc, value) => acc.concat(value),
-      []
-    );
-
-    const filteredEvents = eventArray.filter((e1: Event, index: number) => {
-      if (e1.content === "") {
-        return false;
-      }
-      return eventArray.findIndex((e2: Event) => e2.id === e1.id) === index;
-    });
-    return filteredEvents;
   }
 
   export function randomId() {
