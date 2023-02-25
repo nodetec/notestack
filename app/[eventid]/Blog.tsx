@@ -1,13 +1,11 @@
 import { Event, nip19 } from "nostr-tools";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Aside from "../Aside";
 import Content from "../Content";
 import Main from "../Main";
-import RecommendedEvents from "../RecommendedEvents";
 import MarkdownDisplay from "./MarkdownDisplay";
 import Topics from "../Topics";
 import UserCard from "../components/profile/UserCard";
-import Following from "../components/profile/Following";
 
 interface NoteProps {
   event: Event;
@@ -46,7 +44,9 @@ export default function Note({ event }: NoteProps) {
           {/*   showProfile */}
           {/*   showThumbnail */}
           {/* /> */}
-          <Topics title="Related topics" TOPICS={tagsTags} />
+          {tagsTags.length > 0 ? (
+            <Topics title="Related topics" TOPICS={tagsTags} />
+          ) : null}
         </Aside>
       )}
     </Main>
