@@ -258,6 +258,7 @@ export const DatePosted = ({ timestamp }: { timestamp: number }) => {
     <Item className="text-gray text-xs sm:text-sm">
       <Tooltip
         direction="bottom"
+        size="sm"
         color="black"
         className="w-max"
         showOnHover
