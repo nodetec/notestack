@@ -6,7 +6,6 @@ import Button from "./Button";
 import AccountButton from "./AccountButton";
 
 import { KeysContext } from "./context/keys-provider.jsx";
-import Link from "next/link";
 
 export default function Login() {
   // @ts-ignore
