@@ -21,7 +21,7 @@ export default function RootLayout({
       lang="en"
       id="blogstack-html"
       className="main-font"
-      data-color-mode="light"
+      data-color-mode="dark"
     >
       <head />
       <body className="font-main">

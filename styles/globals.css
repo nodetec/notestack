@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --bg: rgb(255, 255, 255);
+    --text: rgb(0, 0, 0);
+    --error: rgb(201, 74, 74);
+    --red: rgb(247, 0, 0);
+    --red-hover: rgb(210, 19, 7);
+    --green: rgb(26, 137, 23);
+    --green-hover: rgb(15, 115, 12);
+    --gray: rgb(117, 117, 117);
+    --gray-hover: rgb(41, 41, 41);
+    --light-gray: rgb(225, 225, 225);
+    --medium-gray: rgb(168, 168, 168);
+  }
+
+  :root[data-color-mode="dark"] {
+    --bg: rgb(0, 0, 0);
+    --text: rgb(255, 255, 255);
+    --error: rgb(201, 74, 74);
+    --red: rgb(247, 0, 0);
+    --red-hover: rgb(210, 19, 7);
+    --green: rgb(26, 137, 23);
+    --green-hover: rgb(15, 115, 12);
+    --gray: rgb(117, 117, 117);
+    --gray-hover: rgb(41, 41, 41);
+    --light-gray: rgb(225, 225, 225);
+    --medium-gray: rgb(168, 168, 168);
+  }
+}
+
 html,
 body {
   scroll-behavior: smooth;
