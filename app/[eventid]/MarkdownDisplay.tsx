@@ -1,4 +1,4 @@
-import { getTagValues, shortenHash } from "../lib/utils";
+import { getTagValues } from "../lib/utils";
 // @ts-ignore
 import { NoComment } from "react-nocomment";
 import { Event, nip19 } from "nostr-tools";
@@ -9,13 +9,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { DUMMY_PROFILE_API, HOST } from "../lib/constants";
-import Link from "next/link";
+import { DUMMY_PROFILE_API } from "../lib/constants";
 import { DatePosted } from "../Article";
 import { RelayContext } from "../context/relay-provider";
 import { ProfilesContext } from "../context/profiles-provider";
 import BlogActions from "./BlogActions";
 import TopProfile from "./TopProfile";
+import styles from "@/styles/nocomment.module.css";
 
 interface MarkdownDisplayProps {
   event: Event;
@@ -128,9 +128,11 @@ const MarkdownDisplay = ({
           dangerouslySetInnerHTML={{ __html: markdown }}
         />
       </div>
-      <div className="border border-zinc-200 my-4" />
-
-      {event && <NoComment className="outline-none" relays={[relayUrl]} />}
+      {event && (
+        <div className={styles.nocomment}>
+          <NoComment className="outline-none" relays={[relayUrl]} />
+        </div>
+      )}
     </>
   );
 };
