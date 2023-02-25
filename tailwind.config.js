@@ -7,7 +7,7 @@ module.exports = {
   ],
   theme: {
     fontFamily: {
-      main: ["var(--main-font)", "sans-serif"],
+      main: ["Cantarell", "Roboto", "sans-serif"],
     },
     container: {
       center: true,
