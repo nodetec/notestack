@@ -6,12 +6,14 @@ import Button from "./Button";
 import AccountButton from "./AccountButton";
 
 import { KeysContext } from "./context/keys-provider.jsx";
+import Link from "next/link";
 
 export default function Login() {
   // @ts-ignore
   const { keys, setKeys } = useContext(KeysContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isLightningConnected, setIsLightningConnected] = useState(false);
+  const [isPublicKeyDefined, setIsPublicKeyDefined] = useState(false);
 
   useEffect(() => {
     const shouldReconnect = localStorage.getItem("shouldReconnect");
@@ -78,6 +80,16 @@ export default function Login() {
     setIsOpen(true);
   };
 
+  useEffect(() => {
+    (async () => {
+      // @ts-ignore
+      if (typeof window.nostr === "undefined") return false;
+      // @ts-ignore
+      const publicKey = await nostr.getPublicKey();
+      setIsPublicKeyDefined(!!publicKey);
+    })();
+  }, []);
+
   return (
     <>
       {isLightningConnected && keys?.publicKey ? (
@@ -88,10 +100,30 @@ export default function Login() {
         </Button>
       )}
 
-      <Popup title="Generate Keys" isOpen={isOpen} setIsOpen={setIsOpen}>
-        <Button className="w-full" onClick={loginHandler} size="sm">
-          {isLightningConnected ? "connected" : "Login with Extension"}
-        </Button>
+      <Popup title="Login" isOpen={isOpen} setIsOpen={setIsOpen}>
+        {typeof window !== "undefined" &&
+        //@ts-ignore
+        typeof window.nostr === "undefined" ? (
+          <div className="text-center">
+            <p className="mb-4 font-bold">You need Extension to Login</p>
+            <Link
+              href="https://getalby.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full text-white block bg-black rounded-full text-sm font-bold py-2 px-4"
+            >
+              Get Alby Extension
+            </Link>
+          </div>
+        ) : isPublicKeyDefined ? (
+          <Button className="w-full font-bold" onClick={loginHandler} size="sm">
+            {isLightningConnected ? "connected" : "Login with Extension"}
+          </Button>
+        ) : (
+          <p className="mb-4 font-bold text-center">
+            You need to setup Nostr keys form your Extension
+          </p>
+        )}
       </Popup>
     </>
   );
