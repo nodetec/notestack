@@ -2,7 +2,6 @@ import { IconType } from "react-icons";
 import {
   AiFillGithub,
   AiFillHeart,
-  AiOutlineTwitter,
   AiFillYoutube,
 } from "react-icons/ai";
 import { GiOstrich } from "react-icons/gi";
@@ -33,7 +32,7 @@ const SOCIALS: ISocialLink[] = [
   },
   {
     name: "GitHub",
-    url: "https://github.com/nodetec/NoteBin",
+    url: "https://github.com/nodetec/blogstack",
     Icon: AiFillGithub,
   },
   {
