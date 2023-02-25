@@ -88,10 +88,36 @@ export default function Login() {
         </Button>
       )}
 
-      <Popup title="Generate Keys" isOpen={isOpen} setIsOpen={setIsOpen}>
-        <Button className="w-full" onClick={loginHandler} size="sm">
-          {isLightningConnected ? "connected" : "Login with Extension"}
-        </Button>
+      <Popup title="Login" isOpen={isOpen} setIsOpen={setIsOpen}>
+        {typeof window !== "undefined" &&
+        //@ts-ignore
+        typeof window.nostr === "undefined" ? (
+          <div>
+            <div className="text-center flex flex-col items-center gap-4 py-2">
+              <p>Install Alby Extension and setup keys to Login</p>
+              <a
+                href="https://getalby.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-white block bg-black rounded-full text-sm font-bold py-2 px-4"
+              >
+                Get Alby Extension
+              </a>
+            </div>
+            <a
+              className="font-bold underline text-black text-sm text-center block"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://guides.getalby.com/overall-guide/alby-browser-extension/features/nostr"
+            >
+              Learn more
+            </a>
+          </div>
+        ) : (
+          <Button className="w-full font-bold" onClick={loginHandler} size="sm">
+            {isLightningConnected ? "connected" : "Login with Extension"}
+          </Button>
+        )}
       </Popup>
     </>
   );
