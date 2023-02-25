@@ -13,7 +13,6 @@ export default function Login() {
   const { keys, setKeys } = useContext(KeysContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isLightningConnected, setIsLightningConnected] = useState(false);
-  const [isPublicKeyDefined, setIsPublicKeyDefined] = useState(false);
 
   useEffect(() => {
     const shouldReconnect = localStorage.getItem("shouldReconnect");
@@ -80,16 +79,6 @@ export default function Login() {
     setIsOpen(true);
   };
 
-  useEffect(() => {
-    (async () => {
-      // @ts-ignore
-      if (typeof window.nostr === "undefined") return false;
-      // @ts-ignore
-      const publicKey = await nostr.getPublicKey();
-      setIsPublicKeyDefined(!!publicKey);
-    })();
-  }, []);
-
   return (
     <>
       {isLightningConnected && keys?.publicKey ? (
@@ -104,25 +93,31 @@ export default function Login() {
         {typeof window !== "undefined" &&
         //@ts-ignore
         typeof window.nostr === "undefined" ? (
-          <div className="text-center">
-            <p className="mb-4 font-bold">You need Extension to Login</p>
-            <Link
-              href="https://getalby.com/"
+          <div>
+            <div className="text-center flex flex-col items-center gap-4 py-2">
+              <p>Install Alby Extension and setup keys to Login</p>
+              <a
+                href="https://getalby.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-white block bg-black rounded-full text-sm font-bold py-2 px-4"
+              >
+                Get Alby Extension
+              </a>
+            </div>
+            <a
+              className="font-bold underline text-black text-sm text-center block"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full text-white block bg-black rounded-full text-sm font-bold py-2 px-4"
+              href="https://guides.getalby.com/overall-guide/alby-browser-extension/features/nostr"
             >
-              Get Alby Extension
-            </Link>
+              Learn more
+            </a>
           </div>
-        ) : isPublicKeyDefined ? (
+        ) : (
           <Button className="w-full font-bold" onClick={loginHandler} size="sm">
             {isLightningConnected ? "connected" : "Login with Extension"}
           </Button>
-        ) : (
-          <p className="mb-4 font-bold text-center">
-            You need to setup Nostr keys form your Extension
-          </p>
         )}
       </Popup>
     </>
