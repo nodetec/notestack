@@ -71,7 +71,7 @@ export default function Pagination({ numPages }: PaginationProps) {
 
       <Button
         variant="outline"
-        icon={<IoChevronDown className="-rotate-90" />}
+        icon={<ChevronDown className="-rotate-90" />}
         title="Next page"
         size="sm"
         onClick={() => navigate(currentPage + 1)}
