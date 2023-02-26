@@ -72,18 +72,18 @@ const WriteButton = () => {
   }, [blog]);
 
   useEffect(() => {
-    console.log("PUBLISH SUCCESS:", publishSuccess);
-    console.log("PUBLISH FAILED:", publishFailed);
-    console.log("PUBLISH TOGGLED:", toggledRelays);
-    console.log("PUBLISH SUCCESS LENGTH:", publishSuccess.length);
-    console.log("PUBLISH FAILED LENGTH:", publishFailed.length);
-    console.log("PUBLISH TOGGLED LENGTH:", toggledRelays.length);
+    // console.log("PUBLISH SUCCESS:", publishSuccess);
+    // console.log("PUBLISH FAILED:", publishFailed);
+    // console.log("PUBLISH TOGGLED:", toggledRelays);
+    // console.log("PUBLISH SUCCESS LENGTH:", publishSuccess.length);
+    // console.log("PUBLISH FAILED LENGTH:", publishFailed.length);
+    // console.log("PUBLISH TOGGLED LENGTH:", toggledRelays.length);
     if (publishSuccess.length + publishFailed.length < toggledRelays.length) {
       if (publishEvent) {
         publishToRelay(publishEvent);
       }
     }
-    console.log("PUBLISH COUNT:", publishCount);
+    // console.log("PUBLISH COUNT:", publishCount);
   }, [publishSuccess, publishFailed]);
 
   useEffect(() => {

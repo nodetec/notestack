@@ -92,15 +92,15 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [relayUrl]);
 
   useEffect(() => {
-    console.log("NEW ACTIVE RELAY IS:", activeRelay);
+    // console.log("NEW ACTIVE RELAY IS:", activeRelay);
   }, [activeRelay]);
 
   useEffect(() => {
-    console.log("CONNECTED RELAYS URE:", connectedRelays);
+    // console.log("CONNECTED RELAYS URE:", connectedRelays);
   }, [connectedRelays]);
 
   const connect = async (newRelayUrl: string) => {
-    console.log("connecting to relay:", newRelayUrl);
+    // console.log("connecting to relay:", newRelayUrl);
     if (!newRelayUrl) return;
 
     let relay: Relay;
@@ -112,19 +112,19 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     if (existingRelay) {
-      console.log("info", `✅ nostr (${newRelayUrl}): Already connected!`);
+      // console.log("info", `✅ nostr (${newRelayUrl}): Already connected!`);
       relay = existingRelay;
       if (relayUrl === relay.url) {
         setActiveRelay(relay);
       }
     } else {
-      console.log("NEWING UP A RELAY");
+      // console.log("NEWING UP A RELAY");
       relay = relayInit(newRelayUrl);
 
       await relay.connect();
 
       relay.on("connect", () => {
-        console.log("info", `✅ nostr (${newRelayUrl}): Connected!`);
+        // console.log("info", `✅ nostr (${newRelayUrl}): Connected!`);
         if (relayUrl === relay.url) {
           setActiveRelay(relay);
           const isRelayInSet = Array.from(connectedRelays).some(
@@ -138,7 +138,7 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       relay.on("disconnect", () => {
-        console.log("warn", `🚪 nostr (${newRelayUrl}): Connection closed.`);
+        // console.log("warn", `🚪 nostr (${newRelayUrl}): Connection closed.`);
         setConnectedRelays(
           new Set([...connectedRelays].filter((r) => r.url !== relay.url))
         );
