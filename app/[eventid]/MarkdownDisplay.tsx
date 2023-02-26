@@ -41,6 +41,7 @@ const MarkdownDisplay = ({
 
   useLayoutEffect(() => {
     document.documentElement.focus();
+    window.scrollTo(0, 0);
   }, []);
 
   // @ts-ignore
@@ -70,10 +71,6 @@ const MarkdownDisplay = ({
       }
     }
   };
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   useEffect(() => {
     getProfile();
