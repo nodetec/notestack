@@ -7,6 +7,7 @@ import {
   SetStateAction,
   useContext,
   useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 import { DUMMY_PROFILE_API } from "../lib/constants";
@@ -36,8 +37,11 @@ const MarkdownDisplay = ({
   const npub = nip19.npubEncode(event.pubkey);
   const [name, setName] = useState<string>();
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
-
   const { relayUrl } = useContext(RelayContext);
+
+  useLayoutEffect(() => {
+    document.documentElement.focus();
+  }, []);
 
   // @ts-ignore
   const { profiles, reload, addProfiles } = useContext(ProfilesContext);
