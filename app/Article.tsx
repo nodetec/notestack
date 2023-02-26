@@ -10,7 +10,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { BsFillTagFill } from "react-icons/bs";
 import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 import DeleteBlog from "./DeleteBlog";
@@ -26,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
 import { AddressPointer } from "nostr-tools/nip19";
 import Tooltip from "./Tooltip";
+import { Tag } from "./icons";
 // import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
@@ -280,7 +280,7 @@ export const NoteTags = ({
   <Item>
     {showIcon ? (
       <span>
-        <BsFillTagFill className="w-4 h-4 text-current" />
+        <Tag className="w-4 h-4 text-current" />
       </span>
     ) : null}
     <ul className="flex items-center gap-2 list-none pl-0 my-0">

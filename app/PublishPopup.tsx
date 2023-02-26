@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect } from "react";
-import { IoMdClose } from "react-icons/io";
 import Button from "./Button";
+import { X } from "./icons";
 
 export interface PublishPopupProps {
   title: string;
@@ -30,14 +30,18 @@ const PublishPopup = ({
     };
   }, [setIsOpen]);
 
-  if (!isOpen){
-    if(typeof document !== "undefined"){
-      document.getElementById('blogstack-html')?.classList.remove("overflow-y-hidden");
+  if (!isOpen) {
+    if (typeof document !== "undefined") {
+      document
+        .getElementById("blogstack-html")
+        ?.classList.remove("overflow-y-hidden");
     }
     return null;
   }
-  if(typeof document !== "undefined"){
-    document.getElementById('blogstack-html')?.classList.add("overflow-y-hidden");
+  if (typeof document !== "undefined") {
+    document
+      .getElementById("blogstack-html")
+      ?.classList.add("overflow-y-hidden");
   }
 
   return (
@@ -46,7 +50,7 @@ const PublishPopup = ({
         className={`z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[64rem] border-2 bg-white/100 rounded-md ${className}`}
       >
         <Button
-          icon={<IoMdClose size={24} />}
+          icon={<X size={24} />}
           color="transparent"
           variant="ghost"
           className="absolute w-fit right-0 top-0 opacity-70 hover:opacity-100"

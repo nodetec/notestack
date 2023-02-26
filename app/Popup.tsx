@@ -1,6 +1,6 @@
 import { Fragment, ReactNode, useEffect } from "react";
-import { IoMdClose } from "react-icons/io";
 import Button from "./Button";
+import { X } from "./icons";
 
 export interface PopupProps {
   title: string;
@@ -50,7 +50,7 @@ const Popup = ({
           <div className="flex justify-between gap-4">
             <h3 className="text-xl font-bold pb-4">{title}</h3>
             <Button
-              icon={<IoMdClose size={20} />}
+              icon={<X size={20} />}
               color="transparent"
               variant="ghost"
               className="w-fit translate-x-1/2 -translate-y-1/2 opacity-70 hover:opacity-100"

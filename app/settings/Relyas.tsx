@@ -2,10 +2,10 @@
 import { Fragment, useContext, useEffect, useState } from "react";
 import { RelayContext } from "@/app/context/relay-provider";
 import Button from "../Button";
-import { RiDeleteBin2Line } from "react-icons/ri";
 import PopupInput from "../PopupInput";
 import Popup from "../Popup";
 import { RELAYS } from "../lib/constants";
+import { BinX } from "../icons";
 
 const Relays = () => {
   const { allRelays, addRelay, resetRelays, removeRelay } =
@@ -36,7 +36,7 @@ const Relays = () => {
             <div className="flex">
               <Button
                 icon={
-                  <RiDeleteBin2Line
+                  <BinX
                     className="fill-gray group-hover:fill-red-hover"
                     size={16}
                   />

@@ -1,10 +1,10 @@
 "use client";
 import { Event } from "nostr-tools";
 import { useContext, useEffect, useState } from "react";
-import { RiDeleteBin2Line } from "react-icons/ri";
 import { KeysContext } from "./context/keys-provider";
 import { NotifyContext } from "./context/notify-provider";
 import { RelayContext } from "./context/relay-provider";
+import { BinX } from "./icons";
 import { NostrService } from "./lib/nostr";
 
 interface DeleteBlogProps {
@@ -51,7 +51,7 @@ export default function DeleteBlog({ event }: DeleteBlogProps) {
     <>
       {event.pubkey === loggedInUserKeys.publicKey && (
         <button className="p-1 text-gray rounded-lg" onClick={handleDelete}>
-          <RiDeleteBin2Line size={15} />
+          <BinX size={15} />
         </button>
       )}
     </>

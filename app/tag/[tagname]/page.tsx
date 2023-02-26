@@ -2,7 +2,7 @@
 
 import Aside from "@/app/Aside";
 import BlogFeed from "@/app/BlogFeed";
-import type { Event, Relay } from "nostr-tools";
+import type { Event } from "nostr-tools";
 import Content from "@/app/Content";
 import Main from "@/app/Main";
 import Tabs from "@/app/Tabs";
@@ -10,12 +10,12 @@ import { usePathname } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import Topics from "@/app/Topics";
 import RecommendedEvents from "@/app/RecommendedEvents";
-import { AiFillTag } from "react-icons/ai";
 import { RelayContext } from "@/app/context/relay-provider";
 import { NostrService } from "@/app/lib/nostr";
 import { FeedContext } from "@/app/context/feed-provider";
 import { ProfilesContext } from "@/app/context/profiles-provider";
 import FollowedRelays from "@/app/FollowedRelays";
+import { Tag } from "@/app/icons";
 
 export default function TagPage() {
   const pathname = usePathname();
@@ -106,7 +106,7 @@ export default function TagPage() {
     <Main>
       <Content>
         <div className="flex items-center justify-start gap-2">
-          <AiFillTag size="20" />
+          <Tag size="20" />
           <h1 className="text-5xl font-medium my-12">{tagname}</h1>
         </div>
         <FollowedRelays />

@@ -1,6 +1,5 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import { IoChevronDown } from "react-icons/io5";
 import Button from "./Button";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import ProfileMenu from "./ProfileMenu";
@@ -8,6 +7,7 @@ import { Event, nip19 } from "nostr-tools";
 import { UserContext } from "./context/user-provider";
 import { RelayContext } from "./context/relay-provider";
 import { FollowingContext } from "./context/following-provider";
+import { ChevronDown } from "./icons";
 
 interface AccountButtonProps {
   pubkey: string;
@@ -113,7 +113,7 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
         color="transparent"
         variant="ghost"
         size="xs"
-        icon={<IoChevronDown />}
+        icon={<ChevronDown />}
         iconAfter
         className="flex items-center gap-2 text-gray hover:text-gray-hover p-0"
         onClick={() => setShowMenu((currrent) => !currrent)}

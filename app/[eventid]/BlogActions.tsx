@@ -1,4 +1,4 @@
-import { getTagValues, shortenHash } from "../lib/utils";
+import { getTagValues } from "../lib/utils";
 import { Event, nip19 } from "nostr-tools";
 import {
   AnchorHTMLAttributes,
@@ -11,33 +11,36 @@ import {
 } from "react";
 import Button from "../Button";
 import { usePathname } from "next/navigation";
-import { AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import { HOST } from "../lib/constants";
 import AuthorTooltip from "../AuthorTooltip";
-import { IconType } from "react-icons";
 import { NotifyContext } from "../context/notify-provider";
 import useCopy from "../hooks/useCopy";
-import { ImLink } from "react-icons/im";
 import Tooltip from "../Tooltip";
-import { FaFacebook } from "react-icons/fa";
-import { BsArrowBarRight } from "react-icons/bs";
+import {
+  ArrowBarRight,
+  Facebook,
+  IconType,
+  Link,
+  Linkedin,
+  Twitter,
+} from "../icons";
 
 const SOCLIAL_LINKS = [
   {
     label: "Twitter",
-    Icon: AiOutlineTwitter,
+    Icon: Twitter,
     url: (title: string, link: string) =>
       `https://twitter.com/intent/tweet?text=${title}&url=${link}`,
   },
   {
     label: "Facebook",
-    Icon: FaFacebook,
+    Icon: Facebook,
     url: (title: string, link: string) =>
       `https://www.facebook.com/sharer/sharer.php?u=${link}&title=${title}`,
   },
   {
     label: "LinkedIn",
-    Icon: AiFillLinkedin,
+    Icon: Linkedin,
     url: (title: string, link: string) =>
       `https://www.linkedin.com/shareArticle?url=${link}&title=${title}&mini=true`,
   },
@@ -49,11 +52,7 @@ interface BlogActionsProps {
   setZenMode: Dispatch<SetStateAction<boolean>>;
 }
 
-const BlogActions = ({
-  event,
-  zenMode,
-  setZenMode,
-}: BlogActionsProps) => {
+const BlogActions = ({ event, zenMode, setZenMode }: BlogActionsProps) => {
   const tags = event.tags;
   const pathname = usePathname();
   const title = getTagValues("title", tags);
@@ -96,7 +95,7 @@ const BlogActions = ({
             variant="ghost"
             title="Copy Link"
             size="sm"
-            icon={<ImLink size={20} />}
+            icon={<Link size={20} />}
             className="text-medium-gray hover:text-gray-hover text-xs"
             onClick={() => copyToClipboard(`${HOST}${pathname}`)}
           />
@@ -117,7 +116,7 @@ const BlogActions = ({
             className="ml-auto hidden md:flex"
             onClick={() => setZenMode((current) => !current)}
             icon={
-              <BsArrowBarRight
+              <ArrowBarRight
                 size={20}
                 className={zenMode ? "rotate-180" : ""}
               />

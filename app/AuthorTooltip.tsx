@@ -3,12 +3,12 @@ import Button from "./Button";
 import { NotifyContext } from "./context/notify-provider";
 import useCopy from "./hooks/useCopy";
 import Tooltip from "./Tooltip";
-import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { BlogContext } from "./context/blog-provider";
 import { nip19, Event } from "nostr-tools";
 import { KeysContext } from "./context/keys-provider";
 import { useRouter } from "next/navigation";
 import { getTagValues } from "./lib/utils";
+import { Dots } from "./icons";
 
 interface AuthorTooltipProps {
   npub: string;
@@ -17,7 +17,7 @@ interface AuthorTooltipProps {
 
 const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
   // @ts-ignore
-  const { blog, setBlog } = useContext(BlogContext);
+  const { setBlog } = useContext(BlogContext);
   const profilePubkey = nip19.decode(npub).data.toString();
   // @ts-ignore
   const { keys } = useContext(KeysContext);
@@ -68,7 +68,7 @@ const AuthorTooltip: FC<AuthorTooltipProps> = ({ npub, event }) => {
           color="transparent"
           variant="ghost"
           size="sm"
-          icon={<BiDotsHorizontalRounded size="24" />}
+          icon={<Dots size="24" />}
         />
       }
     >

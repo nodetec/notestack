@@ -1,10 +1,10 @@
 import Popup from "./Popup";
 import { useEffect, useState } from "react";
 import Button from "./Button";
-import { BsLightningChargeFill } from "react-icons/bs";
 import { requestInvoice } from "lnurl-pay";
 import { PRESET_AMOUNTS } from "./lib/constants";
 import Buttons from "@/app/Buttons";
+import { LightningCharge } from "./icons";
 
 export default function LightningTip({
   lud06,
@@ -86,7 +86,7 @@ export default function LightningTip({
               variant="outline"
               iconAfter
               className="w-full"
-              icon={<BsLightningChargeFill size="14" />}
+              icon={<LightningCharge size="14" />}
               onClick={() => setTipInputValue(amount.value)}
             >
               {amount.label}
@@ -107,7 +107,7 @@ export default function LightningTip({
           variant="solid"
           onClick={handleSendTip}
           size="md"
-          icon={<BsLightningChargeFill size="14" />}
+          icon={<LightningCharge size="14" />}
           className="w-full"
         >
           Send

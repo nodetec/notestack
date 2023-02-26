@@ -1,6 +1,5 @@
 "use client";
 
-import { SlNote } from "react-icons/sl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BlogContext } from "./context/blog-provider";
@@ -17,6 +16,7 @@ import { FeedContext } from "./context/feed-provider";
 import PublishPopupInput from "./PublishPopupInput";
 import PopupCheckbox from "./PopupCheckbox";
 import Popup from "./Popup";
+import { Note } from "./icons";
 
 const WriteButton = () => {
   // @ts-ignore
@@ -295,7 +295,7 @@ const WriteButton = () => {
           className="flex gap-2 text-gray hover:text-gray-hover"
           href="/write"
         >
-          <SlNote size="20" />
+          <Note size="20" />
           <span className="text-sm">Write</span>
         </Link>
       )}

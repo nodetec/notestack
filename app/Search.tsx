@@ -8,15 +8,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import { BsSearch } from "react-icons/bs";
 import Tooltip from "./Tooltip";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import { DUMMY_PROFILE_API } from "./lib/constants";
 import { shortenHash } from "./lib/utils";
-import { AiFillTag } from "react-icons/ai";
 import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
+import { Search as SearchIcon, Tag as TagIcon } from "@/app/icons";
 
 type ResultType = {
   pubkeys: string[];
@@ -147,7 +146,7 @@ const SearchInput: FC<
   DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 > = (props) => (
   <div className="flex flex-row items-center gap-2 px-3 py-2 bg-light-gray bg-opacity-40 rounded-full">
-    <BsSearch className="text-gray-hover" size="15" />
+    <SearchIcon className="text-gray-hover" size="15" />
     <input
       placeholder="Search blogstack"
       className="bg-transparent focus:outline-none focus:ring-0"
@@ -222,7 +221,7 @@ const Profile: FC<{ pubkey: string }> = ({ pubkey }) => {
 const Tag: FC<{ tag: string }> = ({ tag }) => {
   return (
     <>
-      <AiFillTag size="20" className="text-gray" />
+      <TagIcon size="20" className="text-gray" />
       <span>{tag}</span>
     </>
   );
