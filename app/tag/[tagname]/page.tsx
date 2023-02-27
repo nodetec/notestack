@@ -20,7 +20,10 @@ import { Tag } from "@/app/icons";
 export default function TagPage() {
   const pathname = usePathname();
   const tagname = pathname!.split("/").pop();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<{ e: Event[]; isLoading: boolean }>({
+    e: [],
+    isLoading: false,
+  });
 
   const TABS = ["Latest"];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
@@ -51,12 +54,12 @@ export default function TagPage() {
     let pubkeysSet = new Set<string>();
     let eventTagsSet = new Set<string>();
 
-    setEvents([]);
+    setEvents({ e: [], isLoading: true });
     let relayName = relayUrl.replace("wss://", "");
     let feedKey = `tag_${tagname}_${relayName}`;
 
     if (feed[feedKey]) {
-      setEvents(feed[feedKey]);
+      setEvents({ e: feed[feedKey], isLoading: false });
       const events = feed[feedKey];
       events.forEach((event: Event) => {
         const tValues = getTValues(event.tags);
@@ -86,9 +89,9 @@ export default function TagPage() {
       setFeed(feed);
       if (filteredEvents.length > 0) {
         // @ts-ignore
-        setEvents(filteredEvents);
+        setEvents({ e: filteredEvents, isLoading: false });
       } else {
-        setEvents([]);
+        setEvents({ e: [], isLoading: false });
       }
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
@@ -113,19 +116,20 @@ export default function TagPage() {
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
         {activeTab === "Latest" ? (
           <BlogFeed
-            events={events}
+            events={events.e}
             setEvents={setEvents}
             filter={filter}
             profile={true}
+            isEventsLoading={events.isLoading}
           />
         ) : null}
       </Content>
       <Aside>
-        {events.length > 0 && (
+        {events.e.length > 0 && (
           <RecommendedEvents
             title="Recommended Blogs"
             showProfile
-            events={events.slice(0, 3)}
+            events={events.e.slice(0, 3)}
           />
         )}
 
