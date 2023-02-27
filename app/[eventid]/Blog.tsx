@@ -6,6 +6,7 @@ import Main from "../Main";
 import MarkdownDisplay from "./MarkdownDisplay";
 import Topics from "../Topics";
 import UserCard from "../components/profile/UserCard";
+import useLocalStorage from "../hooks/useLocalStorage";
 
 interface NoteProps {
   event: Event;
@@ -18,8 +19,8 @@ export default function Note({ event }: NoteProps) {
     .filter((tag: string[]) => tag[0] === "t")
     .map((tag: string[]) => tag[1]);
   const npub = nip19.npubEncode(event.pubkey);
-  // @ts-ignore
-  const [zenMode, setZenMode] = useState(false);
+  const [storedZenMode] = useLocalStorage("zenMode", false);
+  const [zenMode, setZenMode] = useState(storedZenMode);
 
   return (
     <Main mode={zenMode ? "zen" : "normal"}>

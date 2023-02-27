@@ -11,6 +11,7 @@ import { NostrService } from "@/app/lib/nostr";
 import { KeysContext } from "../context/keys-provider";
 import { UserContext } from "../context/user-provider";
 import { ProfilesContext } from "../context/profiles-provider";
+import Item from "./Item";
 
 const Account = () => {
   const initialProfileInfo = {
@@ -182,36 +183,24 @@ const Account = () => {
   return (
     <Fragment>
       <div className="flex flex-col gap-6">
-        <Item
-          title="Name"
-          value={newProfile.name}
-          onClick={() => setPopup("Name")}
-        />
-        <Item
-          title="NIP-05 ID"
-          value={newProfile.nip05}
-          onClick={() => setPopup("NIP-05 ID")}
-        />
-        <Item
-          title="About"
-          value={newProfile.about}
-          onClick={() => setPopup("About")}
-        />
-        <Item
-          title="Picture"
-          value={newProfile.picture}
-          onClick={() => setPopup("Picture")}
-        />
-        <Item
-          title="Banner"
-          value={newProfile.banner}
-          onClick={() => setPopup("Banner")}
-        />
-        <Item
-          title="Lightning Tips"
-          value={newProfile.lud16}
-          onClick={() => setPopup("Lightning Tips")}
-        />
+        <Item title="Name" onClick={() => setPopup("Name")}>
+          {newProfile.name}
+        </Item>
+        <Item title="NIP-05 ID" onClick={() => setPopup("NIP-05 ID")}>
+          {newProfile.nip05}
+        </Item>
+        <Item title="About" onClick={() => setPopup("About")}>
+          {newProfile.about}
+        </Item>
+        <Item title="Picture" onClick={() => setPopup("Picture")}>
+          {newProfile.picture}
+        </Item>
+        <Item title="Banner" onClick={() => setPopup("Banner")}>
+          {newProfile.banner}
+        </Item>
+        <Item title="Lightning Tips" onClick={() => setPopup("Lightning Tips")}>
+          {newProfile.lud16}
+        </Item>
         {noChanges ? null : (
           <div className="flex gap-2 justify-end items-center mt-4">
             <Button
@@ -328,25 +317,5 @@ const Account = () => {
     </Fragment>
   );
 };
-
-const Item = ({
-  title,
-  value,
-  onClick,
-}: {
-  title: string;
-  value: string;
-  onClick: () => void;
-}) => (
-  <button
-    className="w-full flex items-center gap-4 justify-between text-sm"
-    onClick={onClick}
-  >
-    <h3>{title}</h3>
-    <span className="text-gray max-w-[70%] overflow-hidden hover:text-gray-hover whitespace-nowrap text-ellipsis">
-      {value}
-    </span>
-  </button>
-);
 
 export default Account;
