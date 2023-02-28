@@ -10,7 +10,7 @@ const Appearance = () => {
   const [darkTheme, setDarkTheme] = useLocalStorage("darkTheme", false);
 
   useEffect(() => {
-    document.body.dataset.colorMode = darkTheme ? "dark" : "light";
+    document.documentElement.dataset.colorMode = darkTheme ? "dark" : "light";
   }, [darkTheme]);
 
   return (
@@ -19,7 +19,7 @@ const Appearance = () => {
         <Switch checked={zenMode} />
       </Item>
       <Item
-        title="Dark theme"
+        title="Dark mode"
         onClick={() => setDarkTheme((current) => !current)}
       >
         <Switch checked={darkTheme} />

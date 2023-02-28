@@ -2,9 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root[data-color-mode="dark"] {
+    filter: invert(1) hue-rotate(180deg);
+  }
+  :root[data-color-mode="dark"] img {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
 html,
 body {
-  scroll-behavior: smooth;
+  @apply scroll-smooth transition-colors;
 }
 
 textarea:invalid[titlefocused="true"] ~ span,
