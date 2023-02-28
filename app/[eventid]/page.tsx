@@ -22,6 +22,7 @@ export default function NotePage() {
   const [event, setEvent] = useState<Event>();
   // @ts-ignore
   const { addProfiles } = useContext(ProfilesContext);
+  const naddr: any = nip19.decode(naddrStr).data;
 
   // @ts-ignore
   const { cachedEvent, setCachedEvent } = useContext(CachedEventContext);
@@ -29,7 +30,6 @@ export default function NotePage() {
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 
-    const naddr: any = nip19.decode(naddrStr).data;
 
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
@@ -73,6 +73,6 @@ export default function NotePage() {
   }, []);
 
   if (event) {
-    return <Blog event={event} />;
+    return <Blog event={event} naddr={naddrStr} />;
   }
 }

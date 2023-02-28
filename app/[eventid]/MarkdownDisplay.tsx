@@ -22,12 +22,14 @@ interface MarkdownDisplayProps {
   event: Event;
   zenMode: boolean;
   setZenMode: Dispatch<SetStateAction<boolean>>;
+  naddr: string;
 }
 
 const MarkdownDisplay = ({
   event,
   zenMode,
   setZenMode,
+  naddr,
 }: MarkdownDisplayProps) => {
   const tags = event.tags;
   const title = getTagValues("title", tags);
@@ -38,6 +40,8 @@ const MarkdownDisplay = ({
   const [name, setName] = useState<string>();
   const [picture, setPicture] = useState<string>(DUMMY_PROFILE_API(npub));
   const { relayUrl } = useContext(RelayContext);
+  console.log("NADDR: ", naddr);
+  console.log("EVENT: ", event);
 
   useLayoutEffect(() => {
     document.documentElement.focus();
@@ -129,9 +133,13 @@ const MarkdownDisplay = ({
           dangerouslySetInnerHTML={{ __html: markdown }}
         />
       </div>
-      {event && (
+      {event && naddr && naddr !== "" &&(
         <div className={styles.nocomment}>
-          <NoComment className="outline-none" relays={[relayUrl]} />
+          <NoComment
+            className="outline-none"
+            relays={[relayUrl]}
+            customBase={naddr}
+          />
         </div>
       )}
     </>
