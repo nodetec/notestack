@@ -51,7 +51,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
             onClick={handleSignOut}
           >
             <span className="group-hover:text-gray-hover">Sign out</span>
-            <span>{shortenHash(npub, 16)}</span>
+            <span>{shortenHash(npub, 12)}</span>
           </button>
         </GroupMenu>
       </div>

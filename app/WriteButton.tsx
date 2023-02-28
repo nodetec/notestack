@@ -93,6 +93,10 @@ const WriteButton = () => {
     }
   }, [publishCount]);
 
+  if (!keys.publicKey) {
+    return null;
+  }
+
   const setNoOptionsMessage = () => {
     return "No Options";
   };

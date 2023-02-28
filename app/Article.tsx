@@ -134,10 +134,7 @@ const Article: FC<NoteProps> = ({
   };
 
   return (
-    <article
-      className="py-8 border-b border-b-light-gray overflow-x-hidden"
-      {...props}
-    >
+    <article className="py-8 border-b border-b-light-gray" {...props}>
       <div className="flex flex-row justify-between">
         <div>
           <div className="flex items-center gap-2 pb-4">

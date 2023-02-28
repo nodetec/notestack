@@ -8,22 +8,24 @@ import RecommendedEvents from "../RecommendedEvents";
 import Tabs from "../Tabs";
 import Account from "./Account";
 import Notifications from "./Notifications";
-import Publishing from "./Publishing";
+import Appearance from "./Appearance";
 import Relays from "./Relyas";
+import FollowedRelays from "../FollowedRelays";
 
 const SettingsPage = () => {
-  const TABS = ["Account", "Relays" /* , "Publishing", "Notifications" */];
+  const TABS = ["Account", "Relays", "Appearance" /* "Notifications" */];
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(TABS[0]);
 
   return (
     <Main>
       <Content>
         <h1 className="text-5xl font-medium my-12">Settings</h1>
+        {activeTab === "Account" && <FollowedRelays />}
         <Tabs TABS={TABS} activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="mt-12">
           {activeTab === "Account" && <Account />}
           {activeTab === "Relays" && <Relays />}
-          {activeTab === "Publishing" && <Publishing />}
+          {activeTab === "Appearance" && <Appearance />}
           {activeTab === "Notifications" && <Notifications />}
         </div>
       </Content>
