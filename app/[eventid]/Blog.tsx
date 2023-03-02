@@ -10,9 +10,10 @@ import useLocalStorage from "../hooks/useLocalStorage";
 
 interface NoteProps {
   event: Event;
+  naddr: any;
 }
 
-export default function Note({ event }: NoteProps) {
+export default function Note({ event, naddr }: NoteProps) {
   // TODO: get event from context if available instead of using hook everytime
   const tags = event.tags;
   const tagsTags = tags
@@ -31,6 +32,7 @@ export default function Note({ event }: NoteProps) {
               zenMode={zenMode}
               setZenMode={setZenMode}
               event={event}
+              naddr={naddr}
             />
           </div>
         )}
