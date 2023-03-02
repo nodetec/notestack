@@ -185,7 +185,7 @@ export default function HomePage() {
       <Content className="mt-8">
         <FollowedRelays />
         <Tabs
-          className="sticky top-0 z-20"
+          className="sticky top-0 z-10"
           TABS={TABS}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
