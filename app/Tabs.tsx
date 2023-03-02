@@ -20,7 +20,7 @@ const Tabs: React.FC<TabProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-6 border-b border-b-light-gray ${className}`}
+      className={`flex items-center gap-6 border-b border-b-light-gray bg-white ${className}`}
     >
       {TABS.map((tab) => (
         <button
