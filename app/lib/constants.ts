@@ -1,8 +1,8 @@
 export const RELAYS = [
-  "wss://relay.snort.social",
-  "wss://nostr-pub.wellorder.net",
   "wss://relay.damus.io",
+  "wss://nostr-pub.wellorder.net",
   "wss://nos.lol/",
+  "wss://relay.snort.social",
   "wss://nostr.wine/",
   // "wss://nostr.nostrelay.org",
   // "wss://relay.nostr.ch",
