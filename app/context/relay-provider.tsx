@@ -54,22 +54,22 @@ const RelayProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { setNotifyMessage } = useContext(NotifyContext);
-  const [allRelays, setAllRelays] = useState<string[]>([]);
+  const [allRelays, setAllRelays] = useState<string[]>(RELAYS);
   const [relayUrl, setRelayUrl] = useState<string>(RELAYS[0]);
   const [activeRelay, setActiveRelay] = useState<Relay>();
   const [connectedRelays, setConnectedRelays] = useState<Set<Relay>>(new Set());
 
   // get custom relays from local storage
-  useEffect(() => {
-    const customRelays = JSON.parse(
-      localStorage.getItem("blogstackRelays") || "null"
-    );
-    setAllRelays(customRelays || RELAYS);
-  }, []);
+  // useEffect(() => {
+  //   const customRelays = JSON.parse(
+  //     localStorage.getItem("blogstackRelays") || "null"
+  //   );
+  //   setAllRelays(customRelays || RELAYS);
+  // }, []);
   // set blogstack relays to local storage
-  useEffect(() => {
-    localStorage.setItem("blogstackRelays", JSON.stringify(allRelays));
-  }, [allRelays]);
+  // useEffect(() => {
+  //   localStorage.setItem("blogstackRelays", JSON.stringify(allRelays));
+  // }, [allRelays]);
   // reset relays to default
   const resetRelays = () => {
     setAllRelays(RELAYS);
