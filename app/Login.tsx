@@ -6,12 +6,14 @@ import Button from "./Button";
 import AccountButton from "./AccountButton";
 
 import { KeysContext } from "./context/keys-provider.jsx";
+import { ChevronUp } from "./icons";
 
 export default function Login() {
   // @ts-ignore
   const { keys, setKeys } = useContext(KeysContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isLightningConnected, setIsLightningConnected] = useState(false);
+  const [skipGetAlby, setSkipGetAlby] = useState(false);
 
   useEffect(() => {
     const shouldReconnect = localStorage.getItem("shouldReconnect");
@@ -90,10 +92,11 @@ export default function Login() {
 
       <Popup title="Login" isOpen={isOpen} setIsOpen={setIsOpen}>
         {typeof window !== "undefined" &&
+        !skipGetAlby &&
         //@ts-ignore
         typeof window.nostr === "undefined" ? (
           <div>
-            <div className="text-center flex flex-col items-center gap-4 py-2">
+            <div className="text-center flex flex-col items-center gap-4 pt-2 pb-4">
               <p>Install Alby Extension and setup keys to Login</p>
               <a
                 href="https://getalby.com/"
@@ -104,14 +107,26 @@ export default function Login() {
                 Get Alby Extension
               </a>
             </div>
-            <a
-              className="font-bold underline text-black text-sm text-center block"
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://guides.getalby.com/overall-guide/alby-browser-extension/features/nostr"
-            >
-              Learn more
-            </a>
+            <div className="flex items-center gap-4 justify-between">
+              <a
+                className="font-bold underline text-black text-sm"
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://guides.getalby.com/overall-guide/alby-browser-extension/features/nostr"
+              >
+                Learn more
+              </a>
+              <Button
+                variant="ghost"
+                size="xs"
+                className="font-bold text-sm"
+                iconAfter
+                icon={<ChevronUp className="rotate-90" />}
+                onClick={() => setSkipGetAlby(true)}
+              >
+                skip
+              </Button>
+            </div>
           </div>
         ) : (
           <Button className="w-full font-bold" onClick={loginHandler} size="sm">
