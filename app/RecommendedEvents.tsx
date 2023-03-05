@@ -9,9 +9,9 @@ import { useContext, useEffect, useState } from "react";
 import { RelayContext } from "./context/relay-provider";
 import { ProfilesContext } from "./context/profiles-provider";
 import { CachedEventContext } from "./context/cached-event-provider";
-import { AddressPointer } from "nostr-tools/nip19";
 import { useRouter } from "next/navigation";
 import RecommendedEventsSkeleton from "./components/Skeleton/RecommendedEvents";
+import { AddressPointer } from "nostr-tools/lib/nip19";
 
 interface RecommendedEventsProps {
   events: Event[];

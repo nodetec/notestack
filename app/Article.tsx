@@ -23,9 +23,9 @@ import {
 import { getTagValues } from "./lib/utils";
 import { useRouter } from "next/navigation";
 import { CachedEventContext } from "./context/cached-event-provider";
-import { AddressPointer } from "nostr-tools/nip19";
 import Tooltip from "./Tooltip";
 import { Tag } from "./icons";
+import { AddressPointer } from "nostr-tools/lib/nip19";
 // import AuthorTooltip from "./AuthorTooltip";
 
 interface NoteProps
