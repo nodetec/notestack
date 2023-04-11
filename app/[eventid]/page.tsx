@@ -7,6 +7,7 @@ import Blog from "./Blog";
 import { RelayContext } from "../context/relay-provider";
 import { CachedEventContext } from "../context/cached-event-provider";
 import { ProfilesContext } from "../context/profiles-provider";
+import { getTagValues } from "../lib/utils";
 // import { AddressPointer } from "nostr-tools/nip19";
 
 export default function NotePage() {
@@ -30,14 +31,13 @@ export default function NotePage() {
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 
-
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
     const filter = {
       kinds: [naddr.kind],
       authors: [naddr.pubkey],
-      "#d": naddr.identifier,
+      // "#d": naddr.identifier,
     };
 
     let events: Event[] = [];
@@ -51,7 +51,11 @@ export default function NotePage() {
 
     const onEOSE = () => {
       if (events.length > 0) {
-        setEvent(events[0]);
+        // TODO: this should be handled by the relay!!!!!!!!
+        const retEvent = events.filter((ev) => {
+          return getTagValues("d", ev.tags) === naddr.identifier;
+        });
+        setEvent(retEvent[0]);
       }
       if (pubkeysSet.size > 0) {
         addProfiles(Array.from(pubkeysSet));
