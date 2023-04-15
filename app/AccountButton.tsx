@@ -65,7 +65,6 @@ export default function AccountButton({ pubkey }: AccountButtonProps) {
     let events: Event[] = [];
 
     const onEvent = (event: any) => {
-      // @ts-ignore
       event.relayUrl = relayUrl;
       events.push(event);
       if (event.kind === 0) {

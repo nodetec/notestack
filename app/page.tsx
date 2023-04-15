@@ -83,7 +83,6 @@ export default function HomePage() {
     let events: Event[] = [];
 
     const onEvent = (event: any) => {
-      // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
@@ -130,6 +129,7 @@ export default function HomePage() {
     if (followingPublicKeys.length === 0) {
       return;
     }
+
     const newfollowingFilter = {
       kinds: [30023],
       limit: 50,
@@ -148,7 +148,6 @@ export default function HomePage() {
     let events: Event[] = [];
 
     const onEvent = (event: any) => {
-      // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
     };

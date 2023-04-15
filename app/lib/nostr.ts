@@ -64,7 +64,6 @@ export namespace NostrService {
 
   export async function signEvent(event: Event) {
     try {
-      // @ts-ignore
       event = await window.nostr.signEvent(event);
     } catch (err: any) {
       console.error("signing event failed");

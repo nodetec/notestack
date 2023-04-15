@@ -38,7 +38,6 @@ export default function BlogFeed({
         // let sub = activeRelay.sub([filter]);
 
         const onEvent = (event: any) => {
-          // @ts-ignore
           event.relayUrl = relayName;
           events.push(event);
           pubkeysSet.add(event.pubkey);

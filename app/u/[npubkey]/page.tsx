@@ -91,7 +91,6 @@ export default function ProfilePage() {
     let events: Event[] = [];
 
     const onEvent = (event: any) => {
-      // @ts-ignore
       event.relayUrl = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);

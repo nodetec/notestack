@@ -2,9 +2,16 @@ import Popup from "./Popup";
 import { useEffect, useState } from "react";
 import Button from "./Button";
 import { requestInvoice } from "lnurl-pay";
-import { PRESET_AMOUNTS } from "./lib/constants";
 import Buttons from "@/app/Buttons";
 import { LightningCharge } from "./icons";
+import { Satoshis } from "lnurl-pay/dist/types/types";
+
+const PRESET_AMOUNTS = [
+  { value: 1000 as Satoshis, label: "1k" },
+  { value: 5000 as Satoshis, label: "5k" },
+  { value: 10000 as Satoshis, label: "10k" },
+  { value: 25000 as Satoshis, label: "25k" },
+];
 
 export default function LightningTip({
   lud06,
@@ -12,15 +19,17 @@ export default function LightningTip({
   isTipOpen,
   setIsTipOpen,
 }: any) {
+  const defaultTipAmount = 1 as Satoshis;
   const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
-  const [tipInputValue, setTipInputValue] = useState<string>("1");
+  const [tipInputValue, setTipInputValue] =
+    useState<Satoshis>(defaultTipAmount);
   const [tipMessage, setTipMessage] = useState<string>();
   const [paymentHash, setPaymentHash] = useState();
   const [tippedAmount, setTippedAmount] = useState<any>();
 
   useEffect(() => {
     setTipMessage("");
-    setTipInputValue("1");
+    setTipInputValue(defaultTipAmount);
   }, [isTipOpen]);
 
   const validateTipInputKeyDown = (e: any) => {
@@ -31,19 +40,16 @@ export default function LightningTip({
 
   const handleSendTip = async (e: any) => {
     e.preventDefault();
-    // @ts-ignore
     if (typeof window.webln !== "undefined") {
       const lnUrlOrAddress = lud06 || lud16;
 
-      const { invoice, params, successAction, validatePreimage } =
+      const { invoice /* , params, successAction, validatePreimage  */ } =
         await requestInvoice({
           lnUrlOrAddress,
-          // @ts-ignore
           tokens: tipInputValue, // satoshis
           comment: tipMessage,
         });
       try {
-        // @ts-ignore
         const result = await webln.sendPayment(invoice);
         // console.log("Tip Result:", result);
         setTippedAmount(tipInputValue);
@@ -64,12 +70,16 @@ export default function LightningTip({
         setIsOpen={setIsTipOpen}
       >
         <h2 className="pt-2 font-bold text-lg ">Amount</h2>
-        <div className="flex items-center w-full py-2 px-4 rounded-md   ring-1 ring-black-700">
+        <div className="flex items-center w-full py-2 px-4 rounded-md ring-1 ring-black-700">
           <input
             type="number"
             value={tipInputValue}
             onKeyDown={validateTipInputKeyDown}
-            onChange={(e) => setTipInputValue(e.target.value)}
+            onChange={(e) => {
+              const inputValue = e.target.value;
+              const tipAmount = parseInt(inputValue) as Satoshis;
+              setTipInputValue(tipAmount);
+            }}
             placeholder="Enter amount in sats"
             required
             min={1}
@@ -80,9 +90,9 @@ export default function LightningTip({
           </span>
         </div>
         <Buttons>
-          {PRESET_AMOUNTS.map((amount: any) => (
+          {PRESET_AMOUNTS.map((amount, idx) => (
             <Button
-              key={amount.label}
+              key={idx}
               variant="outline"
               iconAfter
               className="w-full"

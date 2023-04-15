@@ -21,27 +21,22 @@ export default function Login() {
     const getConnected = async (shouldReconnect: string) => {
       let enabled = false;
 
-      // @ts-ignore
       if (typeof window.nostr === "undefined") {
         return;
       }
 
       if (shouldReconnect === "true") {
-        // @ts-ignore
         const publicKey = await nostr.getPublicKey();
         // console.log("public key", publicKey);
         setKeys({ privateKey: "", publicKey: publicKey });
       }
 
-      // @ts-ignore
       if (typeof window.webln === "undefined") {
         return;
       }
 
-      // @ts-ignore
       if (shouldReconnect === "true" && !webln.executing) {
         try {
-          // @ts-ignore
           enabled = await window.webln.enable();
           setIsLightningConnected(true);
         } catch (e: any) {
@@ -57,18 +52,14 @@ export default function Login() {
   }, [setKeys]);
 
   const loginHandler = async () => {
-    // @ts-ignore
     if (typeof window.nostr !== "undefined") {
-      // @ts-ignore
       const publicKey = await nostr.getPublicKey();
       // console.log("public key", publicKey);
       setKeys({ privateKey: "", publicKey: publicKey });
       localStorage.setItem("shouldReconnect", "true");
     }
 
-    // @ts-ignore
     if (typeof window.webln !== "undefined") {
-      // @ts-ignore
       await window.webln.enable();
     }
     console.log("connected ");
@@ -93,7 +84,6 @@ export default function Login() {
       <Popup title="Login" isOpen={isOpen} setIsOpen={setIsOpen}>
         {typeof window !== "undefined" &&
         !skipGetAlby &&
-        //@ts-ignore
         typeof window.nostr === "undefined" ? (
           <div>
             <div className="text-center flex flex-col items-center gap-4 pt-2 pb-4">

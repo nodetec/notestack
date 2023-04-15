@@ -30,7 +30,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "/home/mhmdali102/mhmdali102/blogstack/.next/types/**/*.ts"
+    "/home/mhmdali102/mhmdali102/blogstack/.next/types/**/*.ts",
+    "/mnt/home/mhmdali102/mhmdali102/blogstack/.next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
