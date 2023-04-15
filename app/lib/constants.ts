@@ -13,13 +13,6 @@ export const RELAYS = [
   // "wss://relay.nostr.info",
 ];
 
-export const PRESET_AMOUNTS = [
-  { value: "1000", label: "1k" },
-  { value: "5000", label: "5k" },
-  { value: "10000", label: "10k" },
-  { value: "25000", label: "25k" },
-];
-
 export const HOST = "https://blogstack.io";
 
 export const DUMMY_PROFILE_API = (seed: string) => {

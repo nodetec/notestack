@@ -30,7 +30,6 @@ export default function NotePage() {
   const getEvents = async () => {
     let pubkeysSet = new Set<string>();
 
-
     setEvent(undefined);
     let relayName = relayUrl.replace("wss://", "");
 
@@ -43,7 +42,6 @@ export default function NotePage() {
     let events: Event[] = [];
 
     const onEvent = (event: any) => {
-      // @ts-ignore
       event.relayName = relayName;
       events.push(event);
       pubkeysSet.add(event.pubkey);
