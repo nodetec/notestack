@@ -177,7 +177,7 @@ const Article: FC<NoteProps> = ({
                 {title}
               </h2>
             ) : null}
-            <p className="text-gray text-sm leading-6 hidden sm:block">
+            <p className="text-gray text-sm leading-6 hidden sm:block break-words">
               {summary
                 ? summary.length > 250
                   ? summary.slice(0, 250) + "..."
