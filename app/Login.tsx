@@ -10,6 +10,7 @@ import { ChevronUp } from "./icons";
 import More from "./icons/More";
 import { Cogwheel } from "./icons/Cogwheel";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Login() {
   // @ts-ignore
@@ -17,6 +18,7 @@ export default function Login() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLightningConnected, setIsLightningConnected] = useState(false);
   const [skipGetAlby, setSkipGetAlby] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const shouldReconnect = localStorage.getItem("shouldReconnect");
@@ -83,16 +85,14 @@ export default function Login() {
           <Button variant="outline" onClick={handleClick} size="sm">
             login
           </Button>
-          <Link href="/settings">
-            <Button
-              variant="ghost"
-              onClick={() => console.log("hello")}
-              size="sm"
-            >
-              {/* <More /> */}
-              <Cogwheel />
-            </Button>
-          </Link>
+          {pathname !== "/settings" && (
+            <Link href="/settings">
+              <Button variant="ghost" size="sm">
+                {/* <More /> */}
+                <Cogwheel />
+              </Button>
+            </Link>
+          )}
         </>
       )}
 
