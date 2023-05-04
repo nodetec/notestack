@@ -7,6 +7,9 @@ import AccountButton from "./AccountButton";
 
 import { KeysContext } from "./context/keys-provider.jsx";
 import { ChevronUp } from "./icons";
+import More from "./icons/More";
+import { Cogwheel } from "./icons/Cogwheel";
+import Link from "next/link";
 
 export default function Login() {
   // @ts-ignore
@@ -76,9 +79,21 @@ export default function Login() {
       {isLightningConnected && keys?.publicKey ? (
         <AccountButton pubkey={keys?.publicKey} />
       ) : (
-        <Button variant="outline" onClick={handleClick} size="sm">
-          login
-        </Button>
+        <>
+          <Button variant="outline" onClick={handleClick} size="sm">
+            login
+          </Button>
+          <Link href="/settings">
+            <Button
+              variant="ghost"
+              onClick={() => console.log("hello")}
+              size="sm"
+            >
+              {/* <More /> */}
+              <Cogwheel />
+            </Button>
+          </Link>
+        </>
       )}
 
       <Popup title="Login" isOpen={isOpen} setIsOpen={setIsOpen}>
