@@ -4,6 +4,7 @@ import { nip19 } from "nostr-tools";
 import { shortenHash } from "./lib/utils";
 import { UserContext } from "./context/user-provider";
 import { User, IconType, Bookmark } from "./icons";
+import { Cogwheel } from "./icons/Cogwheel";
 
 interface ProfileMenuProps {
   pubkey: string;
@@ -43,6 +44,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ pubkey, toggleMenu }) => {
             onClick={() => toggleMenu(false)}
             label="Settings"
             href="/settings"
+            Icon={Cogwheel}
           />
         </GroupMenu>
         <GroupMenu>
