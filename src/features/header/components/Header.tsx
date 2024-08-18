@@ -23,9 +23,9 @@ export function Header() {
   return (
     <header className="relative flex items-center justify-between px-4 py-4 md:px-6">
       <Link href="/" className="flex items-center gap-2">
-        <Layers3 className="h-5 w-5 lg:h-7 lg:w-7" />
+        <Layers3 className="h-5 w-5" />
         <span
-          className={`${merriweather.className} text-xl font-bold lg:text-2xl`}
+          className={`${merriweather.className} text-xl font-bold`}
         >
           NoteStack
         </span>
@@ -82,12 +82,12 @@ export function Header() {
             <Button
               variant="outline"
               size="icon"
-              className="h-11 w-11 overflow-hidden rounded-full focus-visible:ring-muted"
+              className="overflow-hidden rounded-full focus-visible:ring-muted"
             >
               <img
                 src="https://chrisatmachine.com/images/me.jpg"
                 alt="Avatar"
-                className="overflow-hidden rounded-full object-cover ring"
+                className="overflow-hidden rounded-full object-cover"
               />
             </Button>
           </DropdownMenuTrigger>
