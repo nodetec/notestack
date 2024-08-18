@@ -82,13 +82,13 @@ const config = {
           "serif",
         ],
       },
-      typography: (theme: ThemeConfig) => ({
+      typography: (_: ThemeConfig) => ({
         DEFAULT: {
           css: {
             "p, li, blockquote, a, table, th, td": {
               lineHeight: "1.65",
               fontSize: "1.2rem",
-              fontFamily: theme("fontFamily.newsreader"),
+              fontFamily: "var(--font-newsreader)",
             },
           },
         },
