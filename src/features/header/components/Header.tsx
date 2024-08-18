@@ -10,15 +10,25 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ThemeToggle } from "~/features/theme-toggle";
-import { Layers3 } from "lucide-react";
+import { Layers3, PenBoxIcon } from "lucide-react";
+import { Merriweather } from "next/font/google";
 import Link from "next/link";
+
+const merriweather = Merriweather({
+  subsets: ["latin"],
+  weight: ["700"],
+});
 
 export function Header() {
   return (
     <header className="relative flex items-center justify-between px-4 py-4 md:px-6">
       <Link href="#" className="flex items-center gap-2">
-        <Layers3 className="h-7 w-7" />
-        <span className="font-serif text-2xl font-semibold">NoteStack</span>
+        <Layers3 className="h-5 w-5 lg:h-7 lg:w-7" />
+        <span
+          className={`${merriweather.className} text-xl font-bold lg:text-2xl`}
+        >
+          NoteStack
+        </span>
       </Link>
       <nav className="absolute left-1/2 hidden -translate-x-1/2 transform items-center gap-4 md:flex">
         <Link
@@ -50,7 +60,22 @@ export function Header() {
           About
         </Link>
       </nav>
-      <div className="flex gap-4 items-center">
+      <div className="flex items-center gap-4">
+        <Button
+          className="focus-visible:outline-none focus-visible:ring-transparent lg:hidden"
+          variant="outline"
+          size="icon"
+        >
+          <PenBoxIcon className="h-[1.2rem] w-[1.2rem]" />
+        </Button>
+        <Button
+          className="hidden focus-visible:outline-none focus-visible:ring-transparent lg:flex"
+          variant="outline"
+        >
+          <PenBoxIcon className="mr-2 h-[1.2rem] w-[1.2rem]" />
+          <span className="text-[1.05rem]">Write</span>
+        </Button>
+
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
