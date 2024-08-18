@@ -32,18 +32,12 @@ export function ArticleFeed() {
       {data?.map((post) => (
         <>
           <Card className="w-full border-none shadow-none" key={post.id}>
-            <Link href={`/a/${makeNaddr(post, relays)}`} prefetch={false}>
+            <Link href={`/a/${makeNaddr(post, relays)}`}>
               <CardContent className="flex items-center p-4 md:p-6">
                 <div className="md:flex-1 md:p-0">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                      <Link
-                        href="#"
-                        className="hover:underline"
-                        prefetch={false}
-                      >
-                        {"Technology"}
-                      </Link>
+                      <span>Technology</span>
                       <span className="mx-2">•</span>
                       <span>{"Chris"}</span>
                     </div>
