@@ -22,7 +22,7 @@ const merriweather = Merriweather({
 export function Header() {
   return (
     <header className="relative flex items-center justify-between px-4 py-4 md:px-6">
-      <Link href="#" className="flex items-center gap-2">
+      <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5 lg:h-7 lg:w-7" />
         <span
           className={`${merriweather.className} text-xl font-bold lg:text-2xl`}

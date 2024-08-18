@@ -4,7 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "~/components/ui/card";
 import { getFirstImage, parseContent } from "~/lib/markdown";
-import { getTag } from "~/lib/nostr";
+import { getTag, makeNaddr } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import Link from "next/link";
 
@@ -30,9 +30,9 @@ export function ArticleFeed() {
     <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-8">
       {data?.map((post) => (
         <Card className="w-full" key={post.id}>
-          <Link href={`/article/${post.id}`} prefetch={false}>
-            <CardContent className="flex items-center p-6">
-              <div className="p-4 md:flex-1 md:p-0">
+          <Link href={`/a/${makeNaddr(post, relays)}`} prefetch={false}>
+            <CardContent className="flex items-center p-4 md:p-6">
+              <div className="md:flex-1 md:p-0">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
                     <Link href="#" className="hover:underline" prefetch={false}>
@@ -54,7 +54,7 @@ export function ArticleFeed() {
               <img
                 src={getTag("image", post.tags) ?? getFirstImage(post.content)}
                 alt=""
-                className="ml-14 h-28 w-40 rounded-md object-cover"
+                className="ml-2 md:ml-14 h-14 w-20 md:h-28 md:w-40 rounded-md object-cover"
               />
             </CardContent>
           </Link>
