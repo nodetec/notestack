@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import type { Config } from "tailwindcss";
+import { type ThemeConfig } from "tailwindcss/types/config";
 
 const config = {
   darkMode: ["class"],
@@ -69,6 +71,28 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        newsreader: "var(--font-newsreader)",
+        serif: [
+          "Newsreader",
+          "Georgia",
+          "Cambria",
+          "Times New Roman",
+          "Times",
+          "serif",
+        ],
+      },
+      typography: (theme: ThemeConfig) => ({
+        DEFAULT: {
+          css: {
+            "p, li, blockquote, a, table, th, td": {
+              lineHeight: "1.65",
+              fontSize: "1.2rem",
+              fontFamily: theme("fontFamily.newsreader"),
+            },
+          },
+        },
+      }),
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

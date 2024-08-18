@@ -14,7 +14,7 @@ export default async function page({ params }: { params: { naddr: string } }) {
 
   const address = decodeResult.data;
 
-  const relays = ["wss://relay.notestack.com", "wss://nos.lol"];
+  const relays = ["wss://relay.notestack.com"];
 
   const pool = new SimplePool();
 

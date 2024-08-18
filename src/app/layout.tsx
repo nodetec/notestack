@@ -3,8 +3,17 @@ import type { Metadata } from "next";
 import "~/styles/globals.css";
 
 import { ThemeProvider } from "~/components/theme-provider";
+import { Newsreader } from "next/font/google";
 
 import Providers from "./providers";
+
+const newsreader = Newsreader({
+  weight: ["500", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-newsreader",
+});
 
 export const metadata: Metadata = {
   title: "NoteStack",
@@ -18,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-background antialiased overflow-x-hidden">
+      <body className={`overflow-x-hidden bg-background antialiased ${newsreader.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

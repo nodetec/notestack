@@ -8,7 +8,7 @@ import { getTag, makeNaddr } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import Link from "next/link";
 
-const relays = ["wss://relay.notestack.com", "wss://nos.lol"];
+const relays = ["wss://relay.notestack.com"];
 
 export function ArticleFeed() {
   const pool = useAppState((state) => state.pool);
