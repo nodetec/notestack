@@ -40,7 +40,7 @@ export default async function page({ params }: { params: { naddr: string } }) {
   return (
     <main className="grow p-2 sm:rounded-lg sm:bg-secondary sm:p-10 sm:shadow-sm sm:ring-1 sm:ring-zinc-950/5 dark:sm:ring-white/10">
       <article
-        className="prose prose-zinc prose-invert mx-auto"
+        className="prose prose-zinc dark:prose-invert mx-auto"
         dangerouslySetInnerHTML={{ __html: processedContent }}
       />
     </main>
