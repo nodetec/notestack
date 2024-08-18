@@ -29,7 +29,7 @@ export function ArticleFeed() {
     // <div className="flex flex-col">
     <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-8">
       {data?.map((post) => (
-        <Card className="w-full" key={post.id}>
+        <Card className="w-full border-none shadow-none hover:bg-background/25" key={post.id}>
           <Link href={`/a/${makeNaddr(post, relays)}`} prefetch={false}>
             <CardContent className="flex items-center p-4 md:p-6">
               <div className="md:flex-1 md:p-0">
