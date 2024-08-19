@@ -73,6 +73,7 @@ const config = {
       },
       fontFamily: {
         newsreader: "var(--font-newsreader)",
+        merriweather: "var(--font-merriweather)",
         serif: [
           "Newsreader",
           "Georgia",
