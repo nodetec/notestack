@@ -25,7 +25,7 @@ export function ArticleFeed() {
     <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-8">
       {data?.map((post) => (
         <Fragment key={post.id}>
-          <Card className="w-full border-none bg-background shadow-none sm:bg-secondary">
+          <Card className="w-full border-none bg-secondary shadow-none">
             <Link href={`/a/${makeNaddr(post, relays)}`}>
               <CardContent className="flex items-center p-4 md:p-6">
                 <div className="md:flex-1 md:p-0">

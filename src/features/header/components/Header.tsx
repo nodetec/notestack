@@ -37,7 +37,7 @@ export async function Header() {
   }
 
   return (
-    <header className="relative flex items-center justify-between px-4 py-4 md:px-6">
+    <header className="relative border-b sm:border-none flex items-center justify-between mx-4 py-4 md:px-6">
       <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
@@ -72,7 +72,7 @@ export async function Header() {
         {session && (
           <>
             <Button
-              className="focus-visible:outline-none focus-visible:ring-transparent lg:hidden"
+              className="focus-visible:outline-none focus-visible:ring-transparent hidden sm:flex lg:hidden"
               variant="outline"
               size="icon"
             >

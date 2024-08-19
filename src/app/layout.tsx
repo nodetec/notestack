@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`overflow-x-hidden bg-background antialiased ${newsreader.variable} ${merriweather.variable}`}
+        className={`overflow-x-hidden bg-secondary sm:bg-background antialiased ${newsreader.variable} ${merriweather.variable}`}
       >
         <ThemeProvider
           attribute="class"

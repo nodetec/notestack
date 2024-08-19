@@ -24,7 +24,7 @@ export default async function Home() {
   });
 
   return (
-    <main className="grow p-2 sm:rounded-lg sm:bg-secondary sm:p-10 sm:shadow-sm sm:ring-1 sm:ring-zinc-950/5 dark:sm:ring-white/10">
+    <main className="grow bg-secondary p-2 sm:rounded-lg sm:p-10 sm:shadow-sm sm:ring-1 sm:ring-zinc-950/5 dark:sm:ring-white/10">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ArticleFeed />
       </HydrationBoundary>
