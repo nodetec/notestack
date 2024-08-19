@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Fragment } from "react";
@@ -7,26 +6,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { getFirstImage, parseContent } from "~/lib/markdown";
-import { getTag, makeNaddr } from "~/lib/nostr";
+import { getPosts, getTag, makeNaddr } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import Image from "next/image";
 import Link from "next/link";
 
-const relays = ["wss://relay.notestack.com"];
-
 export function ArticleFeed() {
   const pool = useAppState((state) => state.pool);
-
-  async function getPosts() {
-    const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
-    console.log("events", events);
-    return events;
-  }
+  const relays = useAppState((state) => state.relays);
 
   const { data } = useQuery({
     queryKey: ["posts"],
     refetchOnWindowFocus: false, // Disable refetching on window focus for now
-    queryFn: () => getPosts(),
+    queryFn: () => getPosts(pool, relays),
   });
 
   return (

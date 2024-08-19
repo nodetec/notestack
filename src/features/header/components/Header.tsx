@@ -1,15 +1,38 @@
-import { auth } from "~/auth";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { authOptions } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { ThemeToggle } from "~/features/theme-toggle";
+import { getProfile } from "~/lib/nostr";
+import { type Profile, type UserWithKeys } from "~/types";
 import { Layers3, PenBoxIcon } from "lucide-react";
+import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
+import { SimplePool } from "nostr-tools/pool";
 
 import { LoginButton } from "./LoginButton";
 import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
+  const pool = new SimplePool();
+  const queryClient = new QueryClient();
+  const relays = ["wss://relay.notestack.com"];
+  const user = session?.user as UserWithKeys | undefined;
+  let profile: Profile | undefined = undefined;
+
+  if (user) {
+    profile = await getProfile(pool, relays, user.publicKey);
+
+    await queryClient.prefetchQuery({
+      queryKey: ["userProfile"],
+      queryFn: async () => profile,
+    });
+  }
 
   return (
     <header className="relative flex items-center justify-between px-4 py-4 md:px-6">
@@ -64,21 +87,23 @@ export async function Header() {
         )}
         <ThemeToggle />
         {session ? (
-          <ProfileDropdown>
-            <Button
-              variant="outline"
-              size="icon"
-              className="overflow-hidden rounded-full focus-visible:ring-muted"
-            >
-              <Image
-                className="overflow-hidden rounded-full object-cover"
-                src="https://chrisatmachine.com/images/me.jpg"
-                width={100}
-                height={100}
-                alt=""
-              />
-            </Button>
-          </ProfileDropdown>
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <ProfileDropdown>
+              <Button
+                variant="outline"
+                size="icon"
+                className="overflow-hidden rounded-full focus-visible:ring-muted"
+              >
+                <Image
+                  className="overflow-hidden rounded-full object-cover"
+                  src={profile?.picture ?? ""}
+                  width={100}
+                  height={100}
+                  alt=""
+                />
+              </Button>
+            </ProfileDropdown>
+          </HydrationBoundary>
         ) : (
           <LoginButton />
         )}

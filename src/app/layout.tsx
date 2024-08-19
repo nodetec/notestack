@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 
 import "~/styles/globals.css";
 
+import AuthProvider from "~/components/auth-provider";
+import QueryClientProviderWrapper from "~/components/query-client-provider";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Merriweather, Newsreader } from "next/font/google";
-
-import Providers from "./providers";
 
 const newsreader = Newsreader({
   weight: ["500", "700"],
@@ -33,14 +33,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`overflow-x-hidden bg-background antialiased ${newsreader.variable} ${merriweather.variable}`}>
+      <body
+        className={`overflow-x-hidden bg-background antialiased ${newsreader.variable} ${merriweather.variable}`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <Providers>{children}</Providers>
+          <QueryClientProviderWrapper>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryClientProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

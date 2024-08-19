@@ -12,7 +12,6 @@ const pool = new SimplePool();
 
 async function getPosts() {
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
-  console.log("events", events);
   return events;
 }
 
