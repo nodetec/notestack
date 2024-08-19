@@ -17,7 +17,7 @@ export const useAppState = create<State>()(
       pool: new SimplePool(),
       setPool: (pool) => set({ pool }),
 
-      relays: ["wss://relay.notebook.com"],
+      relays: ["wss://relay.notestack.com"],
       setRelays: (relays) => set({ relays }),
     }),
     {

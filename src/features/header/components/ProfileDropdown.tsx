@@ -26,8 +26,6 @@ export function ProfileDropdown({ children }: { children: React.ReactNode }) {
     queryFn: () => getProfile(pool, relays, publicKey),
   });
 
-  console.log(data);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>

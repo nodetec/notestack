@@ -18,11 +18,13 @@ import { LoginButton } from "./LoginButton";
 import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
+
   const session = await getServerSession(authOptions);
   const pool = new SimplePool();
   const queryClient = new QueryClient();
   const relays = ["wss://relay.notestack.com"];
   const user = session?.user as UserWithKeys | undefined;
+
   let profile: Profile | undefined = undefined;
 
   if (user) {

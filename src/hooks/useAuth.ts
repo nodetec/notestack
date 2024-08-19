@@ -8,22 +8,35 @@ const useAuth = () => {
   const [secretKey, setSecretKey] = useState<Uint8Array | undefined>(undefined);
   const { data: session } = useSession();
 
+  const user = session?.user as UserWithKeys;
+
   useEffect(() => {
     if (session) {
       const user = session?.user as UserWithKeys;
-      setPublicKey(user.publicKey);
+
+      // Only update publicKey if it has changed
+      if (user.publicKey !== publicKey) {
+        setPublicKey(user.publicKey);
+      }
+
       if (!user.secretKey) {
         return;
       }
+
       try {
         const parsedArray = JSON.parse(user.secretKey) as number[];
         const uint8Array = new Uint8Array(parsedArray);
-        setSecretKey(uint8Array);
+
+        // Only update secretKey if it has changed
+        if (!secretKey || !uint8Array.every((val, i) => val === secretKey[i])) {
+          setSecretKey(uint8Array);
+        }
       } catch (e) {
         console.error(e);
       }
     }
-  }, [session]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.publicKey]);
 
   return { publicKey, secretKey };
 };
