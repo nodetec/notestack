@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { Fragment } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
@@ -28,14 +30,10 @@ export function ArticleFeed() {
   });
 
   return (
-    // <div className="flex flex-col">
     <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-8">
       {data?.map((post) => (
-        <>
-          <Card
-            className="w-full border-none bg-background shadow-none sm:bg-secondary"
-            key={post.id}
-          >
+        <Fragment key={post.id}>
+          <Card className="w-full border-none bg-background shadow-none sm:bg-secondary">
             <Link href={`/a/${makeNaddr(post, relays)}`}>
               <CardContent className="flex items-center p-4 md:p-6">
                 <div className="md:flex-1 md:p-0">
@@ -71,7 +69,7 @@ export function ArticleFeed() {
           <div className="w-full px-4">
             <Separator />
           </div>
-        </>
+        </Fragment>
       ))}
     </div>
   );
