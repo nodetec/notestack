@@ -10,7 +10,7 @@ async function SettingsPageWrapper() {
   const session = await getServerSession(authOptions);
   const user = session?.user as UserWithKeys | undefined;
   // TODO: redirect to login if user is not logged in
-  return <ProfileSettings />;
+  return <ProfileSettings publicKey={user?.publicKey} />;
 }
 
 export default async function SettingsPage() {

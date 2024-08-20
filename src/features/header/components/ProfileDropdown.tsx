@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { getProfileEvent, profileContent } from "~/lib/nostr";
+import { getProfileEvent, profileContent, shortNpub } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -33,7 +33,7 @@ export function ProfileDropdown({ children, publicKey }: Props) {
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[12rem] rounded-lg p-2" align="end">
         <DropdownMenuItem className="mb-2 cursor-pointer text-[1rem] font-medium">
-          {profileContent(data)?.name}
+          {profileContent(data)?.name ?? shortNpub(publicKey)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

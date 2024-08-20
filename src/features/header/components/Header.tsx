@@ -4,11 +4,12 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { authOptions } from "~/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ThemeToggle } from "~/features/theme-toggle";
+import { BOT_AVATAR_ENDPOINT } from "~/lib/constants";
 import { getProfileEvent, profileContent } from "~/lib/nostr";
+import { getAvatar } from "~/lib/utils";
 import { type UserWithKeys } from "~/types";
 import { Layers3, PenBoxIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
@@ -107,7 +108,13 @@ export async function Header() {
                     alt=""
                   />
                 ) : (
-                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <Image
+                    className="w-12 overflow-hidden rounded-full object-cover"
+                    src={getAvatar(publicKey)}
+                    width={48}
+                    height={48}
+                    alt=""
+                  />
                 )}
               </Button>
             </ProfileDropdown>

@@ -18,6 +18,7 @@ import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { profileContent, publish } from "~/lib/nostr";
+import { getAvatar } from "~/lib/utils";
 import Image from "next/image";
 import { type Event, type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
@@ -41,7 +42,11 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export function ProfileSettings() {
+type Props = {
+  publicKey: string | undefined;
+};
+
+export function ProfileSettings({ publicKey }: Props) {
   const { data: profileEvent, isFetching } = useQuery<Event>({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
@@ -131,31 +136,6 @@ export function ProfileSettings() {
       >
         <FormField
           control={form.control}
-          name="picture"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center gap-x-2">
-                <Image
-                  className="aspect-square w-12 rounded-full border border-border dark:border-border"
-                  src={field.value || "/favicon/favicon-32x32.png"}
-                  width={48}
-                  height={48}
-                  alt=""
-                />
-                <div className="flex w-full flex-col gap-2">
-                  <FormLabel>Picture</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </div>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem>
@@ -167,6 +147,43 @@ export function ProfileSettings() {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="picture"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-x-4">
+                {field.value ? (
+                  <Image
+                    className="aspect-square w-12 rounded-full border border-border dark:border-border"
+                    src={field.value || "/favicon/favicon-32x32.png"}
+                    width={48}
+                    height={48}
+                    alt=""
+                  />
+                ) : (
+                  <Image
+                    className="w-12 overflow-hidden rounded-full object-cover"
+                    src={getAvatar(publicKey)}
+                    width={48}
+                    height={48}
+                    alt=""
+                  />
+                )}
+
+                <div className="flex w-full flex-col gap-2">
+                  <FormLabel>Picture URL</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </div>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="website"
