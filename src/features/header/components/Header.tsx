@@ -5,9 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { authOptions } from "~/auth";
 import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
 import { ThemeToggle } from "~/features/theme-toggle";
-import { BOT_AVATAR_ENDPOINT } from "~/lib/constants";
 import { getProfileEvent, profileContent } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { type UserWithKeys } from "~/types";
