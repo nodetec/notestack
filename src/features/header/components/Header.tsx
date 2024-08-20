@@ -19,7 +19,6 @@ import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
   const session = await getServerSession(authOptions);
-  // const pool = await getPool();
   const queryClient = new QueryClient();
   const relays = ["wss://relay.notestack.com"];
   const user = session?.user as UserWithKeys | undefined;

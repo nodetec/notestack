@@ -10,8 +10,6 @@ import {
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
-const relays = ["wss://relay.notestack.com"];
-
 export async function getPosts(relays: RelayUrl[]) {
   const pool = new SimplePool();
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
