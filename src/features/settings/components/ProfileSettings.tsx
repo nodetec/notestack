@@ -47,6 +47,7 @@ export function ProfileSettings() {
     refetchOnWindowFocus: false,
   });
   const [isClient, setIsClient] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -72,7 +73,7 @@ export function ProfileSettings() {
     if (profileEvent) {
       const profile = profileContent(profileEvent);
       reset({
-        picture: profile.picture ?? "", // Ensure a fallback
+        picture: profile.picture ?? "",
         username: profile.name ?? "",
         website: profile.website ?? "",
         bio: profile.about ?? "",
@@ -104,7 +105,11 @@ export function ProfileSettings() {
       created_at: Math.floor(Date.now() / 1000),
     };
 
+    setIsSubmitting(true);
+
     const published = await publish(eventTemplate);
+
+    setIsSubmitting(false);
 
     if (published) {
       toast("Profile updated", {
@@ -216,7 +221,7 @@ export function ProfileSettings() {
           )}
         />
         {isClient && (
-          <Button disabled={isFetching} type="submit">
+          <Button disabled={isSubmitting || isFetching} type="submit">
             Update profile
           </Button>
         )}
