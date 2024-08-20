@@ -10,27 +10,12 @@ import {
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
-let newPool: SimplePool | null = null;
-
-function getSimplePool() {
-    if (!newPool) {
-        newPool = new SimplePool();
-    }
-    return newPool;
-}
-
-// Usage
-const pool = getSimplePool();
-
-console.log("pool", pool);
-
-// console.log("list connection", pool.listConnectionStatus());
+const relays = ["wss://relay.notestack.com"];
 
 export async function getPosts(relays: RelayUrl[]) {
-  console.log("getPosts", relays);
-  // const pool = getSimplePool();
+  const pool = new SimplePool();
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
-  // pool.close(relays);
+  pool.close(relays);
   return events;
 }
 
@@ -42,12 +27,14 @@ export async function getProfiles(
     return [];
   }
 
+  const pool = new SimplePool();
+
   const profileEvents = await pool.querySync(relays, {
     kinds: [0],
     authors: publicKeys,
   });
 
-  // pool.close(relays);
+  pool.close(relays);
 
   if (!profileEvents) {
     return [];
@@ -62,12 +49,14 @@ export async function getProfileEvent(
 ) {
   if (!publicKey) return undefined;
 
+  const pool = new SimplePool();
+
   const profileEvent = await pool.get(relays, {
     kinds: [0],
     authors: [publicKey],
   });
 
-  // pool.close(relays);
+  pool.close(relays);
 
   if (!profileEvent) return undefined;
 
@@ -218,6 +207,7 @@ export async function publish(eventTemplate: EventTemplate) {
   if (!event) {
     return false;
   }
+  const pool = new SimplePool();
 
   await Promise.any(pool.publish(relays, event));
 
@@ -225,7 +215,7 @@ export async function publish(eventTemplate: EventTemplate) {
   const retrievedEvent = await pool.get(relays, {
     ids: [event.id],
   });
-  // pool.close(relays);
+  pool.close(relays);
 
   if (!retrievedEvent) {
     return false;
