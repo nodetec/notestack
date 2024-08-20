@@ -97,7 +97,7 @@ export async function Header() {
                 size="icon"
                 className="overflow-hidden rounded-full focus-visible:ring-muted"
               >
-                {profileEvent ? (
+                {profileEvent && profileContent(profileEvent)?.picture  ? (
                   <Image
                     className="w-12 overflow-hidden rounded-full object-cover"
                     src={profileContent(profileEvent)?.picture ?? ""}
