@@ -13,14 +13,13 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
-import { SimplePool } from "nostr-tools/pool";
 
 import { LoginButton } from "./LoginButton";
 import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
   const session = await getServerSession(authOptions);
-  const pool = new SimplePool();
+  // const pool = await getPool();
   const queryClient = new QueryClient();
   const relays = ["wss://relay.notestack.com"];
   const user = session?.user as UserWithKeys | undefined;
@@ -30,7 +29,7 @@ export async function Header() {
   let profileEvent: Event | undefined = undefined;
 
   if (user) {
-    profileEvent = await getProfileEvent(pool, relays, user.publicKey);
+    profileEvent = await getProfileEvent(relays, user.publicKey);
 
     await queryClient.prefetchQuery({
       queryKey: ["userProfile"],

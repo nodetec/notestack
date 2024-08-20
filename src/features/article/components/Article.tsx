@@ -1,4 +1,5 @@
-import { nip19, SimplePool } from "nostr-tools";
+import { getEvent } from "~/server/nostr";
+import { nip19 } from "nostr-tools";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
@@ -16,15 +17,13 @@ export async function Article({ naddr }: Props) {
 
   const address = decodeResult.data;
 
-  const relays = ["wss://relay.notestack.com"];
-
-  const pool = new SimplePool();
-
-  const event = await pool.get(relays, {
+  const filter = {
     kinds: [address.kind],
     limit: 1,
     "#d": [address.identifier],
-  });
+  };
+
+  const event = await getEvent(filter);
 
   if (!event) {
     return <div>404</div>;

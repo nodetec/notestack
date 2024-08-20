@@ -67,8 +67,8 @@ export function ProfileSettings({ publicKey }: Props) {
   const { reset } = form;
 
   useEffect(() => {
-    const profile = profileContent(profileEvent);
-    if (profile) {
+    if (profileEvent) {
+      const profile = profileContent(profileEvent);
       reset({
         picture: profile.picture,
         username: profile.name,
@@ -81,6 +81,9 @@ export function ProfileSettings({ publicKey }: Props) {
 
   if (!publicKey) {
     return <div>redirect to login</div>;
+  }
+  if (!profileEvent || isFetching) {
+    return <div>Loading...</div>;
   }
 
   async function onSubmit(data: ProfileFormValues) {
@@ -127,101 +130,104 @@ export function ProfileSettings({ publicKey }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-xl">
-        <FormField
-          control={form.control}
-          name="picture"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center gap-x-2">
-                <Image
-                  className="aspect-square w-12 rounded-full border border-border dark:border-border"
-                  src={field.value}
-                  width={48}
-                  height={48}
-                  alt=""
-                />
-                <div className="flex w-full flex-col gap-2">
-                  <FormLabel>Picture</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </div>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="satoshi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="website"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Website</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us a little bit about yourself"
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Separator />
-        <div className="space-y-0.5">
-          <h2 className="text-lg font-bold tracking-tight">Integrations</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage integrations with external services.
-          </p>
-        </div>
-        <FormField
-          control={form.control}
-          name="lud16"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Lightning Address</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormDescription>
-                Link your Lightning Address to your profile.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button disabled={isFetching} type="submit">
-          Update profile
-        </Button>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full max-w-xl space-y-8"
+      >
+      {/*   <FormField */}
+      {/*     control={form.control} */}
+      {/*     name="picture" */}
+      {/*     render={({ field }) => ( */}
+      {/*       <FormItem> */}
+      {/*         <div className="flex items-center gap-x-2"> */}
+      {/*           <Image */}
+      {/*             className="aspect-square w-12 rounded-full border border-border dark:border-border" */}
+      {/*             src={field.value} */}
+      {/*             width={48} */}
+      {/*             height={48} */}
+      {/*             alt="" */}
+      {/*           /> */}
+      {/*           <div className="flex w-full flex-col gap-2"> */}
+      {/*             <FormLabel>Picture</FormLabel> */}
+      {/*             <FormControl> */}
+      {/*               <Input {...field} /> */}
+      {/*             </FormControl> */}
+      {/*           </div> */}
+      {/*         </div> */}
+      {/*         <FormMessage /> */}
+      {/*       </FormItem> */}
+      {/*     )} */}
+      {/*   /> */}
+      {/**/}
+      {/*   <FormField */}
+      {/*     control={form.control} */}
+      {/*     name="username" */}
+      {/*     render={({ field }) => ( */}
+      {/*       <FormItem> */}
+      {/*         <FormLabel>Username</FormLabel> */}
+      {/*         <FormControl> */}
+      {/*           <Input placeholder="satoshi" {...field} /> */}
+      {/*         </FormControl> */}
+      {/*         <FormMessage /> */}
+      {/*       </FormItem> */}
+      {/*     )} */}
+      {/*   /> */}
+      {/*   <FormField */}
+      {/*     control={form.control} */}
+      {/*     name="website" */}
+      {/*     render={({ field }) => ( */}
+      {/*       <FormItem> */}
+      {/*         <FormLabel>Website</FormLabel> */}
+      {/*         <FormControl> */}
+      {/*           <Input {...field} /> */}
+      {/*         </FormControl> */}
+      {/*         <FormMessage /> */}
+      {/*       </FormItem> */}
+      {/*     )} */}
+      {/*   /> */}
+      {/*   <FormField */}
+      {/*     control={form.control} */}
+      {/*     name="bio" */}
+      {/*     render={({ field }) => ( */}
+      {/*       <FormItem> */}
+      {/*         <FormLabel>Bio</FormLabel> */}
+      {/*         <FormControl> */}
+      {/*           <Textarea */}
+      {/*             placeholder="Tell us a little bit about yourself" */}
+      {/*             className="resize-none" */}
+      {/*             {...field} */}
+      {/*           /> */}
+      {/*         </FormControl> */}
+      {/*         <FormMessage /> */}
+      {/*       </FormItem> */}
+      {/*     )} */}
+      {/*   /> */}
+      {/*   <Separator /> */}
+      {/*   <div className="space-y-0.5"> */}
+      {/*     <h2 className="text-lg font-bold tracking-tight">Integrations</h2> */}
+      {/*     <p className="text-sm text-muted-foreground"> */}
+      {/*       Manage integrations with external services. */}
+      {/*     </p> */}
+      {/*   </div> */}
+      {/*   <FormField */}
+      {/*     control={form.control} */}
+      {/*     name="lud16" */}
+      {/*     render={({ field }) => ( */}
+      {/*       <FormItem> */}
+      {/*         <FormLabel>Lightning Address</FormLabel> */}
+      {/*         <FormControl> */}
+      {/*           <Input {...field} /> */}
+      {/*         </FormControl> */}
+      {/*         <FormDescription> */}
+      {/*           Link your Lightning Address to your profile. */}
+      {/*         </FormDescription> */}
+      {/*         <FormMessage /> */}
+      {/*       </FormItem> */}
+      {/*     )} */}
+      {/*   /> */}
+      {/*   <Button disabled={isFetching} type="submit"> */}
+      {/*     Update profile */}
+      {/*   </Button> */}
       </form>
     </Form>
   );

@@ -14,8 +14,8 @@ import { type Event } from "nostr-tools";
 const profiles = create({
   fetcher: async (publicKeys: string[]) => {
     const appState = useAppState.getState();
-    const { pool, relays } = appState;
-    return getProfiles(pool, relays, publicKeys);
+    const { relays } = appState;
+    return getProfiles(relays, publicKeys);
   },
   resolver: keyResolver("publicKeys"),
   scheduler: windowScheduler(10),

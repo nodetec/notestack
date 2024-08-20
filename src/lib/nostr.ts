@@ -4,19 +4,37 @@ import { type Profile, type RelayUrl } from "~/types";
 import {
   getEventHash,
   nip19,
+  SimplePool,
   type Event,
   type EventTemplate,
-  type SimplePool,
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
-export async function getPosts(pool: SimplePool, relays: RelayUrl[]) {
+let newPool: SimplePool | null = null;
+
+function getSimplePool() {
+    if (!newPool) {
+        newPool = new SimplePool();
+    }
+    return newPool;
+}
+
+// Usage
+const pool = getSimplePool();
+
+console.log("pool", pool);
+
+// console.log("list connection", pool.listConnectionStatus());
+
+export async function getPosts(relays: RelayUrl[]) {
+  console.log("getPosts", relays);
+  // const pool = getSimplePool();
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
+  // pool.close(relays);
   return events;
 }
 
 export async function getProfiles(
-  pool: SimplePool,
   relays: string[],
   publicKeys: string[] | undefined,
 ) {
@@ -29,6 +47,8 @@ export async function getProfiles(
     authors: publicKeys,
   });
 
+  // pool.close(relays);
+
   if (!profileEvents) {
     return [];
   }
@@ -37,7 +57,6 @@ export async function getProfiles(
 }
 
 export async function getProfileEvent(
-  pool: SimplePool,
   relays: string[],
   publicKey: string | undefined,
 ) {
@@ -47,6 +66,8 @@ export async function getProfileEvent(
     kinds: [0],
     authors: [publicKey],
   });
+
+  // pool.close(relays);
 
   if (!profileEvent) return undefined;
 
@@ -182,7 +203,7 @@ export function makeNaddr(event: Event, relays: string[]) {
 
 export async function publish(eventTemplate: EventTemplate) {
   // TODO: get users publish relays
-  const { pool, relays } = useAppState.getState();
+  const { relays } = useAppState.getState();
 
   let event;
 
@@ -200,9 +221,11 @@ export async function publish(eventTemplate: EventTemplate) {
 
   await Promise.any(pool.publish(relays, event));
 
+
   const retrievedEvent = await pool.get(relays, {
     ids: [event.id],
   });
+  // pool.close(relays);
 
   if (!retrievedEvent) {
     return false;

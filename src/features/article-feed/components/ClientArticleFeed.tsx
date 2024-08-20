@@ -7,13 +7,12 @@ import { useAppState } from "~/store";
 import { ArticleCard } from "./ArticleCard";
 
 export function ClientArticleFeed() {
-  const pool = useAppState((state) => state.pool);
   const relays = useAppState((state) => state.relays);
 
   const { data } = useQuery({
     queryKey: ["posts"],
     refetchOnWindowFocus: false, // Disable refetching on window focus for now
-    queryFn: () => getPosts(pool, relays),
+    queryFn: () => getPosts(relays),
   });
 
   return (

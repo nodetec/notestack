@@ -5,18 +5,11 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { SimplePool } from "nostr-tools/pool";
+import { getEvents } from "~/server/nostr";
 
 import { ClientArticleFeed } from "./ClientArticleFeed";
 
-const relays = ["wss://relay.notestack.com"];
-
-const pool = new SimplePool();
-
-async function getPosts() {
-  const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
-  return events;
-}
+const filter = { kinds: [30023], limit: 10 };
 
 export async function ArticleFeed() {
   const queryClient = new QueryClient();
@@ -26,7 +19,7 @@ export async function ArticleFeed() {
 
   await queryClient.prefetchQuery({
     queryKey: ["posts"],
-    queryFn: getPosts,
+    queryFn: () => getEvents(filter),
   });
 
   return (

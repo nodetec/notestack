@@ -20,13 +20,12 @@ type Props = {
 };
 
 export function ProfileDropdown({ children, publicKey }: Props) {
-  const pool = useAppState((state) => state.pool);
   const relays = useAppState((state) => state.relays);
 
   const { data } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
-    queryFn: () => getProfileEvent(pool, relays, publicKey),
+    queryFn: () => getProfileEvent(relays, publicKey),
   });
 
   return (
