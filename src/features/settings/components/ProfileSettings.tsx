@@ -130,7 +130,6 @@ export function ProfileSettings() {
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center gap-x-2">
-            {}
                 <Image
                   className="aspect-square w-12 rounded-full border border-border dark:border-border"
                   src={field.value || "/favicon/favicon-32x32.png"}

@@ -4,7 +4,9 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { authOptions } from "~/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
 import { ThemeToggle } from "~/features/theme-toggle";
 import { getProfileEvent, profileContent } from "~/lib/nostr";
 import { type UserWithKeys } from "~/types";
@@ -96,13 +98,17 @@ export async function Header() {
                 size="icon"
                 className="overflow-hidden rounded-full focus-visible:ring-muted"
               >
-                <Image
-                  className="overflow-hidden rounded-full object-cover"
-                  src={profileContent(profileEvent)?.picture ?? ""}
-                  width={100}
-                  height={100}
-                  alt=""
-                />
+                {profileEvent ? (
+                  <Image
+                    className="w-12 overflow-hidden rounded-full object-cover"
+                    src={profileContent(profileEvent)?.picture ?? ""}
+                    width={48}
+                    height={48}
+                    alt=""
+                  />
+                ) : (
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                )}
               </Button>
             </ProfileDropdown>
           </HydrationBoundary>
