@@ -5,6 +5,7 @@ import "~/styles/globals.css";
 import AuthProvider from "~/components/auth-provider";
 import QueryClientProviderWrapper from "~/components/query-client-provider";
 import { ThemeProvider } from "~/components/theme-provider";
+import { Toaster } from "~/components/ui/sonner";
 import { Merriweather, Newsreader } from "next/font/google";
 
 const newsreader = Newsreader({
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`overflow-x-hidden bg-secondary sm:bg-background antialiased ${newsreader.variable} ${merriweather.variable}`}
+        className={`overflow-x-hidden bg-secondary antialiased sm:bg-background ${newsreader.variable} ${merriweather.variable}`}
       >
         <ThemeProvider
           attribute="class"
@@ -43,7 +44,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryClientProviderWrapper>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
           </QueryClientProviderWrapper>
         </ThemeProvider>
       </body>

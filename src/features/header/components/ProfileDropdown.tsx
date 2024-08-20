@@ -9,21 +9,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import useAuth from "~/hooks/useAuth";
-import { getProfile } from "~/lib/nostr";
+import { getProfileEvent, profileContent } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
-export function ProfileDropdown({ children }: { children: React.ReactNode }) {
-  const { publicKey } = useAuth();
+type Props = {
+  children: React.ReactNode;
+  publicKey: string | undefined;
+};
 
+export function ProfileDropdown({ children, publicKey }: Props) {
   const pool = useAppState((state) => state.pool);
   const relays = useAppState((state) => state.relays);
 
   const { data } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
-    queryFn: () => getProfile(pool, relays, publicKey),
+    queryFn: () => getProfileEvent(pool, relays, publicKey),
   });
 
   return (
@@ -31,18 +34,21 @@ export function ProfileDropdown({ children }: { children: React.ReactNode }) {
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[12rem] rounded-lg p-2" align="end">
         <DropdownMenuItem className="mb-2 cursor-pointer text-[1rem] font-medium">
-          {data?.name}
+          {profileContent(data)?.name}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium">
-          Home
+        <DropdownMenuItem
+          asChild
+          className="my-2 cursor-pointer text-[1rem] font-medium"
+        >
+          <Link href="/settings">Settings</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium">
-          Inbox
-        </DropdownMenuItem>
-        <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium">
-          Stacks
-        </DropdownMenuItem>
+        {/* <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium"> */}
+        {/*   Inbox */}
+        {/* </DropdownMenuItem> */}
+        {/* <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium"> */}
+        {/*   Stacks */}
+        {/* </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => signOut()}

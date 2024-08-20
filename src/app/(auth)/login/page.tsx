@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { bytesToHex } from "@noble/hashes/utils";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -13,19 +14,10 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { signIn } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
-import { nip19 } from "nostr-tools";
+import { getPublicKey, nip19 } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
-const isValidNpub = (npub: string) => {
-  try {
-    return nip19.decode(npub).type === "npub";
-  } catch (e) {
-    return false;
-  }
-};
 
 const isValidNsec = (nsec: string) => {
   try {
@@ -36,9 +28,6 @@ const isValidNsec = (nsec: string) => {
 };
 
 const formSchema = z.object({
-  npub: z.string().refine(isValidNpub, {
-    message: "Invalid npub.",
-  }),
   nsec: z.string().refine(isValidNsec, {
     message: "Invalid nsec.",
   }),
@@ -50,7 +39,6 @@ export default function UserAuthForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      npub: "",
       nsec: "",
     },
   });
@@ -62,12 +50,9 @@ export default function UserAuthForm() {
     setIsLoading(true);
     if (typeof nostr !== "undefined") {
       const publicKey: string = await nostr.getPublicKey();
-
-      console.log("publicKey: ", publicKey);
-
       await signIn("credentials", {
         publicKey: publicKey,
-        secretKey: new Uint8Array(0),
+        secretKey: undefined,
         redirect: true,
         callbackUrl: "/",
       });
@@ -78,13 +63,10 @@ export default function UserAuthForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const { npub, nsec } = values;
-    const publicKey = nip19.decode(npub).data as string;
+    const { nsec } = values;
     const secretKeyUint8 = nip19.decode(nsec).data as Uint8Array;
-    const array = Array.from(secretKeyUint8);
-    const secretKey = JSON.stringify(array);
-
-    console.log("secretKeyStr: ", secretKey);
+    const publicKey = getPublicKey(secretKeyUint8);
+    const secretKey = bytesToHex(secretKeyUint8);
 
     await signIn("credentials", {
       publicKey,

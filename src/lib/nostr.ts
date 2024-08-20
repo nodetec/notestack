@@ -1,5 +1,13 @@
+import { finishEventWithSecretKey } from "~/server/nostr";
+import { useAppState } from "~/store";
 import { type Profile, type RelayUrl } from "~/types";
-import { nip19, type Event, type SimplePool } from "nostr-tools";
+import {
+  getEventHash,
+  nip19,
+  type Event,
+  type EventTemplate,
+  type SimplePool,
+} from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 export async function getPosts(pool: SimplePool, relays: RelayUrl[]) {
@@ -7,25 +15,42 @@ export async function getPosts(pool: SimplePool, relays: RelayUrl[]) {
   return events;
 }
 
-export async function getProfile(
+export async function getProfiles(
+  pool: SimplePool,
+  relays: string[],
+  publicKeys: string[] | undefined,
+) {
+  if (!publicKeys) {
+    return [];
+  }
+
+  const profileEvents = await pool.querySync(relays, {
+    kinds: [0],
+    authors: publicKeys,
+  });
+
+  if (!profileEvents) {
+    return [];
+  }
+
+  return profileEvents.map(profileContent);
+}
+
+export async function getProfileEvent(
   pool: SimplePool,
   relays: string[],
   publicKey: string | undefined,
 ) {
-  if (!publicKey) {
-    return {} as Profile;
-  }
+  if (!publicKey) return undefined;
 
   const profileEvent = await pool.get(relays, {
     kinds: [0],
     authors: [publicKey],
   });
 
-  if (!profileEvent) {
-    return {} as Profile;
-  }
+  if (!profileEvent) return undefined;
 
-  return profileContent(profileEvent);
+  return profileEvent;
 }
 
 export const shortNpub = (pubkey: string | undefined, length = 4) => {
@@ -102,33 +127,6 @@ export const profileContent = (event: Event | undefined | null) => {
 //   return bytesToHex(hash).substring(0, length);
 // }
 
-// export async function finishEvent(
-//   t: EventTemplate,
-//   secretKey?: Uint8Array,
-//   onErr?: (err: Error) => void
-// ) {
-//   let event = t as Event;
-//   if (secretKey) {
-//     return finalizeEvent(t, secretKey);
-//   } else {
-//     try {
-//       if (nostr) {
-//         event.pubkey = await nostr.getPublicKey();
-//         event.id = getEventHash(event);
-//         event = (await nostr.signEvent(event)) as Event;
-//         console.log("signed event", event);
-//         return event;
-//       } else {
-//         console.error("nostr not defined");
-//         return undefined;
-//       }
-//     } catch (err) {
-//       if (onErr) onErr(err as Error);
-//       return undefined;
-//     }
-//   }
-// }
-
 // function createUrlSlug(title: string): string {
 //   return title
 //     .toLowerCase()
@@ -141,6 +139,25 @@ export const profileContent = (event: Event | undefined | null) => {
 //   const uniqueHash = generateUniqueHash(title + pubkey, 12);
 //   return `${titleSlug}-${uniqueHash}`;
 // }
+
+export async function finishEventWithExtension(t: EventTemplate) {
+  let event = t as Event;
+  try {
+    if (nostr) {
+      event.pubkey = await nostr.getPublicKey();
+      event.id = getEventHash(event);
+      event = (await nostr.signEvent(event)) as Event;
+      console.log("signed event", event);
+      return event;
+    } else {
+      console.error("nostr not defined");
+      return undefined;
+    }
+  } catch (err) {
+    console.error("Error signing event", err);
+    return undefined;
+  }
+}
 
 export function identityTag(
   platform: string,
@@ -161,4 +178,35 @@ export function makeNaddr(event: Event, relays: string[]) {
   };
 
   return nip19.naddrEncode(addr);
+}
+
+export async function publish(eventTemplate: EventTemplate) {
+  // TODO: get users publish relays
+  const { pool, relays } = useAppState.getState();
+
+  let event;
+
+  const publicKey = await nostr.getPublicKey();
+
+  if (publicKey) {
+    event = await finishEventWithExtension(eventTemplate);
+  } else {
+    event = await finishEventWithSecretKey(eventTemplate);
+  }
+
+  if (!event) {
+    return false;
+  }
+
+  await Promise.any(pool.publish(relays, event));
+
+  const retrievedEvent = await pool.get(relays, {
+    ids: [event.id],
+  });
+
+  if (!retrievedEvent) {
+    return false;
+  }
+
+  return true;
 }

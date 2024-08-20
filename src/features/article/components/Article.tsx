@@ -20,14 +20,11 @@ export async function Article({ naddr }: Props) {
 
   const pool = new SimplePool();
 
-  const events = await pool.querySync(address.relays ?? relays, {
+  const event = await pool.get(relays, {
     kinds: [address.kind],
     limit: 1,
     "#d": [address.identifier],
   });
-  console.log("events", events);
-
-  const event = events[0];
 
   if (!event) {
     return <div>404</div>;

@@ -6,38 +6,40 @@ import {
 import { authOptions } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { ThemeToggle } from "~/features/theme-toggle";
-import { getProfile } from "~/lib/nostr";
-import { type Profile, type UserWithKeys } from "~/types";
+import { getProfileEvent, profileContent } from "~/lib/nostr";
+import { type UserWithKeys } from "~/types";
 import { Layers3, PenBoxIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
+import { type Event } from "nostr-tools";
 import { SimplePool } from "nostr-tools/pool";
 
 import { LoginButton } from "./LoginButton";
 import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
-
   const session = await getServerSession(authOptions);
   const pool = new SimplePool();
   const queryClient = new QueryClient();
   const relays = ["wss://relay.notestack.com"];
   const user = session?.user as UserWithKeys | undefined;
 
-  let profile: Profile | undefined = undefined;
+  const publicKey = user?.publicKey;
+
+  let profileEvent: Event | undefined = undefined;
 
   if (user) {
-    profile = await getProfile(pool, relays, user.publicKey);
+    profileEvent = await getProfileEvent(pool, relays, user.publicKey);
 
     await queryClient.prefetchQuery({
       queryKey: ["userProfile"],
-      queryFn: async () => profile,
+      queryFn: async () => profileEvent,
     });
   }
 
   return (
-    <header className="relative border-b sm:border-none flex items-center justify-between mx-4 py-4 md:px-6">
+    <header className="relative mx-4 flex items-center justify-between border-b py-4 sm:border-none md:px-6">
       <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
@@ -72,7 +74,7 @@ export async function Header() {
         {session && (
           <>
             <Button
-              className="focus-visible:outline-none focus-visible:ring-transparent hidden sm:flex lg:hidden"
+              className="hidden focus-visible:outline-none focus-visible:ring-transparent sm:flex lg:hidden"
               variant="outline"
               size="icon"
             >
@@ -90,7 +92,7 @@ export async function Header() {
         <ThemeToggle />
         {session ? (
           <HydrationBoundary state={dehydrate(queryClient)}>
-            <ProfileDropdown>
+            <ProfileDropdown publicKey={publicKey}>
               <Button
                 variant="outline"
                 size="icon"
@@ -98,7 +100,7 @@ export async function Header() {
               >
                 <Image
                   className="overflow-hidden rounded-full object-cover"
-                  src={profile?.picture ?? ""}
+                  src={profileContent(profileEvent)?.picture ?? ""}
                   width={100}
                   height={100}
                   alt=""
