@@ -158,7 +158,7 @@ export function ProfileSettings({ publicKey }: Props) {
               <div className="flex items-center gap-x-4">
                 {field.value ? (
                   <Image
-                    className="aspect-square w-12 rounded-full border border-border dark:border-border"
+                    className="w-12 overflow-hidden rounded-full object-cover aspect-square"
                     src={field.value || "/favicon/favicon-32x32.png"}
                     width={48}
                     height={48}
@@ -166,7 +166,7 @@ export function ProfileSettings({ publicKey }: Props) {
                   />
                 ) : (
                   <Image
-                    className="w-12 overflow-hidden rounded-full object-cover"
+                    className="w-12 overflow-hidden rounded-full object-cover aspect-square"
                     src={getAvatar(publicKey)}
                     width={48}
                     height={48}

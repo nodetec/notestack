@@ -2,6 +2,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,17 +13,18 @@ import {
 import { getProfileEvent, profileContent, shortNpub } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
+import { getAvatar } from "~/lib/utils";
 
 type Props = {
-  children: React.ReactNode;
   publicKey: string | undefined;
 };
 
-export function ProfileDropdown({ children, publicKey }: Props) {
+export function ProfileDropdown({ publicKey }: Props) {
   const relays = useAppState((state) => state.relays);
 
-  const { data } = useQuery({
+  const { data: profileEvent } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
     queryFn: () => getProfileEvent(relays, publicKey),
@@ -30,10 +32,34 @@ export function ProfileDropdown({ children, publicKey }: Props) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="overflow-hidden rounded-full focus-visible:ring-muted"
+        >
+          {profileEvent && profileContent(profileEvent)?.picture ? (
+            <Image
+              className="aspect-square w-12 overflow-hidden rounded-full object-cover"
+              src={profileContent(profileEvent)?.picture ?? ""}
+              width={48}
+              height={48}
+              alt=""
+            />
+          ) : (
+            <Image
+              className="aspect-square w-12 overflow-hidden rounded-full object-cover"
+              src={getAvatar(publicKey)}
+              width={48}
+              height={48}
+              alt=""
+            />
+          )}
+        </Button>
+      </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[12rem] rounded-lg p-2" align="end">
         <DropdownMenuItem className="mb-2 cursor-pointer text-[1rem] font-medium">
-          {profileContent(data)?.name ?? shortNpub(publicKey)}
+          {profileContent(profileEvent)?.name ?? shortNpub(publicKey)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

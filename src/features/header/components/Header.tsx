@@ -91,31 +91,7 @@ export async function Header() {
         <ThemeToggle />
         {session ? (
           <HydrationBoundary state={dehydrate(queryClient)}>
-            <ProfileDropdown publicKey={publicKey}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="overflow-hidden rounded-full focus-visible:ring-muted"
-              >
-                {profileEvent && profileContent(profileEvent)?.picture  ? (
-                  <Image
-                    className="w-12 overflow-hidden rounded-full object-cover"
-                    src={profileContent(profileEvent)?.picture ?? ""}
-                    width={48}
-                    height={48}
-                    alt=""
-                  />
-                ) : (
-                  <Image
-                    className="w-12 overflow-hidden rounded-full object-cover"
-                    src={getAvatar(publicKey)}
-                    width={48}
-                    height={48}
-                    alt=""
-                  />
-                )}
-              </Button>
-            </ProfileDropdown>
+            <ProfileDropdown publicKey={publicKey} />
           </HydrationBoundary>
         ) : (
           <LoginButton />
