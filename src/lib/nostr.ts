@@ -1,3 +1,4 @@
+import { getUser } from "~/server/auth";
 import { finishEventWithSecretKey } from "~/server/nostr";
 import { useAppState } from "~/store";
 import { type Profile, type RelayUrl } from "~/types";
@@ -194,12 +195,12 @@ export async function publish(eventTemplate: EventTemplate) {
 
   let event;
 
-  const publicKey = await nostr.getPublicKey();
+  const user = await getUser();
 
-  if (publicKey) {
-    event = await finishEventWithExtension(eventTemplate);
-  } else {
+  if (user?.secretKey) {
     event = await finishEventWithSecretKey(eventTemplate);
+  } else {
+    event = await finishEventWithExtension(eventTemplate);
   }
 
   if (!event) {
@@ -208,7 +209,6 @@ export async function publish(eventTemplate: EventTemplate) {
   const pool = new SimplePool();
 
   await Promise.any(pool.publish(relays, event));
-
 
   const retrievedEvent = await pool.get(relays, {
     ids: [event.id],

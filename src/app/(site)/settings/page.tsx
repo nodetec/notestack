@@ -1,14 +1,17 @@
 import { Suspense } from "react";
 
 import { authOptions } from "~/auth";
+import { ProfileSettings } from "~/features/settings";
+import { redirectIfNotLoggedIn } from "~/server/auth";
 import { type UserWithKeys } from "~/types";
 import { getServerSession } from "next-auth";
-import { ProfileSettings } from "~/features/settings";
-
 
 async function SettingsPageWrapper() {
   const session = await getServerSession(authOptions);
   const user = session?.user as UserWithKeys | undefined;
+
+  await redirectIfNotLoggedIn();
+
   // TODO: redirect to login if user is not logged in
   return <ProfileSettings publicKey={user?.publicKey} />;
 }

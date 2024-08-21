@@ -24,6 +24,7 @@ import { type Event, type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { redirectIfNotLoggedIn } from "~/server/auth";
 
 const profileFormSchema = z.object({
   picture: z.string(),
@@ -47,6 +48,7 @@ type Props = {
 };
 
 export function ProfileSettings({ publicKey }: Props) {
+
   const { data: profileEvent, isFetching } = useQuery<Event>({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
@@ -78,11 +80,11 @@ export function ProfileSettings({ publicKey }: Props) {
     if (profileEvent) {
       const profile = profileContent(profileEvent);
       reset({
-        picture: profile.picture ?? "",
-        username: profile.name ?? "",
-        website: profile.website ?? "",
-        bio: profile.about ?? "",
-        lud16: profile.lud16 ?? "",
+        picture: profile.picture,
+        username: profile.name,
+        website: profile.website,
+        bio: profile.about,
+        lud16: profile.lud16,
       });
     }
   }, [reset, profileEvent]);
