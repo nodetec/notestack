@@ -16,6 +16,7 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { getAvatar } from "~/lib/utils";
+import { Skeleton } from "~/components/ui/skeleton";
 
 type Props = {
   publicKey: string | undefined;
@@ -24,7 +25,7 @@ type Props = {
 export function ProfileDropdown({ publicKey }: Props) {
   const relays = useAppState((state) => state.relays);
 
-  const { data: profileEvent } = useQuery({
+  const { data: profileEvent, isFetching } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
     queryFn: () => getProfileEvent(relays, publicKey),
@@ -38,18 +39,12 @@ export function ProfileDropdown({ publicKey }: Props) {
           size="icon"
           className="overflow-hidden rounded-full focus-visible:ring-muted"
         >
-          {profileEvent && profileContent(profileEvent)?.picture ? (
-            <Image
-              className="aspect-square w-12 overflow-hidden rounded-full object-cover"
-              src={profileContent(profileEvent)?.picture ?? ""}
-              width={48}
-              height={48}
-              alt=""
-            />
+          {isFetching ? (
+            <Skeleton className="aspect-square w-12 overflow-hidden rounded-full object-cover" />
           ) : (
             <Image
               className="aspect-square w-12 overflow-hidden rounded-full object-cover"
-              src={getAvatar(publicKey)}
+              src={profileContent(profileEvent)?.picture ?? getAvatar(publicKey)}
               width={48}
               height={48}
               alt=""
