@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "~/styles/globals.css";
 
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AuthProvider from "~/components/auth-provider";
 import QueryClientProviderWrapper from "~/components/query-client-provider";
 import { ThemeProvider } from "~/components/theme-provider";
@@ -48,6 +49,7 @@ export default function RootLayout({
               {children}
               <Toaster />
             </AuthProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProviderWrapper>
         </ThemeProvider>
       </body>

@@ -22,6 +22,8 @@ export async function getProfiles(
   relays: string[],
   publicKeys: string[] | undefined,
 ) {
+
+  console.log("publicKeys", publicKeys);
   if (!publicKeys) {
     return [];
   }
@@ -33,13 +35,20 @@ export async function getProfiles(
     authors: publicKeys,
   });
 
+
   pool.close(relays);
 
   if (!profileEvents) {
     return [];
   }
 
-  return profileEvents.map(profileContent);
+  console.log("profileEvents", profileEvents);
+
+  const profiles  = profileEvents.map(profileContent);
+
+  console.log("profiles form func", profiles);
+
+  return profiles;
 }
 
 export async function getProfileEvent(
@@ -98,7 +107,9 @@ export const getTag = (name: string, tags: string[][]) => {
 
 export const profileContent = (event: Event | undefined | null) => {
   try {
-    return JSON.parse(event?.content ?? "{}") as Profile;
+    const profile =  JSON.parse(event?.content ?? "{}") as Profile;
+    profile.pubkey = event?.pubkey;
+    return profile;
   } catch (err) {
     console.error("Error parsing profile content", err);
     return {} as Profile;
