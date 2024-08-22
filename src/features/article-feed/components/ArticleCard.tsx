@@ -12,9 +12,10 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { getFirstImage, parseContent } from "~/lib/markdown";
 import { getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
-import { getAvatar } from "~/lib/utils";
+import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
 import { type Profile } from "~/types";
+import { MessageCircle, ZapIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
@@ -46,53 +47,75 @@ export function ArticleCard({ event }: Props) {
   return (
     <Fragment key={event.id}>
       <Card className="w-full border-none bg-secondary shadow-none">
-        <Link href={`/a/${makeNaddr(event, relays)}`}>
-          <CardContent className="flex items-center p-4 md:p-6">
-            <div className="md:flex-1 md:p-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {isFetching ? (
-                    <>
-                      <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
-                      <Skeleton className="h-4 w-20" />
-                    </>
-                  ) : (
-                    <>
-                      <Image
-                        className="aspect-square w-5 overflow-hidden rounded-full object-cover"
-                        src={profile?.picture ?? getAvatar(profile?.publicKey)}
-                        width={48}
-                        height={48}
-                        alt=""
-                      />
-                      <span>{profile?.name ?? shortNpub(event.pubkey)}</span>
-                    </>
-                  )}
+        <CardContent className="flex flex-col px-4 pb-0 pt-4 md:px-6">
+          {/* <div className="md:flex-1 md:p-0"> */}
+          {/* <div className="flex items-center justify-between"> */}
+
+          {/* User image and name */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {isFetching ? (
+              <>
+                <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
+                <Skeleton className="h-4 w-20" />
+              </>
+            ) : (
+              <>
+                <Image
+                  className="aspect-square w-5 overflow-hidden rounded-full object-cover"
+                  src={profile?.picture ?? getAvatar(profile?.publicKey)}
+                  width={48}
+                  height={48}
+                  alt=""
+                />
+                <span>{profile?.name ?? shortNpub(event.pubkey)}</span>
+              </>
+            )}
+          </div>
+
+          {/* </div> */}
+          <Link
+            className="flex flex-col gap-2 pb-4 pt-4"
+            href={`/a/${makeNaddr(event, relays)}`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start gap-2">
+                <h2 className="line-clamp-2 text-ellipsis break-words text-2xl font-bold leading-7">
+                  {getTag("title", event.tags)}
+                </h2>
+                <h3 className="line-clamp-2 text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
+                  {parseContent(event.content) || "No content \n "}
+                </h3>
+                <div className="mt-4 flex gap-4 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground">
+                    {formatEpochTime(event.created_at)}
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <ZapIcon className="h-4 w-4" />
+                    33.1k
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <MessageCircle className="h-4 w-4" />
+                    33.1k
+                  </div>
                 </div>
               </div>
-              <h3 className="mt-2 text-[1.35rem] font-bold">
-                {getTag("title", event.tags)}
-              </h3>
-              {/* <p className="mt-2 text-muted-foreground">{event.content}</p> */}
-              <div className="mt-2 line-clamp-3 text-ellipsis whitespace-break-spaces pt-0 text-muted-foreground">
-                {parseContent(event.content) || "No content \n "}
-              </div>
+
+              <Image
+                className="ml-2 h-14 w-20 shrink-0 rounded-md object-cover sm:ml-14 sm:h-28 sm:w-40"
+                src={
+                  getTag("image", event.tags) ??
+                  getFirstImage(event.content) ??
+                  ""
+                }
+                width={160}
+                height={112}
+                alt=""
+              />
             </div>
-            <Image
-              className="ml-2 h-14 w-20 rounded-md object-cover md:ml-14 md:h-28 md:w-40"
-              src={
-                getTag("image", event.tags) ??
-                getFirstImage(event.content) ??
-                ""
-              }
-              width={160}
-              height={112}
-              alt=""
-            />
-          </CardContent>
-        </Link>
+          </Link>
+        </CardContent>
       </Card>
-      <div className="w-full px-4">
+      <div className="w-full px-4 md:px-6">
         <Separator />
       </div>
     </Fragment>

@@ -6,12 +6,10 @@ import {
 import { authOptions } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { ThemeToggle } from "~/features/theme-toggle";
-import { getProfileEvent, profileContent } from "~/lib/nostr";
-import { getAvatar } from "~/lib/utils";
+import { getProfileEvent } from "~/lib/nostr";
 import { type UserWithKeys } from "~/types";
 import { Layers3, PenBoxIcon } from "lucide-react";
 import { getServerSession } from "next-auth";
-import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
 
@@ -38,37 +36,11 @@ export async function Header() {
   }
 
   return (
-    <header className="relative mx-4 flex items-center justify-between border-b py-4 sm:border-none md:px-6">
+    <header className="relative flex items-center justify-between border-b py-4 sm:border-none px-6 lg:px-8">
       <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
       </Link>
-      {/* <nav className="absolute left-1/2 hidden -translate-x-1/2 transform items-center gap-4 md:flex"> */}
-      {/*   <Link */}
-      {/*     href="#" */}
-      {/*     className="rounded-md px-2 py-2 font-semibold hover:bg-primary/5" */}
-      {/*   > */}
-      {/*     Home */}
-      {/*   </Link> */}
-      {/*   <Link */}
-      {/*     href="#" */}
-      {/*     className="rounded-md px-2 py-2 font-semibold text-primary/80 hover:bg-primary/5" */}
-      {/*   > */}
-      {/*     Inbox */}
-      {/*   </Link> */}
-      {/*   <Link */}
-      {/*     href="#" */}
-      {/*     className="rounded-md px-2 py-2 font-semibold text-primary/80 hover:bg-primary/5" */}
-      {/*   > */}
-      {/*     Stacks */}
-      {/*   </Link> */}
-      {/*   <Link */}
-      {/*     href="#" */}
-      {/*     className="rounded-md px-2 py-2 font-semibold text-primary/80 hover:bg-primary/5" */}
-      {/*   > */}
-      {/*     About */}
-      {/*   </Link> */}
-      {/* </nav> */}
       <div className="flex items-center gap-4">
         {session && (
           <>

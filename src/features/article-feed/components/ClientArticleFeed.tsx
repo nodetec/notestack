@@ -16,7 +16,7 @@ export function ClientArticleFeed() {
   });
 
   return (
-    <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-8">
+    <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
       {data?.map((event) => <ArticleCard key={event.id} event={event} />)}
     </div>
   );
