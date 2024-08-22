@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -10,13 +9,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Skeleton } from "~/components/ui/skeleton";
 import { getProfileEvent, profileContent, shortNpub } from "~/lib/nostr";
+import { getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { getAvatar } from "~/lib/utils";
-import { Skeleton } from "~/components/ui/skeleton";
 
 type Props = {
   publicKey: string | undefined;
@@ -44,7 +43,9 @@ export function ProfileDropdown({ publicKey }: Props) {
           ) : (
             <Image
               className="aspect-square w-12 overflow-hidden rounded-full object-cover"
-              src={profileContent(profileEvent)?.picture ?? getAvatar(publicKey)}
+              src={
+                profileContent(profileEvent)?.picture ?? getAvatar(publicKey)
+              }
               width={48}
               height={48}
               alt=""
@@ -52,30 +53,22 @@ export function ProfileDropdown({ publicKey }: Props) {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-[12rem] rounded-lg p-2" align="end">
-        <DropdownMenuItem className="mb-2 cursor-pointer text-[1rem] font-medium">
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
           {profileContent(profileEvent)?.name ?? shortNpub(publicKey)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          asChild
-          className="my-2 cursor-pointer text-[1rem] font-medium"
-        >
+        <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium"> */}
-        {/*   Inbox */}
-        {/* </DropdownMenuItem> */}
+        <DropdownMenuItem asChild>
+          <Link href="/relays">Relays</Link>
+        </DropdownMenuItem>
         {/* <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium"> */}
         {/*   Stacks */}
         {/* </DropdownMenuItem> */}
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => signOut()}
-          className="mt-2 cursor-pointer text-[1rem] font-medium"
-        >
-          Logout
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

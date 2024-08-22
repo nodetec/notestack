@@ -4,13 +4,9 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 
-type Props = {
-  id: string;
-};
-
-export function SkeletonArticleCard({ id }: Props) {
+export function SkeletonArticleCard() {
   return (
-    <Fragment key={id}>
+    <Fragment>
       <Card className="w-full border-none bg-secondary shadow-none">
         <CardContent className="flex items-center justify-between p-4 md:p-6">
           <div className="flex flex-col gap-2">
