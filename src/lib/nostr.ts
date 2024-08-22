@@ -1,6 +1,7 @@
+// import { URL } from "url";
+
 import { getUser } from "~/server/auth";
 import { finishEventWithSecretKey } from "~/server/nostr";
-import { useAppState } from "~/store";
 import { type Profile, type RelayUrl } from "~/types";
 import {
   getEventHash,
@@ -10,6 +11,9 @@ import {
   type EventTemplate,
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
+
+import { DEFAULT_RELAYS } from "./constants";
+import { normalizeUri } from "./utils";
 
 export async function getPosts(relays: RelayUrl[]) {
   const pool = new SimplePool();
@@ -22,7 +26,6 @@ export async function getProfiles(
   relays: string[],
   publicKeys: string[] | undefined,
 ) {
-
   console.log("publicKeys", publicKeys);
   if (!publicKeys) {
     return [];
@@ -35,7 +38,6 @@ export async function getProfiles(
     authors: publicKeys,
   });
 
-
   pool.close(relays);
 
   if (!profileEvents) {
@@ -44,7 +46,7 @@ export async function getProfiles(
 
   console.log("profileEvents", profileEvents);
 
-  const profiles  = profileEvents.map(profileContent);
+  const profiles = profileEvents.map(profileContent);
 
   console.log("profiles form func", profiles);
 
@@ -107,7 +109,7 @@ export const getTag = (name: string, tags: string[][]) => {
 
 export const profileContent = (event: Event | undefined | null) => {
   try {
-    const profile =  JSON.parse(event?.content ?? "{}") as Profile;
+    const profile = JSON.parse(event?.content ?? "{}") as Profile;
     profile.pubkey = event?.pubkey;
     return profile;
   } catch (err) {
@@ -115,6 +117,40 @@ export const profileContent = (event: Event | undefined | null) => {
     return {} as Profile;
   }
 };
+
+export async function getUserRelays(
+  publicKey: string | undefined,
+  relays: string[],
+): Promise<{ url: string; read: boolean; write: boolean }[] | undefined> {
+  if (!publicKey) {
+    return undefined;
+  }
+
+  const pool = new SimplePool();
+
+  const relayEvent = await pool.get(relays, {
+    kinds: [10002],
+    authors: [publicKey],
+  });
+
+  pool.close(relays);
+
+  if (!relayEvent) {
+    return undefined;
+  }
+
+  // Parse the tags to construct the desired array of objects
+  const result = relayEvent.tags.map((tag: string[]) => {
+    const [_, url, marker] = tag;
+    return {
+      url: url ?? "",
+      read: marker !== "write",
+      write: marker !== "read",
+    };
+  });
+
+  return result;
+}
 
 // export const createNaddr = (
 //   event: Event | undefined,
@@ -200,10 +236,7 @@ export function makeNaddr(event: Event, relays: string[]) {
   return nip19.naddrEncode(addr);
 }
 
-export async function publish(eventTemplate: EventTemplate) {
-  // TODO: get users publish relays
-  const { relays } = useAppState.getState();
-
+export async function publish(eventTemplate: EventTemplate, relays: string[]) {
   let event;
 
   const user = await getUser();
@@ -231,4 +264,61 @@ export async function publish(eventTemplate: EventTemplate) {
   }
 
   return true;
+}
+
+export async function publishUserRelays(
+  readRelays: string[],
+  writeRelays: string[],
+) {
+  // Initialize an empty array to hold the tags
+  const tags: string[][] = [];
+
+  // Create a Set of normalized write relays for quick lookup
+  const writeRelaysSet = new Set(writeRelays.map(normalizeUri));
+
+  // Create a Set to hold all unique normalized relays
+  const allRelaysSet = new Set<string>();
+
+  // Add relays from the readRelays array
+  readRelays.forEach((relay) => {
+    const normalizedRelay = normalizeUri(relay);
+    allRelaysSet.add(normalizedRelay); // Add to the set of all relays
+
+    if (writeRelaysSet.has(normalizedRelay)) {
+      // If the relay is in both read and write relays, add it with no marker
+      tags.push(["r", normalizedRelay]);
+      // Remove it from the writeRelaysSet to avoid adding it again later
+      writeRelaysSet.delete(normalizedRelay);
+    } else {
+      // Otherwise, add it with the "read" marker
+      tags.push(["r", normalizedRelay, "read"]);
+    }
+  });
+
+  // Add remaining write relays that weren't in read relays
+  writeRelaysSet.forEach((relay) => {
+    allRelaysSet.add(relay); // Add to the set of all relays
+    tags.push(["r", relay, "write"]);
+  });
+
+  // Merge normalized DEFAULT_RELAYS with allRelaysSet, ensuring all values are unique
+  DEFAULT_RELAYS.forEach((relay) => {
+    allRelaysSet.add(normalizeUri(relay));
+  });
+
+  // Convert the set of all unique normalized relays to an array
+  const allRelaysArray = Array.from(allRelaysSet);
+
+  // Construct the final object
+  const eventTemplate: EventTemplate = {
+    kind: 10002,
+    tags: tags,
+    content: "",
+    created_at: Math.floor(Date.now() / 1000),
+  };
+
+  // Pass the unique normalized relays to the publish function
+  const result = await publish(eventTemplate, allRelaysArray);
+
+  return result;
 }

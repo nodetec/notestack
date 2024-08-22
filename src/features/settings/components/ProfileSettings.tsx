@@ -19,12 +19,12 @@ import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { profileContent, publish } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
+import { useAppState } from "~/store";
 import Image from "next/image";
 import { type Event, type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { redirectIfNotLoggedIn } from "~/server/auth";
 
 const profileFormSchema = z.object({
   picture: z.string(),
@@ -44,10 +44,11 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 type Props = {
-  publicKey: string | undefined;
+  publicKey: string;
 };
 
 export function ProfileSettings({ publicKey }: Props) {
+  const relays = useAppState((state) => state.relays);
 
   const { data: profileEvent, isFetching } = useQuery<Event>({
     queryKey: ["userProfile"],
@@ -114,7 +115,7 @@ export function ProfileSettings({ publicKey }: Props) {
 
     setIsSubmitting(true);
 
-    const published = await publish(eventTemplate);
+    const published = await publish(eventTemplate, relays);
 
     setIsSubmitting(false);
 
@@ -158,7 +159,7 @@ export function ProfileSettings({ publicKey }: Props) {
               <div className="flex items-center gap-x-4">
                 {field.value ? (
                   <Image
-                    className="w-12 overflow-hidden rounded-full object-cover aspect-square"
+                    className="aspect-square w-12 overflow-hidden rounded-full object-cover"
                     src={field.value || "/favicon/favicon-32x32.png"}
                     width={48}
                     height={48}
@@ -166,7 +167,7 @@ export function ProfileSettings({ publicKey }: Props) {
                   />
                 ) : (
                   <Image
-                    className="w-12 overflow-hidden rounded-full object-cover aspect-square"
+                    className="aspect-square w-12 overflow-hidden rounded-full object-cover"
                     src={getAvatar(publicKey)}
                     width={48}
                     height={48}

@@ -1,10 +1,9 @@
-import { type RelayUrl } from "~/types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface State {
-  relays: RelayUrl[];
-  setRelays: (relays: RelayUrl[]) => void;
+  relays: string[];
+  setRelays: (relays: string[]) => void;
 }
 
 export const useAppState = create<State>()(
