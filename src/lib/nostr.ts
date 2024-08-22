@@ -2,7 +2,7 @@
 
 import { getUser } from "~/server/auth";
 import { finishEventWithSecretKey } from "~/server/nostr";
-import { type Profile, type RelayUrl } from "~/types";
+import { type Profile } from "~/types";
 import {
   getEventHash,
   nip19,
@@ -15,7 +15,7 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
-export async function getPosts(relays: RelayUrl[]) {
+export async function getPosts(relays: string[]) {
   const pool = new SimplePool();
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
   pool.close(relays);
