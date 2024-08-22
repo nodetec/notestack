@@ -77,40 +77,55 @@ export function ArticleCard({ event }: Props) {
             className="flex flex-col gap-2 pb-4 pt-4"
             href={`/a/${makeNaddr(event, relays)}`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col items-start gap-2">
-                <h2 className="line-clamp-2 text-ellipsis break-words text-2xl font-bold leading-7">
-                  {getTag("title", event.tags)}
-                </h2>
-                <h3 className="line-clamp-2 text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
-                  {parseContent(event.content) || "No content \n "}
-                </h3>
-                <div className="mt-4 flex gap-4 text-sm text-muted-foreground">
-                  <div className="text-muted-foreground">
-                    {formatEpochTime(event.created_at)}
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <ZapIcon className="h-4 w-4" />
-                    33.1k
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <MessageCircle className="h-4 w-4" />
-                    33.1k
+            <div className="flex flex-col">
+              <div className="flex items-start justify-between sm:items-center">
+                <div className="flex flex-col items-start gap-2">
+                  <h2 className="line-clamp-3 text-ellipsis break-words text-xl font-bold leading-6 sm:text-2xl sm:leading-7">
+                    {getTag("title", event.tags)}
+                  </h2>
+                  <h3 className="line-clamp-2 text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
+                    {parseContent(event.content) || "No content \n "}
+                  </h3>
+                  <div className="mt-4 hidden gap-4 text-sm text-muted-foreground sm:flex">
+                    <div className="text-muted-foreground">
+                      {formatEpochTime(event.created_at)}
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <ZapIcon className="h-4 w-4" />
+                      33.1k
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <MessageCircle className="h-4 w-4" />
+                      33.1k
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <Image
-                className="ml-2 h-14 w-20 shrink-0 rounded-md object-cover sm:ml-14 sm:h-28 sm:w-40"
-                src={
-                  getTag("image", event.tags) ??
-                  getFirstImage(event.content) ??
-                  ""
-                }
-                width={160}
-                height={112}
-                alt=""
-              />
+                <Image
+                  className="ml-6 h-14 w-20 shrink-0 rounded-md object-cover sm:ml-14 sm:h-28 sm:w-40"
+                  src={
+                    getTag("image", event.tags) ??
+                    getFirstImage(event.content) ??
+                    ""
+                  }
+                  width={160}
+                  height={112}
+                  alt=""
+                />
+              </div>
+              <div className="mt-6 flex gap-4 text-sm text-muted-foreground sm:hidden">
+                <div className="text-muted-foreground">
+                  {formatEpochTime(event.created_at)}
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <ZapIcon className="h-4 w-4" />
+                  33.1k
+                </div>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <MessageCircle className="h-4 w-4" />
+                  33.1k
+                </div>
+              </div>
             </div>
           </Link>
         </CardContent>
