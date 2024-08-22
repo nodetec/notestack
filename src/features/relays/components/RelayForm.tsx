@@ -21,7 +21,12 @@ const relayFormSchema = z.object({
   relays: z
     .array(
       z.object({
-        url: z.string().url({ message: "Please enter a valid URL." }),
+        url: z
+          .string()
+          .url({ message: "Please enter a valid URL." })
+          .refine((url) => url.startsWith("wss://"), {
+            message: "URL must begin with wss://",
+          }),
         read: z.boolean().optional(),
         write: z.boolean().optional(),
       }),
@@ -50,6 +55,26 @@ export function RelayForm({ defaultValues }: Props) {
   const queryClient = useQueryClient();
 
   async function onSubmit(data: RelayFormValues) {
+    let hasError = false;
+
+    data.relays.forEach((relay, index) => {
+      if (!relay.read && !relay.write) {
+        form.setError(`relays.${index}.read`, {
+          type: "manual",
+          message: "At least one switch must be set to true.",
+        });
+        form.setError(`relays.${index}.write`, {
+          type: "manual",
+          // message: "At least one switch must be set to true.",
+        });
+        hasError = true;
+      }
+    });
+
+    if (hasError) {
+      return;
+    }
+
     const readRelayUrls = data.relays
       .filter((relay) => relay.read)
       .map((relay) => relay.url);
@@ -60,13 +85,13 @@ export function RelayForm({ defaultValues }: Props) {
     const published = await publishUserRelays(readRelayUrls, writeRelayUrls);
 
     if (published) {
-      toast("Profile updated", {
-        description: "Your profile has been updated.",
+      toast("Relays updated", {
+        description: "Your relays have been updated.",
       });
       await queryClient.invalidateQueries({ queryKey: ["userRelays"] });
     } else {
-      toast("Profile update failed", {
-        description: "There was an error updating your profile.",
+      toast("Relays failed to update", {
+        description: "There was an error updating your relays.",
       });
     }
   }
@@ -75,6 +100,17 @@ export function RelayForm({ defaultValues }: Props) {
     e.preventDefault();
     if (fields.length === 1) return;
     remove(index);
+  }
+
+  function appendRelay(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+
+    // check if the last relay has a URL
+    // if it doesn't, don't append a new relay
+    const lastRelay = fields[fields.length - 1];
+    if (!lastRelay?.url) return;
+
+    append({ url: "", read: true, write: true });
   }
 
   return (
@@ -105,52 +141,56 @@ export function RelayForm({ defaultValues }: Props) {
                 />
               </div>
 
-              <div className="flex justify-between">
-                <div className="flex gap-6 px-1">
-                  <FormField
-                    control={form.control}
-                    name={`relays.${index}.read`}
-                    render={({ field }) => (
-                      <FormItem className="flex justify-center gap-2">
-                        <FormControl>
-                          <div className="flex items-center space-x-2">
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                            <FormLabel>Read</FormLabel>
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+              <div className="flex flex-col">
+                <div className="flex justify-between">
+                  <div className="flex gap-6 px-1">
+                    <FormField
+                      control={form.control}
+                      name={`relays.${index}.read`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-center gap-2">
+                          <FormControl>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                              <FormLabel>Read</FormLabel>
+                            </div>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name={`relays.${index}.write`}
-                    render={({ field }) => (
-                      <FormItem className="flex justify-center gap-2">
-                        <FormControl>
-                          <div className="flex items-center space-x-2">
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                            <FormLabel>Write</FormLabel>
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name={`relays.${index}.write`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-center gap-2">
+                          <FormControl>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                              <FormLabel>Write</FormLabel>
+                            </div>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <Button
+                    onClick={(e) => removeRelay(e, index)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Remove
+                  </Button>
                 </div>
-
-                <Button
-                  onClick={(e) => removeRelay(e, index)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Remove
-                </Button>
+                <FormMessage className="mt-4">
+                  {form.formState.errors.relays?.[index]?.read?.message}
+                </FormMessage>
               </div>
               <Separator className="mt-16 sm:hidden" />
             </div>
@@ -159,7 +199,7 @@ export function RelayForm({ defaultValues }: Props) {
             type="button"
             variant="outline"
             className="mt-2 sm:w-24"
-            onClick={() => append({ url: "", read: true, write: true })}
+            onClick={appendRelay}
           >
             Add Relay
           </Button>
