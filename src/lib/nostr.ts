@@ -17,6 +17,7 @@ import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
 export async function getPosts(relays: string[]) {
+  console.log("getPosts", relays);
   const pool = new SimplePool();
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
   pool.close(relays);
@@ -34,7 +35,6 @@ export async function getProfiles(
   relays: string[],
   publicKeys: string[] | undefined,
 ) {
-  console.log("publicKeys", publicKeys);
   if (!publicKeys) {
     return [];
   }
@@ -161,11 +161,14 @@ export async function getReadRelays(
   publicKey: string | undefined,
   relays: string[],
 ) {
+  console.log("getReadRelays", publicKey, relays);
   const userRelays = await getUserRelays(publicKey, relays);
 
   if (!userRelays) {
     return undefined;
   }
+
+  console.log("userRelays", userRelays);
 
   return userRelays.filter((relay) => !relay.write).map((relay) => relay.url);
 }

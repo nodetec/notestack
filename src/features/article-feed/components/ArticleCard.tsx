@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   bufferScheduler,
   create,
@@ -22,27 +22,35 @@ import { type Event } from "nostr-tools";
 
 type Props = {
   event: Event;
+  relays: string[];
 };
 
-// TODO: figure out scheduler
-const profiles = create({
-  fetcher: async (publicKeys: string[]) => {
-    const relays = useAppState.getState().relays;
-    return await getProfiles(relays, publicKeys);
-  },
-  resolver: keyResolver("pubkey"),
-});
+export function ArticleCard({ event, relays }: Props) {
+  // const queryClient = useQueryClient();
 
-export function ArticleCard({ event }: Props) {
-  const relays = useAppState((state) => state.relays);
+  // const relays = queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
 
-  const { data: profile, isFetching } = useQuery<Profile>({
-    queryKey: ["profile", event.pubkey],
-    refetchOnWindowFocus: false,
-    queryFn: async () => {
-      return await profiles.fetch(event.pubkey);
-    },
-  });
+  console.log("relays from the article card", relays);
+
+  // TODO: figure out scheduler
+  // const profiles = create({
+  //   fetcher: async (publicKeys: string[]) => {
+  //     // const relays = useAppState.getState().relays;
+  //     // const relays =
+  //     //   queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
+  //
+  //     return await getProfiles(relays, publicKeys);
+  //   },
+  //   resolver: keyResolver("pubkey"),
+  // });
+
+  // const { data: profile, isFetching } = useQuery<Profile>({
+  //   queryKey: ["profile", event.pubkey],
+  //   refetchOnWindowFocus: false,
+  //   queryFn: async () => {
+  //     return await profiles.fetch(event.pubkey);
+  //   },
+  // });
 
   return (
     <Fragment key={event.id}>
@@ -53,23 +61,23 @@ export function ArticleCard({ event }: Props) {
 
           {/* User image and name */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {isFetching ? (
-              <>
-                <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
-                <Skeleton className="h-4 w-20" />
-              </>
-            ) : (
-              <>
-                <Image
-                  className="aspect-square w-5 overflow-hidden rounded-full object-cover"
-                  src={profile?.picture ?? getAvatar(profile?.publicKey)}
-                  width={48}
-                  height={48}
-                  alt=""
-                />
-                <span>{profile?.name ?? shortNpub(event.pubkey)}</span>
-              </>
-            )}
+            {/* {isFetching ? ( */}
+            {/*   <> */}
+            {/*     <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" /> */}
+            {/*     <Skeleton className="h-4 w-20" /> */}
+            {/*   </> */}
+            {/* ) : ( */}
+            {/*   <> */}
+            {/*     <Image */}
+            {/*       className="aspect-square w-5 overflow-hidden rounded-full object-cover" */}
+            {/*       src={profile?.picture ?? getAvatar(profile?.publicKey)} */}
+            {/*       width={48} */}
+            {/*       height={48} */}
+            {/*       alt="" */}
+            {/*     /> */}
+            {/*     <span>{profile?.name ?? shortNpub(event.pubkey)}</span> */}
+            {/*   </> */}
+            {/* )} */}
           </div>
 
           {/* </div> */}
@@ -106,7 +114,7 @@ export function ArticleCard({ event }: Props) {
                   src={
                     getTag("image", event.tags) ??
                     getFirstImage(event.content) ??
-                    ""
+                    "/images/transparent-160-112.png"
                   }
                   width={160}
                   height={112}
