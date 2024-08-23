@@ -22,6 +22,7 @@ import * as z from "zod";
 const isValidNsec = (nsec: string) => {
   try {
     return nip19.decode(nsec).type === "nsec";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
