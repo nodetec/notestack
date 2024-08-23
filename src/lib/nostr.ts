@@ -173,24 +173,32 @@ export async function getReadRelays(
 export async function getWriteRelays(
   publicKey: string | undefined,
   relays: string[],
-): Promise<{ url: string }[] | undefined> {
+) {
   const userRelays = await getUserRelays(publicKey, relays);
 
   if (!userRelays) {
     return undefined;
   }
 
-  // Filter to return only the write relays
-  return userRelays
-    .filter((relay) => relay.write)
-    .map((relay) => ({
-      url: relay.url,
-    }));
+  return userRelays.filter((relay) => !relay.read).map((relay) => relay.url);
 }
 
-export async function getAllReadRelays(
-  publicKey: string | undefined,
-) {
+export async function getAllWriteRelays(publicKey: string | undefined) {
+  const defaultRelays = DEFAULT_RELAYS;
+
+  let userRelays = await getWriteRelays(publicKey, defaultRelays);
+
+  if (!userRelays) {
+    userRelays = [];
+  }
+
+  // add all relays if defined to a new array of unique relays
+  const allRelays = new Set<string>([...defaultRelays, ...userRelays]);
+
+  return Array.from(allRelays);
+}
+
+export async function getAllReadRelays(publicKey: string | undefined) {
   const defaultRelays = DEFAULT_RELAYS;
 
   let userRelays = await getReadRelays(publicKey, defaultRelays);
@@ -227,9 +235,9 @@ export async function getAllReadRelays(
 //   return nip19.naddrEncode(addressPointer);
 // };
 
-// export function createATag({ kind, pubkey, dTagValue }: ATagParams) {
-//   return `${kind}:${pubkey}:${dTagValue}`;
-// }
+export function createATag(kind: number, pubkey: string, dTagValue: string) {
+  return `${kind}:${pubkey}:${dTagValue}`;
+}
 
 // function generateUniqueHash(data: string, length: number) {
 //   const hash = sha256(utf8Encoder.encode(data));
@@ -310,6 +318,28 @@ export async function publish(eventTemplate: EventTemplate, relays: string[]) {
   const retrievedEvent = await pool.get(relays, {
     ids: [event.id],
   });
+  pool.close(relays);
+
+  if (!retrievedEvent) {
+    return false;
+  }
+
+  return true;
+}
+
+export async function publishFinishedEvent(event: Event, relays: string[]) {
+  if (!event) {
+    return false;
+  }
+
+  const pool = new SimplePool();
+
+  await Promise.any(pool.publish(relays, event));
+
+  const retrievedEvent = await pool.get(relays, {
+    ids: [event.id],
+  });
+
   pool.close(relays);
 
   if (!retrievedEvent) {

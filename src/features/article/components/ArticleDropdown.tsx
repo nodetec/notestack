@@ -6,38 +6,49 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getEvent } from "~/lib/nostr";
-import { signOut } from "next-auth/react";
+import { getAllWriteRelays, publishFinishedEvent } from "~/lib/nostr";
+import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
+import { toast } from "sonner";
 
 type Props = {
   children: React.ReactNode;
   address: AddressPointer;
   publicKey: string | undefined;
+  articleEvent: Event;
 };
 
-export function ArticleDropdown({ children, address, publicKey }: Props) {
-  async function broadcaseArticle() {
+export function ArticleDropdown({
+  children,
+  address,
+  publicKey,
+  articleEvent,
+}: Props) {
+  async function broadcastArticle() {
+    const relays = await getAllWriteRelays(publicKey);
 
-    const filter = {
-      kinds: [address.kind],
-      limit: 1,
-      "#d": [address.identifier],
-    };
+    const published = await publishFinishedEvent(articleEvent, relays);
 
-    const event = await getEvent(filter, address.relays ?? DEFAULT_RELAYS);
-
-    // get event
-    // get users write relays
-    // publish to users write relays
+    if (published) {
+      toast("Article broadcast", {
+        description: "The article has been successfully broadcast.",
+      });
+    } else {
+      toast("failed to broadcast article", {
+        description: "There was an error broadcasting the article.",
+      });
+    }
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => signOut()}>Broadcast</DropdownMenuItem>
+        {publicKey && (
+          <DropdownMenuItem onClick={broadcastArticle}>
+            Broadcast
+          </DropdownMenuItem>
+        )}
         {/* <DropdownMenuItem asChild> */}
         {/*   <Link href="/settings">Settings</Link> */}
         {/* </DropdownMenuItem> */}

@@ -39,7 +39,7 @@ const getCurrentArticle = async (
 };
 
 export function Article({ address, publicKey }: Props) {
-  const { data: currentArticle, status } = useQuery({
+  const { data: articleEvent, status } = useQuery({
     queryKey: ["article", address.pubkey, address.identifier],
     refetchOnWindowFocus: false,
     queryFn: () => getCurrentArticle(address, publicKey),
@@ -55,14 +55,16 @@ export function Article({ address, publicKey }: Props) {
 
   return (
     <>
-      <ArticleHeader address={address} publicKey={publicKey} />
-      {status === "success" && currentArticle && (
-        <article
-          className="prose prose-zinc mx-auto dark:prose-invert"
-          dangerouslySetInnerHTML={{
-            __html: processContent(currentArticle.content),
-          }}
-        />
+      {status === "success" && articleEvent && (
+        <>
+          <ArticleHeader address={address} publicKey={publicKey} articleEvent={articleEvent}  />
+          <article
+            className="prose prose-zinc mx-auto dark:prose-invert"
+            dangerouslySetInnerHTML={{
+              __html: processContent(articleEvent.content),
+            }}
+          />
+        </>
       )}
     </>
   );

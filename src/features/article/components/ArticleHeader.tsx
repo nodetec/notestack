@@ -8,13 +8,15 @@ import { useRouter } from "next/navigation";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleDropdown } from "./ArticleDropdown";
+import { type Event } from "nostr-tools";
 
 type Props = {
   address: AddressPointer;
   publicKey: string | undefined;
+  articleEvent: Event;
 };
 
-export const ArticleHeader = ({ address, publicKey }: Props) => {
+export const ArticleHeader = ({ address, publicKey, articleEvent }: Props) => {
   const router = useRouter();
 
   return (
@@ -27,7 +29,7 @@ export const ArticleHeader = ({ address, publicKey }: Props) => {
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </Button>
-      <ArticleDropdown address={address} publicKey={publicKey}>
+      <ArticleDropdown address={address} publicKey={publicKey} articleEvent={articleEvent}>
         <Button
           className="bg-muted hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-transparent"
           variant="secondary"
