@@ -45,7 +45,7 @@ export function Article({ address, publicKey }: Props) {
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
-  if (status === "error" || !currentArticle) {
+  if (status === "error") {
     return (
       <div className="flex h-96 items-center justify-center">
         <p className="text-lg text-muted-foreground">Article not found</p>
@@ -56,12 +56,14 @@ export function Article({ address, publicKey }: Props) {
   return (
     <>
       <ArticleHeader address={address} publicKey={publicKey} />
-      <article
-        className="prose prose-zinc mx-auto dark:prose-invert"
-        dangerouslySetInnerHTML={{
-          __html: processContent(currentArticle.content),
-        }}
-      />
+      {status === "success" && currentArticle && (
+        <article
+          className="prose prose-zinc mx-auto dark:prose-invert"
+          dangerouslySetInnerHTML={{
+            __html: processContent(currentArticle.content),
+          }}
+        />
+      )}
     </>
   );
 }
