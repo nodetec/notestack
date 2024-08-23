@@ -6,6 +6,7 @@ import { getAllReadRelays, getEvent } from "~/lib/nostr";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleHeader } from "./ArticleHeader";
+import { SkeletonArticle } from "./SkeletonArticle";
 
 type Props = {
   address: AddressPointer;
@@ -45,6 +46,10 @@ export function Article({ address, publicKey }: Props) {
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
+  if (status === "pending") {
+    return <SkeletonArticle />;
+  }
+
   if (status === "error") {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -57,7 +62,11 @@ export function Article({ address, publicKey }: Props) {
     <>
       {status === "success" && articleEvent && (
         <>
-          <ArticleHeader address={address} publicKey={publicKey} articleEvent={articleEvent}  />
+          <ArticleHeader
+            address={address}
+            publicKey={publicKey}
+            articleEvent={articleEvent}
+          />
           <article
             className="prose prose-zinc mx-auto dark:prose-invert"
             dangerouslySetInnerHTML={{

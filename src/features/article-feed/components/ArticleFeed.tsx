@@ -1,32 +1,38 @@
-import { Suspense } from "react";
+"use client";
 
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-import { getEvents } from "~/server/nostr";
+import { useQuery } from "@tanstack/react-query";
+import { getPosts } from "~/lib/nostr";
+import { useAppState } from "~/store";
 
-import { ClientArticleFeed } from "./ClientArticleFeed";
+import { ArticleCard } from "./ArticleCard";
+import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 
-const filter = { kinds: [30023], limit: 10 };
+type Props = {
+  publicKey: string | undefined;
+};
 
-export async function ArticleFeed() {
-  const queryClient = new QueryClient();
+export function ArticleFeed({ publicKey }: Props) {
+  const relays = useAppState((state) => state.relays);
 
-  // sleep for 5 seconds to simulate network latency
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  await queryClient.prefetchQuery({
-    queryKey: ["posts"],
-    queryFn: () => getEvents(filter),
+  const { data: articleEvents, status } = useQuery({
+    queryKey: ["articles"],
+    refetchOnWindowFocus: false, // Disable refetching on window focus for now
+    queryFn: () => getPosts(relays),
   });
 
+  if (status === "pending") {
+    return <SkeletonArticleFeed />;
+  }
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<div></div>}>
-        <ClientArticleFeed />
-      </Suspense>
-    </HydrationBoundary>
+    <>
+      {status === "success" && articleEvents && (
+        <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
+          {articleEvents?.map((event) => (
+            <ArticleCard key={event.id} event={event} />
+          ))}
+        </div>
+      )}
+    </>
   );
 }
