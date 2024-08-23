@@ -1,5 +1,3 @@
-// import { URL } from "url";
-
 import { getUser } from "~/server/auth";
 import { finishEventWithSecretKey } from "~/server/nostr";
 import { type Profile } from "~/types";
@@ -16,11 +14,17 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
-export async function getPosts(relays: string[]) {
-  console.log("getPosts", relays);
+export async function getArticles(relays: string[]) {
   const pool = new SimplePool();
-  const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
+  let events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
   pool.close(relays);
+  if (!events) {
+    return [];
+  }
+  if (events.length > 10) {
+    events = events.slice(0, 10);
+  }
+  events.sort((a, b) => b.created_at - a.created_at);
   return events;
 }
 
@@ -137,6 +141,8 @@ export async function getUserRelays(
     authors: [publicKey],
   });
 
+  console.log("relayEvent", relayEvent);
+
   pool.close(relays);
 
   if (!relayEvent) {
@@ -165,12 +171,19 @@ export async function getReadRelays(
   const userRelays = await getUserRelays(publicKey, relays);
 
   if (!userRelays) {
-    return undefined;
+    return [];
   }
 
   console.log("userRelays", userRelays);
 
-  return userRelays.filter((relay) => !relay.write).map((relay) => relay.url);
+  // where read is true
+  const readRelays = userRelays
+    .filter((relay) => relay.read)
+    .map((relay) => relay.url);
+
+  console.log("READRELAYS", readRelays);
+
+  return readRelays;
 }
 
 export async function getWriteRelays(
@@ -183,7 +196,10 @@ export async function getWriteRelays(
     return undefined;
   }
 
-  return userRelays.filter((relay) => !relay.read).map((relay) => relay.url);
+  const writeRelays = userRelays
+    .filter((relay) => relay.write)
+    .map((relay) => relay.url);
+  return writeRelays;
 }
 
 export async function getAllWriteRelays(publicKey: string | undefined) {
@@ -305,10 +321,15 @@ export async function publish(eventTemplate: EventTemplate, relays: string[]) {
 
   const user = await getUser();
 
-  if (user?.secretKey) {
-    event = await finishEventWithSecretKey(eventTemplate);
-  } else {
+  if (user?.secretKey === "0") {
     event = await finishEventWithExtension(eventTemplate);
+  } else {
+    if (user?.secretKey) {
+      event = await finishEventWithSecretKey(eventTemplate);
+    } else {
+      console.error("User not found");
+      return false;
+    }
   }
 
   if (!event) {

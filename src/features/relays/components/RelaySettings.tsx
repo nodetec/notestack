@@ -2,17 +2,15 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getUserRelays } from "~/lib/nostr";
-import { useAppState } from "~/store";
 
 import { RelayForm } from "./RelayForm";
+import { DEFAULT_RELAYS } from "~/lib/constants";
 
 type Props = {
   publicKey: string;
 };
 
 export function RelaySettings({ publicKey }: Props) {
-  const relays = useAppState((state) => state.relays);
-
   const defaultValues = {
     relays: [{ url: "", read: true, write: true }],
   };
@@ -20,7 +18,7 @@ export function RelaySettings({ publicKey }: Props) {
   const { data: userRelays, isFetching } = useQuery({
     queryKey: ["userRelays"],
     refetchOnWindowFocus: false,
-    queryFn: () => getUserRelays(publicKey, relays),
+    queryFn: () => getUserRelays(publicKey, DEFAULT_RELAYS),
   });
 
   return (

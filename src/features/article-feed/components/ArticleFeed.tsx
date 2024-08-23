@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getPosts, getReadRelays } from "~/lib/nostr";
+import { getArticles, getReadRelays } from "~/lib/nostr";
 
 import { ArticleCard } from "./ArticleCard";
 import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
@@ -14,19 +14,17 @@ type Props = {
 export function ArticleFeed({ publicKey }: Props) {
   const { data: userReadRelays } = useQuery({
     queryKey: ["userReadRelays"],
-    refetchOnWindowFocus: false, // Disable refetching on window focus for now
+    refetchOnWindowFocus: false,
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
 
   const relays = userReadRelays && userReadRelays.length > 0 ? userReadRelays : DEFAULT_RELAYS;
 
-  console.log("relays", relays);
-
   const { data: articleEvents, status } = useQuery({
     queryKey: ["articles", relays],
-    refetchOnWindowFocus: false, // Disable refetching on window focus for now
-    queryFn: () => getPosts(relays),
-    enabled: !!relays.length, // Only enable when relays is non-empty
+    refetchOnWindowFocus: false,
+    queryFn: () => getArticles(relays),
+    enabled: !!relays.length,
   });
 
   if (status === "pending") {

@@ -30,8 +30,6 @@ export function ArticleCard({ event, relays }: Props) {
 
   // const relays = queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
 
-  console.log("relays from the article card", relays);
-
   // TODO: figure out scheduler
   // const profiles = create({
   //   fetcher: async (publicKeys: string[]) => {
@@ -91,7 +89,7 @@ export function ArticleCard({ event, relays }: Props) {
                   <h2 className="line-clamp-3 text-ellipsis break-words text-xl font-bold leading-6 sm:text-2xl sm:leading-7">
                     {getTag("title", event.tags)}
                   </h2>
-                  <h3 className="line-clamp-2 text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
+                  <h3 className="line-clamp-2 break-anywhere text-pretty text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
                     {parseContent(event.content) || "No content \n "}
                   </h3>
                   <div className="mt-4 hidden gap-4 text-sm text-muted-foreground sm:flex">
