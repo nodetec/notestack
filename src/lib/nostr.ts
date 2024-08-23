@@ -9,6 +9,7 @@ import {
   SimplePool,
   type Event,
   type EventTemplate,
+  type Filter,
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
@@ -20,6 +21,13 @@ export async function getPosts(relays: string[]) {
   const events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
   pool.close(relays);
   return events;
+}
+
+export async function getEvent(filter: Filter, relays: string[]) {
+  const pool = new SimplePool();
+  const event = await pool.get(relays, filter);
+  pool.close(relays);
+  return event;
 }
 
 export async function getProfiles(
@@ -44,11 +52,7 @@ export async function getProfiles(
     return [];
   }
 
-  console.log("profileEvents", profileEvents);
-
   const profiles = profileEvents.map(profileContent);
-
-  console.log("profiles form func", profiles);
 
   return profiles;
 }
@@ -141,6 +145,7 @@ export async function getUserRelays(
 
   // Parse the tags to construct the desired array of objects
   const result = relayEvent.tags.map((tag: string[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, url, marker] = tag;
     return {
       url: url ?? "",
@@ -150,6 +155,54 @@ export async function getUserRelays(
   });
 
   return result;
+}
+
+export async function getReadRelays(
+  publicKey: string | undefined,
+  relays: string[],
+) {
+  const userRelays = await getUserRelays(publicKey, relays);
+
+  if (!userRelays) {
+    return undefined;
+  }
+
+  return userRelays.filter((relay) => !relay.write).map((relay) => relay.url);
+}
+
+export async function getWriteRelays(
+  publicKey: string | undefined,
+  relays: string[],
+): Promise<{ url: string }[] | undefined> {
+  const userRelays = await getUserRelays(publicKey, relays);
+
+  if (!userRelays) {
+    return undefined;
+  }
+
+  // Filter to return only the write relays
+  return userRelays
+    .filter((relay) => relay.write)
+    .map((relay) => ({
+      url: relay.url,
+    }));
+}
+
+export async function getAllReadRelays(
+  publicKey: string | undefined,
+) {
+  const defaultRelays = DEFAULT_RELAYS;
+
+  let userRelays = await getReadRelays(publicKey, defaultRelays);
+
+  if (!userRelays) {
+    userRelays = [];
+  }
+
+  // add all relays if defined to a new array of unique relays
+  const allRelays = new Set<string>([...defaultRelays, ...userRelays]);
+
+  return Array.from(allRelays);
 }
 
 // export const createNaddr = (
@@ -262,6 +315,21 @@ export async function publish(eventTemplate: EventTemplate, relays: string[]) {
   if (!retrievedEvent) {
     return false;
   }
+
+  return true;
+}
+
+export async function broadcast(event: Event, relays: string[]) {
+  if (!event) {
+    return false;
+  }
+  const pool = new SimplePool();
+
+  const result = await Promise.any(pool.publish(relays, event));
+
+  pool.close(relays);
+
+  console.log("broadcast result", result);
 
   return true;
 }

@@ -1,3 +1,7 @@
+import remarkHtml from "remark-html";
+import remarkParse from "remark-parse";
+import { unified } from "unified";
+
 export function getFirstImage(markdown: string) {
   const regex = /!\[.*\]\((.*)\)/;
   const match = regex.exec(markdown);
@@ -37,3 +41,12 @@ export function parseContent(markdownContent: string) {
   return content;
 }
 
+export function processContent(content: string) {
+  const processedContent = unified()
+    .use(remarkParse)
+    .use(remarkHtml)
+    .processSync(content)
+    .toString();
+
+  return processedContent;
+}

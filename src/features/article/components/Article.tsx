@@ -1,44 +1,67 @@
-import { getEvent } from "~/server/nostr";
-import { nip19 } from "nostr-tools";
-import remarkHtml from "remark-html";
-import remarkParse from "remark-parse";
-import { unified } from "unified";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { processContent } from "~/lib/markdown";
+import { getAllReadRelays, getEvent } from "~/lib/nostr";
+import { type AddressPointer } from "nostr-tools/nip19";
+
+import { ArticleHeader } from "./ArticleHeader";
 
 type Props = {
-  naddr: string;
+  address: AddressPointer;
+  publicKey: string | undefined;
 };
 
-export async function Article({ naddr }: Props) {
-  const decodeResult = nip19.decode(naddr);
-
-  if (decodeResult.type !== "naddr") {
-    return <div>404</div>;
-  }
-
-  const address = decodeResult.data;
-
+const getCurrentArticle = async (
+  address: AddressPointer,
+  publicKey: string | undefined,
+) => {
   const filter = {
     kinds: [address.kind],
     limit: 1,
     "#d": [address.identifier],
   };
 
-  const event = await getEvent(filter);
+  let relays = address.relays;
 
-  if (!event) {
-    return <div>404</div>;
+  if (!relays) {
+    relays = await getAllReadRelays(publicKey);
   }
 
-  const processedContent = unified()
-    .use(remarkParse)
-    .use(remarkHtml)
-    .processSync(event.content)
-    .toString();
+  const event = await getEvent(filter, relays);
+
+  if (!event) {
+    console.error("Event not found");
+    throw new Error("Event not found");
+  }
+
+  return event;
+};
+
+export function Article({ address, publicKey }: Props) {
+  const { data: currentArticle, status } = useQuery({
+    queryKey: ["article", address.pubkey, address.identifier],
+    refetchOnWindowFocus: false,
+    queryFn: () => getCurrentArticle(address, publicKey),
+  });
+
+  if (status === "error" || !currentArticle) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <p className="text-lg text-muted-foreground">Article not found</p>
+      </div>
+    );
+  }
 
   return (
-    <article
-      className="prose prose-zinc mx-auto dark:prose-invert"
-      dangerouslySetInnerHTML={{ __html: processedContent }}
-    />
+    <>
+      <ArticleHeader address={address} publicKey={publicKey} />
+      <article
+        className="prose prose-zinc mx-auto dark:prose-invert"
+        dangerouslySetInnerHTML={{
+          __html: processContent(currentArticle.content),
+        }}
+      />
+    </>
   );
 }

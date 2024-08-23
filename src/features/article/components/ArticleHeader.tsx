@@ -5,14 +5,16 @@ import React from "react";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftIcon, EllipsisVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleDropdown } from "./ArticleDropdown";
 
 type Props = {
-  naddr: string;
+  address: AddressPointer;
+  publicKey: string | undefined;
 };
 
-export const ArticleHeader = ({ naddr }: Props) => {
+export const ArticleHeader = ({ address, publicKey }: Props) => {
   const router = useRouter();
 
   return (
@@ -25,7 +27,7 @@ export const ArticleHeader = ({ naddr }: Props) => {
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </Button>
-      <ArticleDropdown naddr={naddr}>
+      <ArticleDropdown address={address} publicKey={publicKey}>
         <Button
           className="bg-muted hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-transparent"
           variant="secondary"
