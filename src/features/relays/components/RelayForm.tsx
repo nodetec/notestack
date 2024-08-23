@@ -131,6 +131,7 @@ export function RelayForm({ defaultValues }: Props) {
                       <FormLabel className="ml-1">Relay URL</FormLabel>
                       <FormControl>
                         <Input
+                          className="bg-muted"
                           placeholder="wss://relay.example.com"
                           {...field}
                         />
@@ -182,6 +183,7 @@ export function RelayForm({ defaultValues }: Props) {
                   </div>
                   <Button
                     onClick={(e) => removeRelay(e, index)}
+                    className="bg-accent hover:bg-foreground/20"
                     variant="outline"
                     size="sm"
                   >
@@ -198,7 +200,7 @@ export function RelayForm({ defaultValues }: Props) {
           <Button
             type="button"
             variant="outline"
-            className="mt-2 sm:w-24"
+            className="mt-2 bg-accent hover:bg-foreground/20 sm:w-24"
             onClick={appendRelay}
           >
             Add Relay
