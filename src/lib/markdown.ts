@@ -10,7 +10,7 @@ export function getFirstImage(markdown: string) {
     return match[1];
   }
 
-  return "";
+  return undefined;
 }
 
 export function parseContent(markdownContent: string) {

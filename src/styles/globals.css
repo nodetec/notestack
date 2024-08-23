@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@supports (overflow-wrap: anywhere) {
+  .break-anywhere {
+    overflow-wrap: anywhere;
+  }
+}
+
+@supports not (overflow-wrap: anywhere) {
+  .break-anywhere {
+    word-break: break-word;
+  }
+}
+
 @layer base {
   :root {
     --background: 240 4.8% 95.9%;

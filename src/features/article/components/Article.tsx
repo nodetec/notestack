@@ -23,13 +23,22 @@ const getCurrentArticle = async (
     "#d": [address.identifier],
   };
 
+  console.log("address", address);
+
+
   let relays = address.relays;
 
+
   if (!relays) {
+    console.log("getting all read relays");
     relays = await getAllReadRelays(publicKey);
   }
 
+  console.log("relays", relays);
+
   const event = await getEvent(filter, relays);
+
+  console.log("event", event);
 
   if (!event) {
     console.error("Event not found");
@@ -44,6 +53,7 @@ export function Article({ address, publicKey }: Props) {
     queryKey: ["article", address.pubkey, address.identifier],
     refetchOnWindowFocus: false,
     queryFn: () => getCurrentArticle(address, publicKey),
+    retry: 0,
   });
 
   if (status === "pending") {

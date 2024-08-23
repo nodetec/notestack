@@ -10,9 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
+import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getProfileEvent, profileContent, shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
-import { useAppState } from "~/store";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,12 +22,10 @@ type Props = {
 };
 
 export function ProfileDropdown({ publicKey }: Props) {
-  const relays = useAppState((state) => state.relays);
-
   const { data: profileEvent, isFetching } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
-    queryFn: () => getProfileEvent(relays, publicKey),
+    queryFn: () => getProfileEvent(DEFAULT_RELAYS, publicKey),
   });
 
   return (

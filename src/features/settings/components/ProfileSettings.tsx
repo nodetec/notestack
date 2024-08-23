@@ -19,12 +19,12 @@ import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { profileContent, publish } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
-import { useAppState } from "~/store";
 import Image from "next/image";
 import { type Event, type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { DEFAULT_RELAYS } from "~/lib/constants";
 
 const profileFormSchema = z.object({
   picture: z.string(),
@@ -48,8 +48,6 @@ type Props = {
 };
 
 export function ProfileSettings({ publicKey }: Props) {
-  const relays = useAppState((state) => state.relays);
-
   const { data: profileEvent, isFetching } = useQuery<Event>({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
@@ -115,7 +113,8 @@ export function ProfileSettings({ publicKey }: Props) {
 
     setIsSubmitting(true);
 
-    const published = await publish(eventTemplate, relays);
+    // TODO: publish to the user's relays
+    const published = await publish(eventTemplate, DEFAULT_RELAYS);
 
     setIsSubmitting(false);
 

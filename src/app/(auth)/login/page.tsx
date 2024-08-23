@@ -53,7 +53,7 @@ export default function UserAuthForm() {
       const publicKey: string = await nostr.getPublicKey();
       await signIn("credentials", {
         publicKey: publicKey,
-        secretKey: undefined,
+        secretKey: 0,
         redirect: true,
         callbackUrl: "/",
       });
