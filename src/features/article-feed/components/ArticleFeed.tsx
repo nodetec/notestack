@@ -18,13 +18,6 @@ export function ArticleFeed({ publicKey }: Props) {
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
 
-  // const relays =
-  //   userReadRelays && userReadRelays.length > 0
-  //     ? userReadRelays
-  //     : DEFAULT_RELAYS;
-
-  // const relays = DEFAULT_RELAYS;
-
   // @ts-expect-error HACK: idk what to use as a type here
   const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
     // cast queryKey to string[] to avoid TS error
