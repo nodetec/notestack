@@ -11,23 +11,23 @@ type Props = {
   publicKey: string | undefined;
 };
 
+// @ts-expect-error HACK: idk what to use as a type here
+const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
+  // cast queryKey to string[] to avoid TS error
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const relays = queryKey[1] as string[];
+  console.log("RELAYS", relays);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const response = await getArticles(relays, pageParam);
+  return response;
+};
+
 export function ArticleFeed({ publicKey }: Props) {
   const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
     queryKey: ["userReadRelays"],
     refetchOnWindowFocus: false,
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
-
-  // @ts-expect-error HACK: idk what to use as a type here
-  const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
-    // cast queryKey to string[] to avoid TS error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const relays = queryKey[1] as string[];
-    console.log("RELAYS", relays);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const response = await getArticles(relays, pageParam);
-    return response;
-  };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
@@ -68,7 +68,7 @@ export function ArticleFeed({ publicKey }: Props) {
               disabled={isFetchingNextPage}
               className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
             >
-              {isFetchingNextPage ? "Loading more..." : "Load More"}
+                Load More
             </button>
           )}
         </div>
