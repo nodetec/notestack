@@ -1,6 +1,12 @@
+import { Heading, Text, type Root } from "mdast";
+import { type Event } from "nostr-tools";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
-import { unified } from "unified";
+import remarkStringify from "remark-stringify";
+import { unified, type Plugin } from "unified";
+import { visit } from "unist-util-visit";
+
+import { getTag } from "./nostr";
 
 export function getFirstImage(markdown: string) {
   const regex = /!\[.*\]\((.*)\)/;
@@ -41,11 +47,47 @@ export function parseContent(markdownContent: string) {
   return content;
 }
 
-export function processContent(content: string) {
+interface RemoveHeadingPluginOptions {
+  headingText?: string;
+}
+
+const removeHeadingPlugin: Plugin<[RemoveHeadingPluginOptions?], Root> = ({
+  headingText,
+} = {}) => {
+  if (!headingText) {
+    return () => {};
+  }
+
+  return (tree: Root) => {
+    tree.children = tree.children.filter((node) => {
+      if (node.type === "heading") {
+        const headingNode = node;
+        const textNode = headingNode.children.find(
+          (child) => child.type === "text" && child.value === headingText,
+        );
+
+        if (textNode) {
+          return false; // Remove this heading
+        }
+      }
+      return true; // Keep other nodes
+    });
+  };
+};
+
+export function processArticle(event: Event | undefined) {
+  if (!event) {
+    return "";
+  }
+  console.log("Processing article", event);
+  const title = getTag("title", event.tags);
+  const image = getTag("image", event.tags);
+
   const processedContent = unified()
     .use(remarkParse)
     .use(remarkHtml)
-    .processSync(content)
+    .use(removeHeadingPlugin, { headingText: title })
+    .processSync(event.content)
     .toString();
 
   return processedContent;

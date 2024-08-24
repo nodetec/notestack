@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { processContent } from "~/lib/markdown";
-import { getAllReadRelays, getEvent } from "~/lib/nostr";
+import { processArticle } from "~/lib/markdown";
+import { getAllReadRelays, getEvent, getTag } from "~/lib/nostr";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleHeader } from "./ArticleHeader";
@@ -23,22 +23,13 @@ const getCurrentArticle = async (
     "#d": [address.identifier],
   };
 
-  console.log("address", address);
-
-
   let relays = address.relays;
 
-
   if (!relays) {
-    console.log("getting all read relays");
     relays = await getAllReadRelays(publicKey);
   }
 
-  console.log("relays", relays);
-
   const event = await getEvent(filter, relays);
-
-  console.log("event", event);
 
   if (!event) {
     console.error("Event not found");
@@ -53,7 +44,6 @@ export function Article({ address, publicKey }: Props) {
     queryKey: ["article", address.pubkey, address.identifier],
     refetchOnWindowFocus: false,
     queryFn: () => getCurrentArticle(address, publicKey),
-    retry: 0,
   });
 
   if (status === "pending") {
@@ -77,10 +67,15 @@ export function Article({ address, publicKey }: Props) {
             publicKey={publicKey}
             articleEvent={articleEvent}
           />
+
+          <div className="prose prose-zinc mx-auto dark:prose-invert mb-8">
+            <h1>{getTag("title", articleEvent.tags)}</h1>
+          </div>
+
           <article
             className="prose prose-zinc mx-auto dark:prose-invert"
             dangerouslySetInnerHTML={{
-              __html: processContent(articleEvent.content),
+              __html: processArticle(articleEvent),
             }}
           />
         </>
