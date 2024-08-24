@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getReadRelays } from "~/lib/nostr";
+import { toast } from "sonner";
 
 import { ArticleCard } from "./ArticleCard";
 import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
@@ -19,6 +20,11 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   console.log("RELAYS", relays);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const response = await getArticles(relays, pageParam);
+  if (response.articles.length === 0) {
+    toast("No more articles to load", {
+      description: "You've reached the end of the feed. Try another relay.",
+    });
+  }
   return response;
 };
 
@@ -68,7 +74,7 @@ export function ArticleFeed({ publicKey }: Props) {
               disabled={isFetchingNextPage}
               className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
             >
-                Load More
+              Load More
             </button>
           )}
         </div>
