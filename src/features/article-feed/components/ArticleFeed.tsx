@@ -20,11 +20,11 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   console.log("RELAYS", relays);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const response = await getArticles(relays, pageParam);
-  if (response.articles.length === 0) {
-    toast("No more articles to load", {
-      description: "You've reached the end of the feed. Try another relay.",
-    });
-  }
+  // if (response.articles.length === 0) {
+  //   toast("No more articles to load", {
+  //     description: "You've reached the end of the feed. Try another relay.",
+  //   });
+  // }
   return response;
 };
 
@@ -34,6 +34,8 @@ export function ArticleFeed({ publicKey }: Props) {
     refetchOnWindowFocus: false,
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
+
+  // TODO: know what feed you came from based on zustand client state
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
