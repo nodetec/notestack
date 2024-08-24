@@ -2,55 +2,42 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getArticles, getReadRelays, getTag } from "~/lib/nostr";
-import { useAppState } from "~/store";
-import { toast } from "sonner";
+import { getArticles, getReadRelays, getWriteRelays } from "~/lib/nostr";
 
 import { ArticleCard } from "./ArticleCard";
 import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 
 type Props = {
-  publicKey: string | undefined;
+  userPublicKey: string | undefined;
+  profilePublicKey?: string;
 };
 
 // @ts-expect-error HACK: idk what to use as a type here
 const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
-  console.log("FETCHING ARTICLES", pageParam, queryKey);
   // cast queryKey to string[] to avoid TS error
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const relays = queryKey[1] as string[];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const publicKey = queryKey[2] as string;
   console.log("RELAYS", relays);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const response = await getArticles(relays, pageParam);
-  // if (response.articles.length === 0) {
-  //   toast("No more articles to load", {
-  //     description: "You've reached the end of the feed. Try another relay.",
-  //   });
-  // }
-
-  const addArticle = useAppState.getState().addArticle;
-  for (const article of response.articles) {
-    const identifier = getTag("d", article.tags);
-    const publicKey = article.pubkey;
-    const id = identifier + publicKey;
-    addArticle(id, article);
-  }
-
+  const response = await getArticles(relays, pageParam, publicKey);
   return response;
 };
 
-export function ArticleFeed({ publicKey }: Props) {
+export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
   const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
     queryKey: ["userReadRelays"],
     refetchOnWindowFocus: false,
-    queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
+    queryFn: () =>
+      profilePublicKey
+        ? getWriteRelays(profilePublicKey, DEFAULT_RELAYS)
+        : getReadRelays(userPublicKey, DEFAULT_RELAYS),
   });
-
-  // TODO: know what feed you came from based on zustand client state
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles", userReadRelays],
+      queryKey: ["articles", userReadRelays, profilePublicKey],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
       gcTime: Infinity,

@@ -14,6 +14,7 @@ import { MessageCircle, ZapIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
+import ArticleProfile from "./ArticleProfile";
 
 type Props = {
   event: Event;
@@ -52,31 +53,14 @@ export function ArticleCard({ event, relays }: Props) {
     <Fragment key={event.id}>
       <Card className="w-full border-none bg-secondary shadow-none">
         <CardContent className="flex flex-col px-4 pb-0 pt-4 md:px-6">
-          {/* <div className="md:flex-1 md:p-0"> */}
-          {/* <div className="flex items-center justify-between"> */}
 
           {/* User image and name */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {isFetching ? (
-              <>
-                <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
-                <Skeleton className="h-4 w-20" />
-              </>
-            ) : (
-              <>
-                <Image
-                  className="aspect-square w-5 overflow-hidden rounded-full object-cover"
-                  src={profile?.picture ?? getAvatar(profile?.publicKey)}
-                  width={48}
-                  height={48}
-                  alt=""
-                />
-                <span>{profile?.name ?? shortNpub(event.pubkey)}</span>
-              </>
-            )}
-          </div>
+          <ArticleProfile
+            profile={profile}
+            publicKey={event.pubkey}
+            isFetching={isFetching}
+          />
 
-          {/* </div> */}
           <Link
             className="flex flex-col gap-2 pb-4 pt-4"
             href={`/a/${makeNaddr(event, relays)}`}

@@ -7,7 +7,7 @@ import { getUser } from "~/server/auth";
 async function ArticleFeedWrapper() {
   const user = await getUser();
 
-  return <ArticleFeed publicKey={user?.publicKey} />;
+  return <ArticleFeed userPublicKey={user?.publicKey} />;
 }
 
 export default async function ArticleFeedPage() {

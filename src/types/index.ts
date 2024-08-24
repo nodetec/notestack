@@ -11,6 +11,7 @@ export type RelayUrl = `wss://${string}`;
 export interface Profile {
   relay?: string;
   publicKey?: string;
+  pubkey?: string;
   about?: string;
   lud06?: string;
   lud16?: string;

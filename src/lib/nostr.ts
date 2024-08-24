@@ -14,7 +14,11 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
-export async function getArticles(relays: string[], pageParam = 0) {
+export async function getArticles(
+  relays: string[],
+  pageParam = 0,
+  publicKey?: string,
+) {
   const pool = new SimplePool();
 
   let limit = 5;
@@ -28,13 +32,14 @@ export async function getArticles(relays: string[], pageParam = 0) {
     {
       kinds: [30023],
       limit,
+      authors: publicKey ? [publicKey] : undefined,
       until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
     },
     {
       id: "getArticles",
     },
   );
-  // console.log("events", events);
+  console.log("EVENTS", events);
   pool.close(relays);
 
   if (!events) {
@@ -256,10 +261,13 @@ export async function getWriteRelays(
   publicKey: string | undefined,
   relays: string[],
 ) {
+  if (!publicKey) {
+    return DEFAULT_RELAYS;
+  }
   const userRelays = await getUserRelays(publicKey, relays);
 
   if (!userRelays) {
-    return undefined;
+    return DEFAULT_RELAYS;
   }
 
   const writeRelays = userRelays
@@ -368,6 +376,26 @@ export function identityTag(
   return tags.find((tag) => tag[0] === "i" && tag[1]?.startsWith(platform));
 }
 
+export function createProfileLink(profile: Profile | undefined) {
+  if (!profile) {
+    return "#";
+  }
+  if (profile.nip05) {
+    // const nip05Profile = await queryProfile(profile.nip05);
+    // if (nip05Profile?.pubkey === profile.pubkey) {
+    return `/${profile.nip05}`;
+    // }
+  }
+
+  if (profile.pubkey) {
+    const publicKey = profile.pubkey;
+    return `/${nip19.npubEncode(publicKey)}`;
+  }
+
+  return "#";
+}
+
+// TODO: change this to createArticleLink, should try to use nip05/identifier and fallback to a/naddr
 export function makeNaddr(event: Event, relays: string[]) {
   const identifier = getTag("d", event.tags);
   if (!identifier) return;
