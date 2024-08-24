@@ -10,6 +10,7 @@ import {
   getProfileEvent,
   getTag,
   profileContent,
+  shortNpub,
 } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
@@ -109,7 +110,7 @@ export function Article({ address, publicKey }: Props) {
                 alt=""
               />
               <div className="flex flex-col gap-1">
-                <div>{profile?.name}</div>
+                <div>{profile?.name ?? shortNpub(address.pubkey)}</div>
                 <div className="flex gap-2 text-sm text-muted-foreground">
                   <span>{readingTime(articleEvent?.content)}</span>
                   <span>•</span>
