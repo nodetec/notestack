@@ -25,15 +25,20 @@ export function ArticleFeed({ publicKey }: Props) {
 
   // const relays = DEFAULT_RELAYS;
 
-  const fetchArticles = async ({ pageParam = 0 }) => {
+  // @ts-expect-error HACK: idk what to use as a type here
+  const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
+    // cast queryKey to string[] to avoid TS error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const relays = queryKey[1] as string[];
     console.log("RELAYS", relays);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const response = await getArticles(relays, pageParam);
     return response;
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles"],
+      queryKey: ["articles", relays],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
       gcTime: Infinity,

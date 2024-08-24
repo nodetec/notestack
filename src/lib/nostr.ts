@@ -23,7 +23,7 @@ export async function getArticles(relays: string[], pageParam = 0) {
     limit = 10;
   }
 
-  const events = await pool.querySync(
+  let events = await pool.querySync(
     relays,
     {
       kinds: [30023],
@@ -42,7 +42,7 @@ export async function getArticles(relays: string[], pageParam = 0) {
   }
 
   // slice events to limit
-  events.slice(0, limit);
+  events = events.slice(0, limit);
 
   // Sort the events by created_at in descending order
   events.sort((a, b) => b.created_at - a.created_at);

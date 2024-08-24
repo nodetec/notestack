@@ -1,11 +1,7 @@
 import { Fragment } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  create,
-  keyResolver,
-  windowScheduler,
-} from "@yornaath/batshit";
+import { create, keyResolver, windowScheduler } from "@yornaath/batshit";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -13,6 +9,7 @@ import { getFirstImage, parseContent } from "~/lib/markdown";
 import { getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { type Profile } from "~/types";
+import { memoize } from "lodash-es";
 import { MessageCircle, ZapIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,29 +20,31 @@ type Props = {
   relays: string[];
 };
 
-export function ArticleCard({ event, relays }: Props) {
-  // const queryClient = useQueryClient();
+export const key = "publicKeys";
 
-  // const relays = queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
-
-  // TODO: figure out scheduler
-  const profiles = create({
+// TODO: figure out scheduler
+// TODO: figure out types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+const batcher = memoize((relays: string[]) => {
+  return create({
+    name: key,
     fetcher: async (publicKeys: string[]) => {
-      // const relays = useAppState.getState().relays;
-      // const relays =
-      //   queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
-
+      console.log("FETCHING PUB KEYS:", publicKeys);
       return await getProfiles(relays, publicKeys);
     },
-    resolver: keyResolver("pubkey"),
     scheduler: windowScheduler(10),
+    resolver: keyResolver("pubkey"),
   });
+});
 
+export function ArticleCard({ event, relays }: Props) {
   const { data: profile, isFetching } = useQuery<Profile>({
     queryKey: ["profile", event.pubkey],
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      return await profiles.fetch(event.pubkey);
+      // TODO: figure out types
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      return await batcher(relays).fetch(event.pubkey);
     },
   });
 
