@@ -40,6 +40,7 @@ export function ArticleCard({ event, relays }: Props) {
   const { data: profile, isFetching } = useQuery<Profile>({
     queryKey: ["profile", event.pubkey],
     refetchOnWindowFocus: false,
+    gcTime: Infinity,
     queryFn: async () => {
       // TODO: figure out types
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access

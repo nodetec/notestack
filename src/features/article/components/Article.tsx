@@ -12,6 +12,7 @@ import {
   profileContent,
 } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
+import { useAppState } from "~/store";
 import { type Profile } from "~/types";
 import Image from "next/image";
 import { type AddressPointer } from "nostr-tools/nip19";
@@ -28,6 +29,13 @@ const getCurrentArticle = async (
   address: AddressPointer,
   publicKey: string | undefined,
 ) => {
+  const articleMap = useAppState.getState().articleMap;
+
+  if (articleMap.has(address.identifier + address.pubkey)) {
+    console.log("Article found in cache");
+    return articleMap.get(address.identifier + address.pubkey);
+  }
+
   const filter = {
     kinds: [address.kind],
     limit: 1,

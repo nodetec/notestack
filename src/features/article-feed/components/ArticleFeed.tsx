@@ -2,7 +2,8 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getArticles, getReadRelays } from "~/lib/nostr";
+import { getArticles, getReadRelays, getTag } from "~/lib/nostr";
+import { useAppState } from "~/store";
 import { toast } from "sonner";
 
 import { ArticleCard } from "./ArticleCard";
@@ -26,6 +27,15 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   //     description: "You've reached the end of the feed. Try another relay.",
   //   });
   // }
+
+  const addArticle = useAppState.getState().addArticle;
+  for (const article of response.articles) {
+    const identifier = getTag("d", article.tags);
+    const publicKey = article.pubkey;
+    const id = identifier + publicKey;
+    addArticle(id, article);
+  }
+
   return response;
 };
 

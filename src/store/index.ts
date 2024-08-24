@@ -1,27 +1,17 @@
+import { type Event } from "nostr-tools";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 
 interface State {
-  defaultReadRelay: string;
-  setDefaultReadRelay: (defaultReadRelay: string) => void;
-
-  // TODO: maybe let user have list of relays
-  // relays: string[];
-  // setRelays: (relays: string[]) => void;
+  articleMap: Map<string, Event>;
+  addArticle: (id: string, article: Event) => void;
+  clearArticles: () => void;
 }
 
-export const useAppState = create<State>()(
-  persist(
-    (set) => ({
-      defaultReadRelay: "wss://relay.notestack.com",
-      setDefaultReadRelay: (defaultReadRelay) => set({ defaultReadRelay }),
-
-      // relays: ["wss://relay.notestack.com"],
-      // setRelays: (relays) => set({ relays }),
-    }),
-    {
-      name: "notestack-storage",
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+export const useAppState = create<State>()((set) => ({
+  articleMap: new Map(),
+  addArticle: (id, article) =>
+    set((state) => ({
+      articleMap: new Map(state.articleMap.set(id, article)),
+    })),
+  clearArticles: () => set({ articleMap: new Map() }),
+}));
