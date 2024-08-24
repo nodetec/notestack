@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bytesToHex } from "@noble/hashes/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -22,7 +23,7 @@ import * as z from "zod";
 const isValidNsec = (nsec: string) => {
   try {
     return nip19.decode(nsec).type === "nsec";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
@@ -36,6 +37,8 @@ const formSchema = z.object({
 
 export default function UserAuthForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,6 +54,7 @@ export default function UserAuthForm() {
     setIsLoading(true);
     if (typeof nostr !== "undefined") {
       const publicKey: string = await nostr.getPublicKey();
+      await queryClient.invalidateQueries({ queryKey: ["articles"] });
       await signIn("credentials", {
         publicKey: publicKey,
         secretKey: 0,
@@ -69,6 +73,7 @@ export default function UserAuthForm() {
     const publicKey = getPublicKey(secretKeyUint8);
     const secretKey = bytesToHex(secretKeyUint8);
 
+    await queryClient.invalidateQueries({ queryKey: ["articles"] });
     await signIn("credentials", {
       publicKey,
       secretKey,
