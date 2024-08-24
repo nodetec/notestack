@@ -17,10 +17,12 @@ import Link from "next/link";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 
 const isValidNpub = (npub: string) => {
   try {
     return nip19.decode(npub).type === "npub";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
@@ -29,6 +31,7 @@ const isValidNpub = (npub: string) => {
 const isValidNsec = (nsec: string) => {
   try {
     return nip19.decode(nsec).type === "nsec";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
@@ -45,6 +48,8 @@ const formSchema = z.object({
 
 export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,6 +79,7 @@ export default function RegisterForm() {
     const publicKey = nip19.decode(npub).data as string;
     const secretKey = nip19.decode(nsec).data as Uint8Array;
 
+    await queryClient.invalidateQueries({ queryKey: ["articles"] });
     await signIn("credentials", {
       publicKey,
       secretKey,
