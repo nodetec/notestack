@@ -215,21 +215,19 @@ export async function getReadRelays(
   publicKey: string | undefined,
   relays: string[],
 ) {
-  console.log("getReadRelays", publicKey, relays);
+  if (!publicKey) {
+    return DEFAULT_RELAYS;
+  }
   const userRelays = await getUserRelays(publicKey, relays);
 
   if (!userRelays) {
-    return [];
+    return DEFAULT_RELAYS;
   }
-
-  console.log("userRelays", userRelays);
 
   // where read is true
   const readRelays = userRelays
     .filter((relay) => relay.read)
     .map((relay) => relay.url);
-
-  console.log("READRELAYS", readRelays);
 
   return readRelays;
 }

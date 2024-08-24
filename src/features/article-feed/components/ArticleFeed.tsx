@@ -12,16 +12,16 @@ type Props = {
 };
 
 export function ArticleFeed({ publicKey }: Props) {
-  const { data: userReadRelays } = useQuery({
+  const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
     queryKey: ["userReadRelays"],
     refetchOnWindowFocus: false,
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
 
-  const relays =
-    userReadRelays && userReadRelays.length > 0
-      ? userReadRelays
-      : DEFAULT_RELAYS;
+  // const relays =
+  //   userReadRelays && userReadRelays.length > 0
+  //     ? userReadRelays
+  //     : DEFAULT_RELAYS;
 
   // const relays = DEFAULT_RELAYS;
 
@@ -38,27 +38,34 @@ export function ArticleFeed({ publicKey }: Props) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles", relays],
+      queryKey: ["articles", userReadRelays],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
       gcTime: Infinity,
       initialPageParam: 0,
-      enabled: !!relays.length,
+      enabled: !!userReadRelays?.length,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     });
 
-  if (status === "pending") {
+  if (userReadRelaysStatus === "pending" || status === "pending") {
     return <SkeletonArticleFeed />;
+  }
+
+  if (userReadRelaysStatus === "error" || status === "error") {
+    return <div>Error fetching articles</div>;
   }
 
   return (
     <>
-      {status === "error" && <p>Error loading articles</p>}
-      {status === "success" && (
+      {status === "success" && userReadRelaysStatus === "success" && (
         <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
           {data.pages.flatMap((page) =>
             page.articles.map((event) => (
-              <ArticleCard key={event.id} event={event} relays={relays} />
+              <ArticleCard
+                key={event.id}
+                event={event}
+                relays={userReadRelays}
+              />
             )),
           )}
 
