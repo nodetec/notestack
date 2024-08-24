@@ -14,18 +14,68 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
-export async function getArticles(relays: string[]) {
+// export async function getArticles(relays: string[]) {
+//   const pool = new SimplePool();
+//   let events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
+//   pool.close(relays);
+//   if (!events) {
+//     return [];
+//   }
+//   if (events.length > 10) {
+//     events = events.slice(0, 10);
+//   }
+//   events.sort((a, b) => b.created_at - a.created_at);
+//   return events;
+// }
+
+export async function getArticles(relays: string[], pageParam = 0) {
   const pool = new SimplePool();
-  let events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
+
+  let limit = 5;
+
+  if (pageParam === 0) {
+    limit = 10;
+  }
+
+  const events = await pool.querySync(relays, {
+    kinds: [30023],
+    limit,
+    until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
+  });
+  // console.log("events", events);
   pool.close(relays);
+
   if (!events) {
-    return [];
+    return { articles: [], nextCursor: pageParam };
   }
-  if (events.length > 10) {
-    events = events.slice(0, 10);
-  }
+
+  // slice events to limit
+  events.slice(0, limit);
+
+  // Sort the events by created_at in descending order
   events.sort((a, b) => b.created_at - a.created_at);
-  return events;
+
+  // Determine if there's a next page by checking if we got more events than the limit
+  // const hasNextPage = events.length > limit;
+
+  console.log("slicedEvents 1", events);
+
+  // The cursor for the next page would be the creation time of the last event in the list
+  let nextCursor = pageParam;
+  if (events.length > 0) {
+    console.log("slicedEvents", events);
+    const lastEvent = events[events.length - 1];
+    if (lastEvent) {
+      nextCursor = lastEvent.created_at;
+    }
+  }
+
+  console.log("nextCursor", nextCursor);
+
+  return {
+    articles: events,
+    nextCursor,
+  };
 }
 
 export async function getEvent(filter: Filter, relays: string[]) {

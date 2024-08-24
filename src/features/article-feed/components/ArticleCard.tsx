@@ -1,8 +1,7 @@
 import { Fragment } from "react";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-  bufferScheduler,
   create,
   keyResolver,
   windowScheduler,
@@ -13,7 +12,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { getFirstImage, parseContent } from "~/lib/markdown";
 import { getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
-import { useAppState } from "~/store";
 import { type Profile } from "~/types";
 import { MessageCircle, ZapIcon } from "lucide-react";
 import Image from "next/image";
@@ -31,24 +29,25 @@ export function ArticleCard({ event, relays }: Props) {
   // const relays = queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
 
   // TODO: figure out scheduler
-  // const profiles = create({
-  //   fetcher: async (publicKeys: string[]) => {
-  //     // const relays = useAppState.getState().relays;
-  //     // const relays =
-  //     //   queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
-  //
-  //     return await getProfiles(relays, publicKeys);
-  //   },
-  //   resolver: keyResolver("pubkey"),
-  // });
+  const profiles = create({
+    fetcher: async (publicKeys: string[]) => {
+      // const relays = useAppState.getState().relays;
+      // const relays =
+      //   queryClient.getQueryData<string[]>(["userReadRelays"]) ?? [];
 
-  // const { data: profile, isFetching } = useQuery<Profile>({
-  //   queryKey: ["profile", event.pubkey],
-  //   refetchOnWindowFocus: false,
-  //   queryFn: async () => {
-  //     return await profiles.fetch(event.pubkey);
-  //   },
-  // });
+      return await getProfiles(relays, publicKeys);
+    },
+    resolver: keyResolver("pubkey"),
+    scheduler: windowScheduler(10),
+  });
+
+  const { data: profile, isFetching } = useQuery<Profile>({
+    queryKey: ["profile", event.pubkey],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      return await profiles.fetch(event.pubkey);
+    },
+  });
 
   return (
     <Fragment key={event.id}>
@@ -59,23 +58,23 @@ export function ArticleCard({ event, relays }: Props) {
 
           {/* User image and name */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {/* {isFetching ? ( */}
-            {/*   <> */}
-            {/*     <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" /> */}
-            {/*     <Skeleton className="h-4 w-20" /> */}
-            {/*   </> */}
-            {/* ) : ( */}
-            {/*   <> */}
-            {/*     <Image */}
-            {/*       className="aspect-square w-5 overflow-hidden rounded-full object-cover" */}
-            {/*       src={profile?.picture ?? getAvatar(profile?.publicKey)} */}
-            {/*       width={48} */}
-            {/*       height={48} */}
-            {/*       alt="" */}
-            {/*     /> */}
-            {/*     <span>{profile?.name ?? shortNpub(event.pubkey)}</span> */}
-            {/*   </> */}
-            {/* )} */}
+            {isFetching ? (
+              <>
+                <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
+                <Skeleton className="h-4 w-20" />
+              </>
+            ) : (
+              <>
+                <Image
+                  className="aspect-square w-5 overflow-hidden rounded-full object-cover"
+                  src={profile?.picture ?? getAvatar(profile?.publicKey)}
+                  width={48}
+                  height={48}
+                  alt=""
+                />
+                <span>{profile?.name ?? shortNpub(event.pubkey)}</span>
+              </>
+            )}
           </div>
 
           {/* </div> */}
@@ -89,7 +88,7 @@ export function ArticleCard({ event, relays }: Props) {
                   <h2 className="line-clamp-3 text-ellipsis break-words text-xl font-bold leading-6 sm:text-2xl sm:leading-7">
                     {getTag("title", event.tags)}
                   </h2>
-                  <h3 className="line-clamp-2 break-anywhere text-pretty text-ellipsis whitespace-break-spaces pt-0 text-[1rem] text-muted-foreground">
+                  <h3 className="break-anywhere line-clamp-2 text-ellipsis whitespace-break-spaces text-pretty pt-0 text-[1rem] text-muted-foreground">
                     {parseContent(event.content) || "No content \n "}
                   </h3>
                   <div className="mt-4 hidden gap-4 text-sm text-muted-foreground sm:flex">

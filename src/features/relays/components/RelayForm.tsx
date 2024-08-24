@@ -88,6 +88,7 @@ export function RelayForm({ defaultValues }: Props) {
       toast("Relays updated", {
         description: "Your relays have been updated.",
       });
+      await queryClient.invalidateQueries({ queryKey: ["articles"] });
       await queryClient.invalidateQueries({ queryKey: ["userRelays"] });
     } else {
       toast("Relays failed to update", {

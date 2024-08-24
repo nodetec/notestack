@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getReadRelays } from "~/lib/nostr";
 
@@ -18,14 +18,29 @@ export function ArticleFeed({ publicKey }: Props) {
     queryFn: () => getReadRelays(publicKey, DEFAULT_RELAYS),
   });
 
-  const relays = userReadRelays && userReadRelays.length > 0 ? userReadRelays : DEFAULT_RELAYS;
+  const relays =
+    userReadRelays && userReadRelays.length > 0
+      ? userReadRelays
+      : DEFAULT_RELAYS;
 
-  const { data: articleEvents, status } = useQuery({
-    queryKey: ["articles", relays],
-    refetchOnWindowFocus: false,
-    queryFn: () => getArticles(relays),
-    enabled: !!relays.length,
-  });
+  // const relays = DEFAULT_RELAYS;
+
+  const fetchArticles = async ({ pageParam = 0 }) => {
+    console.log("RELAYS", relays);
+    const response = await getArticles(relays, pageParam);
+    return response;
+  };
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+    useInfiniteQuery({
+      queryKey: ["articles"],
+      queryFn: fetchArticles,
+      refetchOnWindowFocus: false,
+      gcTime: Infinity,
+      initialPageParam: 0,
+      enabled: !!relays.length,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    });
 
   if (status === "pending") {
     return <SkeletonArticleFeed />;
@@ -33,14 +48,26 @@ export function ArticleFeed({ publicKey }: Props) {
 
   return (
     <>
-      {status === "success" && articleEvents && relays && (
+      {status === "error" && <p>Error loading articles</p>}
+      {status === "success" && (
         <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
-          {articleEvents?.map((event) => (
-            <ArticleCard key={event.id} event={event} relays={relays} />
-          ))}
+          {data.pages.flatMap((page) =>
+            page.articles.map((event) => (
+              <ArticleCard key={event.id} event={event} relays={relays} />
+            )),
+          )}
+
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              {isFetchingNextPage ? "Loading more..." : "Load More"}
+            </button>
+          )}
         </div>
       )}
     </>
   );
 }
-
