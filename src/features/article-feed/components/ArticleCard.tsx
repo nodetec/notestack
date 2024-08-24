@@ -5,7 +5,7 @@ import { create, keyResolver, windowScheduler } from "@yornaath/batshit";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { getFirstImage, parseContent } from "~/lib/markdown";
+import { getFirstImage, parseContent, readingTime } from "~/lib/markdown";
 import { getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { type Profile } from "~/types";
@@ -90,18 +90,20 @@ export function ArticleCard({ event, relays }: Props) {
                   <h3 className="break-anywhere line-clamp-2 text-ellipsis whitespace-break-spaces text-pretty pt-0 text-[1rem] text-muted-foreground">
                     {parseContent(event.content) || "No content \n "}
                   </h3>
-                  <div className="mt-4 hidden gap-4 text-sm text-muted-foreground sm:flex">
+                  <div className="mt-4 hidden gap-1 text-sm text-muted-foreground sm:flex">
                     <div className="text-muted-foreground">
                       {formatEpochTime(event.created_at)}
                     </div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <ZapIcon className="h-4 w-4" />
-                      33.1k
-                    </div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <MessageCircle className="h-4 w-4" />
-                      42
-                    </div>
+                    <span>•</span>
+                    <span>{readingTime(event?.content)}</span>
+                    {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
+                    {/*   <ZapIcon className="h-4 w-4" /> */}
+                    {/*   33.1k */}
+                    {/* </div> */}
+                    {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
+                    {/*   <MessageCircle className="h-4 w-4" /> */}
+                    {/*   42 */}
+                    {/* </div> */}
                   </div>
                 </div>
 
@@ -117,18 +119,20 @@ export function ArticleCard({ event, relays }: Props) {
                   alt=""
                 />
               </div>
-              <div className="mt-6 flex gap-4 text-sm text-muted-foreground sm:hidden">
+              <div className="mt-6 flex gap-1 text-sm text-muted-foreground sm:hidden">
                 <div className="text-muted-foreground">
                   {formatEpochTime(event.created_at)}
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <ZapIcon className="h-4 w-4" />
-                  33.1k
-                </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <MessageCircle className="h-4 w-4" />
-                  33.1k
-                </div>
+                <span>•</span>
+                <span>{readingTime(event?.content)}</span>
+                {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
+                {/*   <ZapIcon className="h-4 w-4" /> */}
+                {/*   33.1k */}
+                {/* </div> */}
+                {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
+                {/*   <MessageCircle className="h-4 w-4" /> */}
+                {/*   33.1k */}
+                {/* </div> */}
               </div>
             </div>
           </Link>
