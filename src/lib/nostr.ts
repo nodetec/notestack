@@ -14,20 +14,6 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { DEFAULT_RELAYS } from "./constants";
 import { normalizeUri } from "./utils";
 
-// export async function getArticles(relays: string[]) {
-//   const pool = new SimplePool();
-//   let events = await pool.querySync(relays, { kinds: [30023], limit: 10 });
-//   pool.close(relays);
-//   if (!events) {
-//     return [];
-//   }
-//   if (events.length > 10) {
-//     events = events.slice(0, 10);
-//   }
-//   events.sort((a, b) => b.created_at - a.created_at);
-//   return events;
-// }
-
 export async function getArticles(relays: string[], pageParam = 0) {
   const pool = new SimplePool();
 
@@ -37,11 +23,17 @@ export async function getArticles(relays: string[], pageParam = 0) {
     limit = 10;
   }
 
-  const events = await pool.querySync(relays, {
-    kinds: [30023],
-    limit,
-    until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
-  });
+  const events = await pool.querySync(
+    relays,
+    {
+      kinds: [30023],
+      limit,
+      until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
+    },
+    {
+      id: "getArticles",
+    },
+  );
   // console.log("events", events);
   pool.close(relays);
 
@@ -95,10 +87,16 @@ export async function getProfiles(
 
   const pool = new SimplePool();
 
-  const profileEvents = await pool.querySync(relays, {
-    kinds: [0],
-    authors: publicKeys,
-  });
+  const profileEvents = await pool.querySync(
+    relays,
+    {
+      kinds: [0],
+      authors: publicKeys,
+    },
+    {
+      id: "getProfiles",
+    },
+  );
 
   pool.close(relays);
 
