@@ -129,6 +129,26 @@ export async function getProfileEvent(
   return profileEvent;
 }
 
+export async function getProfile(
+  relays: string[],
+  publicKey: string | undefined,
+) {
+  if (!publicKey) {
+    return profileContent(undefined);
+  }
+
+  const pool = new SimplePool();
+
+  const profileEvent = await pool.get(relays, {
+    kinds: [0],
+    authors: [publicKey],
+  });
+
+  pool.close(relays);
+
+  return profileContent(profileEvent);
+}
+
 export const shortNpub = (pubkey: string | undefined, length = 4) => {
   if (!pubkey) {
     return undefined;

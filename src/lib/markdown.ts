@@ -1,10 +1,8 @@
-import { Heading, Text, type Root } from "mdast";
+import { type Root } from "mdast";
 import { type Event } from "nostr-tools";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
 import { unified, type Plugin } from "unified";
-import { visit } from "unist-util-visit";
 
 import { getTag } from "./nostr";
 
@@ -91,4 +89,18 @@ export function processArticle(event: Event | undefined) {
     .toString();
 
   return processedContent;
+}
+
+export function readingTime(markdown: string | undefined): string {
+  if (!markdown) {
+    return "0 min read";
+  }
+  const wordsPerMinute = 200;
+  const words = markdown
+    .replace(/[#*>\-`~\[\]\(\)]/g, "") // Remove markdown syntax
+    .trim()
+    .split(/\s+/).length; // Split by whitespace to count words
+
+  const minutes = Math.ceil(words / wordsPerMinute);
+  return `${minutes} min read`;
 }

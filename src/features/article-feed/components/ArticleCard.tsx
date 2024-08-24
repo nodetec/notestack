@@ -29,7 +29,6 @@ const batcher = memoize((relays: string[]) => {
   return create({
     name: key,
     fetcher: async (publicKeys: string[]) => {
-      console.log("FETCHING PUB KEYS:", publicKeys);
       return await getProfiles(relays, publicKeys);
     },
     scheduler: windowScheduler(10),

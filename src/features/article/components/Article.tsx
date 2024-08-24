@@ -1,8 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { processArticle } from "~/lib/markdown";
-import { getAllReadRelays, getEvent, getTag } from "~/lib/nostr";
+import { DEFAULT_RELAYS } from "~/lib/constants";
+import { processArticle, readingTime } from "~/lib/markdown";
+import {
+  getAllReadRelays,
+  getEvent,
+  getProfile,
+  getProfileEvent,
+  getTag,
+  profileContent,
+} from "~/lib/nostr";
+import { formatEpochTime, getAvatar } from "~/lib/utils";
+import { type Profile } from "~/types";
+import Image from "next/image";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleHeader } from "./ArticleHeader";
@@ -43,10 +54,19 @@ export function Article({ address, publicKey }: Props) {
   const { data: articleEvent, status } = useQuery({
     queryKey: ["article", address.pubkey, address.identifier],
     refetchOnWindowFocus: false,
+    retry: 0,
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
-  if (status === "pending") {
+  const { data: profile, status: profileStatus } = useQuery<Profile>({
+    queryKey: ["profile", articleEvent?.pubkey],
+    refetchOnWindowFocus: false,
+    enabled: !!articleEvent,
+    queryFn: () =>
+      getProfile(address.relays ?? DEFAULT_RELAYS, articleEvent?.pubkey),
+  });
+
+  if (status === "pending" || profileStatus === "pending") {
     return <SkeletonArticle />;
   }
 
@@ -67,9 +87,28 @@ export function Article({ address, publicKey }: Props) {
             publicKey={publicKey}
             articleEvent={articleEvent}
           />
+          <div className="mx-auto mb-8 flex max-w-[65ch] flex-col gap-8 border-b pb-8">
+            <div className="prose prose-zinc dark:prose-invert">
+              <h1>{getTag("title", articleEvent.tags)}</h1>
+            </div>
 
-          <div className="prose prose-zinc mx-auto dark:prose-invert mb-8">
-            <h1>{getTag("title", articleEvent.tags)}</h1>
+            <div className="flex items-center gap-4">
+              <Image
+                className="aspect-square w-10 overflow-hidden rounded-full object-cover"
+                src={profile?.picture ?? getAvatar(address.pubkey)}
+                width={32}
+                height={32}
+                alt=""
+              />
+              <div className="flex flex-col gap-1">
+                <div>{profile?.name}</div>
+                <div className="flex gap-2 text-sm text-muted-foreground">
+                  <span>{readingTime(articleEvent?.content)}</span>
+                  <span>•</span>
+                  <span>{formatEpochTime(articleEvent.created_at)}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <article
