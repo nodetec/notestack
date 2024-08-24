@@ -21,17 +21,23 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
 
   if (status === "pending") {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Skeleton className="aspect-square w-5 overflow-hidden rounded-full object-cover" />
-        <Skeleton className="h-4 w-20" />
+      <div className="flex w-full flex-col gap-12 px-4 pb-6 md:px-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="aspect-square w-12 overflow-hidden rounded-full object-cover" />
+          <Skeleton className="h-8 w-36" />
+        </div>
+
+        <div className="w-full">
+          <Separator />
+        </div>
       </div>
     );
   }
 
   if (status === "success") {
     return (
-      <div className="flex w-full flex-col gap-12 pb-6 px-4 md:px-6">
-        <div className="flex gap-4 items-center">
+      <div className="flex w-full flex-col gap-12 px-4 pb-6 md:px-6">
+        <div className="flex items-center gap-4">
           <Image
             className="aspect-square w-12 overflow-hidden rounded-full object-cover hover:brightness-90"
             src={profile?.picture ?? getAvatar(publicKey)}
