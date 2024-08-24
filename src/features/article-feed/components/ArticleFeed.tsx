@@ -5,6 +5,7 @@ import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getReadRelays, getWriteRelays } from "~/lib/nostr";
 
 import { ArticleCard } from "./ArticleCard";
+import ArticleFeedProfile from "./ArticleFeedProfile";
 import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 
 type Props = {
@@ -58,6 +59,12 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     <>
       {status === "success" && userReadRelaysStatus === "success" && (
         <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
+          {profilePublicKey && (
+            <ArticleFeedProfile
+              relays={userReadRelays}
+              publicKey={profilePublicKey}
+            />
+          )}
           {data.pages.flatMap((page) =>
             page.articles.map((event) => (
               <ArticleCard

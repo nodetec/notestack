@@ -14,7 +14,7 @@ import { MessageCircle, ZapIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
-import ArticleProfile from "./ArticleProfile";
+import { ArticleCardProfile } from "./ArticleCardProfile";
 
 type Props = {
   event: Event;
@@ -55,7 +55,7 @@ export function ArticleCard({ event, relays }: Props) {
         <CardContent className="flex flex-col px-4 pb-0 pt-4 md:px-6">
 
           {/* User image and name */}
-          <ArticleProfile
+          <ArticleCardProfile
             profile={profile}
             publicKey={event.pubkey}
             isFetching={isFetching}

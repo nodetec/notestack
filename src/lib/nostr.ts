@@ -376,9 +376,12 @@ export function identityTag(
   return tags.find((tag) => tag[0] === "i" && tag[1]?.startsWith(platform));
 }
 
-export function createProfileLink(profile: Profile | undefined) {
+export function createProfileLink(
+  profile: Profile | undefined,
+  publicKey: string,
+) {
   if (!profile) {
-    return "#";
+    return `/${nip19.npubEncode(publicKey)}`;
   }
   if (profile.nip05) {
     // const nip05Profile = await queryProfile(profile.nip05);

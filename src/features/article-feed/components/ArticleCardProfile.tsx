@@ -13,7 +13,7 @@ type Props = {
   isFetching: boolean;
 };
 
-export default function ArticleProfile({
+export function ArticleCardProfile({
   profile,
   publicKey,
   isFetching,
@@ -28,7 +28,7 @@ export default function ArticleProfile({
       ) : (
         <Link
           className="flex items-center gap-2 text-sm text-muted-foreground"
-          href={createProfileLink(profile)}
+          href={createProfileLink(profile, publicKey)}
         >
           <Image
             className="aspect-square w-5 overflow-hidden rounded-full object-cover hover:brightness-90"
