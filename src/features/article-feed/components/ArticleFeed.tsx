@@ -14,6 +14,7 @@ type Props = {
 
 // @ts-expect-error HACK: idk what to use as a type here
 const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
+  console.log("FETCHING ARTICLES", pageParam, queryKey);
   // cast queryKey to string[] to avoid TS error
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const relays = queryKey[1] as string[];
