@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { Badge } from "~/components/ui/badge";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getFollowEvent, getTag } from "~/lib/nostr";
 import { useAppState } from "~/store";
@@ -30,7 +31,13 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const feed = queryKey[4] as string;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const response = await getArticles(relays, pageParam, publicKey, followEvent, feed);
+  const response = await getArticles(
+    relays,
+    pageParam,
+    publicKey,
+    followEvent,
+    feed,
+  );
 
   const addArticle = useAppState.getState().addArticle;
 
@@ -69,7 +76,13 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles", userReadRelays, profilePublicKey, userfollowEvent, searchParams.get("feed")],
+      queryKey: [
+        "articles",
+        userReadRelays,
+        profilePublicKey,
+        userfollowEvent,
+        searchParams.get("feed"),
+      ],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
@@ -91,38 +104,53 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
   }
 
   return (
-    <>
+    <div className="flex w-full flex-col items-center border border-blue-500">
       {status === "success" && (
-        // {status === "success" && userReadRelaysStatus === "success" && (
-        <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
-          {profilePublicKey && (
-            <ArticleFeedProfile
-              relays={userReadRelays}
-              publicKey={profilePublicKey}
-            />
-          )}
-          <ArticleFeedControls show={!profilePublicKey} />
-          {data.pages.flatMap((page) =>
-            page.articles.map((event) => (
-              <ArticleCard
-                key={event.id}
-                event={event}
+        <div className="mx-auto flex w-full justify-between max-w-6xl border border-red-500">
+          <div className="min-w-3xl flex w-full max-w-3xl flex-col items-center gap-y-4">
+            {profilePublicKey && (
+              <ArticleFeedProfile
                 relays={userReadRelays}
+                publicKey={profilePublicKey}
               />
-            )),
-          )}
+            )}
+            <ArticleFeedControls show={!profilePublicKey} />
+            {data.pages.flatMap((page) =>
+              page.articles.map((event) => (
+                <ArticleCard
+                  key={event.id}
+                  event={event}
+                  relays={userReadRelays}
+                />
+              )),
+            )}
 
-          {hasNextPage && (
-            <button
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              Load More
-            </button>
-          )}
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                Load More
+              </button>
+            )}
+          </div>
+          <div className="pt-6 flex-col gap-4 hidden lg:flex">
+            <h2 className="text-lg font-semibold text-foreground/80">
+              Recommended Topics
+            </h2>
+            <div className="sticky top-6 max-w-80 flex-wrap gap-4 flex border-green-500">
+              <Badge>java</Badge>
+              <Badge>nostr</Badge>
+              <Badge>lightning</Badge>
+              <Badge>bitcoin</Badge>
+              <Badge>Golang</Badge>
+              <Badge>Rust</Badge>
+              <Badge>Tailwind</Badge>
+            </div>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
