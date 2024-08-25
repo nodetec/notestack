@@ -25,7 +25,7 @@ export function ArticleFeedControls({ show }: Props) {
   }
 
   return (
-    <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-4 backdrop-blur transition-colors duration-500">
+    <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-7 backdrop-blur transition-colors duration-500">
       <div className="flex items-center justify-between px-4 pb-4 md:px-6">
         <h2 className="text-2xl font-semibold text-foreground/80">
           {getFeedTitle()}
