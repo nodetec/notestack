@@ -4,7 +4,6 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { authOptions } from "~/auth";
-import { Button } from "~/components/ui/button";
 import { ThemeToggle } from "~/features/theme-toggle";
 import { getProfileEvent } from "~/lib/nostr";
 import { type UserWithKeys } from "~/types";
@@ -18,25 +17,25 @@ import { ProfileDropdown } from "./ProfileDropdown";
 
 export async function Header() {
   const session = await getServerSession(authOptions);
-  const queryClient = new QueryClient();
-  const relays = ["wss://relay.notestack.com"];
+  // const queryClient = new QueryClient();
+  // const relays = ["wss://relay.notestack.com"];
   const user = session?.user as UserWithKeys | undefined;
 
   const publicKey = user?.publicKey;
 
-  let profileEvent: Event | undefined = undefined;
+  // let profileEvent: Event | undefined = undefined;
 
-  if (user) {
-    profileEvent = await getProfileEvent(relays, user.publicKey);
-
-    await queryClient.prefetchQuery({
-      queryKey: ["userProfile"],
-      queryFn: async () => profileEvent,
-    });
-  }
+  // if (user) {
+  //   profileEvent = await getProfileEvent(relays, user.publicKey);
+  //
+  //   await queryClient.prefetchQuery({
+  //     queryKey: ["userProfile"],
+  //     queryFn: async () => profileEvent,
+  //   });
+  // }
 
   return (
-    <header className="relative flex items-center justify-between border-b py-4 sm:border-none px-6 lg:px-8">
+    <header className="relative flex items-center justify-between border-b px-6 py-4 sm:border-none lg:px-8">
       <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
@@ -61,13 +60,7 @@ export async function Header() {
         {/*   </> */}
         {/* )} */}
         <ThemeToggle />
-        {session ? (
-          <HydrationBoundary state={dehydrate(queryClient)}>
-            <ProfileDropdown publicKey={publicKey} />
-          </HydrationBoundary>
-        ) : (
-          <LoginButton />
-        )}
+        {session ? <ProfileDropdown publicKey={publicKey} /> : <LoginButton />}
       </div>
     </header>
   );
