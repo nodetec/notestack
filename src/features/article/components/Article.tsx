@@ -7,9 +7,7 @@ import {
   getAllReadRelays,
   getEvent,
   getProfile,
-  getProfileEvent,
   getTag,
-  profileContent,
   shortNpub,
 } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
@@ -46,7 +44,8 @@ const getCurrentArticle = async (
   let relays = address.relays;
 
   if (!relays) {
-    relays = await getAllReadRelays(publicKey);
+    // relays = await getAllReadRelays(publicKey);
+    relays = DEFAULT_RELAYS;
   }
 
   const event = await getEvent(filter, relays);

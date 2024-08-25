@@ -6,7 +6,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { getFirstImage, parseContent, readingTime } from "~/lib/markdown";
-import { getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
+import { createArticleLink, getProfiles, getTag, makeNaddr, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { type Profile } from "~/types";
 import { memoize } from "lodash-es";
@@ -63,7 +63,7 @@ export function ArticleCard({ event, relays }: Props) {
 
           <Link
             className="flex flex-col gap-2 pb-4 pt-4"
-            href={`/a/${makeNaddr(event, relays)}`}
+            href={createArticleLink(profile, event, relays)}
           >
             <div className="flex flex-col">
               <div className="flex items-start justify-between sm:items-center">

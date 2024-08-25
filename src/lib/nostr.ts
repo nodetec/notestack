@@ -398,7 +398,6 @@ export function createProfileLink(
   return "#";
 }
 
-// TODO: change this to createArticleLink, should try to use nip05/identifier and fallback to a/naddr
 export function makeNaddr(event: Event, relays: string[]) {
   const identifier = getTag("d", event.tags);
   if (!identifier) return;
@@ -411,6 +410,18 @@ export function makeNaddr(event: Event, relays: string[]) {
   };
 
   return nip19.naddrEncode(addr);
+}
+
+// TODO: change this to createArticleLink, should try to use nip05/identifier and fallback to a/naddr
+export function createArticleLink(
+  profile: Profile | undefined,
+  event: Event,
+  relays: string[],
+) {
+  if (profile?.nip05) {
+    return `/${profile.nip05}/${getTag("d", event.tags)}`;
+  }
+  return `/a/${makeNaddr(event, relays)}`;
 }
 
 export async function publish(eventTemplate: EventTemplate, relays: string[]) {

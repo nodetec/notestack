@@ -1,18 +1,55 @@
 "use server";
 
 import { hexToBytes } from "@noble/hashes/utils";
-import {
-  finalizeEvent,
-  SimplePool,
-  type EventTemplate,
-  type Filter,
-} from "nostr-tools";
+import { notFound } from "next/navigation";
+import { finalizeEvent, nip19, type EventTemplate } from "nostr-tools";
+import { queryProfile } from "nostr-tools/nip05";
 
 import { getUser } from "./auth";
 
+export async function getPublicKeyFromNip05OrNpub(profile: string) {
+  console.log("getPublicKeyFromNip05OrNpub", profile);
+
+  profile = decodeURIComponent(profile);
+
+  console.log("getPublicKeyFromNip05OrNpub AFTER", profile);
+
+  let profilePublicKey;
+
+  if (!profile) {
+    console.log("FAILING HERE");
+    console.error("Invalid profile", profile);
+    notFound();
+  }
+
+  if (profile.startsWith("npub")) {
+    try {
+      const decodeResult = nip19.decode(profile);
+      profilePublicKey = decodeResult.data as string;
+    } catch (error) {
+      console.error("Invalid npub", profile, error);
+      notFound();
+    }
+  }
+
+  if (!profilePublicKey) {
+    const nip05Profile = await queryProfile(profile);
+    profilePublicKey = nip05Profile?.pubkey;
+    // const profileRelays = nip05Profile?.relays; // TODO: make use of this
+  }
+
+  if (!profilePublicKey) {
+    console.log("FAILING HERE 2");
+    console.error("Invalid profile", profile);
+    notFound();
+  }
+
+  return profilePublicKey;
+}
+
 // let newPool: SimplePool | null = null;
 
-const relays = ["wss://relay.notestack.com"];
+// const relays = ["wss://relay.notestack.com"];
 
 // export async function getSimplePool() {
 //   if (!newPool) {
@@ -35,19 +72,19 @@ const relays = ["wss://relay.notestack.com"];
 //   return pool;
 // }
 
-export async function getEvent(filter: Filter) {
-  const pool = new SimplePool();
-  const event = await pool.get(relays, filter);
-  pool.close(relays);
-  return event;
-}
+// export async function getEvent(filter: Filter) {
+//   const pool = new SimplePool();
+//   const event = await pool.get(relays, filter);
+//   pool.close(relays);
+//   return event;
+// }
 
-export async function getEvents(filter: Filter) {
-  const pool = new SimplePool();
-  const events = await pool.querySync(relays, filter);
-  pool.close(relays);
-  return events;
-}
+// export async function getEvents(filter: Filter) {
+//   const pool = new SimplePool();
+//   const events = await pool.querySync(relays, filter);
+//   pool.close(relays);
+//   return events;
+// }
 
 export async function finishEventWithSecretKey(t: EventTemplate) {
   const user = await getUser();

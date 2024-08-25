@@ -27,14 +27,16 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
 };
 
 export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
-  const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
-    queryKey: ["userReadRelays"],
-    refetchOnWindowFocus: false,
-    queryFn: () =>
-      profilePublicKey
-        ? getWriteRelays(profilePublicKey, DEFAULT_RELAYS)
-        : getReadRelays(userPublicKey, DEFAULT_RELAYS),
-  });
+  // const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
+  //   queryKey: ["userReadRelays"],
+  //   refetchOnWindowFocus: false,
+  //   queryFn: () =>
+  //     profilePublicKey
+  //       ? getWriteRelays(profilePublicKey, DEFAULT_RELAYS)
+  //       : getReadRelays(userPublicKey, DEFAULT_RELAYS),
+  // });
+
+  const userReadRelays = DEFAULT_RELAYS;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
@@ -47,17 +49,20 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     });
 
-  if (userReadRelaysStatus === "pending" || status === "pending") {
-    return <SkeletonArticleFeed />;
+  if (status === "pending") {
+    // if (userReadRelaysStatus === "pending" || status === "pending") {
+    return <SkeletonArticleFeed profileFeed={!!profilePublicKey} />;
   }
 
-  if (userReadRelaysStatus === "error" || status === "error") {
+  if (status === "error") {
+    // if (userReadRelaysStatus === "error" || status === "error") {
     return <div>Error fetching articles</div>;
   }
 
   return (
     <>
-      {status === "success" && userReadRelaysStatus === "success" && (
+      {status === "success" && (
+        // {status === "success" && userReadRelaysStatus === "success" && (
         <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
           {profilePublicKey && (
             <ArticleFeedProfile
