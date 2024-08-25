@@ -25,6 +25,9 @@ export function ProfileDropdown({ publicKey }: Props) {
   const { data: profileEvent, isFetching } = useQuery({
     queryKey: ["userProfile"],
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    gcTime: Infinity,
+    staleTime: Infinity,
     queryFn: () => getProfileEvent(DEFAULT_RELAYS, publicKey),
   });
 
