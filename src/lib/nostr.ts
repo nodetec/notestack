@@ -18,10 +18,12 @@ export async function getArticles(
   relays: string[],
   pageParam = 0,
   publicKey?: string,
-  followEvent?: Event,
+  followEvent?: Event | "notloggedin",
   feed?: string,
 ) {
   const pool = new SimplePool();
+
+  console.log("GETTING ARTICLES", publicKey);
 
   let publicKeys = FEATURED_WRITERS;
 
@@ -29,7 +31,7 @@ export async function getArticles(
     publicKeys = [publicKey];
   }
 
-  if (followEvent && feed === "following") {
+  if (followEvent && followEvent !== "notloggedin" && feed === "following") {
     const followList = followEvent.tags
       .filter((tag) => tag[0] === "p" && typeof tag[1] !== "undefined")
       .map((tag) => tag[1]!);
@@ -180,7 +182,7 @@ export async function getFollowEvent(
   publicKey: string | undefined,
 ) {
   if (!publicKey) {
-    return undefined;
+    return "notloggedin";
   }
 
   const pool = new SimplePool();
@@ -191,6 +193,10 @@ export async function getFollowEvent(
   });
 
   pool.close(relays);
+
+  if (!followEvent) {
+    return "notloggedin";
+  }
 
   return followEvent;
 }

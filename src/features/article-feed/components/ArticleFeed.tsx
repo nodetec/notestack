@@ -19,6 +19,7 @@ type Props = {
 
 // @ts-expect-error HACK: idk what to use as a type here
 const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
+  console.log("fetchArticles", pageParam, queryKey);
   // cast queryKey to string[] to avoid TS error
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const relays = queryKey[1] as string[];
@@ -75,7 +76,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
       gcTime: Infinity,
       staleTime: Infinity,
       initialPageParam: 0,
-      enabled: !!userfollowEvent?.id,
+      enabled: !!userfollowEvent,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     });
 
