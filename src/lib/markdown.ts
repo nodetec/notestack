@@ -77,9 +77,9 @@ export function processArticle(event: Event | undefined) {
   if (!event) {
     return "";
   }
-  console.log("Processing article", event);
+  // console.log("Processing article", event);
   const title = getTag("title", event.tags);
-  const image = getTag("image", event.tags);
+  // const image = getTag("image", event.tags);
 
   const processedContent = unified()
     .use(remarkParse)

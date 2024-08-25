@@ -30,6 +30,8 @@ const getCurrentArticle = async (
 ) => {
   const articleMap = useAppState.getState().articleMap;
 
+  console.log("ArticleMap", articleMap);
+
   if (articleMap.has(address.identifier + address.pubkey)) {
     console.log("Article found in cache");
     return articleMap.get(address.identifier + address.pubkey);

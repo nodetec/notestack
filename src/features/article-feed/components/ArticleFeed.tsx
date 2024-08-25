@@ -2,7 +2,13 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getArticles, getReadRelays, getWriteRelays } from "~/lib/nostr";
+import {
+  getArticles,
+  getReadRelays,
+  getTag,
+  getWriteRelays,
+} from "~/lib/nostr";
+import { useAppState } from "~/store";
 
 import { ArticleCard } from "./ArticleCard";
 import ArticleFeedProfile from "./ArticleFeedProfile";
@@ -20,9 +26,19 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   const relays = queryKey[1] as string[];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const publicKey = queryKey[2] as string;
-  console.log("RELAYS", relays);
+  // console.log("RELAYS", relays);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const response = await getArticles(relays, pageParam, publicKey);
+
+  const addArticle = useAppState.getState().addArticle;
+
+  response.articles.forEach((article) => {
+    const identifier = getTag("d", article.tags);
+    const publicKey = article.pubkey;
+    const id = identifier + publicKey;
+    addArticle(id, article);
+  });
+
   return response;
 };
 
