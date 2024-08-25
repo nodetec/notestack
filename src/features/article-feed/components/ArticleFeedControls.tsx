@@ -1,6 +1,7 @@
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { ListFilterIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { ArticleFeedFilterDropdown } from "./ArticleFeedFilterDropdown";
 
@@ -9,6 +10,15 @@ type Props = {
 };
 
 export function ArticleFeedControls({ show }: Props) {
+  const searchParams = useSearchParams();
+
+  function getFeedTitle() {
+    const feed = searchParams.get("feed");
+    if (feed === "following") {
+      return "Following";
+    }
+    return "Featured";
+  }
 
   if (!show) {
     return null;
@@ -17,7 +27,9 @@ export function ArticleFeedControls({ show }: Props) {
   return (
     <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-4 backdrop-blur transition-colors duration-500">
       <div className="flex items-center justify-between px-4 pb-4 md:px-6">
-        <h2 className="text-2xl font-semibold text-foreground/80">Featured</h2>
+        <h2 className="text-2xl font-semibold text-foreground/80">
+          {getFeedTitle()}
+        </h2>
         <ArticleFeedFilterDropdown>
           <Button
             className="bg-accent text-foreground/80 hover:bg-foreground/20"
