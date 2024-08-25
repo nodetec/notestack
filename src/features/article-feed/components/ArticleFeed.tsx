@@ -2,13 +2,10 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import {
-  getArticles,
-  getReadRelays,
-  getTag,
-  getWriteRelays,
-} from "~/lib/nostr";
+import { getArticles, getFollowEvent, getTag } from "~/lib/nostr";
 import { useAppState } from "~/store";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Event } from "nostr-tools";
 
 import { ArticleCard } from "./ArticleCard";
 import { ArticleFeedControls } from "./ArticleFeedControls";
@@ -27,9 +24,12 @@ const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
   const relays = queryKey[1] as string[];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const publicKey = queryKey[2] as string;
-  // console.log("RELAYS", relays);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const followEvent = queryKey[3] as Event;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const feed = queryKey[4] as string;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const response = await getArticles(relays, pageParam, publicKey);
+  const response = await getArticles(relays, pageParam, publicKey, followEvent, feed);
 
   const addArticle = useAppState.getState().addArticle;
 
@@ -53,16 +53,29 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
   //       : getReadRelays(userPublicKey, DEFAULT_RELAYS),
   // });
 
+  const searchParams = useSearchParams();
+
   const userReadRelays = DEFAULT_RELAYS;
+
+  const { data: userfollowEvent, status: userFollowEventStatus } = useQuery({
+    queryKey: ["followList", userPublicKey],
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    gcTime: Infinity,
+    staleTime: Infinity,
+    queryFn: () => getFollowEvent(userReadRelays, userPublicKey),
+  });
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles", userReadRelays, profilePublicKey],
+      queryKey: ["articles", userReadRelays, profilePublicKey, userfollowEvent, searchParams.get("feed")],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
+      refetchOnMount: true,
       gcTime: Infinity,
+      staleTime: Infinity,
       initialPageParam: 0,
-      enabled: !!userReadRelays?.length,
+      enabled: !!userfollowEvent?.id,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     });
 
@@ -87,7 +100,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
               publicKey={profilePublicKey}
             />
           )}
-          {/* <ArticleFeedControls show={!profilePublicKey} /> */}
+          <ArticleFeedControls show={!profilePublicKey} />
           {data.pages.flatMap((page) =>
             page.articles.map((event) => (
               <ArticleCard

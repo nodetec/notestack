@@ -18,8 +18,29 @@ export async function getArticles(
   relays: string[],
   pageParam = 0,
   publicKey?: string,
+  followEvent?: Event,
+  feed?: string,
 ) {
   const pool = new SimplePool();
+
+  let publicKeys = FEATURED_WRITERS;
+
+  if (publicKey) {
+    publicKeys = [publicKey];
+  }
+
+  if (followEvent && feed === "following") {
+    const followList = followEvent.tags
+      .filter((tag) => tag[0] === "p" && typeof tag[1] !== "undefined")
+      .map((tag) => tag[1]!);
+
+    // // trim the follow list to 50
+    if (followList.length > 50) {
+      followList.length = 50;
+    }
+
+    publicKeys = followList;
+  }
 
   let limit = 5;
 
@@ -32,7 +53,7 @@ export async function getArticles(
     {
       kinds: [30023],
       limit,
-      authors: publicKey ? [publicKey] : FEATURED_WRITERS,
+      authors: publicKeys,
       until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
     },
     {
@@ -152,6 +173,26 @@ export async function getProfile(
   pool.close(relays);
 
   return profileContent(profileEvent);
+}
+
+export async function getFollowEvent(
+  relays: string[],
+  publicKey: string | undefined,
+) {
+  if (!publicKey) {
+    return undefined;
+  }
+
+  const pool = new SimplePool();
+
+  const followEvent = await pool.get(relays, {
+    kinds: [3],
+    authors: [publicKey],
+  });
+
+  pool.close(relays);
+
+  return followEvent;
 }
 
 export const shortNpub = (pubkey: string | undefined, length = 4) => {
