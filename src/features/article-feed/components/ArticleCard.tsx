@@ -42,6 +42,8 @@ export function ArticleCard({ event, relays }: Props) {
   const { data: profile, isFetching } = useQuery<Profile>({
     queryKey: ["profile", event.pubkey],
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
     gcTime: Infinity,
     queryFn: async () => {
       // TODO: figure out types

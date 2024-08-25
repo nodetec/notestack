@@ -64,13 +64,15 @@ export function Article({ address, publicKey }: Props) {
   const { data: articleEvent, status } = useQuery({
     queryKey: ["article", address.pubkey, address.identifier],
     refetchOnWindowFocus: false,
-    retry: 0,
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
   const { data: profile, status: profileStatus } = useQuery<Profile>({
     queryKey: ["profile", articleEvent?.pubkey],
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
+    gcTime: Infinity,
     enabled: !!articleEvent,
     queryFn: () =>
       getProfile(address.relays ?? DEFAULT_RELAYS, articleEvent?.pubkey),

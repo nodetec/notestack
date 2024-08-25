@@ -16,6 +16,9 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
   const { data: profile, status } = useQuery<Profile>({
     queryKey: ["profile", publicKey],
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: Infinity,
+    gcTime: Infinity,
     queryFn: () => getProfile(relays ?? DEFAULT_RELAYS, publicKey),
   });
 
