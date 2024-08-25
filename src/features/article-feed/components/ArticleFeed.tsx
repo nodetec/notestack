@@ -11,6 +11,7 @@ import {
 import { useAppState } from "~/store";
 
 import { ArticleCard } from "./ArticleCard";
+import { ArticleFeedControls } from "./ArticleFeedControls";
 import ArticleFeedProfile from "./ArticleFeedProfile";
 import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 
@@ -79,13 +80,14 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     <>
       {status === "success" && (
         // {status === "success" && userReadRelaysStatus === "success" && (
-        <div className="min-w-3xl mx-auto mt-12 flex w-full max-w-3xl flex-col items-center gap-y-4">
+        <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
           {profilePublicKey && (
             <ArticleFeedProfile
               relays={userReadRelays}
               publicKey={profilePublicKey}
             />
           )}
+          {/* <ArticleFeedControls show={!profilePublicKey} /> */}
           {data.pages.flatMap((page) =>
             page.articles.map((event) => (
               <ArticleCard

@@ -11,7 +11,7 @@ import {
 } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
-import { DEFAULT_RELAYS } from "./constants";
+import { DEFAULT_RELAYS, FEATURED_WRITERS } from "./constants";
 import { normalizeUri } from "./utils";
 
 export async function getArticles(
@@ -32,7 +32,7 @@ export async function getArticles(
     {
       kinds: [30023],
       limit,
-      authors: publicKey ? [publicKey] : undefined,
+      authors: publicKey ? [publicKey] : FEATURED_WRITERS,
       until: pageParam === 0 ? undefined : pageParam - 1, // This assumes the API supports pagination by time or some other param
     },
     {
