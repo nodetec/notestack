@@ -1,19 +1,20 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import { Button } from "~/components/ui/button";
 import { ZapDialog } from "~/components/ZapDialog";
 import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
 import { processArticle, readingTime } from "~/lib/markdown";
-import { getEvent, getTag, shortNpub } from "~/lib/nostr";
+import { getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
-import { useAppState } from "~/store";
 import { ZapIcon } from "lucide-react";
 import Image from "next/image";
 import { type AddressPointer } from "nostr-tools/nip19";
 
+import { useArticleEvent } from "../hooks/useArticleEvent";
 import { ArticleHeader } from "./ArticleHeader";
 import { SkeletonArticle } from "./SkeletonArticle";
 
@@ -22,59 +23,19 @@ type Props = {
   publicKey: string | undefined;
 };
 
-const getCurrentArticle = async (
-  address: AddressPointer,
-  publicKey: string | undefined,
-) => {
-  const articleMap = useAppState.getState().articleMap;
-
-  console.log("ArticleMap", articleMap);
-
-  if (articleMap.has(address.identifier + address.pubkey)) {
-    console.log("Article found in cache");
-    return articleMap.get(address.identifier + address.pubkey);
-  }
-
-  const filter = {
-    kinds: [address.kind],
-    limit: 1,
-    "#d": [address.identifier],
-  };
-
-  let relays = address.relays;
-
-  if (!relays) {
-    // relays = await getAllReadRelays(publicKey);
-    relays = DEFAULT_RELAYS;
-  }
-
-  const event = await getEvent(filter, relays);
-
-  if (!event) {
-    console.error("Event not found");
-    throw new Error("Event not found");
-  }
-
-  return event;
-};
-
 export function Article({ address, publicKey }: Props) {
-  const { data: articleEvent, status } = useQuery({
-    queryKey: ["article", address.pubkey, address.identifier],
-    refetchOnWindowFocus: false,
-    queryFn: () => getCurrentArticle(address, publicKey),
-  });
+  // look into react query select to parse data
+  const { data: articleEvent, status } = useArticleEvent(address, publicKey);
 
   const { data: profileEvent, status: profileEventStatus } = useProfileEvent(
     address.relays ?? DEFAULT_RELAYS,
     articleEvent?.pubkey,
   );
 
-  let profile;
-
-  if (profileEvent) {
-    profile = parseProfileEvent(profileEvent);
-  }
+  const profile = useMemo(
+    () => (profileEvent ? parseProfileEvent(profileEvent) : null),
+    [profileEvent],
+  );
 
   if (status === "pending" || profileEventStatus === "pending") {
     return <SkeletonArticle />;
@@ -110,6 +71,7 @@ export function Article({ address, publicKey }: Props) {
                   width={32}
                   height={32}
                   alt=""
+                  loading="lazy"
                 />
                 <div className="flex flex-col gap-1">
                   <div>

@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
-  profile: Profile | undefined;
+  profile: Profile | undefined | null;
   publicKey: string;
   isFetching: boolean;
 };
@@ -32,6 +32,7 @@ export function ArticleCardProfile({ profile, publicKey, isFetching }: Props) {
             width={48}
             height={48}
             alt=""
+            loading="lazy"
           />
           <span className="hover:underline">
             {profile?.content.name ?? shortNpub(publicKey)}

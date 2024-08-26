@@ -378,7 +378,7 @@ export function identityTag(
 }
 
 export function createProfileLink(
-  profile: Profile | undefined,
+  profile: Profile | undefined | null,
   publicKey: string,
 ) {
   if (profile?.content?.nip05) {
@@ -402,7 +402,7 @@ export function makeNaddr(event: Event, relays: string[]) {
 }
 
 export function createArticleLink(
-  profile: Profile | undefined,
+  profile: Profile | undefined | null,
   articleEvent: Event,
   relays: string[],
 ) {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -28,11 +30,10 @@ export function ProfileDropdown({ publicKey }: Props) {
     publicKey,
   );
 
-  let profile;
-
-  if (profileEvent) {
-    profile = parseProfileEvent(profileEvent);
-  }
+  const profile = useMemo(
+    () => (profileEvent ? parseProfileEvent(profileEvent) : null),
+    [profileEvent],
+  );
 
   return (
     <DropdownMenu>
@@ -51,6 +52,7 @@ export function ProfileDropdown({ publicKey }: Props) {
               width={48}
               height={48}
               alt=""
+              loading="lazy"
             />
           )}
         </Button>

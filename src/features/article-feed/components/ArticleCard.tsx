@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
@@ -24,11 +24,10 @@ export function ArticleCard({ articleEvent, relays }: Props) {
     articleEvent.pubkey,
   );
 
-  let profile;
-
-  if (profileEvent) {
-    profile = parseProfileEvent(profileEvent);
-  }
+  const profile = useMemo(
+    () => (profileEvent ? parseProfileEvent(profileEvent) : null),
+    [profileEvent],
+  );
 
   return (
     <Fragment key={articleEvent.id}>
@@ -81,6 +80,7 @@ export function ArticleCard({ articleEvent, relays }: Props) {
                   width={160}
                   height={112}
                   alt=""
+                  loading="lazy"
                 />
               </div>
               <div className="mt-6 flex gap-1 text-sm text-muted-foreground sm:hidden">

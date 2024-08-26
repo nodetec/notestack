@@ -7,6 +7,7 @@ import { shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { EllipsisVerticalIcon } from "lucide-react";
 import Image from "next/image";
+import { useMemo } from "react";
 
 type Props = {
   relays: string[];
@@ -16,11 +17,11 @@ type Props = {
 export default function ArticleFeedProfile({ relays, publicKey }: Props) {
   const { data: profileEvent, status } = useProfileEvent(relays, publicKey);
 
-  let profile;
+  const profile = useMemo(
+    () => (profileEvent ? parseProfileEvent(profileEvent) : null),
+    [profileEvent],
+  );
 
-  if (profileEvent) {
-    profile = parseProfileEvent(profileEvent);
-  }
 
   if (status === "pending") {
     return (
@@ -52,6 +53,7 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
               width={48}
               height={48}
               alt=""
+              loading="lazy"
             />
             <h2 className="text-2xl font-semibold text-foreground/80">
               {profile?.content.name ?? shortNpub(publicKey)}
