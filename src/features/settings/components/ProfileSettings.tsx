@@ -17,14 +17,15 @@ import {
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
-import { profileContent, publish } from "~/lib/nostr";
+import { DEFAULT_RELAYS } from "~/lib/constants";
+import { parseProfileEvent } from "~/lib/events/profile-event";
 import { getAvatar } from "~/lib/utils";
 import Image from "next/image";
 import { type Event, type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { DEFAULT_RELAYS } from "~/lib/constants";
+import { publish } from "~/lib/nostr";
 
 const profileFormSchema = z.object({
   picture: z.string(),
@@ -77,13 +78,13 @@ export function ProfileSettings({ publicKey }: Props) {
 
   useEffect(() => {
     if (profileEvent) {
-      const profile = profileContent(profileEvent);
+      const profile = parseProfileEvent(profileEvent);
       reset({
-        picture: profile.picture,
-        username: profile.name,
-        website: profile.website,
-        bio: profile.about,
-        lud16: profile.lud16,
+        picture: profile?.content.picture,
+        username: profile?.content.name,
+        website: profile?.content.website,
+        bio: profile?.content.about,
+        lud16: profile?.content.lud16,
       });
     }
   }, [reset, profileEvent]);
@@ -94,15 +95,30 @@ export function ProfileSettings({ publicKey }: Props) {
     let tags = profileEvent?.tags;
 
     if (!tags) tags = [];
-    const profile = profileContent(profileEvent);
 
-    profile.picture = picture;
-    profile.name = username;
-    profile.website = website;
-    profile.about = bio;
-    profile.lud16 = lud16;
+    let content = "";
+    let profile;
 
-    const content = JSON.stringify(profile);
+    if (profileEvent) {
+      profile = parseProfileEvent(profileEvent);
+      profile.content.picture = picture;
+      profile.content.name = username;
+      profile.content.website = website;
+      profile.content.about = bio;
+      profile.content.lud16 = lud16;
+    }
+
+    if (!profile) {
+      content = JSON.stringify({
+        picture,
+        name: username,
+        website,
+        about: bio,
+        lud16,
+      });
+    } else {
+      content = JSON.stringify(profile.content);
+    }
 
     const eventTemplate: EventTemplate = {
       kind: 0,

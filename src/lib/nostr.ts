@@ -1,6 +1,5 @@
 import { getUser } from "~/server/auth";
 import { finishEventWithSecretKey } from "~/server/nostr";
-import { type Profile } from "~/types";
 import {
   getEventHash,
   nip19,
@@ -12,6 +11,7 @@ import {
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { DEFAULT_RELAYS, FEATURED_WRITERS } from "./constants";
+import { type Profile } from "./events/profile-event";
 import { normalizeUri } from "./utils";
 
 export async function getArticles(
@@ -105,14 +105,7 @@ export async function getEvent(filter: Filter, relays: string[]) {
   return event;
 }
 
-export async function getProfiles(
-  relays: string[],
-  publicKeys: string[] | undefined,
-) {
-  if (!publicKeys) {
-    return [];
-  }
-
+export async function getProfileEvents(relays: string[], publicKeys: string[]) {
   const pool = new SimplePool();
 
   const profileEvents = await pool.querySync(
@@ -128,20 +121,14 @@ export async function getProfiles(
 
   pool.close(relays);
 
-  if (!profileEvents) {
-    return [];
-  }
-
-  const profiles = profileEvents.map(profileContent);
-
-  return profiles;
+  return profileEvents;
 }
 
 export async function getProfileEvent(
   relays: string[],
   publicKey: string | undefined,
 ) {
-  if (!publicKey) return undefined;
+  if (!publicKey) return null;
 
   const pool = new SimplePool();
 
@@ -151,30 +138,8 @@ export async function getProfileEvent(
   });
 
   pool.close(relays);
-
-  if (!profileEvent) return undefined;
 
   return profileEvent;
-}
-
-export async function getProfile(
-  relays: string[],
-  publicKey: string | undefined,
-) {
-  if (!publicKey) {
-    return profileContent(undefined);
-  }
-
-  const pool = new SimplePool();
-
-  const profileEvent = await pool.get(relays, {
-    kinds: [0],
-    authors: [publicKey],
-  });
-
-  pool.close(relays);
-
-  return profileContent(profileEvent);
 }
 
 export async function getFollowEvent(
@@ -233,17 +198,6 @@ export const getTag = (name: string, tags: string[][]) => {
   const [itemTag] = tags.filter((tag: string[]) => tag[0] === name);
   const [, item] = itemTag ?? [, undefined];
   return item;
-};
-
-export const profileContent = (event: Event | undefined | null) => {
-  try {
-    const profile = JSON.parse(event?.content ?? "{}") as Profile;
-    profile.pubkey = event?.pubkey;
-    return profile;
-  } catch (err) {
-    console.error("Error parsing profile content", err);
-    return {} as Profile;
-  }
 };
 
 export async function getUserRelays(
@@ -427,22 +381,10 @@ export function createProfileLink(
   profile: Profile | undefined,
   publicKey: string,
 ) {
-  if (!profile) {
-    return `/${nip19.npubEncode(publicKey)}`;
+  if (profile?.content?.nip05) {
+    return `/${profile.content?.nip05}`;
   }
-  if (profile.nip05) {
-    // const nip05Profile = await queryProfile(profile.nip05);
-    // if (nip05Profile?.pubkey === profile.pubkey) {
-    return `/${profile.nip05}`;
-    // }
-  }
-
-  if (profile.pubkey) {
-    const publicKey = profile.pubkey;
-    return `/${nip19.npubEncode(publicKey)}`;
-  }
-
-  return "#";
+  return `/${nip19.npubEncode(publicKey)}`;
 }
 
 export function makeNaddr(event: Event, relays: string[]) {
@@ -459,16 +401,15 @@ export function makeNaddr(event: Event, relays: string[]) {
   return nip19.naddrEncode(addr);
 }
 
-// TODO: change this to createArticleLink, should try to use nip05/identifier and fallback to a/naddr
 export function createArticleLink(
   profile: Profile | undefined,
-  event: Event,
+  articleEvent: Event,
   relays: string[],
 ) {
-  if (profile?.nip05) {
-    return `/${profile.nip05}/${getTag("d", event.tags)}`;
+  if (profile?.content?.nip05) {
+    return `/${profile.content?.nip05}/${getTag("d", articleEvent.tags)}`;
   }
-  return `/a/${makeNaddr(event, relays)}`;
+  return `/a/${makeNaddr(articleEvent, relays)}`;
 }
 
 export async function publish(eventTemplate: EventTemplate, relays: string[]) {

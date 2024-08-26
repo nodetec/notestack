@@ -8,10 +8,14 @@ export type UserWithKeys = User & {
 
 export type RelayUrl = `wss://${string}`;
 
-export interface Profile {
+export interface ProfileEvent {
+  id: string;
+  pubkey: string;
+  createdAt: string;
+  tags: string[][];
+  content: string;
+  sig: string;
   relay?: string;
-  publicKey?: string;
-  pubkey?: string;
   about?: string;
   lud06?: string;
   lud16?: string;

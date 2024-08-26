@@ -120,7 +120,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
         <ArticleFeedControls show={!profilePublicKey} />
         {articles.pages.flatMap((page) =>
           page.articles.map((event) => (
-            <ArticleCard key={event.id} event={event} relays={relays} />
+            <ArticleCard key={event.id} articleEvent={event} relays={relays} />
           )),
         )}
 

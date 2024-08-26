@@ -4,13 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { ZapDialog } from "~/components/ZapDialog";
 import { DEFAULT_RELAYS } from "~/lib/constants";
+import { parseProfileEvent } from "~/lib/events/profile-event";
 import { processArticle, readingTime } from "~/lib/markdown";
-import { getEvent, getProfile, getTag, shortNpub } from "~/lib/nostr";
+import { getEvent, getProfileEvent, getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
-import { type Profile } from "~/types";
 import { ZapIcon } from "lucide-react";
 import Image from "next/image";
+import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleHeader } from "./ArticleHeader";
@@ -64,7 +65,7 @@ export function Article({ address, publicKey }: Props) {
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
-  const { data: profile, status: profileStatus } = useQuery<Profile>({
+  const { data: profileEvent, status: profileStatus } = useQuery<Event | null>({
     queryKey: ["profile", articleEvent?.pubkey],
     refetchOnWindowFocus: false,
     refetchOnMount: true,
@@ -72,8 +73,14 @@ export function Article({ address, publicKey }: Props) {
     gcTime: Infinity,
     enabled: !!articleEvent,
     queryFn: () =>
-      getProfile(address.relays ?? DEFAULT_RELAYS, articleEvent?.pubkey),
+      getProfileEvent(address.relays ?? DEFAULT_RELAYS, articleEvent?.pubkey),
   });
+
+  let profile;
+
+  if (profileEvent) {
+    profile = parseProfileEvent(profileEvent);
+  }
 
   if (status === "pending" || profileStatus === "pending") {
     return <SkeletonArticle />;
@@ -105,13 +112,15 @@ export function Article({ address, publicKey }: Props) {
               <div className="flex items-center gap-4">
                 <Image
                   className="aspect-square w-10 overflow-hidden rounded-full object-cover"
-                  src={profile?.picture ?? getAvatar(address.pubkey)}
+                  src={profile?.content.picture ?? getAvatar(address.pubkey)}
                   width={32}
                   height={32}
                   alt=""
                 />
                 <div className="flex flex-col gap-1">
-                  <div>{profile?.name ?? shortNpub(address.pubkey)}</div>
+                  <div>
+                    {profile?.content.name ?? shortNpub(address.pubkey)}
+                  </div>
                   <div className="flex gap-2 text-sm text-muted-foreground">
                     <span>{readingTime(articleEvent?.content)}</span>
                     <span>•</span>

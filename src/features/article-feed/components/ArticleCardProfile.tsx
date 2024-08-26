@@ -1,9 +1,9 @@
 import React from "react";
 
 import { Skeleton } from "~/components/ui/skeleton";
+import { type Profile } from "~/lib/events/profile-event";
 import { createProfileLink, shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
-import { type Profile } from "~/types";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -13,11 +13,7 @@ type Props = {
   isFetching: boolean;
 };
 
-export function ArticleCardProfile({
-  profile,
-  publicKey,
-  isFetching,
-}: Props) {
+export function ArticleCardProfile({ profile, publicKey, isFetching }: Props) {
   return (
     <>
       {isFetching ? (
@@ -32,13 +28,13 @@ export function ArticleCardProfile({
         >
           <Image
             className="aspect-square w-5 overflow-hidden rounded-full object-cover hover:brightness-90"
-            src={profile?.picture ?? getAvatar(publicKey)}
+            src={profile?.content.picture ?? getAvatar(publicKey)}
             width={48}
             height={48}
             alt=""
           />
           <span className="hover:underline">
-            {profile?.name ?? shortNpub(publicKey)}
+            {profile?.content.name ?? shortNpub(publicKey)}
           </span>
         </Link>
       )}

@@ -3,11 +3,12 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getProfile, shortNpub } from "~/lib/nostr";
+import { parseProfileEvent } from "~/lib/events/profile-event";
+import { getProfileEvent, shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
-import { type Profile } from "~/types";
 import { EllipsisVerticalIcon } from "lucide-react";
 import Image from "next/image";
+import { type Event } from "nostr-tools";
 
 type Props = {
   relays: string[];
@@ -15,14 +16,20 @@ type Props = {
 };
 
 export default function ArticleFeedProfile({ relays, publicKey }: Props) {
-  const { data: profile, status } = useQuery<Profile>({
+  const { data: profileEvent, status } = useQuery<Event | null>({
     queryKey: ["profile", publicKey],
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     staleTime: Infinity,
     gcTime: Infinity,
-    queryFn: () => getProfile(relays ?? DEFAULT_RELAYS, publicKey),
+    queryFn: () => getProfileEvent(relays ?? DEFAULT_RELAYS, publicKey),
   });
+
+  let profile;
+
+  if (profileEvent) {
+    profile = parseProfileEvent(profileEvent);
+  }
 
   if (status === "pending") {
     return (
@@ -50,13 +57,13 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
           <div className="flex items-center gap-4">
             <Image
               className="aspect-square w-10 overflow-hidden rounded-full object-cover hover:brightness-90"
-              src={profile?.picture ?? getAvatar(publicKey)}
+              src={profile?.content?.picture ?? getAvatar(publicKey)}
               width={48}
               height={48}
               alt=""
             />
             <h2 className="text-2xl font-semibold text-foreground/80">
-              {profile?.name ?? shortNpub(publicKey)}
+              {profile?.content.name ?? shortNpub(publicKey)}
             </h2>
           </div>
 

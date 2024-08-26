@@ -11,7 +11,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getProfileEvent, profileContent, shortNpub } from "~/lib/nostr";
+import { parseProfileEvent } from "~/lib/events/profile-event";
+import { getProfileEvent, shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -31,6 +32,12 @@ export function ProfileDropdown({ publicKey }: Props) {
     queryFn: () => getProfileEvent(DEFAULT_RELAYS, publicKey),
   });
 
+  let profile;
+
+  if (profileEvent) {
+    profile = parseProfileEvent(profileEvent);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,9 +51,7 @@ export function ProfileDropdown({ publicKey }: Props) {
           ) : (
             <Image
               className="aspect-square w-12 overflow-hidden rounded-full object-cover"
-              src={
-                profileContent(profileEvent)?.picture ?? getAvatar(publicKey)
-              }
+              src={profile?.content?.picture ?? getAvatar(publicKey)}
               width={48}
               height={48}
               alt=""
@@ -56,7 +61,7 @@ export function ProfileDropdown({ publicKey }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem>
-          {profileContent(profileEvent)?.name ?? shortNpub(publicKey)}
+          {profile?.content?.name ?? shortNpub(publicKey)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
