@@ -60,7 +60,11 @@ export async function Header() {
         {/*   </> */}
         {/* )} */}
         <ThemeToggle />
-        {session ? <ProfileDropdown publicKey={publicKey} /> : <LoginButton />}
+        {session && publicKey ? (
+          <ProfileDropdown publicKey={publicKey} />
+        ) : (
+          <LoginButton />
+        )}
       </div>
     </header>
   );

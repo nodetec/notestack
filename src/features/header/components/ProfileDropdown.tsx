@@ -14,14 +14,14 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
-import { shortNpub } from "~/lib/nostr";
+import { createProfileLink, shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
-  publicKey: string | undefined;
+  publicKey: string;
 };
 
 export function ProfileDropdown({ publicKey }: Props) {
@@ -58,8 +58,10 @@ export function ProfileDropdown({ publicKey }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          {profile?.content?.name ?? shortNpub(publicKey)}
+        <DropdownMenuItem asChild>
+          <Link href={createProfileLink(profile, publicKey)}>
+            {profile?.content?.name ?? shortNpub(publicKey)}
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
