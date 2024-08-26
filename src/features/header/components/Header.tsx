@@ -36,7 +36,7 @@ export async function Header() {
 
   return (
     <header className="relative flex items-center justify-between border-b px-6 py-4 sm:border-none lg:px-8">
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/" prefetch={false} className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
       </Link>

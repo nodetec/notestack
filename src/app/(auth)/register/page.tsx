@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -17,12 +18,11 @@ import Link from "next/link";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useQueryClient } from "@tanstack/react-query";
 
 const isValidNpub = (npub: string) => {
   try {
     return nip19.decode(npub).type === "npub";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
@@ -31,7 +31,7 @@ const isValidNpub = (npub: string) => {
 const isValidNsec = (nsec: string) => {
   try {
     return nip19.decode(nsec).type === "nsec";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
@@ -98,6 +98,7 @@ export default function RegisterForm() {
           Already have an account?{" "}
           <Link
             href="/login"
+            prefetch={false}
             className="font-semibold text-blue-500 dark:text-blue-400"
           >
             Sign in
@@ -116,7 +117,12 @@ export default function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input className="border-primary/60" {...field} disabled placeholder="nsec..." />
+                  <Input
+                    className="border-primary/60"
+                    {...field}
+                    disabled
+                    placeholder="nsec..."
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,7 +134,12 @@ export default function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input className="border-primary/60" {...field} disabled placeholder="npub..." />
+                  <Input
+                    className="border-primary/60"
+                    {...field}
+                    disabled
+                    placeholder="npub..."
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
