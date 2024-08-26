@@ -43,7 +43,7 @@ export function ArticleCard({ articleEvent, relays }: Props) {
           <Link
             className="flex flex-col gap-2 pb-4 pt-4"
             href={createArticleLink(profile, articleEvent, relays)}
-            prefetch={false}
+            // prefetch={false}
           >
             <div className="flex flex-col">
               <div className="flex items-start justify-between sm:items-center">

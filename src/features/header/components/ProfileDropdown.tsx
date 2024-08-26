@@ -59,18 +59,24 @@ export function ProfileDropdown({ publicKey }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={createProfileLink(profile, publicKey)} prefetch={false}>
+          <Link href={createProfileLink(profile, publicKey)} 
+            // prefetch={false}
+          >
             {profile?.content?.name ?? shortNpub(publicKey)}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/settings" prefetch={false}>
+          <Link href="/settings" 
+            // prefetch={false}
+          >
             Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/relays" prefetch={false}>
+          <Link href="/relays" 
+            // prefetch={false}
+          >
             Relays
           </Link>
         </DropdownMenuItem>

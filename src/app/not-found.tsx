@@ -22,7 +22,10 @@ export default function NotFound() {
           moved or deleted.
         </p>
         <Button asChild>
-          <Link href="/" prefetch={false}>
+          <Link
+            href="/"
+            // prefetch={false}
+          >
             Return to Home
           </Link>
         </Button>
