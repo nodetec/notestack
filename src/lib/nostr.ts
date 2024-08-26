@@ -18,7 +18,7 @@ export async function getArticles(
   relays: string[],
   pageParam = 0,
   publicKey?: string,
-  followEvent?: Event | "notloggedin",
+  followEvent?: Event | null,
   feed?: string,
 ) {
   const pool = new SimplePool();
@@ -31,7 +31,7 @@ export async function getArticles(
     publicKeys = [publicKey];
   }
 
-  if (followEvent && followEvent !== "notloggedin" && feed === "following") {
+  if (followEvent && followEvent !== null && feed === "following") {
     const followList = followEvent.tags
       .filter((tag) => tag[0] === "p" && typeof tag[1] !== "undefined")
       .map((tag) => tag[1]!);
@@ -147,7 +147,7 @@ export async function getFollowEvent(
   publicKey: string | undefined,
 ) {
   if (!publicKey) {
-    return "notloggedin";
+    return null;
   }
 
   const pool = new SimplePool();
@@ -160,7 +160,7 @@ export async function getFollowEvent(
   pool.close(relays);
 
   if (!followEvent) {
-    return "notloggedin";
+    return null;
   }
 
   return followEvent;

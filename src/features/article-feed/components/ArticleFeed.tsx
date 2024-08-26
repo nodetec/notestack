@@ -1,17 +1,9 @@
 "use client";
 
-import {
-  useInfiniteQuery,
-  useQuery,
-  type QueryFunctionContext,
-} from "@tanstack/react-query";
+import { useFollowEvent } from "~/hooks/useFollowEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { getArticles, getFollowEvent, getTag } from "~/lib/nostr";
-import { useAppState } from "~/store";
-import { useSearchParams } from "next/navigation";
-import type { Event } from "nostr-tools";
-import { toast } from "sonner";
 
+import { useArticleFeed } from "../hooks/useArticleFeed";
 import { ArticleCard } from "./ArticleCard";
 import { ArticleFeedControls } from "./ArticleFeedControls";
 import ArticleFeedProfile from "./ArticleFeedProfile";
@@ -22,83 +14,18 @@ type Props = {
   profilePublicKey?: string;
 };
 
-const fetchArticles = async ({
-  pageParam = 0,
-  queryKey,
-}: QueryFunctionContext) => {
-  console.log("fetchArticles", pageParam, queryKey);
-  const page = (pageParam as number) || 0;
-  const relays = queryKey[1] as string[];
-  const publicKey = queryKey[2] as string;
-  const followEvent = queryKey[3] as Event;
-  const feed = queryKey[4] as string;
-  const response = await getArticles(
-    relays,
-    page,
-    publicKey,
-    followEvent,
-    feed,
-  );
-
-  const addArticle = useAppState.getState().addArticle;
-
-  if (response.articles.length === 0) {
-    toast("You've reached the end", {
-      description: "No more articles found",
-    });
-  }
-
-  response.articles.forEach((article) => {
-    const identifier = getTag("d", article.tags);
-    const publicKey = article.pubkey;
-    const id = identifier + publicKey;
-    addArticle(id, article);
-  });
-
-  return response;
-};
-
 export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
-  // const { data: userReadRelays, status: userReadRelaysStatus } = useQuery({
-  //   queryKey: ["userReadRelays"],
-  //   refetchOnWindowFocus: false,
-  //   queryFn: () =>
-  //     profilePublicKey
-  //       ? getWriteRelays(profilePublicKey, DEFAULT_RELAYS)
-  //       : getReadRelays(userPublicKey, DEFAULT_RELAYS),
-  // });
-
-  const searchParams = useSearchParams();
-
   const relays = DEFAULT_RELAYS;
 
-  const { data: userfollowEvent, status: userFollowEventStatus } = useQuery({
-    queryKey: ["followList", userPublicKey],
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    gcTime: Infinity,
-    staleTime: Infinity,
-    queryFn: () => getFollowEvent(relays, userPublicKey),
-  });
+  const { data: userFollowEvent } = useFollowEvent(userPublicKey, relays);
 
-  const { data: articles, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteQuery({
-      queryKey: [
-        "articles",
-        relays,
-        profilePublicKey,
-        userfollowEvent,
-        searchParams.get("feed"),
-      ],
-      queryFn: fetchArticles,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      gcTime: Infinity,
-      staleTime: Infinity,
-      initialPageParam: 0,
-      enabled: !!userfollowEvent,
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    });
+  const {
+    data: articleEvents,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useArticleFeed(profilePublicKey, userFollowEvent);
 
   if (status === "pending") {
     return <SkeletonArticleFeed profileFeed={!!profilePublicKey} />;
@@ -112,13 +39,10 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     return (
       <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
         {profilePublicKey && (
-          <ArticleFeedProfile
-            relays={relays}
-            publicKey={profilePublicKey}
-          />
+          <ArticleFeedProfile relays={relays} publicKey={profilePublicKey} />
         )}
         <ArticleFeedControls show={!profilePublicKey} />
-        {articles.pages.flatMap((page) =>
+        {articleEvents.pages.flatMap((page) =>
           page.articles.map((event) => (
             <ArticleCard key={event.id} articleEvent={event} relays={relays} />
           )),
