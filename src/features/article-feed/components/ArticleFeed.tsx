@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  type QueryFunctionContext,
   useInfiniteQuery,
   useQuery,
+  type QueryFunctionContext,
 } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getFollowEvent, getTag } from "~/lib/nostr";
@@ -70,7 +70,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
 
   const searchParams = useSearchParams();
 
-  const userReadRelays = DEFAULT_RELAYS;
+  const relays = DEFAULT_RELAYS;
 
   const { data: userfollowEvent, status: userFollowEventStatus } = useQuery({
     queryKey: ["followList", userPublicKey],
@@ -78,14 +78,14 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     refetchOnMount: true,
     gcTime: Infinity,
     staleTime: Infinity,
-    queryFn: () => getFollowEvent(userReadRelays, userPublicKey),
+    queryFn: () => getFollowEvent(relays, userPublicKey),
   });
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+  const { data: articles, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: [
         "articles",
-        userReadRelays,
+        relays,
         profilePublicKey,
         userfollowEvent,
         searchParams.get("feed"),
@@ -101,48 +101,39 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     });
 
   if (status === "pending") {
-    // if (userReadRelaysStatus === "pending" || status === "pending") {
     return <SkeletonArticleFeed profileFeed={!!profilePublicKey} />;
   }
 
   if (status === "error") {
-    // if (userReadRelaysStatus === "error" || status === "error") {
     return <div>Error fetching articles</div>;
   }
 
-  return (
-    <>
-      {status === "success" && (
-        // {status === "success" && userReadRelaysStatus === "success" && (
-        <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
-          {profilePublicKey && (
-            <ArticleFeedProfile
-              relays={userReadRelays}
-              publicKey={profilePublicKey}
-            />
-          )}
-          <ArticleFeedControls show={!profilePublicKey} />
-          {data.pages.flatMap((page) =>
-            page.articles.map((event) => (
-              <ArticleCard
-                key={event.id}
-                event={event}
-                relays={userReadRelays}
-              />
-            )),
-          )}
+  if (status === "success") {
+    return (
+      <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
+        {profilePublicKey && (
+          <ArticleFeedProfile
+            relays={relays}
+            publicKey={profilePublicKey}
+          />
+        )}
+        <ArticleFeedControls show={!profilePublicKey} />
+        {articles.pages.flatMap((page) =>
+          page.articles.map((event) => (
+            <ArticleCard key={event.id} event={event} relays={relays} />
+          )),
+        )}
 
-          {hasNextPage && (
-            <button
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              Load More
-            </button>
-          )}
-        </div>
-      )}
-    </>
-  );
+        {hasNextPage && (
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Load More
+          </button>
+        )}
+      </div>
+    );
+  }
 }
