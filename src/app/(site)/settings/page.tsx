@@ -7,7 +7,7 @@ import { type UserWithKeys } from "~/types";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
-async function SettingsPageWrapper() {
+export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   const user = session?.user as UserWithKeys | undefined;
 
@@ -17,17 +17,10 @@ async function SettingsPageWrapper() {
     redirect("/login");
   }
 
-  // TODO: redirect to login if user is not logged in
-  return <ProfileSettings publicKey={user?.publicKey} />;
-}
-
-export default async function SettingsPage() {
   return (
     <main className="grow bg-secondary p-2 sm:rounded-lg sm:p-10 sm:shadow-sm sm:ring-1 sm:ring-zinc-950/5 dark:sm:ring-white/10">
       <div className="flex w-full flex-col items-center pt-12">
-        <Suspense fallback={<div className="h-screen">loading...</div>}>
-          <SettingsPageWrapper />
-        </Suspense>
+        <ProfileSettings publicKey={user?.publicKey} />;
       </div>
     </main>
   );
