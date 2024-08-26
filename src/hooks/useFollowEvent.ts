@@ -17,6 +17,6 @@ export const useFollowEvent = (
     gcTime: Infinity,
     staleTime: Infinity,
     queryFn: () => getFollowEvent(relays, publicKey),
-    enabled: !!publicKey, // Ensure the query only runs if userPublicKey is defined
+    // enabled: !!publicKey, // Ensure the query only runs if userPublicKey is defined
   });
 };

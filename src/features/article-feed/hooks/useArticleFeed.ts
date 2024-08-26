@@ -50,6 +50,7 @@ export const useArticleFeed = (
 ) => {
   const searchParams = useSearchParams();
   const relays = DEFAULT_RELAYS;
+  console.log("useArticleFeed", profilePublicKey, userFollowEvent);
 
   return useInfiniteQuery({
     queryKey: [
@@ -65,7 +66,7 @@ export const useArticleFeed = (
     gcTime: Infinity,
     staleTime: Infinity,
     initialPageParam: 0,
-    enabled: !!userFollowEvent, // Ensure the query only runs if userFollowEvent is defined
+    enabled: userFollowEvent !== undefined, // Ensure the query only runs if userFollowEvent is defined
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 };
