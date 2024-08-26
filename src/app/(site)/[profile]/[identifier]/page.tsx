@@ -1,5 +1,4 @@
 import { Article } from "~/features/article";
-import { getUser } from "~/server/auth";
 import { getPublicKeyFromNip05OrNpub } from "~/server/nostr";
 import { notFound } from "next/navigation";
 
@@ -8,8 +7,6 @@ export default async function ArticlePage({
 }: {
   params: { profile: string; identifier: string };
 }) {
-  const user = await getUser();
-
   if (!params?.identifier) {
     notFound();
   }
@@ -22,5 +19,5 @@ export default async function ArticlePage({
     kind: 30023,
   };
 
-  return <Article address={address} publicKey={user?.publicKey} />;
+  return <Article address={address} />;
 }

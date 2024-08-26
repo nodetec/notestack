@@ -1,5 +1,4 @@
 import { Article } from "~/features/article";
-import { getUser } from "~/server/auth";
 import { notFound } from "next/navigation";
 import { nip19 } from "nostr-tools";
 
@@ -8,8 +7,6 @@ export default async function ArticlePage({
 }: {
   params: { naddr: string };
 }) {
-  const user = await getUser();
-
   let decodeResult;
 
   try {
@@ -30,5 +27,5 @@ export default async function ArticlePage({
 
   const address = decodeResult.data;
 
-  return <Article address={address} publicKey={user?.publicKey} />;
+  return <Article address={address} />;
 }

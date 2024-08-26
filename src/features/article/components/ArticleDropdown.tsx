@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import useAuth from "~/hooks/useAuth";
 import { getAllWriteRelays, publishFinishedEvent } from "~/lib/nostr";
 import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
@@ -14,18 +15,13 @@ import { toast } from "sonner";
 type Props = {
   children: React.ReactNode;
   address: AddressPointer;
-  publicKey: string | undefined;
   articleEvent: Event;
 };
 
-export function ArticleDropdown({
-  children,
-  address,
-  publicKey,
-  articleEvent,
-}: Props) {
+export function ArticleDropdown({ children, address, articleEvent }: Props) {
+  const { userPublicKey } = useAuth();
   async function broadcastArticle() {
-    const relays = await getAllWriteRelays(publicKey);
+    const relays = await getAllWriteRelays(userPublicKey);
 
     const published = await publishFinishedEvent(articleEvent, relays);
 
@@ -44,7 +40,7 @@ export function ArticleDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {publicKey && (
+        {userPublicKey && (
           <DropdownMenuItem onClick={broadcastArticle}>
             Broadcast
           </DropdownMenuItem>

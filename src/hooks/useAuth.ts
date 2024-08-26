@@ -4,8 +4,8 @@ import { type UserWithKeys } from "~/types";
 import { useSession } from "next-auth/react";
 
 const useAuth = () => {
-  const [publicKey, setPublicKey] = useState<string | undefined>(undefined);
-  const [secretKey, setSecretKey] = useState<Uint8Array | undefined>(undefined);
+  const [userPublicKey, setUserPublicKey] = useState<string | undefined>(undefined);
+  const [userSecretKey, setUserSecretKey] = useState<Uint8Array | undefined>(undefined);
   const { data: session } = useSession();
 
   const user = session?.user as UserWithKeys;
@@ -15,8 +15,8 @@ const useAuth = () => {
       const user = session?.user as UserWithKeys;
 
       // Only update publicKey if it has changed
-      if (user.publicKey !== publicKey) {
-        setPublicKey(user.publicKey);
+      if (user.publicKey !== userPublicKey) {
+        setUserPublicKey(user.publicKey);
       }
 
       if (!user.secretKey) {
@@ -28,8 +28,8 @@ const useAuth = () => {
         const uint8Array = new Uint8Array(parsedArray);
 
         // Only update secretKey if it has changed
-        if (!secretKey || !uint8Array.every((val, i) => val === secretKey[i])) {
-          setSecretKey(uint8Array);
+        if (!userSecretKey || !uint8Array.every((val, i) => val === userSecretKey[i])) {
+          setUserSecretKey(uint8Array);
         }
       } catch (e) {
         console.error(e);
@@ -38,7 +38,7 @@ const useAuth = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.publicKey]);
 
-  return { publicKey, secretKey };
+  return { userPublicKey, userSecretKey };
 };
 
 export default useAuth;

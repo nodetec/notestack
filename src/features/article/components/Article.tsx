@@ -17,15 +17,15 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { useArticleEvent } from "../hooks/useArticleEvent";
 import { ArticleHeader } from "./ArticleHeader";
 import { SkeletonArticle } from "./SkeletonArticle";
+// import useAuth from "~/hooks/useAuth";
 
 type Props = {
   address: AddressPointer;
-  publicKey: string | undefined;
 };
 
-export function Article({ address, publicKey }: Props) {
+export function Article({ address }: Props) {
   // look into react query select to parse data
-  const { data: articleEvent, status } = useArticleEvent(address, publicKey);
+  const { data: articleEvent, status } = useArticleEvent(address, address.pubkey);
 
   const { data: profileEvent, status: profileEventStatus } = useProfileEvent(
     address.relays ?? DEFAULT_RELAYS,
@@ -55,7 +55,6 @@ export function Article({ address, publicKey }: Props) {
         <>
           <ArticleHeader
             address={address}
-            publicKey={publicKey}
             articleEvent={articleEvent}
           />
           <div className="mx-auto mb-8 flex max-w-[65ch] flex-col gap-8 border-b pb-8">

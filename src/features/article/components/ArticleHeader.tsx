@@ -5,18 +5,17 @@ import React from "react";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftIcon, EllipsisVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleDropdown } from "./ArticleDropdown";
-import { type Event } from "nostr-tools";
 
 type Props = {
   address: AddressPointer;
-  publicKey: string | undefined;
   articleEvent: Event;
 };
 
-export const ArticleHeader = ({ address, publicKey, articleEvent }: Props) => {
+export const ArticleHeader = ({ address, articleEvent }: Props) => {
   const router = useRouter();
 
   return (
@@ -29,7 +28,7 @@ export const ArticleHeader = ({ address, publicKey, articleEvent }: Props) => {
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </Button>
-      <ArticleDropdown address={address} publicKey={publicKey} articleEvent={articleEvent}>
+      <ArticleDropdown address={address} articleEvent={articleEvent}>
         <Button
           className="bg-muted hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-transparent"
           variant="secondary"
