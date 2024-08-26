@@ -1,8 +1,5 @@
-"use client";
-
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { usePathname } from "next/navigation";
 
 import { SkeletonArticleCard } from "./SkeletonArticleCard";
 
@@ -11,12 +8,6 @@ type Props = {
 };
 
 export function SkeletonArticleFeed({ profileFeed }: Props) {
-  const pathname = usePathname();
-
-  if (pathname.split("/").length > 2) {
-    return null;
-  }
-
   return (
     <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
       <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-7 backdrop-blur transition-colors duration-500">
