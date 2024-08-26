@@ -35,13 +35,8 @@ export default function ArticlePage({
   params: { profile: string; identifier: string };
 }) {
   return (
-    <main className="grow px-6 py-4 sm:rounded-lg sm:bg-secondary sm:px-10 sm:shadow-sm sm:ring-1 sm:ring-foreground/10">
-      <Suspense fallback={<SkeletonArticle />}>
-        <ArticleWrapper
-          profile={params.profile}
-          identifier={params.identifier}
-        />
-      </Suspense>
-    </main>
+    <Suspense fallback={<SkeletonArticle />}>
+      <ArticleWrapper profile={params.profile} identifier={params.identifier} />
+    </Suspense>
   );
 }

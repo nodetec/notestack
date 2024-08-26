@@ -28,11 +28,8 @@ export default function ProfileArticleFeedPage({
   params: { profile: string };
 }) {
   return (
-    <main className="grow px-6 py-4 sm:rounded-lg sm:bg-secondary sm:px-10 sm:shadow-sm sm:ring-1 sm:ring-foreground/10">
-      <Suspense fallback={<SkeletonArticleFeed profileFeed />}>
-{/* <SkeletonArticleFeed profileFeed /> */}
-        <ProfileArticleFeedWrapper profile={params.profile} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<SkeletonArticleFeed profileFeed />}>
+      <ProfileArticleFeedWrapper profile={params.profile} />
+    </Suspense>
   );
 }
