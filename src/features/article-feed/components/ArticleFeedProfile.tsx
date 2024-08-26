@@ -1,14 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
-import { DEFAULT_RELAYS } from "~/lib/constants";
+import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { parseProfileEvent } from "~/lib/events/profile-event";
-import { getProfileEvent, shortNpub } from "~/lib/nostr";
+import { shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { EllipsisVerticalIcon } from "lucide-react";
 import Image from "next/image";
-import { type Event } from "nostr-tools";
 
 type Props = {
   relays: string[];
@@ -16,14 +14,7 @@ type Props = {
 };
 
 export default function ArticleFeedProfile({ relays, publicKey }: Props) {
-  const { data: profileEvent, status } = useQuery<Event | null>({
-    queryKey: ["profile", publicKey],
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    queryFn: () => getProfileEvent(relays ?? DEFAULT_RELAYS, publicKey),
-  });
+  const { data: profileEvent, status } = useProfileEvent(relays, publicKey);
 
   let profile;
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -10,9 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
+import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
-import { getProfileEvent, shortNpub } from "~/lib/nostr";
+import { shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -23,14 +23,10 @@ type Props = {
 };
 
 export function ProfileDropdown({ publicKey }: Props) {
-  const { data: profileEvent, isFetching } = useQuery({
-    queryKey: ["userProfile"],
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    gcTime: Infinity,
-    staleTime: Infinity,
-    queryFn: () => getProfileEvent(DEFAULT_RELAYS, publicKey),
-  });
+  const { data: profileEvent, status } = useProfileEvent(
+    DEFAULT_RELAYS,
+    publicKey,
+  );
 
   let profile;
 
@@ -46,7 +42,7 @@ export function ProfileDropdown({ publicKey }: Props) {
           size="icon"
           className="overflow-hidden rounded-full focus-visible:ring-muted"
         >
-          {isFetching ? (
+          {status === "pending" ? (
             <Skeleton className="aspect-square w-12 overflow-hidden rounded-full object-cover" />
           ) : (
             <Image

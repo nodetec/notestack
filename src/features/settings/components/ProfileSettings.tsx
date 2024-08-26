@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -17,15 +17,16 @@ import {
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
+import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
+import { publish } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import Image from "next/image";
-import { type Event, type EventTemplate } from "nostr-tools";
+import { type EventTemplate } from "nostr-tools";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { publish } from "~/lib/nostr";
 
 const profileFormSchema = z.object({
   picture: z.string(),
@@ -49,10 +50,11 @@ type Props = {
 };
 
 export function ProfileSettings({ publicKey }: Props) {
-  const { data: profileEvent, isFetching } = useQuery<Event>({
-    queryKey: ["userProfile"],
-    refetchOnWindowFocus: false,
-  });
+  const { data: profileEvent, status } = useProfileEvent(
+    DEFAULT_RELAYS,
+    publicKey,
+  );
+
   const [isClient, setIsClient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -256,7 +258,7 @@ export function ProfileSettings({ publicKey }: Props) {
           )}
         />
         {isClient && (
-          <Button disabled={isSubmitting || isFetching} type="submit">
+          <Button disabled={isSubmitting || status === "pending"} type="submit">
             Update profile
           </Button>
         )}

@@ -3,15 +3,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { ZapDialog } from "~/components/ZapDialog";
+import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
 import { processArticle, readingTime } from "~/lib/markdown";
-import { getEvent, getProfileEvent, getTag, shortNpub } from "~/lib/nostr";
+import { getEvent, getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
 import { ZapIcon } from "lucide-react";
 import Image from "next/image";
-import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 
 import { ArticleHeader } from "./ArticleHeader";
@@ -65,16 +65,10 @@ export function Article({ address, publicKey }: Props) {
     queryFn: () => getCurrentArticle(address, publicKey),
   });
 
-  const { data: profileEvent, status: profileStatus } = useQuery<Event | null>({
-    queryKey: ["profile", articleEvent?.pubkey],
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    enabled: !!articleEvent,
-    queryFn: () =>
-      getProfileEvent(address.relays ?? DEFAULT_RELAYS, articleEvent?.pubkey),
-  });
+  const { data: profileEvent, status: profileEventStatus } = useProfileEvent(
+    address.relays ?? DEFAULT_RELAYS,
+    articleEvent?.pubkey,
+  );
 
   let profile;
 
@@ -82,7 +76,7 @@ export function Article({ address, publicKey }: Props) {
     profile = parseProfileEvent(profileEvent);
   }
 
-  if (status === "pending" || profileStatus === "pending") {
+  if (status === "pending" || profileEventStatus === "pending") {
     return <SkeletonArticle />;
   }
 

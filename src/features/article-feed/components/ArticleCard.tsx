@@ -1,14 +1,12 @@
 import { Fragment } from "react";
 
-import { useQuery } from "@tanstack/react-query";
-import { create, keyResolver, windowScheduler } from "@yornaath/batshit";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
+import { useBatchedProfileEvent } from "~/hooks/useBatchedProfileEvent";
 import { parseProfileEvent } from "~/lib/events/profile-event";
 import { getFirstImage, parseContent, readingTime } from "~/lib/markdown";
-import { createArticleLink, getProfileEvents, getTag } from "~/lib/nostr";
+import { createArticleLink, getTag } from "~/lib/nostr";
 import { formatEpochTime } from "~/lib/utils";
-import { memoize } from "lodash-es";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
@@ -20,31 +18,11 @@ type Props = {
   relays: string[];
 };
 
-export const key = "publicKeys";
-
-const batcher = memoize((relays: string[]) => {
-  return create({
-    name: key,
-    fetcher: async (publicKeys: string[]) => {
-      console.log("Fetching profiles", publicKeys);
-      return await getProfileEvents(relays, publicKeys);
-    },
-    scheduler: windowScheduler(10),
-    resolver: keyResolver("pubkey"),
-  });
-});
-
 export function ArticleCard({ articleEvent, relays }: Props) {
-  const { data: profileEvent, isFetching } = useQuery<Event>({
-    queryKey: ["profile", articleEvent.pubkey],
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    queryFn: async () => {
-      return await batcher(relays).fetch(articleEvent.pubkey);
-    },
-  });
+  const { data: profileEvent, isFetching } = useBatchedProfileEvent(
+    relays,
+    articleEvent.pubkey,
+  );
 
   let profile;
 
