@@ -14,6 +14,23 @@ import { DEFAULT_RELAYS, FEATURED_WRITERS } from "./constants";
 import { type Profile } from "./events/profile-event";
 import { normalizeUri } from "./utils";
 
+function getFollowPubkeys(followEvent: Event | null | undefined) {
+  if (!followEvent) {
+    return [];
+  }
+
+  const followList = followEvent.tags
+    .filter((tag) => tag[0] === "p" && typeof tag[1] !== "undefined")
+    .map((tag) => tag[1]!);
+
+  // // trim the follow list to 50
+  if (followList.length > 50) {
+    followList.length = 50;
+  }
+
+  return followList;
+}
+
 export async function getArticles(
   relays: string[],
   pageParam = 0,
@@ -25,23 +42,14 @@ export async function getArticles(
 
   console.log("GETTING ARTICLES", publicKey);
 
-  let publicKeys = FEATURED_WRITERS;
+  let publicKeys = [...FEATURED_WRITERS, ...getFollowPubkeys(followEvent)];
 
   if (publicKey) {
     publicKeys = [publicKey];
   }
 
-  if (followEvent && followEvent !== null && feed === "following") {
-    const followList = followEvent.tags
-      .filter((tag) => tag[0] === "p" && typeof tag[1] !== "undefined")
-      .map((tag) => tag[1]!);
-
-    // // trim the follow list to 50
-    if (followList.length > 50) {
-      followList.length = 50;
-    }
-
-    publicKeys = followList;
+  if (followEvent && feed === "following") {
+    publicKeys = getFollowPubkeys(followEvent);
   }
 
   let limit = 5;
