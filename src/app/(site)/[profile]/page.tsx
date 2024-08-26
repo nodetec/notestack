@@ -22,7 +22,7 @@ async function ProfileArticleFeedWrapper({ profile }: Props) {
   );
 }
 
-export default async function ProfileArticleFeedPage({
+export default function ProfileArticleFeedPage({
   params,
 }: {
   params: { profile: string };

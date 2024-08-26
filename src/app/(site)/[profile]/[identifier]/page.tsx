@@ -29,7 +29,7 @@ async function ArticleWrapper({ profile, identifier }: Props) {
   return <Article address={address} publicKey={user?.publicKey} />;
 }
 
-export default async function ArticlePage({
+export default function ArticlePage({
   params,
 }: {
   params: { profile: string; identifier: string };

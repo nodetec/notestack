@@ -36,7 +36,7 @@ async function ArticleWrapper({ naddr }: Props) {
   return <Article address={address} publicKey={user?.publicKey} />;
 }
 
-export default async function ArticlePage({
+export default function ArticlePage({
   params,
 }: {
   params: { naddr: string };

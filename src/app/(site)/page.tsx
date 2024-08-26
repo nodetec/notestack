@@ -10,7 +10,7 @@ async function ArticleFeedWrapper() {
   return <ArticleFeed userPublicKey={user?.publicKey} />;
 }
 
-export default async function ArticleFeedPage() {
+export default function ArticleFeedPage() {
   return (
     <main className="grow bg-secondary px-2 pb-10 pt-4 sm:rounded-lg sm:px-10 sm:shadow-sm sm:ring-1 sm:ring-foreground/10">
       <Suspense fallback={<SkeletonArticleFeed />}>
