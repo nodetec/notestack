@@ -1,18 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "~/components/ui/button";
+import { ZapDialog } from "~/components/ZapDialog";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { processArticle, readingTime } from "~/lib/markdown";
-import {
-  getAllReadRelays,
-  getEvent,
-  getProfile,
-  getTag,
-  shortNpub,
-} from "~/lib/nostr";
+import { getEvent, getProfile, getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { useAppState } from "~/store";
 import { type Profile } from "~/types";
+import { ZapIcon } from "lucide-react";
 import Image from "next/image";
 import { type AddressPointer } from "nostr-tools/nip19";
 
@@ -104,22 +101,34 @@ export function Article({ address, publicKey }: Props) {
               <h1>{getTag("title", articleEvent.tags)}</h1>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Image
-                className="aspect-square w-10 overflow-hidden rounded-full object-cover"
-                src={profile?.picture ?? getAvatar(address.pubkey)}
-                width={32}
-                height={32}
-                alt=""
-              />
-              <div className="flex flex-col gap-1">
-                <div>{profile?.name ?? shortNpub(address.pubkey)}</div>
-                <div className="flex gap-2 text-sm text-muted-foreground">
-                  <span>{readingTime(articleEvent?.content)}</span>
-                  <span>•</span>
-                  <span>{formatEpochTime(articleEvent.created_at)}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Image
+                  className="aspect-square w-10 overflow-hidden rounded-full object-cover"
+                  src={profile?.picture ?? getAvatar(address.pubkey)}
+                  width={32}
+                  height={32}
+                  alt=""
+                />
+                <div className="flex flex-col gap-1">
+                  <div>{profile?.name ?? shortNpub(address.pubkey)}</div>
+                  <div className="flex gap-2 text-sm text-muted-foreground">
+                    <span>{readingTime(articleEvent?.content)}</span>
+                    <span>•</span>
+                    <span>{formatEpochTime(articleEvent.created_at)}</span>
+                  </div>
                 </div>
               </div>
+
+              <ZapDialog>
+                <Button
+                  className="hover:bg-muted/80 hover:text-yellow-500 focus-visible:outline-none focus-visible:ring-transparent"
+                  variant="ghost"
+                  size="icon"
+                >
+                  <ZapIcon className="h-5 w-5" />
+                </Button>
+              </ZapDialog>
             </div>
           </div>
 

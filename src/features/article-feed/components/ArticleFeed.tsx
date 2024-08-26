@@ -1,11 +1,16 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  type QueryFunctionContext,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getArticles, getFollowEvent, getTag } from "~/lib/nostr";
 import { useAppState } from "~/store";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { Event } from "nostr-tools";
+import { toast } from "sonner";
 
 import { ArticleCard } from "./ArticleCard";
 import { ArticleFeedControls } from "./ArticleFeedControls";
@@ -17,22 +22,31 @@ type Props = {
   profilePublicKey?: string;
 };
 
-// @ts-expect-error HACK: idk what to use as a type here
-const fetchArticles = async ({ pageParam = 0, queryKey }: unknown) => {
+const fetchArticles = async ({
+  pageParam = 0,
+  queryKey,
+}: QueryFunctionContext) => {
   console.log("fetchArticles", pageParam, queryKey);
-  // cast queryKey to string[] to avoid TS error
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const page = (pageParam as number) || 0;
   const relays = queryKey[1] as string[];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const publicKey = queryKey[2] as string;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const followEvent = queryKey[3] as Event;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const feed = queryKey[4] as string;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const response = await getArticles(relays, pageParam, publicKey, followEvent, feed);
+  const response = await getArticles(
+    relays,
+    page,
+    publicKey,
+    followEvent,
+    feed,
+  );
 
   const addArticle = useAppState.getState().addArticle;
+
+  if (response.articles.length === 0) {
+    toast("You've reached the end", {
+      description: "No more articles found",
+    });
+  }
 
   response.articles.forEach((article) => {
     const identifier = getTag("d", article.tags);
@@ -69,7 +83,13 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
-      queryKey: ["articles", userReadRelays, profilePublicKey, userfollowEvent, searchParams.get("feed")],
+      queryKey: [
+        "articles",
+        userReadRelays,
+        profilePublicKey,
+        userfollowEvent,
+        searchParams.get("feed"),
+      ],
       queryFn: fetchArticles,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
