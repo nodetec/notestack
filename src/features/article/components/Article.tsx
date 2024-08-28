@@ -87,7 +87,6 @@ export function Article({ address }: Props) {
                   </div>
                 </div>
               </div>
-              {profile?.pubkey && userPublicKey && (
                 <ZapDialog
                   recipientProfileEvent={profile?.event}
                   senderPubkey={userPublicKey}
@@ -100,7 +99,6 @@ export function Article({ address }: Props) {
                     <ZapIcon className="h-5 w-5" />
                   </Button>
                 </ZapDialog>
-              )}
             </div>
           </div>
 
