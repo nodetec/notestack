@@ -208,112 +208,6 @@ export const getTag = (name: string, tags: string[][]) => {
   return item;
 };
 
-export async function getUserRelays(
-  publicKey: string | undefined,
-  relays: string[],
-): Promise<{ url: string; read: boolean; write: boolean }[] | undefined> {
-  if (!publicKey) {
-    return undefined;
-  }
-
-  const pool = new SimplePool();
-
-  const relayEvent = await pool.get(relays, {
-    kinds: [10002],
-    authors: [publicKey],
-  });
-
-  // console.log("relayEvent", relayEvent);
-
-  pool.close(relays);
-
-  if (!relayEvent) {
-    return undefined;
-  }
-
-  // Parse the tags to construct the desired array of objects
-  const result = relayEvent.tags.map((tag: string[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, url, marker] = tag;
-    return {
-      url: url ?? "",
-      read: marker !== "write",
-      write: marker !== "read",
-    };
-  });
-
-  return result;
-}
-
-export async function getReadRelays(
-  publicKey: string | undefined,
-  relays: string[],
-) {
-  if (!publicKey) {
-    return DEFAULT_RELAYS;
-  }
-  const userRelays = await getUserRelays(publicKey, relays);
-
-  if (!userRelays) {
-    return DEFAULT_RELAYS;
-  }
-
-  // where read is true
-  const readRelays = userRelays
-    .filter((relay) => relay.read)
-    .map((relay) => relay.url);
-
-  return readRelays;
-}
-
-export async function getWriteRelays(
-  publicKey: string | undefined,
-  relays: string[],
-) {
-  if (!publicKey) {
-    return DEFAULT_RELAYS;
-  }
-  const userRelays = await getUserRelays(publicKey, relays);
-
-  if (!userRelays) {
-    return DEFAULT_RELAYS;
-  }
-
-  const writeRelays = userRelays
-    .filter((relay) => relay.write)
-    .map((relay) => relay.url);
-  return writeRelays;
-}
-
-export async function getAllWriteRelays(publicKey: string | undefined) {
-  const defaultRelays = DEFAULT_RELAYS;
-
-  let userRelays = await getWriteRelays(publicKey, defaultRelays);
-
-  if (!userRelays) {
-    userRelays = [];
-  }
-
-  // add all relays if defined to a new array of unique relays
-  const allRelays = new Set<string>([...defaultRelays, ...userRelays]);
-
-  return Array.from(allRelays);
-}
-
-export async function getAllReadRelays(publicKey: string | undefined) {
-  const defaultRelays = DEFAULT_RELAYS;
-
-  let userRelays = await getReadRelays(publicKey, defaultRelays);
-
-  if (!userRelays) {
-    userRelays = [];
-  }
-
-  // add all relays if defined to a new array of unique relays
-  const allRelays = new Set<string>([...defaultRelays, ...userRelays]);
-
-  return Array.from(allRelays);
-}
 
 // export const createNaddr = (
 //   event: Event | undefined,
@@ -337,7 +231,11 @@ export async function getAllReadRelays(publicKey: string | undefined) {
 //   return nip19.naddrEncode(addressPointer);
 // };
 
-export function createEventAdress(kind: number, pubkey: string, dTagValue: string) {
+export function createEventAdress(
+  kind: number,
+  pubkey: string,
+  dTagValue: string,
+) {
   return `${kind}:${pubkey}:${dTagValue}`;
 }
 

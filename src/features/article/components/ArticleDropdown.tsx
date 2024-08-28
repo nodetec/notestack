@@ -7,7 +7,12 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import useAuth from "~/hooks/useAuth";
-import { getAllWriteRelays, publishFinishedEvent } from "~/lib/nostr";
+import { DEFAULT_RELAYS } from "~/lib/constants";
+import {
+  getRelayMetadataEvent,
+  parseRelayMetadataEvent,
+} from "~/lib/events/relay-metadata-event";
+import { publishFinishedEvent } from "~/lib/nostr";
 import { type Event } from "nostr-tools";
 import { type AddressPointer } from "nostr-tools/nip19";
 import { toast } from "sonner";
@@ -21,9 +26,23 @@ type Props = {
 export function ArticleDropdown({ children, address, articleEvent }: Props) {
   const { userPublicKey } = useAuth();
   async function broadcastArticle() {
-    const relays = await getAllWriteRelays(userPublicKey);
+    const relayMetadataEvent = await getRelayMetadataEvent(
+      DEFAULT_RELAYS,
+      userPublicKey,
+    );
+    if (!relayMetadataEvent) {
+      toast("Failed to broadcast article", {
+        description: "Make sure to set your relays in settings.",
+      });
+      return;
+    }
 
-    const published = await publishFinishedEvent(articleEvent, relays);
+    const relayMetadata = parseRelayMetadataEvent(relayMetadataEvent);
+
+    const published = await publishFinishedEvent(
+      articleEvent,
+      relayMetadata.writeRelays,
+    );
 
     if (published) {
       toast("Article broadcast", {

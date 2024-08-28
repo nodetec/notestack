@@ -1,7 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useFollowEvent } from "~/hooks/useFollowEvent";
+import { useRelayMetadataEvent } from "~/hooks/useRelayMetadataEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
+import { parseRelayMetadataEvent } from "~/lib/events/relay-metadata-event";
 
 import { useArticleFeed } from "../hooks/useArticleFeed";
 import { ArticleCard } from "./ArticleCard";
@@ -15,9 +19,23 @@ type Props = {
 };
 
 export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
-  const relays = DEFAULT_RELAYS;
+  const { data: profileRelayMetadataEvent } = useRelayMetadataEvent(
+    profilePublicKey,
+    DEFAULT_RELAYS,
+  );
 
-  const { data: userFollowEvent } = useFollowEvent(userPublicKey, relays);
+  const profileRelayMetadata = useMemo(
+    () =>
+      profileRelayMetadataEvent
+        ? parseRelayMetadataEvent(profileRelayMetadataEvent)
+        : null,
+    [profileRelayMetadataEvent],
+  );
+
+  const { data: userFollowEvent } = useFollowEvent(
+    userPublicKey,
+    DEFAULT_RELAYS,
+  );
 
   const {
     data: articleEvents,
@@ -25,7 +43,11 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     hasNextPage,
     isFetchingNextPage,
     status,
-  } = useArticleFeed(profilePublicKey, userFollowEvent);
+  } = useArticleFeed(
+    profilePublicKey,
+    userFollowEvent,
+    profileRelayMetadata,
+  );
 
   if (status === "pending") {
     return <SkeletonArticleFeed profileFeed={!!profilePublicKey} />;
@@ -39,12 +61,12 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     return (
       <div className="min-w-3xl mx-auto flex w-full max-w-3xl flex-col items-center gap-y-4">
         {profilePublicKey && (
-          <ArticleFeedProfile relays={relays} publicKey={profilePublicKey} />
+          <ArticleFeedProfile relays={DEFAULT_RELAYS} publicKey={profilePublicKey} />
         )}
         <ArticleFeedControls show={!profilePublicKey} />
         {articleEvents.pages.flatMap((page) =>
           page.articles.map((event) => (
-            <ArticleCard key={event.id} articleEvent={event} relays={relays} />
+            <ArticleCard key={event.id} articleEvent={event} relays={DEFAULT_RELAYS} />
           )),
         )}
 

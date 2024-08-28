@@ -17,32 +17,31 @@ export function getFirstImage(markdown: string) {
   return undefined;
 }
 
-export function parseContent(markdownContent: string) {
-  // Split the content into lines
-  const lines = markdownContent.split("\n");
+export function cleanMarkdown(mdText: string) {
+  // Remove headers
+  const noHeaders = mdText.replace(/^\s*#{1,6}\s+.*$/gm, "");
 
-  // Check if the first line is a header
-  const firstLine = lines[0]?.trim();
-  if (!firstLine) {
-    return "";
+  // Remove links (in format [text](url) and [text][id])
+  let noLinks = noHeaders.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  noLinks = noLinks.replace(/\[([^\]]+)\]\[[^\]]+\]/g, "$1");
+
+  // Remove images (in format ![alt text](url))
+  const noImages = noLinks.replace(/!\[([^\]]*)\]\([^)]+\)/g, "");
+
+  // Remove code fences (``` or ~~~ and the code between them)
+  const noCodeFences = noImages.replace(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/g, "");
+
+  // Remove inline code (`code`)
+  let cleanText = noCodeFences.replace(/`([^`]+)`/g, "");
+
+  // Trim extra blank lines
+  cleanText = cleanText.replace(/\n{2,}/g, "\n").trim();
+
+  if (cleanText === "") {
+    return "No content";
   }
-  const isHeader = /^#+\s+(.*)$/.test(firstLine);
 
-  // Determine the starting index for processing lines
-  const startIndex = isHeader ? 1 : 0;
-
-  // Filter out empty lines and lines containing Markdown image elements
-  const filteredLines = lines
-    .slice(startIndex) // Start from the second line if the first line is a header
-    .filter((line) => {
-      const trimmedLine = line.trim();
-      return trimmedLine !== "" && !/^!\[.*\]\(.*\)$/.test(trimmedLine);
-    });
-
-  // Join the lines back together with newlines
-  const content = filteredLines.join("\n");
-
-  return content;
+  return cleanText;
 }
 
 interface RemoveHeadingPluginOptions {

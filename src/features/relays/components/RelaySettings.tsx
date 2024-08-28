@@ -1,35 +1,49 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getUserRelays } from "~/lib/nostr";
+import { useMemo } from "react";
+
+import { useRelayMetadataEvent } from "~/hooks/useRelayMetadataEvent";
+import { parseRelayMetadataEvent } from "~/lib/events/relay-metadata-event";
 
 import { RelayForm } from "./RelayForm";
-import { DEFAULT_RELAYS } from "~/lib/constants";
 
 type Props = {
-  publicKey: string;
+  userPublicKey: string;
 };
 
-export function RelaySettings({ publicKey }: Props) {
-  const defaultValues = {
-    relays: [{ url: "", read: true, write: true }],
+export function RelaySettings({ userPublicKey }: Props) {
+  const { data: relayMetadataEvent, status } =
+    useRelayMetadataEvent(userPublicKey);
+
+  const relayMetadata = useMemo(
+    () =>
+      relayMetadataEvent ? parseRelayMetadataEvent(relayMetadataEvent) : null,
+    [relayMetadataEvent],
+  );
+
+  if (status === "pending") {
+    return <div>Loading...</div>;
+  }
+
+  const relays = relayMetadata?.relays ?? [];
+  const readRelays = relayMetadata?.readRelays ?? [];
+  const writeRelays = relayMetadata?.writeRelays ?? [];
+
+  let formValues = {
+    relays: relays.map((url) => ({
+      url,
+      read: readRelays.includes(url),
+      write: writeRelays.includes(url),
+    })),
   };
 
-  const { data: userRelays, isFetching } = useQuery({
-    queryKey: ["userRelays"],
-    refetchOnWindowFocus: false,
-    queryFn: () => getUserRelays(publicKey, DEFAULT_RELAYS),
-  });
+  if (formValues.relays.length === 0) {
+    formValues = { relays: [{ url: "", read: true, write: true }] };
+  }
 
   return (
     <div className="w-full">
-      {isFetching ? (
-        <div>Loading...</div>
-      ) : (
-        <RelayForm
-          defaultValues={{ relays: userRelays } ?? defaultValues}
-        />
-      )}
+      <RelayForm defaultValues={formValues} />
     </div>
   );
 }

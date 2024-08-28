@@ -4,7 +4,11 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { useBatchedProfileEvent } from "~/hooks/useBatchedProfileEvent";
 import { parseProfileEvent } from "~/lib/events/profile-event";
-import { getFirstImage, parseContent, readingTime } from "~/lib/markdown";
+import {
+  cleanMarkdown,
+  getFirstImage,
+  readingTime,
+} from "~/lib/markdown";
 import { createArticleLink, getTag } from "~/lib/nostr";
 import { formatEpochTime } from "~/lib/utils";
 import Image from "next/image";
@@ -43,7 +47,6 @@ export function ArticleCard({ articleEvent, relays }: Props) {
           <Link
             className="flex flex-col gap-2 pb-4 pt-4"
             href={createArticleLink(profile, articleEvent, relays)}
-            // prefetch={false}
           >
             <div className="flex flex-col">
               <div className="flex items-start justify-between sm:items-center">
@@ -52,7 +55,7 @@ export function ArticleCard({ articleEvent, relays }: Props) {
                     {getTag("title", articleEvent.tags)}
                   </h2>
                   <h3 className="break-anywhere line-clamp-2 text-ellipsis whitespace-break-spaces text-pretty pt-0 text-[1rem] text-muted-foreground">
-                    {parseContent(articleEvent.content) || "No content \n "}
+                    {cleanMarkdown(articleEvent.content)}
                   </h3>
                   <div className="mt-4 hidden gap-1 text-sm text-muted-foreground sm:flex">
                     <div className="text-muted-foreground">

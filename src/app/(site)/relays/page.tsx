@@ -21,7 +21,7 @@ export default async function RelayPage() {
         Relay Settings
       </h1>
       <div className="mx-auto flex max-w-xl flex-col items-center">
-        <RelaySettings publicKey={user?.publicKey} />;
+        <RelaySettings userPublicKey={user?.publicKey} />
       </div>
     </>
   );

@@ -3,6 +3,7 @@ import {
   type QueryFunctionContext,
 } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
+import { type RelayMetadata } from "~/lib/events/relay-metadata-event";
 import { getArticles, getTag } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import { useSearchParams } from "next/navigation";
@@ -47,10 +48,16 @@ const fetchArticles = async ({
 export const useArticleFeed = (
   profilePublicKey: string | undefined,
   userFollowEvent: Event | null | undefined,
+  profileRelayMetadata: RelayMetadata | null | undefined,
 ) => {
   const searchParams = useSearchParams();
-  const relays = DEFAULT_RELAYS;
-  console.log("useArticleFeed", profilePublicKey, userFollowEvent);
+  console.log(
+    "useArticleFeed",
+    profilePublicKey,
+    userFollowEvent,
+    profileRelayMetadata,
+  );
+  const relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
 
   return useInfiniteQuery({
     queryKey: [
@@ -66,7 +73,8 @@ export const useArticleFeed = (
     gcTime: Infinity,
     staleTime: Infinity,
     initialPageParam: 0,
-    enabled: userFollowEvent !== undefined, // Ensure the query only runs if userFollowEvent is defined
+    enabled:
+      userFollowEvent !== undefined && profileRelayMetadata !== undefined, // Ensure the query only runs if userFollowEvent is defined
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 };
