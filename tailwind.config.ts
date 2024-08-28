@@ -72,10 +72,10 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       fontFamily: {
-        newsreader: "var(--font-newsreader)",
+        sourceserif: "var(--font-source-serif-4)",
         merriweather: "var(--font-merriweather)",
         serif: [
-          "Newsreader",
+          "Source Serif 4",
           "Georgia",
           "Cambria",
           "Times New Roman",
@@ -87,9 +87,9 @@ const config = {
         DEFAULT: {
           css: {
             "p, li, blockquote, a, table, th, td": {
-              lineHeight: "1.65",
-              fontSize: "1.2rem",
-              fontFamily: "var(--font-newsreader)",
+              lineHeight: "1.60",
+              fontSize: "1.25rem",
+              fontFamily: "var(--font-source-serif-4)",
             },
           },
         },

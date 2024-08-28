@@ -7,14 +7,13 @@ import AuthProvider from "~/components/auth-provider";
 import QueryClientProviderWrapper from "~/components/query-client-provider";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-import { Merriweather, Newsreader } from "next/font/google";
+import { Merriweather, Source_Serif_4 } from "next/font/google";
 
-const newsreader = Newsreader({
-  weight: ["500", "700"],
+const sourceSerif = Source_Serif_4({
+  weight: ["400", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
-  display: "swap",
-  variable: "--font-newsreader",
+  variable: "--font-source-serif-4",
 });
 
 const merriweather = Merriweather({
@@ -36,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`overflow-x-hidden bg-secondary antialiased sm:bg-background ${newsreader.variable} ${merriweather.variable}`}
+        className={`overflow-x-hidden bg-secondary antialiased sm:bg-background ${sourceSerif.variable} ${merriweather.variable}`}
       >
         <ThemeProvider
           attribute="class"
