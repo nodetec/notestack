@@ -1,10 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { useRelayMetadataEvent } from "~/hooks/useRelayMetadataEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { parseRelayMetadataEvent } from "~/lib/events/relay-metadata-event";
 
 import { type ArticleFeedParams } from "../hooks/useArticleFeed";
 import { ArticleFeed } from "./ArticleFeed";
