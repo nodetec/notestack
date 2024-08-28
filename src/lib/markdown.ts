@@ -1,9 +1,10 @@
-import { type Root } from "mdast";
+import { type Link, type Root } from "mdast";
 import { type Event } from "nostr-tools";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
 import remarkYoutube from "remark-youtube";
 import { unified, type Plugin } from "unified";
+import { visit } from "unist-util-visit";
 
 import { getTag } from "./nostr";
 
@@ -73,6 +74,49 @@ const removeHeadingPlugin: Plugin<[RemoveHeadingPluginOptions?], Root> = ({
   };
 };
 
+// Define the options type
+interface NostrLinkPluginOptions {
+  baseUrls: {
+    naddr1?: string;
+    npub1?: string;
+    nprofile1?: string;
+    nevent1?: string;
+    note1?: string;
+  };
+}
+
+// Define the plugin with options
+const nostrLinkPlugin: Plugin<[NostrLinkPluginOptions?], Root> = (options) => {
+  if (!options?.baseUrls) {
+    return () => {};
+  }
+  const { baseUrls } = options;
+
+  return (tree: Root) => {
+    visit(tree, "link", (node: Link) => {
+      if (node.url.startsWith("nostr:naddr1") && baseUrls?.naddr1) {
+        const nostrId = node.url.replace("nostr:", "");
+        node.url = `${baseUrls.naddr1}${nostrId}`;
+      } else if (node.url.startsWith("nostr:npub1") && baseUrls?.npub1) {
+        const nostrId = node.url.replace("nostr:", "");
+        node.url = `${baseUrls.npub1}${nostrId}`;
+      } else if (
+        node.url.startsWith("nostr:nprofile1") &&
+        baseUrls?.nprofile1
+      ) {
+        const nostrId = node.url.replace("nostr:", "");
+        node.url = `${baseUrls.nprofile1}${nostrId}`;
+      } else if (node.url.startsWith("nostr:nevent1") && baseUrls?.nevent1) {
+        const nostrId = node.url.replace("nostr:", "");
+        node.url = `${baseUrls.nevent1}${nostrId}`;
+      } else if (node.url.startsWith("nostr:note1") && baseUrls?.note1) {
+        const nostrId = node.url.replace("nostr:", "");
+        node.url = `${baseUrls.note1}${nostrId}`;
+      }
+    });
+  };
+};
+
 export function processArticle(event: Event | undefined) {
   if (!event) {
     return "";
@@ -85,6 +129,15 @@ export function processArticle(event: Event | undefined) {
     .use(remarkParse)
     .use(remarkHtml)
     .use(remarkYoutube)
+    .use(nostrLinkPlugin, {
+      baseUrls: {
+        naddr1: "https://notestack.com/a/",
+        npub1: "https://notestack.com/",
+        nprofile1: "https://nostrudel.ninja/#/u/",
+        nevent1: "https://nostrudel.ninja/#/n/",
+        note1: "https://nostrudel.ninja/#/n/",
+      },
+    })
     .use(removeHeadingPlugin, { headingText: title })
     .processSync(event.content)
     .toString();
