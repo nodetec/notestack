@@ -50,21 +50,28 @@ export const useArticleFeed = (
   userFollowEvent: Event | null | undefined,
   profileRelayMetadata: RelayMetadata | null | undefined,
   nip05HintRelays: string[],
+  isProfileFeed: boolean,
 ) => {
   const searchParams = useSearchParams();
-  console.log(
-    "useArticleFeed",
-    profilePublicKey,
-    userFollowEvent,
-    profileRelayMetadata,
-  );
+
+  // console.log("ARTICLE FEED PROFILE PUBLIC KEY", profilePublicKey);
+  // console.log("ARTICLE FEED USER FOLLOW EVENT", userFollowEvent);
+  // console.log("ARTICLE FEED PROFILE RELAY METADATA", profileRelayMetadata);
+  // console.log("ARTICLE FEED NIP05 HINT RELAYS", nip05HintRelays);
+
   let relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
 
   relays = [...relays, ...nip05HintRelays];
   // make sure relays is unique
   relays = Array.from(new Set(relays));
 
-  console.log("ARTICLE FEED RELAYS", relays);
+  // console.log("ARTICLE FEED RELAYS", relays);
+
+  const enabled =
+    (isProfileFeed &&
+      profileRelayMetadata !== undefined &&
+      userFollowEvent !== undefined) ||
+    (!isProfileFeed && userFollowEvent !== undefined);
 
   return useInfiniteQuery({
     queryKey: [
@@ -80,8 +87,7 @@ export const useArticleFeed = (
     gcTime: Infinity,
     staleTime: Infinity,
     initialPageParam: 0,
-    enabled:
-      userFollowEvent !== undefined && profileRelayMetadata !== undefined, // Ensure the query only runs if userFollowEvent is defined
+    enabled,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 };

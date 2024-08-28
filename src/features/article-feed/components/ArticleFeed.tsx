@@ -20,6 +20,9 @@ type Props = {
 };
 
 export function ArticleFeed({ userPublicKey, profilePublicKey, nip05HintRelays }: Props) {
+
+  const isProfileFeed = !!profilePublicKey;
+
   const { data: profileRelayMetadataEvent } = useRelayMetadataEvent(
     profilePublicKey,
     DEFAULT_RELAYS,
@@ -29,7 +32,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey, nip05HintRelays }
     () =>
       profileRelayMetadataEvent
         ? parseRelayMetadataEvent(profileRelayMetadataEvent)
-        : null,
+        : undefined,
     [profileRelayMetadataEvent],
   );
 
@@ -49,6 +52,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey, nip05HintRelays }
     userFollowEvent,
     profileRelayMetadata,
     nip05HintRelays ?? [],
+    isProfileFeed,
   );
 
   if (status === "pending") {
