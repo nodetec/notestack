@@ -47,15 +47,6 @@ export function ZapDialog({
   }
 
   async function handleSubmit() {
-    // recipientPubkey: string;
-    // amount: number;
-    // relays: string[];
-    // comment?: string;
-    // senderPubkey?: string;
-    // eventId?: string | null;
-    // address?: string;
-    // lnurl?: string;
-
     if (amount === "" || parseInt(amount, 10) === 0) {
       setAmount("");
       setMessage("");
@@ -95,8 +86,17 @@ export function ZapDialog({
     setMessage("");
   }
 
+  // Reset the fields when the dialog is closed
+  function handleDialogOpenChange(isOpen: boolean) {
+    if (!isOpen) {
+      setAmount("");
+      setMessage("");
+    }
+    setOpen(isOpen);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-[425px] rounded-lg">
         <DialogHeader>
@@ -174,3 +174,4 @@ export function ZapDialog({
     </Dialog>
   );
 }
+
