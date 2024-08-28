@@ -130,7 +130,7 @@ export const sendZap = async (zapRequest: ZapRequest, profileEvent: Event) => {
       zapRequestEvent = await finishEventWithSecretKey(zapRequestEventTemplate);
     } else {
       console.error("User not found");
-      return false;
+      throw new Error("user not found");
     }
   }
 

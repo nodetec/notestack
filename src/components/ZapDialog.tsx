@@ -14,6 +14,7 @@ import { Label } from "~/components/ui/label";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { sendZap, type ZapRequest } from "~/lib/zap";
 import { type Event } from "nostr-tools";
+import { toast } from "sonner";
 
 type Props = {
   children: React.ReactNode;
@@ -53,16 +54,25 @@ export function ZapDialog({
       setAmount("");
       setMessage("");
       console.log("amount is 0");
+      toast("Amount must be greater than 0", {
+        description: "Please enter a valid amount.",
+      });
       return;
     }
 
     if (!recipientProfileEvent) {
       console.log("no recipient profile event");
+      toast("Error sending zap", {
+        description: "There was an error sending your zap.",
+      });
       return;
     }
 
     if (!senderPubkey) {
       console.log("no sender pubkey");
+      toast("Error sending zap", {
+        description: "There was an error sending your zap.",
+      });
       return;
     }
 
@@ -78,13 +88,16 @@ export function ZapDialog({
 
     try {
       await sendZap(zapRequest, recipientProfileEvent);
+      toast("Zap sent", {
+        description: "Your zap has been sent.",
+      });
     } catch (e) {
       console.error("error sending zap", e);
+      toast(" Error sending zap", {
+        description: "There was an error sending your zap.",
+      });
       return;
     }
-    console.log("sending zap", zapRequest);
-
-    console.log("submitting");
     setOpen(false);
     setAmount("");
     setMessage("");
