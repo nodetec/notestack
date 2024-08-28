@@ -9,7 +9,7 @@ import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
 import { processArticle, readingTime } from "~/lib/markdown";
-import { getTag, shortNpub } from "~/lib/nostr";
+import { createEventAdress, getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { ZapIcon } from "lucide-react";
 import Image from "next/image";
@@ -87,18 +87,23 @@ export function Article({ address }: Props) {
                   </div>
                 </div>
               </div>
-                <ZapDialog
-                  recipientProfileEvent={profile?.event}
-                  senderPubkey={userPublicKey}
+              <ZapDialog
+                recipientProfileEvent={profile?.event}
+                senderPubkey={userPublicKey}
+                address={createEventAdress(
+                  30023,
+                  articleEvent.pubkey,
+                  getTag("d", articleEvent.tags)!,
+                )}
+              >
+                <Button
+                  className="hover:bg-muted/80 hover:text-yellow-500 focus-visible:outline-none focus-visible:ring-transparent"
+                  variant="ghost"
+                  size="icon"
                 >
-                  <Button
-                    className="hover:bg-muted/80 hover:text-yellow-500 focus-visible:outline-none focus-visible:ring-transparent"
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <ZapIcon className="h-5 w-5" />
-                  </Button>
-                </ZapDialog>
+                  <ZapIcon className="h-5 w-5" />
+                </Button>
+              </ZapDialog>
             </div>
           </div>
 

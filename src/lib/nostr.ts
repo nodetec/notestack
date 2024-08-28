@@ -337,7 +337,7 @@ export async function getAllReadRelays(publicKey: string | undefined) {
 //   return nip19.naddrEncode(addressPointer);
 // };
 
-export function createATag(kind: number, pubkey: string, dTagValue: string) {
+export function createEventAdress(kind: number, pubkey: string, dTagValue: string) {
   return `${kind}:${pubkey}:${dTagValue}`;
 }
 

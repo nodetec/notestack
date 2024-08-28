@@ -19,7 +19,7 @@ type Props = {
   children: React.ReactNode;
   recipientProfileEvent: Event | null | undefined;
   senderPubkey: string | null | undefined;
-  eventId?: Event;
+  eventId?: string;
   address?: string;
 };
 
@@ -27,6 +27,8 @@ export function ZapDialog({
   children,
   recipientProfileEvent,
   senderPubkey,
+  eventId,
+  address,
 }: Props) {
   // create state to hold the amount of satoshis to send
   const [amount, setAmount] = useState("");
@@ -71,6 +73,14 @@ export function ZapDialog({
       comment: message,
       senderPubkey,
     };
+
+    if (eventId) {
+      zapRequest.eventId = eventId;
+    }
+
+    if (address) {
+      zapRequest.address = address;
+    }
 
     try {
       await sendZap(zapRequest, recipientProfileEvent);
@@ -174,4 +184,3 @@ export function ZapDialog({
     </Dialog>
   );
 }
-
