@@ -2,6 +2,7 @@ import { type Root } from "mdast";
 import { type Event } from "nostr-tools";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
+import remarkYoutube from "remark-youtube";
 import { unified, type Plugin } from "unified";
 
 import { getTag } from "./nostr";
@@ -83,6 +84,7 @@ export function processArticle(event: Event | undefined) {
   const processedContent = unified()
     .use(remarkParse)
     .use(remarkHtml)
+    .use(remarkYoutube)
     .use(removeHeadingPlugin, { headingText: title })
     .processSync(event.content)
     .toString();
