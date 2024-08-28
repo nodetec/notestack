@@ -145,7 +145,7 @@ export function processArticle(event: Event | undefined) {
     .use(remarkRehype)
     .use(rehypeExternalLinks, {
       target: "_blank",
-      rel: ["noopener", "noreferrer"],
+      rel: ["noopener", "noreferrer", "nofollow"],
     })
     .use(rehypeStringify)
     .processSync(event.content)
