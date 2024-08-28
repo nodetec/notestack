@@ -22,11 +22,7 @@ export default function NotFound() {
           moved or deleted.
         </p>
         <Button asChild>
-          <Link
-            href="/"
-          >
-            Return to Home
-          </Link>
+          <Link href="/">Return to Home</Link>
         </Button>
       </div>
     </div>

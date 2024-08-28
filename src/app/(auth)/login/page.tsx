@@ -90,7 +90,6 @@ export default function UserAuthForm() {
           New to Nostr?{" "}
           <Link
             href="/register"
-            // prefetch={false}
             className="font-semibold text-blue-500 dark:text-blue-400"
           >
             Create an account

@@ -98,7 +98,6 @@ export default function RegisterForm() {
           Already have an account?{" "}
           <Link
             href="/login"
-            // prefetch={false}
             className="font-semibold text-blue-500 dark:text-blue-400"
           >
             Sign in

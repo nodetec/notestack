@@ -25,7 +25,6 @@ export function ArticleCardProfile({ profile, publicKey, isFetching }: Props) {
         <Link
           className="flex items-center gap-2 text-sm text-muted-foreground"
           href={createProfileLink(profile, publicKey)}
-          // prefetch={false}
         >
           <Image
             className="aspect-square w-5 overflow-hidden rounded-full object-cover hover:brightness-90"
