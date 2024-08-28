@@ -11,26 +11,87 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { DEFAULT_RELAYS } from "~/lib/constants";
+import { sendZap, type ZapRequest } from "~/lib/zap";
+import { type Event } from "nostr-tools";
 
 type Props = {
   children: React.ReactNode;
+  recipientProfileEvent: Event | null | undefined;
+  senderPubkey: string | null | undefined;
+  eventId?: Event;
+  address?: string;
 };
 
-export function ZapDialog({ children }: Props) {
+export function ZapDialog({
+  children,
+  recipientProfileEvent,
+  senderPubkey,
+}: Props) {
   // create state to hold the amount of satoshis to send
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
 
-  // create function to set the amount of satoshis to send
-  function setAmountToTip(amount: number) {
-    setAmount(amount);
+  if (!recipientProfileEvent) {
+    return null;
   }
 
-  function handleSubmit() {
+  if (!senderPubkey) {
+    return null;
+  }
+
+  // create function to set the amount of satoshis to send
+  function setAmountToTip(amount: number) {
+    setAmount(amount.toString());
+  }
+
+  async function handleSubmit() {
+    // recipientPubkey: string;
+    // amount: number;
+    // relays: string[];
+    // comment?: string;
+    // senderPubkey?: string;
+    // eventId?: string | null;
+    // address?: string;
+    // lnurl?: string;
+
+    if (amount === "" || parseInt(amount, 10) === 0) {
+      setAmount("");
+      setMessage("");
+      console.log("amount is 0");
+      return;
+    }
+
+    if (!recipientProfileEvent) {
+      console.log("no recipient profile event");
+      return;
+    }
+
+    if (!senderPubkey) {
+      console.log("no sender pubkey");
+      return;
+    }
+
+    const zapRequest: ZapRequest = {
+      recipientPubkey: recipientProfileEvent.pubkey,
+      amount: parseInt(amount, 10) * 1000,
+      relays: DEFAULT_RELAYS,
+      comment: message,
+      senderPubkey,
+    };
+
+    try {
+      await sendZap(zapRequest, recipientProfileEvent);
+    } catch (e) {
+      console.error("error sending zap", e);
+      return;
+    }
+    console.log("sending zap", zapRequest);
+
     console.log("submitting");
     setOpen(false);
-    setAmount(0);
+    setAmount("");
     setMessage("");
   }
 
@@ -40,9 +101,6 @@ export function ZapDialog({ children }: Props) {
       <DialogContent className="max-w-[425px] rounded-lg">
         <DialogHeader>
           <DialogTitle>Send a Tip</DialogTitle>
-          {/* <DialogDescription> */}
-          {/*   Make changes to your profile here. Click save when you're done. */}
-          {/* </DialogDescription> */}
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex flex-col gap-4">
@@ -53,7 +111,11 @@ export function ZapDialog({ children }: Props) {
               placeholder="Enter amount in satoshis"
               className="col-span-3"
               value={amount}
-              onChange={(e) => setAmount(parseInt(e.target.value))}
+              onChange={(e) =>
+                setAmount(
+                  e.target.value ? parseInt(e.target.value, 10).toString() : "",
+                )
+              }
             />
           </div>
 

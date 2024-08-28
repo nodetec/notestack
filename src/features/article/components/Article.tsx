@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { Button } from "~/components/ui/button";
 import { ZapDialog } from "~/components/ZapDialog";
+import useAuth from "~/hooks/useAuth";
 import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
@@ -17,6 +18,7 @@ import { type AddressPointer } from "nostr-tools/nip19";
 import { useArticleEvent } from "../hooks/useArticleEvent";
 import { ArticleHeader } from "./ArticleHeader";
 import { SkeletonArticle } from "./SkeletonArticle";
+
 // import useAuth from "~/hooks/useAuth";
 
 type Props = {
@@ -25,7 +27,10 @@ type Props = {
 
 export function Article({ address }: Props) {
   // look into react query select to parse data
-  const { data: articleEvent, status } = useArticleEvent(address, address.pubkey);
+  const { data: articleEvent, status } = useArticleEvent(
+    address,
+    address.pubkey,
+  );
 
   const { data: profileEvent, status: profileEventStatus } = useProfileEvent(
     address.relays ?? DEFAULT_RELAYS,
@@ -36,6 +41,8 @@ export function Article({ address }: Props) {
     () => (profileEvent ? parseProfileEvent(profileEvent) : null),
     [profileEvent],
   );
+
+  const { userPublicKey } = useAuth();
 
   if (status === "pending" || profileEventStatus === "pending") {
     return <SkeletonArticle />;
@@ -53,10 +60,7 @@ export function Article({ address }: Props) {
     <>
       {status === "success" && articleEvent && (
         <>
-          <ArticleHeader
-            address={address}
-            articleEvent={articleEvent}
-          />
+          <ArticleHeader address={address} articleEvent={articleEvent} />
           <div className="mx-auto mb-8 flex max-w-[65ch] flex-col gap-8 border-b pb-8">
             <div className="prose prose-zinc dark:prose-invert">
               <h1>{getTag("title", articleEvent.tags)}</h1>
@@ -83,16 +87,20 @@ export function Article({ address }: Props) {
                   </div>
                 </div>
               </div>
-
-              <ZapDialog>
-                <Button
-                  className="hover:bg-muted/80 hover:text-yellow-500 focus-visible:outline-none focus-visible:ring-transparent"
-                  variant="ghost"
-                  size="icon"
+              {profile?.pubkey && userPublicKey && (
+                <ZapDialog
+                  recipientProfileEvent={profile?.event}
+                  senderPubkey={userPublicKey}
                 >
-                  <ZapIcon className="h-5 w-5" />
-                </Button>
-              </ZapDialog>
+                  <Button
+                    className="hover:bg-muted/80 hover:text-yellow-500 focus-visible:outline-none focus-visible:ring-transparent"
+                    variant="ghost"
+                    size="icon"
+                  >
+                    <ZapIcon className="h-5 w-5" />
+                  </Button>
+                </ZapDialog>
+              )}
             </div>
           </div>
 
