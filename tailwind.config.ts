@@ -87,8 +87,8 @@ const config = {
         DEFAULT: {
           css: {
             "p, li, blockquote, a, table, th, td": {
-              lineHeight: "1.60",
-              fontSize: "1.25rem",
+              lineHeight: "1.6",
+              fontSize: "1.2rem",
               fontFamily: "var(--font-source-serif-4)",
             },
           },
