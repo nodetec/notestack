@@ -1,9 +1,11 @@
+import { useMemo } from "react";
+
 import {
   useInfiniteQuery,
   type QueryFunctionContext,
 } from "@tanstack/react-query";
 import { DEFAULT_RELAYS } from "~/lib/constants";
-import { type RelayMetadata } from "~/lib/events/relay-metadata-event";
+import { parseRelayMetadataEvent } from "~/lib/events/relay-metadata-event";
 import { getArticles, getTag } from "~/lib/nostr";
 import { useAppState } from "~/store";
 import { useSearchParams } from "next/navigation";
@@ -46,33 +48,37 @@ const fetchArticles = async ({
   return response;
 };
 
-export const useArticleFeed = (
-  profilePublicKey: string | undefined,
-  userFollowEvent: Event | null | undefined,
-  profileRelayMetadata: RelayMetadata | null | undefined,
-  nip05HintRelays: string[],
-  isProfileFeed: boolean,
-) => {
+export interface ArticleFeedParams {
+  enabled: boolean;
+  profilePublicKey: string | undefined;
+  userFollowEvent: Event | null | undefined;
+  profileRelayMetadataEvent: Event | null | undefined;
+  nip05HintRelays: string[];
+}
+
+export const useArticleFeed = (useArticleFeedParams: ArticleFeedParams) => {
+  const {
+    enabled,
+    profilePublicKey,
+    userFollowEvent,
+    profileRelayMetadataEvent,
+    nip05HintRelays,
+  } = useArticleFeedParams;
   const searchParams = useSearchParams();
 
-  // console.log("ARTICLE FEED PROFILE PUBLIC KEY", profilePublicKey);
-  // console.log("ARTICLE FEED USER FOLLOW EVENT", userFollowEvent);
-  // console.log("ARTICLE FEED PROFILE RELAY METADATA", profileRelayMetadata);
-  // console.log("ARTICLE FEED NIP05 HINT RELAYS", nip05HintRelays);
+  const profileRelayMetadata = useMemo(
+    () =>
+      profileRelayMetadataEvent
+        ? parseRelayMetadataEvent(profileRelayMetadataEvent)
+        : null,
+    [profileRelayMetadataEvent],
+  );
 
-  let relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
+  const profileWriteRelays = profileRelayMetadata?.writeRelays ?? [];
 
-  relays = [...DEFAULT_RELAYS, ...relays, ...nip05HintRelays];
-  // make sure relays is unique
-  relays = Array.from(new Set(relays));
-
-  // console.log("ARTICLE FEED RELAYS", relays);
-
-  const enabled =
-    (isProfileFeed &&
-      profileRelayMetadata !== undefined &&
-      userFollowEvent !== undefined) ||
-    (!isProfileFeed && userFollowEvent !== undefined);
+  const relays = Array.from(
+    new Set([...DEFAULT_RELAYS, ...profileWriteRelays, ...nip05HintRelays]),
+  );
 
   return useInfiniteQuery({
     queryKey: [
