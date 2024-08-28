@@ -72,15 +72,9 @@ export function ZapDialog({
       relays: DEFAULT_RELAYS,
       comment: message,
       senderPubkey,
+      eventId: eventId,
+      address: address,
     };
-
-    if (eventId) {
-      zapRequest.eventId = eventId;
-    }
-
-    if (address) {
-      zapRequest.address = address;
-    }
 
     try {
       await sendZap(zapRequest, recipientProfileEvent);
