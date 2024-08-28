@@ -1,7 +1,10 @@
 import { type Link, type Root } from "mdast";
 import { type Event } from "nostr-tools";
+import rehypeExternalLinks from "rehype-external-links";
+import rehypeStringify from "rehype-stringify";
 import remarkHtml from "remark-html";
 import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
 import remarkYoutube from "remark-youtube";
 import { unified, type Plugin } from "unified";
 import { visit } from "unist-util-visit";
@@ -127,8 +130,6 @@ export function processArticle(event: Event | undefined) {
 
   const processedContent = unified()
     .use(remarkParse)
-    .use(remarkHtml)
-    .use(remarkYoutube)
     .use(nostrLinkPlugin, {
       baseUrls: {
         naddr1: "https://notestack.com/a/",
@@ -139,6 +140,14 @@ export function processArticle(event: Event | undefined) {
       },
     })
     .use(removeHeadingPlugin, { headingText: title })
+    .use(remarkHtml)
+    .use(remarkYoutube)
+    .use(remarkRehype)
+    .use(rehypeExternalLinks, {
+      target: "_blank",
+      rel: ["noopener", "noreferrer"],
+    })
+    .use(rehypeStringify)
     .processSync(event.content)
     .toString();
 
