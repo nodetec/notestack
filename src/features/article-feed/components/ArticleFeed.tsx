@@ -16,9 +16,10 @@ import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 type Props = {
   userPublicKey: string | undefined;
   profilePublicKey?: string;
+  nip05HintRelays?: string[];
 };
 
-export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
+export function ArticleFeed({ userPublicKey, profilePublicKey, nip05HintRelays }: Props) {
   const { data: profileRelayMetadataEvent } = useRelayMetadataEvent(
     profilePublicKey,
     DEFAULT_RELAYS,
@@ -47,6 +48,7 @@ export function ArticleFeed({ userPublicKey, profilePublicKey }: Props) {
     profilePublicKey,
     userFollowEvent,
     profileRelayMetadata,
+    nip05HintRelays ?? [],
   );
 
   if (status === "pending") {

@@ -70,7 +70,7 @@ export async function getArticles(
       id: "getArticles",
     },
   );
-  // console.log("EVENTS", events);
+  console.log("EVENTS", events);
   pool.close(relays);
 
   if (!events) {

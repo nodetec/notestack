@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ArticleFeed } from "~/features/article-feed";
 import { SkeletonArticleFeed } from "~/features/article-feed/components/SkeletonArticleFeed";
 import { getUser } from "~/server/auth";
-import { getPublicKeyFromNip05OrNpub } from "~/server/nostr";
+import { getPublicKeyAndRelayHintFromNip05OrNpub } from "~/server/nostr";
 
 type Props = {
   profile: string;
@@ -12,12 +12,14 @@ type Props = {
 async function ProfileArticleFeedWrapper({ profile }: Props) {
   const user = await getUser();
 
-  const profilePublicKey = await getPublicKeyFromNip05OrNpub(profile);
+  const publicKeyAndRelay =
+    await getPublicKeyAndRelayHintFromNip05OrNpub(profile);
 
   return (
     <ArticleFeed
       userPublicKey={user?.publicKey}
-      profilePublicKey={profilePublicKey}
+      profilePublicKey={publicKeyAndRelay?.publicKey}
+      nip05HintRelays={publicKeyAndRelay?.relays}
     />
   );
 }

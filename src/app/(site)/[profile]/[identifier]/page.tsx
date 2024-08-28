@@ -1,5 +1,5 @@
 import { Article } from "~/features/article";
-import { getPublicKeyFromNip05OrNpub } from "~/server/nostr";
+import { getPublicKeyAndRelayHintFromNip05OrNpub } from "~/server/nostr";
 import { notFound } from "next/navigation";
 
 export default async function ArticlePage({
@@ -11,11 +11,13 @@ export default async function ArticlePage({
     notFound();
   }
 
-  const profilePublicKey = await getPublicKeyFromNip05OrNpub(params.profile);
+  const publicKeyAndRelay = await getPublicKeyAndRelayHintFromNip05OrNpub(
+    params.profile,
+  );
 
   const address = {
     identifier: params.identifier,
-    pubkey: profilePublicKey,
+    pubkey: publicKeyAndRelay.publicKey,
     kind: 30023,
   };
 

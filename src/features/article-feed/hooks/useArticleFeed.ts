@@ -49,6 +49,7 @@ export const useArticleFeed = (
   profilePublicKey: string | undefined,
   userFollowEvent: Event | null | undefined,
   profileRelayMetadata: RelayMetadata | null | undefined,
+  nip05HintRelays: string[],
 ) => {
   const searchParams = useSearchParams();
   console.log(
@@ -57,7 +58,13 @@ export const useArticleFeed = (
     userFollowEvent,
     profileRelayMetadata,
   );
-  const relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
+  let relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
+
+  relays = [...relays, ...nip05HintRelays];
+  // make sure relays is unique
+  relays = Array.from(new Set(relays));
+
+  console.log("ARTICLE FEED RELAYS", relays);
 
   return useInfiniteQuery({
     queryKey: [

@@ -7,17 +7,13 @@ import { queryProfile } from "nostr-tools/nip05";
 
 import { getUser } from "./auth";
 
-export async function getPublicKeyFromNip05OrNpub(profile: string) {
-  console.log("getPublicKeyFromNip05OrNpub", profile);
-
+export async function getPublicKeyAndRelayHintFromNip05OrNpub(profile: string) {
   profile = decodeURIComponent(profile);
 
-  console.log("getPublicKeyFromNip05OrNpub AFTER", profile);
-
   let profilePublicKey;
+  let profileRelays;
 
   if (!profile) {
-    console.log("FAILING HERE");
     console.error("Invalid profile", profile);
     notFound();
   }
@@ -35,16 +31,18 @@ export async function getPublicKeyFromNip05OrNpub(profile: string) {
   if (!profilePublicKey) {
     const nip05Profile = await queryProfile(profile);
     profilePublicKey = nip05Profile?.pubkey;
-    // const profileRelays = nip05Profile?.relays; // TODO: make use of this
+    profileRelays = nip05Profile?.relays;
   }
 
   if (!profilePublicKey) {
-    console.log("FAILING HERE 2");
     console.error("Invalid profile", profile);
     notFound();
   }
 
-  return profilePublicKey;
+  return {
+    publicKey: profilePublicKey,
+    relays: profileRelays,
+  };
 }
 
 // let newPool: SimplePool | null = null;
