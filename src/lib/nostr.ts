@@ -208,7 +208,6 @@ export const getTag = (name: string, tags: string[][]) => {
   return item;
 };
 
-
 // export const createNaddr = (
 //   event: Event | undefined,
 //   relays: RelayUrl[] | undefined = undefined
@@ -288,6 +287,9 @@ export function createProfileLink(
   publicKey: string,
 ) {
   if (profile?.content?.nip05) {
+    if (profile.content?.nip05.startsWith("_@")) {
+      return `/${profile.content?.nip05.slice(2)}`;
+    }
     return `/${profile.content?.nip05}`;
   }
   return `/${nip19.npubEncode(publicKey)}`;
@@ -313,6 +315,9 @@ export function createArticleLink(
   relays: string[],
 ) {
   if (profile?.content?.nip05) {
+    if (profile.content?.nip05.startsWith("_@")) {
+      return `/${profile.content?.nip05.slice(2)}/${getTag("d", articleEvent.tags)}`;
+    }
     return `/${profile.content?.nip05}/${getTag("d", articleEvent.tags)}`;
   }
   return `/a/${makeNaddr(articleEvent, relays)}`;

@@ -19,6 +19,7 @@ const fetchArticles = async ({
   const publicKey = queryKey[2] as string;
   const followEvent = queryKey[3] as Event;
   const feed = queryKey[4] as string;
+  console.log("RELAYS", relays);
   const response = await getArticles(
     relays,
     page,
@@ -61,7 +62,7 @@ export const useArticleFeed = (
 
   let relays = profileRelayMetadata?.writeRelays ?? DEFAULT_RELAYS;
 
-  relays = [...relays, ...nip05HintRelays];
+  relays = [...DEFAULT_RELAYS, ...relays, ...nip05HintRelays];
   // make sure relays is unique
   relays = Array.from(new Set(relays));
 
