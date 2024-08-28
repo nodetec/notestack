@@ -3,7 +3,10 @@ import { DEFAULT_RELAYS } from "~/lib/constants";
 import { getProfileEvent } from "~/lib/nostr";
 import { type Event } from "nostr-tools";
 
-export const useProfileEvent = (relays: string[], publicKey: string | undefined) => {
+export const useProfileEvent = (
+  relays: string[],
+  publicKey: string | undefined,
+) => {
   return useQuery<Event | null>({
     queryKey: ["profile", publicKey],
     refetchOnWindowFocus: false,
@@ -11,6 +14,6 @@ export const useProfileEvent = (relays: string[], publicKey: string | undefined)
     staleTime: Infinity,
     gcTime: Infinity,
     enabled: !!publicKey,
-    queryFn: () => getProfileEvent(relays ?? DEFAULT_RELAYS, publicKey),
+    queryFn: () => getProfileEvent([...relays, ...DEFAULT_RELAYS], publicKey),
   });
 };
