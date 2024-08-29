@@ -230,7 +230,7 @@ export const getTag = (name: string, tags: string[][]) => {
 //   return nip19.naddrEncode(addressPointer);
 // };
 
-export function createEventAdress(
+export function createEventAddress(
   kind: number,
   pubkey: string,
   dTagValue: string,

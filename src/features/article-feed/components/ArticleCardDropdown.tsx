@@ -12,9 +12,11 @@ import {
   getRelayMetadataEvent,
   parseRelayMetadataEvent,
 } from "~/lib/events/relay-metadata-event";
-import { publishFinishedEvent } from "~/lib/nostr";
+import { createEventAddress, getTag, publishFinishedEvent } from "~/lib/nostr";
 import { type Event } from "nostr-tools";
 import { toast } from "sonner";
+
+import { useDeleteArticle } from "../hooks/useDeleteArticle";
 
 type Props = {
   children: React.ReactNode;
@@ -23,6 +25,48 @@ type Props = {
 
 export function ArticleCardDropdown({ children, articleEvent }: Props) {
   const { userPublicKey } = useAuth();
+
+  const deleteArticleMutation = useDeleteArticle();
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+
+    if (!articleEvent) {
+      return;
+    }
+
+    const dTagValue = getTag("d", articleEvent.tags);
+
+    if (!dTagValue) {
+      return;
+    }
+
+    const articleAddress = createEventAddress(
+      30023,
+      articleEvent.pubkey,
+      dTagValue,
+    );
+
+    const relayMetadataEvent = await getRelayMetadataEvent(
+      DEFAULT_RELAYS,
+      userPublicKey,
+    );
+    if (!relayMetadataEvent) {
+      toast("Failed to delete article", {
+        description: "Make sure to set your relays in settings.",
+      });
+      return;
+    }
+
+    const relayMetadata = parseRelayMetadataEvent(relayMetadataEvent);
+
+    deleteArticleMutation.mutate({
+      articleAddress,
+      relays: relayMetadata.relays,
+      articleEventId: articleEvent.id,
+    });
+  }
+
   async function broadcastArticle(e: React.MouseEvent) {
     e.stopPropagation();
     const relayMetadataEvent = await getRelayMetadataEvent(
@@ -63,9 +107,9 @@ export function ArticleCardDropdown({ children, articleEvent }: Props) {
             Broadcast
           </DropdownMenuItem>
         )}
-        {/* <DropdownMenuItem asChild> */}
-        {/*   <Link href="/settings">Settings</Link> */}
-        {/* </DropdownMenuItem> */}
+        {userPublicKey && userPublicKey === articleEvent.pubkey && (
+          <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+        )}
         {/* <DropdownMenuItem className="my-2 cursor-pointer text-[1rem] font-medium"> */}
         {/*   Inbox */}
         {/* </DropdownMenuItem> */}

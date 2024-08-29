@@ -29,6 +29,7 @@ const fetchArticles = async ({
     followEvent,
     feed,
   );
+  console.log("RESPONSE", response);
 
   const addArticle = useAppState.getState().addArticle;
 
@@ -73,6 +74,8 @@ export const useArticleFeed = (useArticleFeedParams: ArticleFeedParams) => {
         : null,
     [profileRelayMetadataEvent],
   );
+
+  console.log("PROFILERELAYMETADATA", profileRelayMetadata);
 
   const profileWriteRelays = profileRelayMetadata?.writeRelays ?? [];
 

@@ -5,6 +5,7 @@ import { DEFAULT_RELAYS } from "~/lib/constants";
 
 import { type ArticleFeedParams } from "../hooks/useArticleFeed";
 import { ArticleFeed } from "./ArticleFeed";
+import { SkeletonArticleFeed } from "./SkeletonArticleFeed";
 
 type Props = {
   userPublicKey: string | undefined;
@@ -17,7 +18,7 @@ export function ArticleProfileFeed({
   profilePublicKey,
   nip05HintRelays,
 }: Props) {
-  const { data: profileRelayMetadataEvent } = useRelayMetadataEvent(
+  const profileRelayMetadataEvent = useRelayMetadataEvent(
     profilePublicKey,
     DEFAULT_RELAYS,
   );
@@ -28,9 +29,17 @@ export function ArticleProfileFeed({
     enabled: profileRelayMetadataEvent !== undefined,
     profilePublicKey,
     userFollowEvent: undefined,
-    profileRelayMetadataEvent: profileRelayMetadataEvent,
+    profileRelayMetadataEvent: profileRelayMetadataEvent.data,
     nip05HintRelays: nip05HintRelays ?? [],
   };
 
-  return <ArticleFeed articleFeedParams={articleFeedParams} />;
+  return (
+    <>
+      {profileRelayMetadataEvent.status === "pending" ? (
+        <SkeletonArticleFeed profileFeed />
+      ) : (
+        <ArticleFeed articleFeedParams={articleFeedParams} />
+      )}
+    </>
+  );
 }

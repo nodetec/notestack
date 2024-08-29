@@ -9,7 +9,7 @@ import { useProfileEvent } from "~/hooks/useProfileEvent";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { parseProfileEvent } from "~/lib/events/profile-event";
 import { processArticle, readingTime } from "~/lib/markdown";
-import { createEventAdress, getTag, shortNpub } from "~/lib/nostr";
+import { createEventAddress, getTag, shortNpub } from "~/lib/nostr";
 import { formatEpochTime, getAvatar } from "~/lib/utils";
 import { ZapIcon } from "lucide-react";
 import Image from "next/image";
@@ -92,7 +92,7 @@ export function Article({ address }: Props) {
               <ZapDialog
                 recipientProfileEvent={profile?.event}
                 senderPubkey={userPublicKey}
-                address={createEventAdress(
+                address={createEventAddress(
                   30023,
                   articleEvent.pubkey,
                   getTag("d", articleEvent.tags)!,
