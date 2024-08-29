@@ -27,7 +27,9 @@ async function deleteArticle({
   relays = [],
   articleEventId,
 }: DeleteArticleArgs) {
-  const deleteEvent = createDeleteEvent([30023], [], [articleAddress]);
+  const deleteEvent = createDeleteEvent([30023], [articleEventId], []);
+
+  console.log("deleteEvent", deleteEvent);
 
   const published = await publish(deleteEvent, [...relays, ...DEFAULT_RELAYS]);
 
