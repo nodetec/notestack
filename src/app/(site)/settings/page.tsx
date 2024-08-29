@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-
 import { authOptions } from "~/auth";
 import { ProfileSettings } from "~/features/settings";
 import { redirectIfNotLoggedIn } from "~/server/auth";
@@ -18,10 +16,8 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="grow bg-secondary p-2 sm:rounded-lg sm:p-10 sm:shadow-sm sm:ring-1 sm:ring-zinc-950/5 dark:sm:ring-white/10">
-      <div className="flex w-full flex-col items-center pt-12">
-        <ProfileSettings publicKey={user?.publicKey} />;
-      </div>
-    </main>
+    <div className="flex w-full flex-col items-center pt-12">
+      <ProfileSettings publicKey={user?.publicKey} />
+    </div>
   );
 }
