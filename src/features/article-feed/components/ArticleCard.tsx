@@ -4,17 +4,13 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { useBatchedProfileEvent } from "~/hooks/useBatchedProfileEvent";
 import { parseProfileEvent } from "~/lib/events/profile-event";
-import {
-  cleanMarkdown,
-  getFirstImage,
-  readingTime,
-} from "~/lib/markdown";
+import { cleanMarkdown, getFirstImage } from "~/lib/markdown";
 import { createArticleLink, getTag } from "~/lib/nostr";
-import { formatEpochTime } from "~/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { type Event } from "nostr-tools";
 
+import { ArticleCardFooter } from "./ArticleCardFooter";
 import { ArticleCardProfile } from "./ArticleCardProfile";
 
 type Props = {
@@ -50,27 +46,15 @@ export function ArticleCard({ articleEvent, relays }: Props) {
           >
             <div className="flex flex-col">
               <div className="flex items-start justify-between sm:items-center">
-                <div className="flex flex-col items-start gap-2">
+                <div className="flex flex-col items-start gap-2 w-full">
                   <h2 className="line-clamp-3 text-ellipsis break-words text-xl font-bold leading-6 sm:text-2xl sm:leading-7">
                     {getTag("title", articleEvent.tags)}
                   </h2>
                   <h3 className="break-anywhere line-clamp-2 text-ellipsis whitespace-break-spaces text-pretty pt-0 text-[1rem] text-muted-foreground">
                     {cleanMarkdown(articleEvent.content)}
                   </h3>
-                  <div className="mt-4 hidden gap-1 text-sm text-muted-foreground sm:flex">
-                    <div className="text-muted-foreground">
-                      {formatEpochTime(articleEvent.created_at)}
-                    </div>
-                    <span>•</span>
-                    <span>{readingTime(articleEvent?.content)}</span>
-                    {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
-                    {/*   <ZapIcon className="h-4 w-4" /> */}
-                    {/*   33.1k */}
-                    {/* </div> */}
-                    {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
-                    {/*   <MessageCircle className="h-4 w-4" /> */}
-                    {/*   42 */}
-                    {/* </div> */}
+                  <div className="mt-4 hidden sm:flex w-full">
+                    <ArticleCardFooter articleEvent={articleEvent} />
                   </div>
                 </div>
 
@@ -87,20 +71,8 @@ export function ArticleCard({ articleEvent, relays }: Props) {
                   loading="lazy"
                 />
               </div>
-              <div className="mt-6 flex gap-1 text-sm text-muted-foreground sm:hidden">
-                <div className="text-muted-foreground">
-                  {formatEpochTime(articleEvent.created_at)}
-                </div>
-                <span>•</span>
-                <span>{readingTime(articleEvent?.content)}</span>
-                {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
-                {/*   <ZapIcon className="h-4 w-4" /> */}
-                {/*   33.1k */}
-                {/* </div> */}
-                {/* <div className="flex items-center gap-1 text-muted-foreground"> */}
-                {/*   <MessageCircle className="h-4 w-4" /> */}
-                {/*   33.1k */}
-                {/* </div> */}
+              <div className="mt-6 flex sm:hidden w-full">
+                <ArticleCardFooter articleEvent={articleEvent} />
               </div>
             </div>
           </Link>
