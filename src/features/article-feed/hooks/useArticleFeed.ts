@@ -21,7 +21,6 @@ const fetchArticles = async ({
   const publicKey = queryKey[2] as string;
   const followEvent = queryKey[3] as Event;
   const feed = queryKey[4] as string;
-  console.log("RELAYS", relays);
   const response = await getArticles(
     relays,
     page,
@@ -74,8 +73,6 @@ export const useArticleFeed = (useArticleFeedParams: ArticleFeedParams) => {
         : null,
     [profileRelayMetadataEvent],
   );
-
-  console.log("PROFILERELAYMETADATA", profileRelayMetadata);
 
   const profileWriteRelays = profileRelayMetadata?.writeRelays ?? [];
 

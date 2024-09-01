@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -7,7 +9,6 @@ import { shortNpub } from "~/lib/nostr";
 import { getAvatar } from "~/lib/utils";
 import { EllipsisVerticalIcon } from "lucide-react";
 import Image from "next/image";
-import { useMemo } from "react";
 
 type Props = {
   relays: string[];
@@ -21,7 +22,6 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
     () => (profileEvent ? parseProfileEvent(profileEvent) : null),
     [profileEvent],
   );
-
 
   if (status === "pending") {
     return (
@@ -44,7 +44,7 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
 
   if (status === "success") {
     return (
-      <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-7 backdrop-blur transition-colors duration-500">
+      <div className="mb-2 w-full bg-secondary/95 pt-8 backdrop-blur transition-colors duration-500">
         <div className="flex items-center justify-between px-4 pb-4 md:px-6">
           <div className="flex items-center gap-4">
             <Image
@@ -69,9 +69,6 @@ export default function ArticleFeedProfile({ relays, publicKey }: Props) {
             <EllipsisVerticalIcon className="h-5 w-5" />
           </Button>
           {/* </ArticleFeedFilterDropdown> */}
-        </div>
-        <div className="w-full px-4 md:px-6">
-          <Separator />
         </div>
       </div>
     );

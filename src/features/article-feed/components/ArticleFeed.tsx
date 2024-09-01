@@ -1,6 +1,7 @@
 "use client";
 
 import { DEFAULT_RELAYS } from "~/lib/constants";
+import { useInView } from "react-intersection-observer";
 
 import {
   useArticleFeed,
@@ -15,6 +16,17 @@ type Props = {
   articleFeedParams: ArticleFeedParams;
 };
 
+const isLastArticle = (
+  pageIndex: number,
+  articleIndex: number,
+  totalPages: number,
+  totalArticlesInPage: number,
+): boolean => {
+  return (
+    pageIndex === totalPages - 1 && articleIndex === totalArticlesInPage - 1
+  );
+};
+
 export function ArticleFeed({ articleFeedParams }: Props) {
   const {
     data: articleEvents,
@@ -23,6 +35,17 @@ export function ArticleFeed({ articleFeedParams }: Props) {
     isFetchingNextPage,
     status,
   } = useArticleFeed(articleFeedParams);
+
+  // Use useInView to create a ref and track visibility of the last article
+  const { ref } = useInView({
+    threshold: 0.1, // Adjust threshold as needed
+    triggerOnce: false, // Continue observing
+    onChange: (inView) => {
+      if (inView && hasNextPage && !isFetchingNextPage) {
+        void fetchNextPage();
+      }
+    },
+  });
 
   if (status === "pending") {
     return (
@@ -43,24 +66,24 @@ export function ArticleFeed({ articleFeedParams }: Props) {
         />
       )}
       <ArticleFeedControls show={!articleFeedParams.profilePublicKey} />
-      {articleEvents.pages.flatMap((page) =>
-        page.articles.map((event) => (
+      {articleEvents.pages.flatMap((page, pageIndex) =>
+        page.articles.map((event, articleIndex) => (
           <ArticleCard
-            key={event.id}
             articleEvent={event}
             relays={DEFAULT_RELAYS}
+            key={event.id}
+            ref={
+              isLastArticle(
+                pageIndex,
+                articleIndex,
+                articleEvents.pages.length,
+                page.articles.length,
+              )
+                ? ref
+                : undefined
+            }
           />
         )),
-      )}
-
-      {hasNextPage && (
-        <button
-          onClick={() => fetchNextPage()}
-          disabled={isFetchingNextPage}
-          className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Load More
-        </button>
       )}
     </div>
   );
