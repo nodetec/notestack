@@ -25,9 +25,9 @@ export function ArticleFeedControls({ show }: Props) {
   }
 
   return (
-    <div className="sticky top-0 mb-2 w-full bg-secondary/95 pt-7 backdrop-blur transition-colors duration-500">
+    <div className="mb-2 w-full bg-secondary/95 pt-8 backdrop-blur transition-colors duration-500">
       <div className="flex items-center justify-between px-4 pb-4 md:px-6">
-        <h2 className="text-2xl font-semibold text-foreground/80">
+        <h2 className="text-[1.65rem] font-semibold text-foreground/80">
           {getFeedTitle()}
         </h2>
         <ArticleFeedFilterDropdown>
@@ -39,9 +39,6 @@ export function ArticleFeedControls({ show }: Props) {
             <ListFilterIcon className="h-5 w-5" />
           </Button>
         </ArticleFeedFilterDropdown>
-      </div>
-      <div className="w-full px-4 md:px-6">
-        <Separator />
       </div>
     </div>
   );
