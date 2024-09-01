@@ -1,4 +1,3 @@
-import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 
 import { SkeletonArticleCard } from "./SkeletonArticleCard";
