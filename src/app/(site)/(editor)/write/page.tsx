@@ -19,17 +19,14 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { $convertFromMarkdown } from "~/lib/lexical-md";
-import { $getRoot, $getSelection, type EditorState } from "lexical";
+import {
+  $getRoot,
+  $getSelection,
+  LexicalEditor,
+  type EditorState,
+} from "lexical";
 import { type Link, type Root } from "mdast";
-import { remark } from "remark";
 
-const markdownToMdast = (markdown: string) => {
-  const mdast = remark().parse(markdown);
-  return mdast;
-};
-
-// When the editor changes, you can get notified via the
 // LexicalOnChangePlugin!
 function onChange(editorState: EditorState) {
   editorState.read(() => {
@@ -67,8 +64,11 @@ export default function Editor() {
   const initialConfig: InitialConfigType = {
     namespace: "NoteStackEditor",
     // theme: getTheme("dark"),
-    // editorState: () => $convertFromMarkdownString("# ", TRANSFORMERS),
-    editorState: () => $convertFromMarkdown("# Don't write anything here yet!"),
+    editorState: () =>
+      $convertFromMarkdownString(
+        "# Don't write anything here yet!",
+        TRANSFORMERS,
+      ),
     nodes: [
       HorizontalRuleNode,
       //   // BannerNode,
