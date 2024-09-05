@@ -68,7 +68,7 @@ export default function Editor() {
     namespace: "NoteStackEditor",
     // theme: getTheme("dark"),
     // editorState: () => $convertFromMarkdownString("# ", TRANSFORMERS),
-    editorState: () => $convertFromMarkdown("#"),
+    editorState: () => $convertFromMarkdown("# Don't write anything here yet!"),
     nodes: [
       HorizontalRuleNode,
       //   // BannerNode,
