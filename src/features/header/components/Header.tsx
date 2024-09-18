@@ -42,28 +42,28 @@ export async function Header() {
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
       </Link>
       <div className="flex items-center gap-4">
-        {session && (
-          <>
-            <Link href="/write">
-              <Button
-                className="focus-visible:outline-none focus-visible:ring-transparent sm:flex lg:hidden"
-                variant="outline"
-                size="icon"
-              >
-                <PenBoxIcon className="h-[1.2rem] w-[1.2rem]" />
-              </Button>
-            </Link>
-            <Link href="/write">
-              <Button
-                className="hidden focus-visible:outline-none focus-visible:ring-transparent lg:flex"
-                variant="outline"
-              >
-                <PenBoxIcon className="mr-2 h-[1.2rem] w-[1.2rem]" />
-                <span className="text-[1.05rem]">Write</span>
-              </Button>
-            </Link>
-          </>
-        )}
+        {/* {session && ( */}
+        {/*   <> */}
+        {/*     <Link href="/write"> */}
+        {/*       <Button */}
+        {/*         className="focus-visible:outline-none focus-visible:ring-transparent sm:flex lg:hidden" */}
+        {/*         variant="outline" */}
+        {/*         size="icon" */}
+        {/*       > */}
+        {/*         <PenBoxIcon className="h-[1.2rem] w-[1.2rem]" /> */}
+        {/*       </Button> */}
+        {/*     </Link> */}
+        {/*     <Link href="/write"> */}
+        {/*       <Button */}
+        {/*         className="hidden focus-visible:outline-none focus-visible:ring-transparent lg:flex" */}
+        {/*         variant="outline" */}
+        {/*       > */}
+        {/*         <PenBoxIcon className="mr-2 h-[1.2rem] w-[1.2rem]" /> */}
+        {/*         <span className="text-[1.05rem]">Write</span> */}
+        {/*       </Button> */}
+        {/*     </Link> */}
+        {/*   </> */}
+        {/* )} */}
         <ThemeToggle />
         {session && publicKey ? (
           <ProfileDropdown publicKey={publicKey} />
