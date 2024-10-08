@@ -1,0 +1,108 @@
+.editor-wrapper {
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: hsl(var(--border));
+}
+
+.editor-container {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 5px;
+  height: 80vh;
+  width: 80vw;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(var(--secondary));
+  position: relative;
+  overflow: hidden;
+}
+
+.toolbar-toggle {
+    align-self: flex-end;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .toolbar-toggle:hover {
+    background-color: #0056b3;
+  }
+  /* To keep inside of editor but not always in view depending on size of editor*/
+
+  /* .toolbar-overlay {
+    margin-top: auto;
+    align-self: center;
+    background-color: hsl(var(--border));
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+  } */
+
+  /* To keep outside of editor but always in view */
+  .toolbar-overlay {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: hsl(var(--border));
+    /* border: 1px solid #ccc; */
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+  }
+ 
+  
+  .toolbar-row {
+    flex-direction: row;
+  }
+  
+  .toolbar-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .toolbar-icon:hover {
+    color: hsl(var(--secondary));
+  }
+  
+  .editor-content {
+    position: relative;
+    flex: 1;
+    display: flex;
+    overflow-y: auto;
+  }
+  
+  .editor-input {
+    flex: 1;
+    outline: none;
+    overflow: auto;
+    padding: 0.5rem;
+    max-height: 100%;
+
+  }
+  
+  .editor-placeholder {
+    color: #888;
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    pointer-events: none;
+  }
+
+  .toolbar-icon.active {
+    background-color: hsl(var(--secondary));
+    color: white;
+    border-radius: 4px;
+  }
