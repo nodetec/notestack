@@ -83,44 +83,44 @@ export const ToolbarPlugin: React.FC = () => {
     );
   }, [editor, $updateToolbar]);
   return (
-    <div className="toolbar-overlay toolbar-row" ref={toolbarRef}>
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-border p-4 rounded-lg shadow-md flex gap-4" ref={toolbarRef}>
       <AiOutlineUndo
-        className="toolbar-icon"
+        className="text-2xl cursor-pointer"
         title="Undo"
         onClick={() => {
           editor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
       />
       <AiOutlineRedo
-        className="toolbar-icon"
+        className="text-2xl cursor-pointer"
         title="Redo"
         onClick={() => {
           editor.dispatchCommand(REDO_COMMAND, undefined);
         }}
       />
       <AiOutlineBold
-        className={"toolbar-icon " + (isBold ? "active" : "")}
+        className={`text-2xl cursor-pointer ${isBold ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Bold"
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
         }}
       />
       <AiOutlineItalic
-        className={"toolbar-icon " + (isItalic ? "active" : "")}
+        className={`text-2xl cursor-pointer ${isItalic ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Italic"
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         }}
       />
       <AiOutlineUnderline
-        className={"toolbar-icon " + (isUnderline ? "active" : "")}
+        className={`text-2xl cursor-pointer ${isUnderline ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Underline"
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
         }}
       />
       <AiOutlineStrikethrough
-        className={"toolbar-icon " + (isStrikethrough ? "active" : "")}
+        className={`text-2xl cursor-pointer ${isStrikethrough ? "bg-gray-900 text-white rounded p-1" : ""}`}
         aria-label="Format Strikethrough"
         title="Strikethrough"
         onClick={() => {
@@ -128,21 +128,21 @@ export const ToolbarPlugin: React.FC = () => {
         }}
       />
       <AiOutlineAlignLeft
-        className={"toolbar-icon " + (align === "left" ? "active" : "")}
+        className={`text-2xl cursor-pointer ${align === "left" ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Align Left"
         onClick={() => {
           editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
         }}
       />
       <AiOutlineAlignCenter
-        className={"toolbar-icon " + (align === "right" ? "active" : "")}
+        className={`text-2xl cursor-pointer ${align === "right" ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Align Center"
         onClick={() => {
           editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
         }}
       />
       <AiOutlineAlignRight
-        className={"toolbar-icon " + (align === "center" ? "active" : "")}
+        className={`text-2xl cursor-pointer ${align === "center" ? "bg-gray-900 text-white rounded p-1" : ""}`}
         title="Align Right"
         onClick={() => {
           editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");

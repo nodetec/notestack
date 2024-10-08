@@ -98,23 +98,21 @@ export default function Editor() {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="editor-wrapper">
-        <div className="editor-container">
+      <div className="h-[90vh] flex items-center justify-center border border-border">
+        <div className="border border-gray-300 p-4 rounded-md h-[80vh] w-[80vw] max-w-[800px] flex flex-col bg-secondary relative overflow-hidden">
           {/* Toolbar Toggle Button */}
           <button
-            className="toolbar-toggle"
+            className="self-end mb-2 p-2 bg-blue-600 text-white border-none rounded cursor-pointer hover:bg-blue-800"
             onClick={() => setShowToolbar((prev) => !prev)}
           >
             {showToolbar ? "Hide Toolbar" : "Show Toolbar"}
           </button>
 
           {/* Rich Text Editor */}
-          <div className="editor-content">
+          <div className="relative flex-1 flex overflow-y-auto">
             <RichTextPlugin
-              contentEditable={<ContentEditable className="editor-input" />}
-              placeholder={
-                <div className="editor-placeholder">Enter some text...</div>
-              }
+              contentEditable={<ContentEditable className="flex-1 outline-none overflow-auto p-2 max-h-full" />}
+              placeholder={<div className="text-gray-500 absolute top-2 left-2 pointer-events-none">Enter some text...</div>}
               ErrorBoundary={LexicalErrorBoundary}
             />
           </div>
