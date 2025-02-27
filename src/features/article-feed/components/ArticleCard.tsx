@@ -16,11 +16,12 @@ import { ArticleCardProfile } from "./ArticleCardProfile";
 type Props = {
   articleEvent: Event;
   relays: string[];
+  userPublicKey?: string;
 };
 
 // Update the component to use forwardRef
 export const ArticleCard = forwardRef<HTMLDivElement, Props>(
-  ({ articleEvent, relays }, ref) => {
+  ({ articleEvent, relays, userPublicKey }, ref) => {
     const { data: profileEvent, isFetching } = useBatchedProfileEvent(
       relays,
       articleEvent.pubkey,
@@ -57,7 +58,10 @@ export const ArticleCard = forwardRef<HTMLDivElement, Props>(
                       {cleanMarkdown(articleEvent.content)}
                     </h3>
                     <div className="mt-4 hidden w-full sm:flex">
-                      <ArticleCardFooter articleEvent={articleEvent} />
+                      <ArticleCardFooter
+                        userPublicKey={userPublicKey}
+                        articleEvent={articleEvent}
+                      />
                     </div>
                   </div>
 
@@ -75,7 +79,10 @@ export const ArticleCard = forwardRef<HTMLDivElement, Props>(
                   />
                 </div>
                 <div className="mt-6 flex w-full sm:hidden">
-                  <ArticleCardFooter articleEvent={articleEvent} />
+                  <ArticleCardFooter
+                    userPublicKey={userPublicKey}
+                    articleEvent={articleEvent}
+                  />
                 </div>
               </div>
             </Link>

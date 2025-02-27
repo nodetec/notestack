@@ -1,5 +1,6 @@
 "use client";
 
+import useAuth from "~/hooks/useAuth";
 import { DEFAULT_RELAYS } from "~/lib/constants";
 import { useInView } from "react-intersection-observer";
 
@@ -36,6 +37,8 @@ export function ArticleFeed({ articleFeedParams }: Props) {
     status,
   } = useArticleFeed(articleFeedParams);
 
+  const { userPublicKey } = useAuth();
+
   // Use useInView to create a ref and track visibility of the last article
   const { ref } = useInView({
     threshold: 0.1, // Adjust threshold as needed
@@ -69,9 +72,10 @@ export function ArticleFeed({ articleFeedParams }: Props) {
       {articleEvents.pages.flatMap((page, pageIndex) =>
         page.articles.map((event, articleIndex) => (
           <ArticleCard
+            key={event.id}
             articleEvent={event}
             relays={DEFAULT_RELAYS}
-            key={event.id}
+            userPublicKey={userPublicKey}
             ref={
               isLastArticle(
                 pageIndex,

@@ -8,9 +8,10 @@ import { ArticleCardDropdown } from "./ArticleCardDropdown";
 
 type Props = {
   articleEvent: Event;
+  userPublicKey?: string;
 };
 
-export function ArticleCardFooter({ articleEvent }: Props) {
+export function ArticleCardFooter({ articleEvent, userPublicKey }: Props) {
   return (
     <div className="flex w-full justify-between text-sm text-muted-foreground">
       <div className="flex gap-1">
@@ -29,15 +30,17 @@ export function ArticleCardFooter({ articleEvent }: Props) {
         {/* </div> */}
       </div>
 
-      <ArticleCardDropdown articleEvent={articleEvent}>
-        <Button
-          className="z-20 h-6 w-6 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-transparent"
-          variant="ghost"
-          size="icon"
-        >
-          <EllipsisIcon className="h-5 w-5" />
-        </Button>
-      </ArticleCardDropdown>
+      {userPublicKey && (
+        <ArticleCardDropdown articleEvent={articleEvent}>
+          <Button
+            className="z-20 h-6 w-6 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-transparent"
+            variant="ghost"
+            size="icon"
+          >
+            <EllipsisIcon className="h-5 w-5" />
+          </Button>
+        </ArticleCardDropdown>
+      )}
     </div>
   );
 }
