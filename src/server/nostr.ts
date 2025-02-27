@@ -61,12 +61,7 @@ export async function getPublicKeyAndRelayHintFromNip05OrNpub(profile: string) {
 //
 // const pool = new SimplePool();
 
-// console.log("pool", pool);
-
-// console.log("list connection", pool.listConnectionStatus());
-
 // export async function getPool() {
-//   console.log("getPool");
 //   return pool;
 // }
 

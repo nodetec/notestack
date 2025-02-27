@@ -7,6 +7,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import useAuth from "~/hooks/useAuth";
+import { useFollowEvent } from "~/hooks/useFollowEvent";
+import { DEFAULT_RELAYS } from "~/lib/constants";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -15,6 +18,10 @@ type Props = {
 
 export function ArticleFeedFilterDropdown({ children }: Props) {
   const router = useRouter();
+
+  const { userPublicKey } = useAuth();
+
+  const userFollowEvent = useFollowEvent(userPublicKey, DEFAULT_RELAYS);
 
   function handleChangeFilter(filter: string) {
     if (filter === "featured") router.push(`/`);
@@ -31,9 +38,11 @@ export function ArticleFeedFilterDropdown({ children }: Props) {
           <DropdownMenuItem onSelect={() => handleChangeFilter("featured")}>
             Featured
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => handleChangeFilter("following")}>
-            Following
-          </DropdownMenuItem>
+          {userFollowEvent.data && (
+            <DropdownMenuItem onSelect={() => handleChangeFilter("following")}>
+              Following
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

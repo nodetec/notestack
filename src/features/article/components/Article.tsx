@@ -56,8 +56,6 @@ export function Article({ address }: Props) {
     );
   }
 
-  console.log("articleEvent content", articleEvent?.content);
-
   return (
     <>
       {status === "success" && articleEvent && (

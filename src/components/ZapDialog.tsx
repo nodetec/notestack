@@ -53,7 +53,6 @@ export function ZapDialog({
     if (amount === "" || parseInt(amount, 10) === 0) {
       setAmount("");
       setMessage("");
-      console.log("amount is 0");
       toast("Amount must be greater than 0", {
         description: "Please enter a valid amount.",
       });
@@ -61,7 +60,6 @@ export function ZapDialog({
     }
 
     if (!recipientProfileEvent) {
-      console.log("no recipient profile event");
       toast("Error sending zap", {
         description: "There was an error sending your zap.",
       });
@@ -69,7 +67,6 @@ export function ZapDialog({
     }
 
     if (!senderPubkey) {
-      console.log("no sender pubkey");
       toast("Error sending zap", {
         description: "There was an error sending your zap.",
       });

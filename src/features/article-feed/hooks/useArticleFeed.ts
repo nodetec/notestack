@@ -28,7 +28,6 @@ const fetchArticles = async ({
     followEvent,
     feed,
   );
-  console.log("RESPONSE", response);
 
   const addArticle = useAppState.getState().addArticle;
 

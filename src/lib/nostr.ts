@@ -40,8 +40,6 @@ export async function getArticles(
 ) {
   const pool = new SimplePool();
 
-  console.log("GETTING ARTICLES", publicKey);
-
   let publicKeys = [...FEATURED_WRITERS, ...getFollowPubkeys(followEvent)];
 
   if (publicKey) {
@@ -70,7 +68,6 @@ export async function getArticles(
       id: "getArticles",
     },
   );
-  console.log("EVENTS", events);
   pool.close(relays);
 
   if (!events) {
@@ -86,19 +83,14 @@ export async function getArticles(
   // Determine if there's a next page by checking if we got more events than the limit
   // const hasNextPage = events.length > limit;
 
-  // console.log("slicedEvents 1", events);
-
   // The cursor for the next page would be the creation time of the last event in the list
   let nextCursor = pageParam;
   if (events.length > 0) {
-    // console.log("slicedEvents", events);
     const lastEvent = events[events.length - 1];
     if (lastEvent) {
       nextCursor = lastEvent.created_at;
     }
   }
-
-  // console.log("nextCursor", nextCursor);
 
   return {
     articles: events,
@@ -263,7 +255,6 @@ export async function finishEventWithExtension(t: EventTemplate) {
       event.pubkey = await nostr.getPublicKey();
       event.id = getEventHash(event);
       event = (await nostr.signEvent(event)) as Event;
-      // console.log("signed event", event);
       return event;
     } else {
       console.error("nostr not defined");
@@ -389,8 +380,6 @@ export async function broadcast(event: Event, relays: string[]) {
   const result = await Promise.any(pool.publish(relays, event));
 
   pool.close(relays);
-
-  // console.log("broadcast result", result);
 
   return true;
 }

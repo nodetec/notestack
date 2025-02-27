@@ -8,7 +8,6 @@ const batcher = memoize((relays: string[]) => {
   return create({
     name: "publicKeys",
     fetcher: async (publicKeys: string[]) => {
-      console.log("Fetching profiles", publicKeys);
       return await getProfileEvents(relays, publicKeys);
     },
     scheduler: windowScheduler(10),

@@ -145,8 +145,6 @@ export const sendZap = async (zapRequest: ZapRequest, profileEvent: Event) => {
 
   if (!invoice) throw new Error("invoice not found");
 
-  console.log("invoice", invoice);
-
   try {
     return await payInvoice(invoice);
   } catch (err) {

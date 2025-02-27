@@ -23,8 +23,6 @@ export function ArticleProfileFeed({
     DEFAULT_RELAYS,
   );
 
-  console.log("profileRelayMetadataEvent", profileRelayMetadataEvent);
-
   const articleFeedParams: ArticleFeedParams = {
     enabled: profileRelayMetadataEvent.isSuccess,
     profilePublicKey,
