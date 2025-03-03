@@ -109,7 +109,7 @@ export const Editor = () => {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="sticky top-0 z-10 mt-1 pb-1 flex w-full justify-center border-b bg-secondary">
+      <div className="sticky top-0 z-10 mt-1 flex w-full justify-center border-b bg-secondary pb-1">
         <ToolbarPlugin />
       </div>
       <div className="editor-shell relative flex cursor-text justify-center">

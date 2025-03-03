@@ -1,6 +1,16 @@
+/* eslint-disable @next/next/no-img-element */
+
 import * as React from "react";
 import { type JSX } from "react";
 
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "~/components/ui/hover-card";
+import { useProfileEvent } from "~/hooks/useProfileEvent";
+import { DEFAULT_RELAYS } from "~/lib/constants";
+import { parseProfileEvent } from "~/lib/events/profile-event";
 import {
   DecoratorNode,
   type DOMConversionMap,
@@ -11,6 +21,7 @@ import {
   type SerializedLexicalNode,
   type Spread,
 } from "lexical";
+import { nip19 } from "nostr-tools";
 
 const shortNpub = (npub: string | undefined, length = 4) => {
   if (!npub) {
@@ -33,7 +44,65 @@ interface ProfileComponentProps {
 
 // This will be the React component that renders in the editor
 function ProfileComponent({ profileData }: ProfileComponentProps) {
-  return <span className="text-blue-500">{shortNpub(profileData.npub)}</span>;
+  const publicKey = nip19.decode(profileData.npub).data as string;
+  const profileEvent = useProfileEvent(DEFAULT_RELAYS, publicKey);
+
+  return (
+    <HoverCard>
+      <span className="cursor-pointer text-blue-500 hover:underline">
+        {profileEvent.data !== undefined ? (
+          profileEvent.data ? (
+            <>
+              <HoverCardTrigger asChild>
+                <span className="text-blue-500">
+                  <a href={`/${profileData.npub}`}>
+                    @{parseProfileEvent(profileEvent.data).content.name}
+                  </a>
+                </span>
+              </HoverCardTrigger>
+              <HoverCardContent>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <img
+                      className="h-8 w-8 rounded-full"
+                      src={parseProfileEvent(profileEvent.data).content.picture}
+                      alt="Profile"
+                    />
+                    <span>
+                      {parseProfileEvent(profileEvent.data).content.name}
+                    </span>
+                  </div>
+                  <div>{shortNpub(profileData.npub)}</div>
+                  <div>
+                    website:{" "}
+                    {parseProfileEvent(profileEvent.data).content.website}
+                  </div>
+                  {parseProfileEvent(profileEvent.data).content.nip05 && (
+                    <div>
+                      nip05:{" "}
+                      {parseProfileEvent(profileEvent.data).content.nip05}
+                    </div>
+                  )}
+                </div>
+              </HoverCardContent>
+            </>
+          ) : (
+            <HoverCardTrigger asChild>
+              <span className="text-blue-500">
+                <a href={`/${profileData.npub}`}>
+                  <span className="text-blue-500">
+                    {shortNpub(profileData.npub)}
+                  </span>
+                </a>
+              </span>
+            </HoverCardTrigger>
+          )
+        ) : (
+          <>...</>
+        )}
+      </span>
+    </HoverCard>
+  );
 }
 
 export type SerializedProfileNode = Spread<
