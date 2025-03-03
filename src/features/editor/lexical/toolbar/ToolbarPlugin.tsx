@@ -29,17 +29,17 @@ import {
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
 } from "lexical";
-import { Layers3 } from "lucide-react";
+import { ChevronDownIcon, Layers3 } from "lucide-react";
 import Link from "next/link";
 
 import { PublishDialog } from "../../components/PublishDialog";
+import CodeBlockPlugin from "../codeblock/CodeBlockPlugin";
 import MarkdownImagePlugin from "../markdownImage/ImageActions";
 // import { InsertProfileButton } from "../nostrProfile/ProfilePlugin";
 import TwitterAction from "../tweet/TwitterActions";
 import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
 import { useKeyBinds } from "./hooks/useKeybinds";
-import CodeBlockPlugin from "../codeblock/CodeBlockPlugin";
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -197,11 +197,12 @@ export function ToolbarPlugin() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="w-[110px] justify-start"
+              className="w-[120px] justify-start flex items-center gap-2"
               size="sm"
               variant="outline"
             >
               {blockTypeToName[blockType] ?? "Paragraph"}
+              <ChevronDownIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
