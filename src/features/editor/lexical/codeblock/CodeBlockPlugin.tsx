@@ -2,11 +2,7 @@ import { $createCodeNode } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $setBlocksType } from "@lexical/selection";
 import { Button } from "~/components/ui/button";
-import {
-  $createParagraphNode,
-  $getSelection,
-  $isRangeSelection,
-} from "lexical";
+import { $getSelection, $isRangeSelection } from "lexical";
 import { SquareCodeIcon } from "lucide-react";
 
 interface CodeBlockPluginProps {
@@ -27,18 +23,8 @@ export default function CodeBlockPlugin({ blockType }: CodeBlockPluginProps) {
         // Create the code block
         const codeNode = $createCodeNode();
 
-        // Create paragraph nodes before and after
-        const paragraphBefore = $createParagraphNode();
-        const paragraphAfter = $createParagraphNode();
-
         // First transform selection to codeblock
         $setBlocksType(selection, () => codeNode);
-
-        // Then insert paragraphs around it
-        // Insert before
-        codeNode.insertBefore(paragraphBefore);
-        // Insert after
-        codeNode.insertAfter(paragraphAfter);
       }
     });
   };

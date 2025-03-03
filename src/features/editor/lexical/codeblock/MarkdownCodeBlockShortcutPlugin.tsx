@@ -4,7 +4,6 @@ import { $createCodeNode } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $setBlocksType } from "@lexical/selection";
 import {
-  $createParagraphNode,
   $createRangeSelection,
   $getSelection,
   $isRangeSelection,
@@ -51,7 +50,6 @@ export const MarkdownCodeBlockShortcutPlugin = () => {
         }
 
         const anchorKey = selection.anchor.key;
-        const anchorOffset = selection.anchor.offset;
 
         const anchorNode = editorState._nodeMap.get(anchorKey);
 
@@ -121,14 +119,6 @@ export const MarkdownCodeBlockShortcutPlugin = () => {
 
     // Transform the selection to a code block
     $setBlocksType(selection, () => codeNode);
-
-    // Create paragraph nodes before and after
-    const paragraphBefore = $createParagraphNode();
-    const paragraphAfter = $createParagraphNode();
-
-    // Insert paragraphs around the code block
-    codeNode.insertBefore(paragraphBefore);
-    codeNode.insertAfter(paragraphAfter);
 
     return true;
   };
