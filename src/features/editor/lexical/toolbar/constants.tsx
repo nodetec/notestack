@@ -11,7 +11,7 @@ import {
 export enum RichTextAction {
   Bold = "bold",
   Italics = "italics",
-  Underline = "underline",
+  // Underline = "underline",
   Strikethrough = "strikethrough",
   Code = "code",
   Divider = "divider",
@@ -30,11 +30,11 @@ export const RICH_TEXT_OPTIONS = [
     icon: <ItalicIcon className="h-4 w-4" />,
     label: "Italics",
   },
-  {
-    id: RichTextAction.Underline,
-    icon: <UnderlineIcon className="h-4 w-4" />,
-    label: "Underline",
-  },
+  // {
+  //   id: RichTextAction.Underline,
+  //   icon: <UnderlineIcon className="h-4 w-4" />,
+  //   label: "Underline",
+  // },
   {
     id: RichTextAction.Strikethrough,
     icon: <StrikethroughIcon className="h-4 w-4" />,
