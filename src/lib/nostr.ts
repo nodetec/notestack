@@ -40,7 +40,10 @@ export async function getArticles(
 ) {
   const pool = new SimplePool();
 
-  let publicKeys = [...FEATURED_WRITERS, ...getFollowPubkeys(followEvent)];
+  let publicKeys: string[] | undefined = [
+    ...FEATURED_WRITERS,
+    ...getFollowPubkeys(followEvent),
+  ];
 
   if (publicKey) {
     publicKeys = [publicKey];
@@ -54,6 +57,10 @@ export async function getArticles(
 
   if (pageParam === 0) {
     limit = 10;
+  }
+
+  if (feed === "latest") {
+    publicKeys = undefined;
   }
 
   let events = await pool.querySync(

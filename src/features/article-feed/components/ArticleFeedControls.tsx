@@ -16,6 +16,9 @@ export function ArticleFeedControls({ show }: Props) {
     if (feed === "following") {
       return "Following";
     }
+    if (feed === "latest") {
+      return "Latest";
+    }
     return "Featured";
   }
 
@@ -42,60 +45,3 @@ export function ArticleFeedControls({ show }: Props) {
     </div>
   );
 }
-
-// import * as React from "react";
-//
-// import { Button } from "~/components/ui/button";
-// import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-// import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-// import { ChevronLeft, ChevronRight, PlusIcon } from "lucide-react";
-//
-// const tabItems = [
-//   "Featured",
-//   "Following",
-//   "Javascript",
-//   "React",
-//   "Bitcoin",
-//   "Lightning",
-//   "Linux",
-//   "Programming",
-//   "Golang",
-//   "Rust",
-// ];
-//
-// type Props = {
-//   show?: boolean;
-// };
-//
-// export function ArticleFeedControls({ show }: Props) {
-//   return (
-//     <Tabs
-//       defaultValue="dashboard"
-//       className="sticky top-0 w-full max-w-3xl bg-secondary px-3 pt-4 md:px-5"
-//     >
-//       <div className="relative">
-//         <ScrollArea className="w-full whitespace-nowrap border-b">
-//           <TabsList className="inline-flex w-max items-center justify-start gap-1 rounded-none bg-secondary px-2 py-6">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-sm px-3 py-0 text-sm font-medium transition-all hover:bg-muted/80 data-[state=active]:text-foreground"
-//             >
-//               <PlusIcon className="h-5 w-5 shrink-0" />
-//             </Button>
-//             {tabItems.map((item) => (
-//               <TabsTrigger
-//                 key={item.toLowerCase()}
-//                 value={item.toLowerCase()}
-//                 className="rounded-sm px-2.5 py-1.5 text-sm font-medium transition-all hover:bg-muted/80 data-[state=active]:bg-secondary data-[state=active]:text-foreground"
-//               >
-//                 {item}
-//               </TabsTrigger>
-//             ))}
-//           </TabsList>
-//           <ScrollBar orientation="horizontal" className="invisible" />
-//         </ScrollArea>
-//       </div>
-//     </Tabs>
-//   );
-// }
