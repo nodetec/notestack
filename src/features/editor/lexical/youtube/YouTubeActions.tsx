@@ -82,7 +82,7 @@ export default function YoutubeAction() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="icon-sm" variant="ghost">
-          <YoutubeIcon />
+          <YoutubeIcon className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
