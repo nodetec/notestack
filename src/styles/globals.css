@@ -79,3 +79,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.px-auto {
+  padding-left: auto;
+  padding-right: auto;
+}
