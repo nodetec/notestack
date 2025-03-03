@@ -43,6 +43,7 @@ import { TweetNode } from "../lexical/tweet/TwitterNode";
 import { TWITTER_TRANSFORMER } from "../lexical/tweet/TwitterTransformer";
 import { YouTubeNode } from "../lexical/youtube/YouTubeNode";
 import { YOUTUBE_TRANSFORMER } from "../lexical/youtube/YouTubeTransformer";
+import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcut";
 
 export const Editor = () => {
   const markdown = useAppState.getState().markdown;
@@ -140,6 +141,7 @@ export const Editor = () => {
       <ProfilePlugin />
       <ProfilePastePlugin />
       <ProfileMarkdownPlugin />
+      <MarkdownCodeBlockShortcutPlugin />
     </LexicalComposer>
   );
 };
