@@ -108,7 +108,7 @@ export function Article({ address }: Props) {
           </div>
 
           <article
-            className="break-anywhere prose prose-zinc mx-auto dark:prose-invert"
+            className="break-anywhere prose prose-zinc mx-auto dark:prose-invert mb-40"
             dangerouslySetInnerHTML={{
               __html: processArticle(articleEvent),
             }}
