@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-
-import { $createCodeNode, registerCodeHighlighting } from "@lexical/code";
+import { $createCodeNode } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $setBlocksType } from "@lexical/selection";
 import { Button } from "~/components/ui/button";
@@ -9,7 +7,7 @@ import {
   $getSelection,
   $isRangeSelection,
 } from "lexical";
-import { BracesIcon, SquareCodeIcon } from "lucide-react";
+import { SquareCodeIcon } from "lucide-react";
 
 interface CodeBlockPluginProps {
   blockType: string;
@@ -18,9 +16,9 @@ interface CodeBlockPluginProps {
 export default function CodeBlockPlugin({ blockType }: CodeBlockPluginProps) {
   const [editor] = useLexicalComposerContext();
 
-//   useEffect(() => {
-//     registerCodeHighlighting(editor);
-//   }, [editor]);
+  //   useEffect(() => {
+  //     registerCodeHighlighting(editor);
+  //   }, [editor]);
 
   const onAddCodeBlock = () => {
     editor.update(() => {
