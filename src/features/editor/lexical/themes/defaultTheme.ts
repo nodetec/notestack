@@ -14,7 +14,7 @@ export const defaultTheme: EditorThemeClasses = {
     highlight: "bg-yellow-200",
     superscript: "text-xs",
   },
-  code: "font-mono textCode bg-muted text-gray-800 p-4 block overflow-x-auto relative",
+  code: "font-mono textCode bg-muted text-muted-foreground p-4 block overflow-x-auto relative",
   codeHighlight: {},
   heading: {
     h1: "text-4xl font-bold mb-2 mt-3 font-sans",

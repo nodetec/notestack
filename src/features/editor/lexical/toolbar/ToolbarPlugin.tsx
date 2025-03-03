@@ -39,6 +39,7 @@ import TwitterAction from "../tweet/TwitterActions";
 import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
 import { useKeyBinds } from "./hooks/useKeybinds";
+import CodeBlockPlugin from "../codeblock/CodeBlockPlugin";
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -241,6 +242,7 @@ export function ToolbarPlugin() {
             ),
           )}
         </div>
+        <CodeBlockPlugin blockType={blockType} />
         <MarkdownImagePlugin />
         <TwitterAction />
         <YoutubeAction />
