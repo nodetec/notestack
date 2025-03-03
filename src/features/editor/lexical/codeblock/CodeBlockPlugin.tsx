@@ -9,7 +9,7 @@ import {
   $getSelection,
   $isRangeSelection,
 } from "lexical";
-import { BracesIcon } from "lucide-react";
+import { BracesIcon, SquareCodeIcon } from "lucide-react";
 
 interface CodeBlockPluginProps {
   blockType: string;
@@ -53,7 +53,7 @@ export default function CodeBlockPlugin({ blockType }: CodeBlockPluginProps) {
         className={blockType === "code" ? "bg-primary/5" : ""}
         onClick={onAddCodeBlock}
       >
-        <BracesIcon className="h-4 w-4" />
+        <SquareCodeIcon className="h-4 w-4" />
       </Button>
     </div>
   );
