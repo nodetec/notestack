@@ -20,9 +20,9 @@ export const useKeyBinds = ({
         if (event?.key === "I" && event?.ctrlKey) {
           onAction(RichTextAction.Italics);
         }
-        if (event?.key === "U" && event?.ctrlKey) {
-          onAction(RichTextAction.Underline);
-        }
+        // if (event?.key === "U" && event?.ctrlKey) {
+        //   onAction(RichTextAction.Underline);
+        // }
         if (event?.key === "Z" && event?.ctrlKey) {
           onAction(RichTextAction.Undo);
         }
