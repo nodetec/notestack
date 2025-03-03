@@ -4,6 +4,7 @@ import "./defaultTheme.css";
 
 export const defaultTheme: EditorThemeClasses = {
   text: {
+    // base: "font-sourceserif",
     bold: "bold",
     underline: "underline",
     strikethrough: "line-through",
@@ -16,12 +17,12 @@ export const defaultTheme: EditorThemeClasses = {
   code: "font-mono textCode bg-muted text-gray-800 p-4 block overflow-x-auto relative",
   codeHighlight: {},
   heading: {
-    h1: "text-4xl font-bold mb-2 mt-3",
-    h2: "text-3xl font-bold mb-2 mt-3",
-    h3: "text-2xl font-bold mb-2 mt-3",
-    h4: "text-xl font-bold mb-2 mt-3",
-    h5: "text-lg font-bold mb-2 mt-3",
-    h6: "text-lg font-bold mb-2 mt-3",
+    h1: "text-4xl font-bold mb-2 mt-3 font-sans",
+    h2: "text-3xl font-bold mb-2 mt-3 font-sans",
+    h3: "text-2xl font-bold mb-2 mt-3 font-sans",
+    h4: "text-xl font-bold mb-2 mt-3 font-sans",
+    h5: "text-lg font-bold mb-2 mt-3 font-sans",
+    h6: "text-lg font-bold mb-2 mt-3 font-sans",
   },
   list: {
     olDepth: [
