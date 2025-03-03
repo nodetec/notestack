@@ -111,7 +111,7 @@ export function PublishDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <div className="w-full">
+        <div className="flex w-full justify-end">
           <Button
             className="hidden justify-start gap-2 sm:flex"
             type="button"
