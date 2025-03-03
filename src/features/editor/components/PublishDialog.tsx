@@ -31,6 +31,10 @@ function randomId() {
   return Math.floor(Math.random() * 0xffffffff).toString(16);
 }
 
+function isValidImage(url: string) {
+  return url.match(/\.(jpeg|jpg|gif|png)$/) != null;
+}
+
 const handlePublish = async (
   e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   title: string,
@@ -55,8 +59,9 @@ const handlePublish = async (
   const eventTags = [
     ["d", identifier],
     ["title", title],
-    ["image", image],
   ];
+
+  if (image && isValidImage(image)) eventTags.push(["image", image]);
 
   if (tags) {
     tags.forEach((tag) => {
@@ -71,14 +76,16 @@ const handlePublish = async (
     content: markdown,
   };
 
-  const publishedEvent = await publish(eventTemplate, relays);
+  console.log(eventTemplate);
 
-  if (publishedEvent) {
-    const naddr = makeNaddr(publishedEvent, relays);
-    setMarkdown("");
-    setIsOpen(false);
-    void redirectToPublishedArticle(`a/${naddr}`);
-  }
+  //   const publishedEvent = await publish(eventTemplate, relays);
+
+  //   if (publishedEvent) {
+  //     const naddr = makeNaddr(publishedEvent, relays);
+  //     setMarkdown("");
+  //     setIsOpen(false);
+  //     void redirectToPublishedArticle(`a/${naddr}`);
+  //   }
 };
 
 export function PublishDialog() {
