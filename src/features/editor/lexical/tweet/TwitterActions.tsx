@@ -29,6 +29,7 @@ export const INSERT_TWITTER_COMMAND: LexicalCommand<string> = createCommand(
 
 export default function TwitterAction() {
   const [url, setURL] = useState("");
+  const [isOpen, setIsOpen] = useState(false); // Add state to control dialog open state
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -89,10 +90,11 @@ export default function TwitterAction() {
     });
 
     setURL("");
+    setIsOpen(false); // Close the dialog
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="icon-sm" variant="ghost">
           <TwitterIcon className="h-4 w-4" />
@@ -112,7 +114,12 @@ export default function TwitterAction() {
           placeholder="https://twitter.com/username/status/1234567890123456789"
         />
 
-        <Button type="submit" variant="ghost" disabled={!url} onClick={onEmbed}>
+        <Button
+          type="submit"
+          variant="default"
+          disabled={!url}
+          onClick={onEmbed}
+        >
           Embed
         </Button>
       </DialogContent>

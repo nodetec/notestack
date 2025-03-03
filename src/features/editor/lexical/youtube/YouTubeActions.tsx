@@ -29,6 +29,7 @@ export const INSERT_YOUTUBE_COMMAND: LexicalCommand<string> = createCommand(
 
 export default function YoutubeAction() {
   const [url, setURL] = useState("");
+  const [isOpen, setIsOpen] = useState(false); // Add state to control dialog open state
 
   const [editor] = useLexicalComposerContext();
 
@@ -74,10 +75,11 @@ export default function YoutubeAction() {
       $insertNodes([paragraphBefore, youTubeNode, paragraphAfter]);
     });
     setURL("");
+    setIsOpen(false); // Close the dialog
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="icon-sm" variant="ghost">
           <YoutubeIcon />
@@ -97,7 +99,12 @@ export default function YoutubeAction() {
           placeholder="Add Youtube URL"
         />
 
-        <Button type="submit" variant="ghost" disabled={!url} onClick={onEmbed}>
+        <Button
+          type="submit"
+          variant="default"
+          disabled={!url}
+          onClick={onEmbed}
+        >
           Embed
         </Button>
       </DialogContent>
