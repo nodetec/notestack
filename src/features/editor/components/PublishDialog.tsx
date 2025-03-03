@@ -32,7 +32,7 @@ function randomId() {
 }
 
 function isValidImage(url: string) {
-  return url.match(/\.(jpeg|jpg|gif|png)$/) != null;
+  return /\.(jpeg|jpg|gif|png)$/.exec(url) != null;
 }
 
 const handlePublish = async (
@@ -76,16 +76,14 @@ const handlePublish = async (
     content: markdown,
   };
 
-  console.log(eventTemplate);
+  const publishedEvent = await publish(eventTemplate, relays);
 
-  //   const publishedEvent = await publish(eventTemplate, relays);
-
-  //   if (publishedEvent) {
-  //     const naddr = makeNaddr(publishedEvent, relays);
-  //     setMarkdown("");
-  //     setIsOpen(false);
-  //     void redirectToPublishedArticle(`a/${naddr}`);
-  //   }
+  if (publishedEvent) {
+    const naddr = makeNaddr(publishedEvent, relays);
+    setMarkdown("");
+    setIsOpen(false);
+    void redirectToPublishedArticle(`a/${naddr}`);
+  }
 };
 
 export function PublishDialog() {
