@@ -1,0 +1,28 @@
+.textCode {
+  border-radius: var(--radius);
+  font-family: monospace;
+}
+
+.embedBlock {
+  user-select: none;
+}
+.embedBlockFocus {
+  outline: 2px solid rgb(60, 132, 244);
+}
+
+.editor-shell span.editor-image {
+  cursor: default;
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+.editor-shell .editor-image img {
+  max-width: 100%;
+  cursor: default;
+}
+
+.editor-shell .editor-image img.focused {
+  outline: 2px solid rgb(60, 132, 244);
+  user-select: none;
+}

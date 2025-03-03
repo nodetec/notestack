@@ -326,12 +326,12 @@ export async function publish(eventTemplate: EventTemplate, relays: string[]) {
       event = await finishEventWithSecretKey(eventTemplate);
     } else {
       console.error("User not found");
-      return false;
+      return null;
     }
   }
 
   if (!event) {
-    return false;
+    return null;
   }
   const pool = new SimplePool();
 
@@ -343,10 +343,10 @@ export async function publish(eventTemplate: EventTemplate, relays: string[]) {
   pool.close(relays);
 
   if (!retrievedEvent) {
-    return false;
+    return null;
   }
 
-  return true;
+  return event;
 }
 
 export async function publishFinishedEvent(event: Event, relays: string[]) {
