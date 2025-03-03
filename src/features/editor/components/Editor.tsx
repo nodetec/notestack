@@ -23,6 +23,7 @@ import { useAppState } from "~/store";
 import { type EditorState, type LexicalEditor } from "lexical";
 
 import AutoLinkPlugin from "../lexical/autolink/AutoLinkPlugin";
+import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcutPlugin";
 import { ImageNode } from "../lexical/markdownImage/ImageNode";
 import ImagePastePlugin from "../lexical/markdownImage/ImagePastePlugin";
 import IMAGE_TRANSFORMER from "../lexical/markdownImage/ImageTransformer";
@@ -43,7 +44,6 @@ import { TweetNode } from "../lexical/tweet/TwitterNode";
 import { TWITTER_TRANSFORMER } from "../lexical/tweet/TwitterTransformer";
 import { YouTubeNode } from "../lexical/youtube/YouTubeNode";
 import { YOUTUBE_TRANSFORMER } from "../lexical/youtube/YouTubeTransformer";
-import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcutPlugin";
 
 export const Editor = () => {
   const markdown = useAppState.getState().markdown;
@@ -109,7 +109,7 @@ export const Editor = () => {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="sticky top-0 z-10 flex w-full justify-center border-b bg-secondary">
+      <div className="sticky top-0 z-10 my-1 flex w-full justify-center border-b bg-secondary">
         <ToolbarPlugin />
       </div>
       <div className="editor-shell relative flex cursor-text justify-center">
