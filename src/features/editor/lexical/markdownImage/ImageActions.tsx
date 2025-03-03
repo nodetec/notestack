@@ -18,7 +18,7 @@ import {
   $insertNodes,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
-  LexicalCommand,
+  type LexicalCommand,
 } from "lexical";
 import { ImageIcon } from "lucide-react";
 
@@ -29,7 +29,7 @@ export const INSERT_IMAGE_COMMAND: LexicalCommand<{
   altText: string;
 }> = createCommand("INSERT_IMAGE_COMMAND");
 
-export default function MarkdownImagePlugin() {
+export default function ImageAction() {
   const [editor] = useLexicalComposerContext();
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");

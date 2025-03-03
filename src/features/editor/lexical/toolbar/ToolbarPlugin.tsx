@@ -32,8 +32,10 @@ import {
 import { Layers3 } from "lucide-react";
 import Link from "next/link";
 
+import { PublishDialog } from "../../components/PublishDialog";
 import MarkdownImagePlugin from "../markdownImage/ImageActions";
 import TwitterAction from "../tweet/TwitterActions";
+import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
 import { useKeyBinds } from "./hooks/useKeybinds";
 
@@ -184,7 +186,7 @@ export function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex w-full items-center gap-8 border-b px-4 py-4">
+    <div className="flex w-full items-center gap-8 px-4 py-4 md:px-16 max-w-6xl">
       <Link href="/" className="flex items-center gap-2">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
@@ -237,8 +239,10 @@ export function ToolbarPlugin() {
           ),
         )}
         <MarkdownImagePlugin />
-        {/* <TwitterAction /> */}
+        <TwitterAction />
+        <YoutubeAction />
       </div>
+      <PublishDialog />
     </div>
   );
 }

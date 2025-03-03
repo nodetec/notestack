@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from "react";
+
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {
-  $insertNodes,
-  COMMAND_PRIORITY_EDITOR,
-  createCommand,
-  LexicalCommand,
-} from "lexical";
-import { $createYouTubeNode, YouTubeNode } from "~/editor/nodes/YouTubeNode";
-import { YoutubeIcon } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import { $insertNodeToNearestRoot } from "@lexical/utils";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +12,19 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { $createParagraphNode } from "lexical";
+import {
+  $createParagraphNode,
+  $insertNodes,
+  COMMAND_PRIORITY_EDITOR,
+  createCommand,
+  type LexicalCommand,
+} from "lexical";
+import { YoutubeIcon } from "lucide-react";
+
+import { $createYouTubeNode, YouTubeNode } from "./YouTubeNode";
 
 export const INSERT_YOUTUBE_COMMAND: LexicalCommand<string> = createCommand(
-  "INSERT_YOUTUBE_COMMAND"
+  "INSERT_YOUTUBE_COMMAND",
 );
 
 export default function YoutubeAction() {
@@ -50,7 +52,7 @@ export default function YoutubeAction() {
 
         return true;
       },
-      COMMAND_PRIORITY_EDITOR
+      COMMAND_PRIORITY_EDITOR,
     );
   }, [editor]);
 
@@ -77,9 +79,8 @@ export default function YoutubeAction() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="flex gap-1 w-full p-2 justify-start" variant="ghost">
+        <Button size="icon-sm" variant="ghost">
           <YoutubeIcon />
-          YouTube Video
         </Button>
       </DialogTrigger>
       <DialogContent>

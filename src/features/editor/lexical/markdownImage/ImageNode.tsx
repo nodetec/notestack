@@ -1,20 +1,26 @@
-import type { JSX } from "react";
-import * as React from "react";
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
 
-import {
-  $applyNodeReplacement,
-  DecoratorNode,
-  type DOMConversionMap,
-  type DOMConversionOutput,
-  type DOMExportOutput,
-  type EditorConfig,
-  type LexicalNode,
-  type LexicalUpdateJSON,
-  type NodeKey,
-  type SerializedLexicalNode,
-  type Spread,
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  DOMExportOutput,
+  EditorConfig,
+  LexicalNode,
+  LexicalUpdateJSON,
+  NodeKey,
+  SerializedLexicalNode,
+  Spread,
 } from "lexical";
+import type { JSX } from "react";
 
+import { $applyNodeReplacement, DecoratorNode } from "lexical";
+import * as React from "react";
 import ImageComponent from "./ImageComponent";
 
 export interface ImagePayload {
@@ -74,7 +80,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       node.__maxWidth,
       node.__width,
       node.__height,
-      node.__key,
+      node.__key
     );
   }
 
@@ -118,14 +124,14 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     maxWidth: number,
     width?: "inherit" | number,
     height?: "inherit" | number,
-    key?: NodeKey,
+    key?: NodeKey
   ) {
     super(key);
     this.__src = src;
     this.__altText = altText;
     this.__maxWidth = maxWidth;
-    this.__width = width ?? "inherit";
-    this.__height = height ?? "inherit";
+    this.__width = width || "inherit";
+    this.__height = height || "inherit";
   }
 
   exportJSON(): SerializedImageNode {
@@ -141,7 +147,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   setWidthAndHeight(
     width: "inherit" | number,
-    height: "inherit" | number,
+    height: "inherit" | number
   ): void {
     const writable = this.getWritable();
     writable.__width = width;
@@ -195,12 +201,12 @@ export function $createImageNode({
   key,
 }: ImagePayload): ImageNode {
   return $applyNodeReplacement(
-    new ImageNode(src, altText, maxWidth, width, height, key),
+    new ImageNode(src, altText, maxWidth, width, height, key)
   );
 }
 
 export function $isImageNode(
-  node: LexicalNode | null | undefined,
+  node: LexicalNode | null | undefined
 ): node is ImageNode {
   return node instanceof ImageNode;
 }

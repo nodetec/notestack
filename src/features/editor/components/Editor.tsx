@@ -27,10 +27,13 @@ import { MarkdownImageShortcutPlugin } from "../lexical/markdownImage/MarkdownIm
 import { OnBlurPlugin } from "../lexical/onBlur/OnBlurPlugin";
 import { OnChangeDebouncePlugin } from "../lexical/onChangeDebounce/OnChangeDebouncePlugin";
 import { ScrollCenterCurrentLinePlugin } from "../lexical/scrollCenterCurrentLine/ScrollCenterCurrentLinePlugin";
+import TabKeyPlugin from "../lexical/tabKey/TabKeyPlugin";
 import { defaultTheme } from "../lexical/themes/defaultTheme";
 import { ToolbarPlugin } from "../lexical/toolbar/ToolbarPlugin";
 import { TweetNode } from "../lexical/tweet/TwitterNode";
 import { TWITTER_TRANSFORMER } from "../lexical/tweet/TwitterTransformer";
+import { YouTubeNode } from "../lexical/youtube/YouTubeNode";
+import { YOUTUBE_TRANSFORMER } from "../lexical/youtube/YouTubeTransformer";
 
 export const Editor = () => {
   const markdown = useAppState.getState().markdown;
@@ -38,7 +41,8 @@ export const Editor = () => {
 
   const COMBINED_TRANSFORMERS = [
     IMAGE_TRANSFORMER,
-    // TWITTER_TRANSFORMER,
+    TWITTER_TRANSFORMER,
+    YOUTUBE_TRANSFORMER,
     ...TRANSFORMERS,
   ];
 
@@ -70,7 +74,8 @@ export const Editor = () => {
       HashtagNode,
       CodeNode,
       CodeHighlightNode,
-    //   TweetNode,
+      TweetNode,
+      YouTubeNode,
     ],
   };
 
@@ -92,7 +97,7 @@ export const Editor = () => {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="sticky top-0 z-10 flex w-full justify-center bg-secondary">
+      <div className="sticky top-0 z-10 flex w-full justify-center border-b bg-secondary">
         <ToolbarPlugin />
       </div>
       <div className="editor-shell relative flex cursor-text justify-center">
@@ -112,17 +117,12 @@ export const Editor = () => {
       <OnBlurPlugin onBlur={onBlur} />
       <MarkdownImageShortcutPlugin />
       <ImagePastePlugin />
-      {/* 
       <TabKeyPlugin tabSize={2} useSpaces={true} />
-      <ProfilePlugin />
-      <ProfilePastePlugin />
-      <ProfileMarkdownPlugin /> */}
       <MarkdownShortcutPlugin transformers={COMBINED_TRANSFORMERS} />
       <AutoFocusPlugin />
       <ListPlugin />
       <HistoryPlugin />
       <ScrollCenterCurrentLinePlugin />
-      {/* <TreeViewPlugin /> */}
     </LexicalComposer>
   );
 };
