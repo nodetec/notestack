@@ -26,6 +26,7 @@ export function ArticleFeedFilterDropdown({ children }: Props) {
   function handleChangeFilter(filter: string) {
     if (filter === "featured") router.push(`/`);
     if (filter === "following") router.push(`/?feed=following`);
+    if (filter === "latest") router.push(`/?feed=latest`);
   }
 
   return (
@@ -37,6 +38,9 @@ export function ArticleFeedFilterDropdown({ children }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={() => handleChangeFilter("featured")}>
             Featured
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => handleChangeFilter("latest")}>
+            Latest
           </DropdownMenuItem>
           {userFollowEvent.data && (
             <DropdownMenuItem onSelect={() => handleChangeFilter("following")}>
