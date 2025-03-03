@@ -63,6 +63,8 @@ export async function getArticles(
     publicKeys = undefined;
   }
 
+  // https://github.com/nbd-wtf/nostr-tools/issues/229
+  // if we mix relays a relay with older data may be used and newer events will be ignored
   let events = await pool.querySync(
     relays,
     {
