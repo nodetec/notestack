@@ -19,6 +19,10 @@ type Props = {
   userPublicKey?: string;
 };
 
+function isValidImage(url: string) {
+  return /\.(jpeg|jpg|gif|png)$/.exec(url) != null;
+}
+
 // Update the component to use forwardRef
 export const ArticleCard = forwardRef<HTMLDivElement, Props>(
   ({ articleEvent, relays, userPublicKey }, ref) => {
@@ -50,7 +54,7 @@ export const ArticleCard = forwardRef<HTMLDivElement, Props>(
             >
               <div className="flex flex-col">
                 <div className="flex items-start justify-between sm:items-center">
-                  <div className="flex w-full flex-col items-start gap-2">
+                  <div className="flex w-full max-w-sm md:max-w-[25rem] lg:max-w-[31rem] flex-col items-start gap-2">
                     <h2 className="line-clamp-3 text-ellipsis break-words text-xl font-bold leading-6 sm:text-2xl sm:leading-7">
                       {getTag("title", articleEvent.tags)}
                     </h2>
@@ -65,18 +69,27 @@ export const ArticleCard = forwardRef<HTMLDivElement, Props>(
                     </div>
                   </div>
 
-                  <Image
-                    className="ml-6 h-14 w-20 shrink-0 rounded-md object-cover sm:ml-14 sm:h-28 sm:w-40"
-                    src={
+                  {
+                    // Only show the image if it is valid
+                    isValidImage(
                       getTag("image", articleEvent.tags) ??
-                      getFirstImage(articleEvent.content) ??
-                      "/images/transparent-160-112.png"
-                    }
-                    width={160}
-                    height={112}
-                    alt=""
-                    loading="lazy"
-                  />
+                        getFirstImage(articleEvent.content) ??
+                        "",
+                    ) && (
+                      <Image
+                        className="ml-6 h-14 w-20 shrink-0 rounded-md object-cover md:ml-14 md:h-28 md:w-40"
+                        src={
+                          getTag("image", articleEvent.tags) ??
+                          getFirstImage(articleEvent.content) ??
+                          "/images/transparent-160-112.png"
+                        }
+                        width={160}
+                        height={112}
+                        alt=""
+                        loading="lazy"
+                      />
+                    )
+                  }
                 </div>
                 <div className="mt-6 flex w-full sm:hidden">
                   <ArticleCardFooter
