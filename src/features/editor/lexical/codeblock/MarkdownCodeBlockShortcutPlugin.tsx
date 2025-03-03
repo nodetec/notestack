@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 
+import { $createCodeNode } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $setBlocksType } from "@lexical/selection";
 import {
+  $createParagraphNode,
+  $createRangeSelection,
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  $setSelection,
   type ElementNode,
   type TextNode,
 } from "lexical";
-
-import { $createCodeNode } from "@lexical/code";
 
 /**
  * React component that adds markdown code block shortcut functionality to a Lexical editor
@@ -38,12 +41,11 @@ export const MarkdownCodeBlockShortcutPlugin = () => {
         const selection = editorState.read($getSelection);
         const prevSelection = prevEditorState.read($getSelection);
 
-        // We only want to trigger transforms as user types with a collapsed selection
+        // We want to trigger transforms as user types with a collapsed selection
         if (
           !$isRangeSelection(prevSelection) ||
           !$isRangeSelection(selection) ||
-          !selection.isCollapsed() ||
-          selection.is(prevSelection)
+          !selection.isCollapsed()
         ) {
           return;
         }
@@ -53,11 +55,8 @@ export const MarkdownCodeBlockShortcutPlugin = () => {
 
         const anchorNode = editorState._nodeMap.get(anchorKey);
 
-        if (
-          !$isTextNode(anchorNode) ||
-          !dirtyLeaves.has(anchorKey) ||
-          (anchorOffset !== 1 && anchorOffset > prevSelection.anchor.offset + 1)
-        ) {
+        // Check if the node is a text node and has been updated
+        if (!$isTextNode(anchorNode) || !dirtyLeaves.has(anchorKey)) {
           return;
         }
 
@@ -89,53 +88,48 @@ export const MarkdownCodeBlockShortcutPlugin = () => {
    * Transform markdown code block syntax to a code block node
    */
   const transformCodeBlockMarkdown = (
-    _parentNode: ElementNode,
+    parentNode: ElementNode,
     anchorNode: TextNode,
     anchorOffset: number,
   ) => {
     const textContent = anchorNode.getTextContent();
 
-    // Define the code block markdown pattern: ```
-    const CODE_BLOCK_MARKDOWN_REGEX = /```/;
+    // Check if this node ends with exactly ```
+    const endsWithTripleBacktick = textContent.endsWith("```");
 
-    // Look for markdown code block pattern
-    const match = CODE_BLOCK_MARKDOWN_REGEX.exec(textContent);
-
-    if (!match) {
+    // Check if the cursor is right after the ```
+    if (!endsWithTripleBacktick || anchorOffset !== textContent.length) {
       return false;
     }
 
-    const [fullMatch] = match;
-    const matchStartIndex = textContent.indexOf(fullMatch);
-    const matchEndIndex = matchStartIndex + fullMatch.length;
+    // Remove the backticks from the text content
+    const cleanContent = textContent.slice(0, -3).trim();
+    anchorNode.setTextContent(cleanContent);
 
-    // Check if the cursor is just after the pattern
-    if (matchEndIndex !== anchorOffset) {
-      return false;
-    }
+    // Create a selection over the parent paragraph
+    const selection = $createRangeSelection();
+    selection.anchor.set(parentNode.getKey(), 0, "element");
+    selection.focus.set(
+      parentNode.getKey(),
+      parentNode.getChildrenSize(),
+      "element",
+    );
+    $setSelection(selection);
 
-    // Split text at the markdown pattern
-    if (matchStartIndex > 0) {
-      anchorNode.splitText(matchStartIndex);
-    }
-
-    let nodeToReplace;
-    if (matchStartIndex === 0) {
-      nodeToReplace = anchorNode;
-    } else {
-      const [, nodeToReplace_] = anchorNode.splitText(
-        matchStartIndex,
-        matchEndIndex,
-      );
-      nodeToReplace = nodeToReplace_;
-    }
-
-    // Create and insert the code block node
+    // Create the code block
     const codeNode = $createCodeNode();
 
-    if (nodeToReplace) {
-      nodeToReplace.replace(codeNode);
-    }
+    // Transform the selection to a code block
+    $setBlocksType(selection, () => codeNode);
+
+    // Create paragraph nodes before and after
+    const paragraphBefore = $createParagraphNode();
+    const paragraphAfter = $createParagraphNode();
+
+    // Insert paragraphs around the code block
+    codeNode.insertBefore(paragraphBefore);
+    codeNode.insertAfter(paragraphAfter);
+
     return true;
   };
 
