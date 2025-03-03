@@ -9,6 +9,16 @@ import { mergeRegister } from "@lexical/utils";
 import { createCommand } from "lexical";
 import React, { useEffect, useState } from "react";
 import { $createProfileNode, ProfileNode } from "./NostrProfileNode";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 
 // Create a command to insert a profile
 export const INSERT_PROFILE_COMMAND = createCommand("insertProfile");
@@ -17,44 +27,47 @@ export const INSERT_PROFILE_COMMAND = createCommand("insertProfile");
 export function InsertProfileButton() {
   const [editor] = useLexicalComposerContext();
   const [npubInput, setNpubInput] = useState("");
-  const [showInput, setShowInput] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Add state to control dialog open state
 
   const handleInsertProfile = () => {
     if (!npubInput.trim()) return;
 
     editor.dispatchCommand(INSERT_PROFILE_COMMAND, npubInput.trim());
     setNpubInput("");
-    setShowInput(false);
+    setIsOpen(false); // Close the dialog
   };
 
   return (
-    <div className="insert-profile-container relative">
-      <button
-        className="toolbar-item"
-        onClick={() => setShowInput(!showInput)}
-        title="Insert Profile"
-      >
-        <span className="text">👤</span>
-      </button>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button size="icon-sm" variant="ghost">
+          <span className="text">👤</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Embed Nostr Profile</DialogTitle>
+          <DialogDescription>
+            Enter an npub to embed it in your document.
+          </DialogDescription>
+        </DialogHeader>
 
-      {showInput && (
-        <div className="profile-input-container absolute z-10 bg-white p-2 border rounded shadow-md mt-1">
-          <input
-            type="text"
-            value={npubInput}
-            onChange={(e) => setNpubInput(e.target.value)}
-            placeholder="Enter npub..."
-            className="border rounded px-2 py-1 mr-2"
-          />
-          <button
-            onClick={handleInsertProfile}
-            className="bg-blue-500 text-white px-2 py-1 rounded"
-          >
-            Insert
-          </button>
-        </div>
-      )}
-    </div>
+        <Input
+          value={npubInput}
+          onChange={(e) => setNpubInput(e.target.value)}
+          placeholder="Enter npub..."
+        />
+
+        <Button
+          type="submit"
+          variant="default"
+          disabled={!npubInput}
+          onClick={handleInsertProfile}
+        >
+          Insert
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -105,7 +118,7 @@ export function ProfileMarkdownPlugin() {
 
     const removeTextContentListener = editor.registerTextContentListener(
       (textContent) => {
-        const match = textContent.match(PROFILE_REGEX);
+        const match = PROFILE_REGEX.exec(textContent);
 
         if (match) {
           editor.update(() => {
@@ -138,8 +151,10 @@ export function ProfileMarkdownPlugin() {
                   selection.removeText();
 
                   // Insert the profile node
-                  const profileNode = $createProfileNode(match[1]);
-                  selection.insertNodes([profileNode]);
+                  if (match[1]) {
+                    const profileNode = $createProfileNode(match[1]);
+                    selection.insertNodes([profileNode]);
+                  }
                 }
               }
             }
