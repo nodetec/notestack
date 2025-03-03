@@ -40,4 +40,5 @@ export const defaultTheme: EditorThemeClasses = {
   },
   image: "editor-image",
   inlineImage: "inline-editor-image",
+  link: "text-blue-500 underline cursor-pointer",
 };

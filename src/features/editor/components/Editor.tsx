@@ -8,11 +8,13 @@ import {
   TRANSFORMERS,
 } from "@lexical/markdown";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { ClickableLinkPlugin } from "@lexical/react/LexicalClickableLinkPlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -20,6 +22,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { useAppState } from "~/store";
 import { type EditorState, type LexicalEditor } from "lexical";
 
+import AutoLinkPlugin from "../lexical/autolink/AutoLinkPlugin";
 import { ImageNode } from "../lexical/markdownImage/ImageNode";
 import ImagePastePlugin from "../lexical/markdownImage/ImagePastePlugin";
 import IMAGE_TRANSFORMER from "../lexical/markdownImage/ImageTransformer";
@@ -123,6 +126,9 @@ export const Editor = () => {
       <ListPlugin />
       <HistoryPlugin />
       <ScrollCenterCurrentLinePlugin />
+      <LinkPlugin />
+      <ClickableLinkPlugin />
+      <AutoLinkPlugin />
     </LexicalComposer>
   );
 };
