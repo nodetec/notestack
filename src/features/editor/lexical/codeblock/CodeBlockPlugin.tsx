@@ -18,9 +18,9 @@ interface CodeBlockPluginProps {
 export default function CodeBlockPlugin({ blockType }: CodeBlockPluginProps) {
   const [editor] = useLexicalComposerContext();
 
-  useEffect(() => {
-    registerCodeHighlighting(editor);
-  }, [editor]);
+//   useEffect(() => {
+//     registerCodeHighlighting(editor);
+//   }, [editor]);
 
   const onAddCodeBlock = () => {
     editor.update(() => {
