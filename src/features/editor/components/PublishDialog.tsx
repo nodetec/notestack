@@ -121,7 +121,12 @@ export function PublishDialog() {
             <SendIcon className="h-4 w-4" />
             Publish
           </Button>
-          <Button type="button" variant="default" size="icon-sm">
+          <Button
+            className="sm:hidden"
+            type="button"
+            variant="default"
+            size="icon-sm"
+          >
             <SendIcon className="h-4 w-4" />
           </Button>
         </div>
