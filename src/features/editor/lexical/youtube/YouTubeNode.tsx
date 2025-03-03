@@ -1,3 +1,11 @@
+import type { JSX } from "react";
+import * as React from "react";
+
+import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
+import {
+  DecoratorBlockNode,
+  type SerializedDecoratorBlockNode,
+} from "@lexical/react/LexicalDecoratorBlockNode";
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -9,14 +17,6 @@ import type {
   NodeKey,
   Spread,
 } from "lexical";
-import type { JSX } from "react";
-
-import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
-import {
-  DecoratorBlockNode,
-  type SerializedDecoratorBlockNode,
-} from "@lexical/react/LexicalDecoratorBlockNode";
-import * as React from "react";
 
 type YouTubeComponentProps = Readonly<{
   className: Readonly<{
@@ -41,10 +41,9 @@ function YouTubeComponent({
       nodeKey={nodeKey}
     >
       <iframe
-        width="560"
-        height="315"
+        className="h-[315px] w-full p-2 sm:max-w-[560px]"
+        height={315}
         src={`https://www.youtube-nocookie.com/embed/${videoID}`}
-        frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen={true}
         title="YouTube video"
@@ -61,7 +60,7 @@ export type SerializedYouTubeNode = Spread<
 >;
 
 function $convertYoutubeElement(
-  domNode: HTMLElement
+  domNode: HTMLElement,
 ): null | DOMConversionOutput {
   const videoID = domNode.getAttribute("data-lexical-youtube");
   if (videoID) {
@@ -84,7 +83,7 @@ export class YouTubeNode extends DecoratorBlockNode {
 
   static importJSON(serializedNode: SerializedYouTubeNode): YouTubeNode {
     return $createYouTubeNode(serializedNode.videoID).updateFromJSON(
-      serializedNode
+      serializedNode,
     );
   }
 
@@ -107,12 +106,12 @@ export class YouTubeNode extends DecoratorBlockNode {
     element.setAttribute("height", "315");
     element.setAttribute(
       "src",
-      `https://www.youtube-nocookie.com/embed/${this.__id}`
+      `https://www.youtube-nocookie.com/embed/${this.__id}`,
     );
     element.setAttribute("frameborder", "0");
     element.setAttribute(
       "allow",
-      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
     );
     element.setAttribute("allowfullscreen", "true");
     element.setAttribute("title", "YouTube video");
@@ -169,7 +168,7 @@ export function $createYouTubeNode(videoID: string): YouTubeNode {
 }
 
 export function $isYouTubeNode(
-  node: YouTubeNode | LexicalNode | null | undefined
+  node: YouTubeNode | LexicalNode | null | undefined,
 ): node is YouTubeNode {
   return node instanceof YouTubeNode;
 }

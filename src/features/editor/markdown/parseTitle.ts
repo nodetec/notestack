@@ -1,4 +1,8 @@
-export function parseTitle(markdownContent: string) {
+export function parseTitle(markdownContent: string | undefined) {
+  if (!markdownContent) {
+    return "Untitled";
+  }
+
   // Split the content into lines
   const lines = markdownContent.split("\n");
 

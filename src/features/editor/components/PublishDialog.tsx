@@ -111,15 +111,20 @@ export function PublishDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          className="flex justify-start gap-2"
-          type="button"
-          variant="default"
-          size="sm"
-        >
-          <SendIcon className="h-4 w-4" />
-          Publish
-        </Button>
+        <div className="w-full">
+          <Button
+            className="hidden justify-start gap-2 sm:flex"
+            type="button"
+            variant="default"
+            size="sm"
+          >
+            <SendIcon className="h-4 w-4" />
+            Publish
+          </Button>
+          <Button type="button" variant="default" size="icon-sm">
+            <SendIcon className="h-4 w-4" />
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
