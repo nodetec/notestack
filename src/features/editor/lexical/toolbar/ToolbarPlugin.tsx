@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 
 import { $isListNode, ListNode } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -186,8 +186,8 @@ export function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex w-full items-center gap-8 px-4 py-4 md:px-16 max-w-6xl">
-      <Link href="/" className="flex items-center gap-2">
+    <div className="flex w-full max-w-6xl items-center gap-8 px-4 py-4 md:px-16">
+      <Link href="/" className="hidden items-center gap-2 md:flex">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
       </Link>
@@ -218,26 +218,28 @@ export function ToolbarPlugin() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {RICH_TEXT_OPTIONS.map(({ id, icon }, index) =>
-          id === RichTextAction.Divider ? (
-            <Separator
-              orientation="vertical"
-              className="h-4"
-              key={`${id}-${index}`}
-            />
-          ) : (
-            <Button
-              key={`${id}-${index}`}
-              className={cn(selectionMap[id] && "bg-primary/5")}
-              size="icon-sm"
-              variant="ghost"
-              onClick={() => onAction(id)}
-              disabled={disableMap[id]}
-            >
-              {icon}
-            </Button>
-          ),
-        )}
+        <div className="hidden items-center lg:flex gap-2">
+          {RICH_TEXT_OPTIONS.map(({ id, icon }, index) =>
+            id === RichTextAction.Divider ? (
+              <Separator
+                orientation="vertical"
+                className="h-4"
+                key={`${id}-${index}`}
+              />
+            ) : (
+              <Button
+                key={`${id}-${index}`}
+                className={cn(selectionMap[id] && "bg-primary/5")}
+                size="icon-sm"
+                variant="ghost"
+                onClick={() => onAction(id)}
+                disabled={disableMap[id]}
+              >
+                {icon}
+              </Button>
+            ),
+          )}
+        </div>
         <MarkdownImagePlugin />
         <TwitterAction />
         <YoutubeAction />
