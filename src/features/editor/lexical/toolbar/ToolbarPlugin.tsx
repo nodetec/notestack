@@ -34,6 +34,7 @@ import Link from "next/link";
 
 import { PublishDialog } from "../../components/PublishDialog";
 import MarkdownImagePlugin from "../markdownImage/ImageActions";
+import { InsertProfileButton } from "../nostrProfile/ProfilePlugin";
 import TwitterAction from "../tweet/TwitterActions";
 import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
@@ -218,7 +219,7 @@ export function ToolbarPlugin() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="hidden items-center lg:flex gap-2">
+        <div className="hidden items-center gap-2 lg:flex">
           {RICH_TEXT_OPTIONS.map(({ id, icon }, index) =>
             id === RichTextAction.Divider ? (
               <Separator
@@ -243,6 +244,7 @@ export function ToolbarPlugin() {
         <MarkdownImagePlugin />
         <TwitterAction />
         <YoutubeAction />
+        {/* <InsertProfileButton /> */}
       </div>
       <PublishDialog />
     </div>

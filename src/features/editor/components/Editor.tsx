@@ -27,6 +27,12 @@ import { ImageNode } from "../lexical/markdownImage/ImageNode";
 import ImagePastePlugin from "../lexical/markdownImage/ImagePastePlugin";
 import IMAGE_TRANSFORMER from "../lexical/markdownImage/ImageTransformer";
 import { MarkdownImageShortcutPlugin } from "../lexical/markdownImage/MarkdownImageShortcut";
+import { ProfileNode } from "../lexical/nostrProfile/NostrProfileNode";
+import { ProfilePastePlugin } from "../lexical/nostrProfile/ProfilePastePlugin";
+import ProfilePlugin, {
+  ProfileMarkdownPlugin,
+} from "../lexical/nostrProfile/ProfilePlugin";
+import { PROFILE_TRANSFORMER } from "../lexical/nostrProfile/ProfileTransformer";
 import { OnBlurPlugin } from "../lexical/onBlur/OnBlurPlugin";
 import { OnChangeDebouncePlugin } from "../lexical/onChangeDebounce/OnChangeDebouncePlugin";
 import { ScrollCenterCurrentLinePlugin } from "../lexical/scrollCenterCurrentLine/ScrollCenterCurrentLinePlugin";
@@ -46,6 +52,7 @@ export const Editor = () => {
     IMAGE_TRANSFORMER,
     TWITTER_TRANSFORMER,
     YOUTUBE_TRANSFORMER,
+    PROFILE_TRANSFORMER,
     ...TRANSFORMERS,
   ];
 
@@ -79,6 +86,7 @@ export const Editor = () => {
       CodeHighlightNode,
       TweetNode,
       YouTubeNode,
+      ProfileNode,
     ],
   };
 
@@ -129,6 +137,9 @@ export const Editor = () => {
       <LinkPlugin />
       <ClickableLinkPlugin />
       <AutoLinkPlugin />
+      <ProfilePlugin />
+      <ProfilePastePlugin />
+      <ProfileMarkdownPlugin />
     </LexicalComposer>
   );
 };
