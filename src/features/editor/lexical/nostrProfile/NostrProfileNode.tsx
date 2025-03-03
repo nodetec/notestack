@@ -91,7 +91,7 @@ function ProfileComponent({ profileData }: ProfileComponentProps) {
               <span className="text-blue-500">
                 <a href={`/${profileData.npub}`}>
                   <span className="text-blue-500">
-                    {shortNpub(profileData.npub)}
+                    @{shortNpub(profileData.npub)}
                   </span>
                 </a>
               </span>
