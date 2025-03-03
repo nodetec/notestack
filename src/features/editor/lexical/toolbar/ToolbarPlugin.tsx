@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { $isListNode, ListNode } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -34,7 +34,7 @@ import Link from "next/link";
 
 import { PublishDialog } from "../../components/PublishDialog";
 import MarkdownImagePlugin from "../markdownImage/ImageActions";
-import { InsertProfileButton } from "../nostrProfile/ProfilePlugin";
+// import { InsertProfileButton } from "../nostrProfile/ProfilePlugin";
 import TwitterAction from "../tweet/TwitterActions";
 import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
@@ -68,7 +68,7 @@ export function ToolbarPlugin() {
       const newSelectionMap = {
         [RichTextAction.Bold]: selection.hasFormat("bold"),
         [RichTextAction.Italics]: selection.hasFormat("italic"),
-        [RichTextAction.Underline]: selection.hasFormat("underline"),
+        // [RichTextAction.Underline]: selection.hasFormat("underline"),
         [RichTextAction.Strikethrough]: selection.hasFormat("strikethrough"),
         [RichTextAction.Code]: selection.hasFormat("code"),
       };
@@ -147,10 +147,10 @@ export function ToolbarPlugin() {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         break;
       }
-      case RichTextAction.Underline: {
-        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
-        break;
-      }
+      // case RichTextAction.Underline: {
+      //   editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
+      //   break;
+      // }
       case RichTextAction.Strikethrough: {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
         break;
