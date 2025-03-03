@@ -38,7 +38,7 @@ function isValidImage(url: string) {
 const handlePublish = async (
   e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   title: string,
-  image: string,
+  image: string | undefined,
   tags: string[],
   markdown: string,
   setMarkdown: (markdown: string) => void,
@@ -97,7 +97,6 @@ export function PublishDialog() {
 
   const markdown = useAppState.getState().markdown;
   const setMarkdown = useAppState.getState().setMarkdown;
-  const [imageLink, setImageLink] = useState(getFirstImage(markdown) ?? "");
 
   const handleAddTag = () => {
     if (tagInput.trim() !== "" && !tags.includes(tagInput.trim())) {
@@ -179,21 +178,13 @@ export function PublishDialog() {
             </div>
           </div>
           <div className="space-y-4">
-            {imageLink && (
-              <div className="flex flex-col items-center">
-                <img
-                  src={imageLink}
-                  alt="First"
-                  className="mb-2 max-h-48 max-w-full rounded-md"
-                />
-                <Input
-                  type="text"
-                  value={imageLink}
-                  onChange={(e) => setImageLink(e.target.value)}
-                  placeholder="Image link"
-                />
-              </div>
-            )}
+            <div className="flex flex-col items-center">
+              <img
+                src={getFirstImage(markdown)}
+                alt="First"
+                className="mb-2 max-h-48 max-w-full rounded-md"
+              />
+            </div>
           </div>
         </div>
 
@@ -206,7 +197,7 @@ export function PublishDialog() {
               handlePublish(
                 e,
                 parseTitle(markdown),
-                imageLink,
+                getFirstImage(markdown),
                 tags,
                 markdown,
                 setMarkdown,
