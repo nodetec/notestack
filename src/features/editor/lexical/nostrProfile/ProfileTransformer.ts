@@ -9,7 +9,7 @@ import {
 
 // Regex pattern for Nostr npub IDs
 // This matches full npub1 identifiers (captures the entire npub)
-const PROFILE_REGEX = /(npub1[a-z0-9]{6,})(?:\s|$)/;
+const PROFILE_REGEX = /(npub1[a-z0-9]{58})(?:\s|$)/;
 
 // Create a custom transformer for profile nodes
 export const PROFILE_TRANSFORMER: Transformer = {

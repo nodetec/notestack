@@ -11,7 +11,7 @@ import {
 import { $createProfileNode } from "./NostrProfileNode";
 
 // Same regex used in the transformer to ensure consistency
-const PROFILE_REGEX = /(npub1[a-z0-9]{6,})/g;
+const PROFILE_REGEX = /(npub1[a-z0-9]{58,})/g;
 
 export function ProfilePastePlugin() {
   const [editor] = useLexicalComposerContext();
