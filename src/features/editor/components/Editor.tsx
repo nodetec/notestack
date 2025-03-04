@@ -112,10 +112,10 @@ export const Editor = () => {
       <div className="sticky top-0 z-10 mt-1 flex w-full justify-center border-b bg-secondary pb-1">
         <ToolbarPlugin />
       </div>
-      <div className="editor-shell relative flex cursor-text justify-center">
+      <div className="relative flex h-full flex-1 cursor-text justify-center">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="min-h-[calc(100vh-4rem)] max-w-2xl flex-auto select-text flex-col py-8 pb-[20%] font-sourceserif text-[19px] leading-8 focus-visible:outline-none" />
+            <ContentEditable className="min-h-full max-w-2xl flex-auto select-text flex-col py-8 pb-[30%] font-sourceserif text-[19px] leading-8 focus-visible:outline-none" />
           }
           placeholder={
             <div className="pointer-events-none absolute inset-0 mx-auto max-w-2xl py-8 font-sourceserif text-[19px] leading-8 text-muted-foreground">

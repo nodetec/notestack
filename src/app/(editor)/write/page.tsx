@@ -11,5 +11,5 @@ export default function WritePage() {
     setIsClient(true);
   }, []);
 
-  return <div>{isClient && <Editor />}</div>;
+  return <div className="h-full flex flex-col flex-1">{isClient && <Editor />}</div>;
 }
