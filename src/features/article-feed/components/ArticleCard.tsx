@@ -87,6 +87,7 @@ export const ArticleCard = forwardRef<HTMLDivElement, Props>(
                         height={112}
                         alt=""
                         loading="lazy"
+                        unoptimized
                       />
                     )
                   }
