@@ -115,10 +115,10 @@ export const Editor = () => {
       <div className="relative flex h-full flex-1 cursor-text justify-center">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="min-h-full max-w-2xl flex-auto select-text flex-col py-8 pb-[30%] font-sourceserif text-[19px] leading-8 focus-visible:outline-none" />
+            <ContentEditable className="min-h-full max-w-[46rem] flex-auto select-text flex-col py-8 pb-[30%] font-sourceserif text-[18px] leading-8 focus-visible:outline-none sm:px-4 sm:text-[20px]" />
           }
           placeholder={
-            <div className="pointer-events-none absolute inset-0 mx-auto max-w-2xl py-8 font-sourceserif text-[19px] leading-8 text-muted-foreground">
+            <div className="pointer-events-none absolute inset-0 mx-auto max-w-[46rem] py-8 font-sourceserif text-[18px] leading-8 text-muted-foreground sm:px-4 sm:text-[20px]">
               Write something...
             </div>
           }

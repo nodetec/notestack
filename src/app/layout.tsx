@@ -18,7 +18,7 @@ const sourceSerif = Source_Serif_4({
 
 const merriweather = Merriweather({
   subsets: ["latin"],
-  weight: ["700"],
+  weight: ["400", "700"],
   variable: "--font-merriweather",
 });
 
