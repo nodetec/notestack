@@ -31,16 +31,16 @@ async function deleteArticle({
 
   const published = await publish(deleteEvent, [...relays, ...DEFAULT_RELAYS]);
 
-  if (published) {
+  // if (published) {
     toast("Article deleted", {
       description: "The article has been successfully deleted.",
     });
-  } else {
-    toast("failed to delete article", {
-      description: "There was an error deleting the article.",
-    });
-    return;
-  }
+  // } else {
+  //   toast("failed to delete article", {
+  //     description: "There was an error deleting the article.",
+  //   });
+  //   return;
+  // }
 
   return articleEventId;
 }
