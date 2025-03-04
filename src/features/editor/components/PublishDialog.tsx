@@ -81,8 +81,8 @@ const handlePublish = async (
   if (publishedEvent) {
     const naddr = makeNaddr(publishedEvent, relays);
     setMarkdown("");
-    setIsOpen(false);
     void redirectToPublishedArticle(`a/${naddr}`);
+    setIsOpen(false);
   }
 };
 
