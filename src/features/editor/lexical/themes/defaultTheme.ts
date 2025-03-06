@@ -17,12 +17,12 @@ export const defaultTheme: EditorThemeClasses = {
   code: "font-mono textCode bg-muted text-muted-foreground p-4 block overflow-x-auto relative",
   codeHighlight: {},
   heading: {
-    h1: "text-4xl font-bold mb-2 mt-3 font-sans",
-    h2: "text-3xl font-bold mb-2 mt-3 font-sans",
-    h3: "text-2xl font-bold mb-2 mt-3 font-sans",
-    h4: "text-xl font-bold mb-2 mt-3 font-sans",
-    h5: "text-lg font-bold mb-2 mt-3 font-sans",
-    h6: "text-lg font-bold mb-2 mt-3 font-sans",
+    h1: "text-3xl sm:text-[2.25rem] mb-2 mt-3 font-merriweather leading-[2.75rem]",
+    h2: "text-2xl sm:text-3xl font-bold mb-2 mt-3 font-sans",
+    h3: "text-xl sm:text-2xl font-bold mb-2 mt-3 font-sans",
+    h4: "text-xl sm:text-2xl font-bold mb-2 mt-3 font-sans",
+    h5: "text-xl sm:text-2xl font-bold mb-2 mt-3 font-sans",
+    h6: "text-xl sm:text-2xl font-bold mb-2 mt-3 font-sans",
   },
   list: {
     olDepth: [

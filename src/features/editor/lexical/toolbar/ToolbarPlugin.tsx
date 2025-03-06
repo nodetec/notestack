@@ -188,7 +188,7 @@ export function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex w-full max-w-6xl items-center gap-8 py-4 md:px-16">
+    <div className="flex w-full max-w-6xl items-center gap-8 py-4 md:px-16 px-4">
       <Link href="/" className="hidden items-center gap-2 md:flex">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>

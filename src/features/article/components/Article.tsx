@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Button } from "~/components/ui/button";
 import { ZapDialog } from "~/components/ZapDialog";
@@ -26,6 +26,14 @@ type Props = {
 };
 
 export function Article({ address }: Props) {
+
+  // HACK: this shouldn't be necessary 
+  // scroll to top on load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   // look into react query select to parse data
   const { data: articleEvent, status } = useArticleEvent(
     address,
