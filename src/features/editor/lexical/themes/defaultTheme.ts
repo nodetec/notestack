@@ -39,7 +39,7 @@ export const defaultTheme: EditorThemeClasses = {
     base: "p-4",
     focus: "ring-2 ring-blue-500 rounded-md",
   },
-  image: "editor-image",
-  inlineImage: "inline-editor-image",
+
+  image: "cursor-default inline-block relative select-none",
   link: "text-blue-500 underline cursor-pointer",
 };

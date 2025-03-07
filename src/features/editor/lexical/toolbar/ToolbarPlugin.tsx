@@ -34,12 +34,10 @@ import Link from "next/link";
 
 import { PublishDialog } from "../../components/PublishDialog";
 import CodeBlockPlugin from "../codeblock/CodeBlockPlugin";
-import MarkdownImagePlugin from "../markdownImage/ImageActions";
-// import { InsertProfileButton } from "../nostrProfile/ProfilePlugin";
+import { MarkdownImagePlugin } from "../markdownImage/MarkdownImagePlugin";
 import TwitterAction from "../tweet/TwitterActions";
 import YoutubeAction from "../youtube/YouTubeActions";
 import { LOW_PRIORIRTY, RICH_TEXT_OPTIONS, RichTextAction } from "./constants";
-import { useKeyBinds } from "./hooks/useKeybinds";
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -148,10 +146,6 @@ export function ToolbarPlugin() {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         break;
       }
-      // case RichTextAction.Underline: {
-      //   editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
-      //   break;
-      // }
       case RichTextAction.Strikethrough: {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
         break;
@@ -171,8 +165,6 @@ export function ToolbarPlugin() {
     }
   };
 
-  useKeyBinds({ onAction });
-
   const updateFormat = (heading: HeadingTagType | "paragraph") => {
     editor.update(() => {
       const selection = $getSelection();
@@ -188,7 +180,7 @@ export function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex w-full max-w-6xl items-center gap-8 py-4 md:px-16 px-4">
+    <div className="flex w-full max-w-6xl items-center gap-8 px-4 py-4 md:px-16">
       <Link href="/" className="hidden items-center gap-2 md:flex">
         <Layers3 className="h-5 w-5" />
         <span className="font-merriweather text-xl font-bold">NoteStack</span>
@@ -197,7 +189,7 @@ export function ToolbarPlugin() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="w-[120px] justify-start flex items-center gap-2"
+              className="flex w-[120px] items-center justify-start gap-2"
               size="sm"
               variant="outline"
             >
@@ -243,10 +235,12 @@ export function ToolbarPlugin() {
             ),
           )}
         </div>
-        <CodeBlockPlugin blockType={blockType} />
-        <MarkdownImagePlugin />
-        <TwitterAction />
-        <YoutubeAction />
+        <div className="hidden items-center gap-2 sm:flex">
+          <CodeBlockPlugin blockType={blockType} />
+          <MarkdownImagePlugin />
+          <TwitterAction />
+          <YoutubeAction />
+        </div>
         {/* <InsertProfileButton /> */}
       </div>
       <PublishDialog />

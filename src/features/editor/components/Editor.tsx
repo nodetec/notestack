@@ -24,10 +24,10 @@ import { type EditorState, type LexicalEditor } from "lexical";
 
 import AutoLinkPlugin from "../lexical/autolink/AutoLinkPlugin";
 import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcutPlugin";
-import { ImageNode } from "../lexical/markdownImage/ImageNode";
-import ImagePastePlugin from "../lexical/markdownImage/ImagePastePlugin";
-import IMAGE_TRANSFORMER from "../lexical/markdownImage/ImageTransformer";
+import { MarkdownImageNode } from "../lexical/markdownImage/MarkdownImageNode";
+import { MarkdownImagePastePlugin } from "../lexical/markdownImage/MarkdownImagePastePlugin";
 import { MarkdownImageShortcutPlugin } from "../lexical/markdownImage/MarkdownImageShortcut";
+import { MARKDOWN_IMAGE_TRANSFORMER } from "../lexical/markdownImage/MarkdownImageTransformer";
 import { ProfileNode } from "../lexical/nostrProfile/NostrProfileNode";
 import { ProfilePastePlugin } from "../lexical/nostrProfile/ProfilePastePlugin";
 import ProfilePlugin, {
@@ -45,12 +45,14 @@ import { TWITTER_TRANSFORMER } from "../lexical/tweet/TwitterTransformer";
 import { YouTubeNode } from "../lexical/youtube/YouTubeNode";
 import { YOUTUBE_TRANSFORMER } from "../lexical/youtube/YouTubeTransformer";
 
+import "~/features/editor/lexical/themes/defaultTheme.css";
+
 export const Editor = () => {
   const markdown = useAppState.getState().markdown;
   const setMarkdown = useAppState.getState().setMarkdown;
 
   const COMBINED_TRANSFORMERS = [
-    IMAGE_TRANSFORMER,
+    MARKDOWN_IMAGE_TRANSFORMER,
     TWITTER_TRANSFORMER,
     YOUTUBE_TRANSFORMER,
     PROFILE_TRANSFORMER,
@@ -79,7 +81,7 @@ export const Editor = () => {
       CodeNode,
       HorizontalRuleNode,
       QuoteNode,
-      ImageNode,
+      MarkdownImageNode,
       LinkNode,
       AutoLinkNode,
       HashtagNode,
@@ -95,7 +97,7 @@ export const Editor = () => {
     await editor.read(async () => {
       const markdown = $convertToMarkdownString(COMBINED_TRANSFORMERS);
       setMarkdown(markdown);
-      console.log("onChange", markdown);
+      // console.log("onChange", markdown);
     });
   }
 
@@ -103,7 +105,7 @@ export const Editor = () => {
     await editor.read(async () => {
       const markdown = $convertToMarkdownString(COMBINED_TRANSFORMERS);
       setMarkdown(markdown);
-      console.log("onBlur", markdown);
+      // console.log("onBlur", markdown);
     });
   }
 
@@ -127,8 +129,10 @@ export const Editor = () => {
       </div>
       <OnChangeDebouncePlugin onChange={onChange} debounceTime={500} />
       <OnBlurPlugin onBlur={onBlur} />
+
       <MarkdownImageShortcutPlugin />
-      <ImagePastePlugin />
+      <MarkdownImagePastePlugin />
+
       <TabKeyPlugin tabSize={2} useSpaces={true} />
       <MarkdownShortcutPlugin transformers={COMBINED_TRANSFORMERS} />
       <AutoFocusPlugin />

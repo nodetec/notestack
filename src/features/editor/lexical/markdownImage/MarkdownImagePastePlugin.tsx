@@ -8,11 +8,11 @@ import {
   PASTE_COMMAND,
 } from "lexical";
 
-import { $createImageNode } from "./ImageNode";
+import { $createMarkdownImageNode } from "./MarkdownImageNode";
 
 const IMAGE_MARKDOWN_REGEX = /!\[(.*?)\]\((.*?)\)/;
 
-export default function ImagePastePlugin() {
+export function MarkdownImagePastePlugin() {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -35,7 +35,10 @@ export default function ImagePastePlugin() {
               selection.removeText();
             }
             // TODO: fix url ""
-            const imageNode = $createImageNode({ src: url ?? "", altText });
+            const imageNode = $createMarkdownImageNode({
+              src: url ?? "",
+              altText,
+            });
             selection.insertNodes([imageNode]);
           });
           return true;

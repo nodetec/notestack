@@ -3,8 +3,8 @@ export function getFirstImage(markdown: string) {
   const match = regex.exec(markdown);
 
   if (match) {
-    console.log(match);
-    console.log("match[1]",match[1]);
+    // console.log(match);
+    // console.log("match[1]",match[1]);
     return match[1];
   }
 

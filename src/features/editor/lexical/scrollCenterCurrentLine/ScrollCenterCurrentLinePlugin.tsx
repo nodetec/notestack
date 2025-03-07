@@ -6,6 +6,7 @@ import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_CRITICAL,
+  COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
 } from "lexical";
 
@@ -65,7 +66,7 @@ export const ScrollCenterCurrentLinePlugin = ({
         });
         return true;
       },
-      COMMAND_PRIORITY_CRITICAL
+      COMMAND_PRIORITY_HIGH
     );
   }, [editor, viewportPercentage]);
 

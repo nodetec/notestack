@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import type { EditorState, LexicalEditor } from "lexical";
 
+// Reference: https://github.com/facebook/lexical/blob/main/packages/lexical-react/src/LexicalOnChangePlugin.ts
 export function OnChangeDebouncePlugin({
   ignoreHistoryMergeTagChange = true,
   ignoreSelectionChange = true,
@@ -14,7 +15,7 @@ export function OnChangeDebouncePlugin({
   onChange: (
     editorState: EditorState,
     editor: LexicalEditor,
-    tags: Set<string>
+    tags: Set<string>,
   ) => void;
   debounceTime?: number;
 }): null {
@@ -48,7 +49,7 @@ export function OnChangeDebouncePlugin({
           debounceTimeout.current = setTimeout(() => {
             onChange(editorState, editor, tags);
           }, debounceTime);
-        }
+        },
       );
     }
   }, [

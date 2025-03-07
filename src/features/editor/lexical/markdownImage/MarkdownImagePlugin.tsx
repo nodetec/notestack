@@ -22,14 +22,17 @@ import {
 } from "lexical";
 import { ImageIcon } from "lucide-react";
 
-import { $createImageNode, ImageNode } from "./ImageNode";
+import {
+  $createMarkdownImageNode,
+  MarkdownImageNode,
+} from "./MarkdownImageNode";
 
 export const INSERT_IMAGE_COMMAND: LexicalCommand<{
   src: string;
   altText: string;
 }> = createCommand("INSERT_IMAGE_COMMAND");
 
-export default function ImageAction() {
+export function MarkdownImagePlugin() {
   const [editor] = useLexicalComposerContext();
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");
@@ -37,7 +40,7 @@ export default function ImageAction() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!editor.hasNodes([ImageNode])) {
+    if (!editor.hasNodes([MarkdownImageNode])) {
       throw new Error("ImagePlugin: ImageNode not registered on editor");
     }
 
@@ -47,7 +50,7 @@ export default function ImageAction() {
     }>(
       INSERT_IMAGE_COMMAND,
       (payload) => {
-        const imageNode = $createImageNode(payload);
+        const imageNode = $createMarkdownImageNode(payload);
 
         // Create a paragraph node after for better editing
         const paragraphAfter = $createParagraphNode();
@@ -70,7 +73,7 @@ export default function ImageAction() {
         const dataUrl = e.target?.result as string;
 
         editor.update(() => {
-          const imageNode = $createImageNode({
+          const imageNode = $createMarkdownImageNode({
             src: dataUrl,
             altText,
           });
@@ -92,7 +95,7 @@ export default function ImageAction() {
     } else if (src) {
       // For URLs
       editor.update(() => {
-        const imageNode = $createImageNode({
+        const imageNode = $createMarkdownImageNode({
           src,
           altText,
         });
