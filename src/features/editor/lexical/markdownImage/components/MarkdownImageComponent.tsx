@@ -42,10 +42,7 @@ function LazyImage({
 }): JSX.Element {
   return (
     <img
-      className={cn(
-        className,
-        "mr-1 mt-2 h-auto w-auto cursor-default object-contain",
-      )}
+      className={className ?? ""}
       src={src}
       alt={altText}
       ref={imageRef}
@@ -208,16 +205,18 @@ export function MarkdownImageComponent({
       {isLoadError ? (
         <BrokenImage />
       ) : (
-        <LazyImage
-          className={cn(
-            "mr-1 max-w-full sm:max-w-[500px] rounded-md cursor-default",
-            isFocused && "select-none outline outline-blue-500",
-          )}
-          src={src}
-          altText={altText}
-          imageRef={imageRef}
-          onError={() => setIsLoadError(true)}
-        />
+        <div className="max-w-xl">
+          <LazyImage
+            className={cn(
+              "mr-1 mt-2 inline-block h-auto w-auto cursor-default rounded-md object-contain",
+              isFocused && "select-none outline outline-blue-500",
+            )}
+            src={src}
+            altText={altText}
+            imageRef={imageRef}
+            onError={() => setIsLoadError(true)}
+          />
+        </div>
       )}
     </>
   );

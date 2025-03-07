@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_HIGH, PASTE_COMMAND } from "lexical";
+import { type LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_HIGH, PASTE_COMMAND } from "lexical";
 import { $createMarkdownImageNode } from "../nodes/MarkdownImageNode";
 
 const IMAGE_MARKDOWN_REGEX = /!\[(.*?)\]\((.*?)\)/;
