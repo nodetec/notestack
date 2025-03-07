@@ -87,6 +87,15 @@ export function MarkdownImageComponent({
   const [isLoadError, setIsLoadError] = useState<boolean>(false);
   const isEditable = useLexicalEditable();
 
+  const deleteNode = useCallback(() => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isMarkdownImageNode(node)) {
+        node.remove();
+      }
+    });
+  }, [editor, nodeKey]);
+
   const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
       const deleteSelection = $getSelection();
@@ -205,10 +214,10 @@ export function MarkdownImageComponent({
       {isLoadError ? (
         <BrokenImage />
       ) : (
-        <div className="max-w-xl">
+        <div className="relative mr-1 max-w-xl">
           <LazyImage
             className={cn(
-              "pr-1 mt-2 h-auto w-auto cursor-default rounded-md object-contain",
+              "mt-2 h-auto w-auto cursor-default rounded-md object-contain",
               isFocused && "select-none outline outline-blue-500",
             )}
             src={src}
@@ -216,6 +225,34 @@ export function MarkdownImageComponent({
             imageRef={imageRef}
             onError={() => setIsLoadError(true)}
           />
+
+          {/* Close button in upper right corner */}
+          {isFocused && (
+            <button
+              className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black bg-opacity-50 text-white transition-opacity hover:bg-opacity-70"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteNode();
+              }}
+              aria-label="Remove image"
+              type="button"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          )}
         </div>
       )}
     </>
