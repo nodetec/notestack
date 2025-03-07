@@ -5,7 +5,7 @@ import {
   $createMarkdownImageNode,
   $isMarkdownImageNode,
   MarkdownImageNode,
-} from "./MarkdownImageNode";
+} from "../nodes/MarkdownImageNode";
 
 // Modified regex pattern to match markdown image anywhere in the text
 // Removed the $ end anchor to allow text after the pattern

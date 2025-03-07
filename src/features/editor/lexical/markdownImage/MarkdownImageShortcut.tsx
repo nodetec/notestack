@@ -9,7 +9,7 @@ import {
   type TextNode,
 } from "lexical";
 
-import { $createMarkdownImageNode } from "./MarkdownImageNode";
+import { $createMarkdownImageNode } from "./nodes/MarkdownImageNode";
 
 /**
  * React component that adds markdown image shortcut functionality to a Lexical editor

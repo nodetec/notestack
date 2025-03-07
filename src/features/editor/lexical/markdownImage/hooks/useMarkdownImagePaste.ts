@@ -1,20 +1,10 @@
 import { useEffect } from "react";
-
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {
-  $getSelection,
-  $isRangeSelection,
-  COMMAND_PRIORITY_HIGH,
-  PASTE_COMMAND,
-} from "lexical";
-
-import { $createMarkdownImageNode } from "./MarkdownImageNode";
+import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_HIGH, PASTE_COMMAND } from "lexical";
+import { $createMarkdownImageNode } from "../nodes/MarkdownImageNode";
 
 const IMAGE_MARKDOWN_REGEX = /!\[(.*?)\]\((.*?)\)/;
 
-export function MarkdownImagePastePlugin() {
-  const [editor] = useLexicalComposerContext();
-
+export function useMarkdownImagePaste(editor: LexicalEditor) {
   useEffect(() => {
     const removePasteOverride = editor.registerCommand(
       PASTE_COMMAND,
@@ -53,6 +43,4 @@ export function MarkdownImagePastePlugin() {
       removePasteOverride();
     };
   }, [editor]);
-
-  return null;
 }

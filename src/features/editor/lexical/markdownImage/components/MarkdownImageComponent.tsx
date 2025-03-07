@@ -25,7 +25,7 @@ import {
   type NodeKey,
 } from "lexical";
 
-import { $isMarkdownImageNode } from "./MarkdownImageNode";
+import { $isMarkdownImageNode } from "../nodes/MarkdownImageNode";
 
 function LazyImage({
   altText,
@@ -44,7 +44,7 @@ function LazyImage({
     <img
       className={cn(
         className,
-        "mr-1 mt-2 h-auto w-auto max-w-full cursor-default object-contain",
+        "mr-1 mt-2 h-auto w-auto cursor-default object-contain",
       )}
       src={src}
       alt={altText}
@@ -210,7 +210,7 @@ export function MarkdownImageComponent({
       ) : (
         <LazyImage
           className={cn(
-            "mr-1 max-w-[90%] cursor-default",
+            "mr-1 max-w-full sm:max-w-[500px] rounded-md cursor-default",
             isFocused && "select-none outline outline-blue-500",
           )}
           src={src}

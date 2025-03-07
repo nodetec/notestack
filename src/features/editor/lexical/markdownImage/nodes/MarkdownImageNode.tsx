@@ -15,7 +15,7 @@ import {
   type Spread,
 } from "lexical";
 
-import { MarkdownImageComponent } from "./MarkdownImageComponent";
+import { MarkdownImageComponent } from "../components/MarkdownImageComponent";
 
 export interface ImagePayload {
   altText: string;

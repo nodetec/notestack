@@ -24,10 +24,8 @@ import { type EditorState, type LexicalEditor } from "lexical";
 
 import AutoLinkPlugin from "../lexical/autolink/AutoLinkPlugin";
 import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcutPlugin";
-import { MarkdownImageNode } from "../lexical/markdownImage/MarkdownImageNode";
-import { MarkdownImagePastePlugin } from "../lexical/markdownImage/MarkdownImagePastePlugin";
-import { MarkdownImageShortcutPlugin } from "../lexical/markdownImage/MarkdownImageShortcut";
-import { MARKDOWN_IMAGE_TRANSFORMER } from "../lexical/markdownImage/MarkdownImageTransformer";
+import { MarkdownImageNode } from "../lexical/markdownImage/nodes/MarkdownImageNode";
+import { MARKDOWN_IMAGE_TRANSFORMER } from "../lexical/markdownImage/transformers/MarkdownImageTransformer";
 import { ProfileNode } from "../lexical/nostrProfile/NostrProfileNode";
 import { ProfilePastePlugin } from "../lexical/nostrProfile/ProfilePastePlugin";
 import ProfilePlugin, {
@@ -46,6 +44,8 @@ import { YouTubeNode } from "../lexical/youtube/YouTubeNode";
 import { YOUTUBE_TRANSFORMER } from "../lexical/youtube/YouTubeTransformer";
 
 import "~/features/editor/lexical/themes/defaultTheme.css";
+
+import { MarkdownImageShortcutPlugin } from "../lexical/markdownImage/MarkdownImageShortcut";
 
 export const Editor = () => {
   const markdown = useAppState.getState().markdown;
@@ -97,7 +97,7 @@ export const Editor = () => {
     await editor.read(async () => {
       const markdown = $convertToMarkdownString(COMBINED_TRANSFORMERS);
       setMarkdown(markdown);
-      // console.log("onChange", markdown);
+      console.log("onChange", markdown);
     });
   }
 
@@ -129,11 +129,8 @@ export const Editor = () => {
       </div>
       <OnChangeDebouncePlugin onChange={onChange} debounceTime={500} />
       <OnBlurPlugin onBlur={onBlur} />
-
-      <MarkdownImageShortcutPlugin />
-      <MarkdownImagePastePlugin />
-
       <TabKeyPlugin tabSize={2} useSpaces={true} />
+      <MarkdownImageShortcutPlugin />
       <MarkdownShortcutPlugin transformers={COMBINED_TRANSFORMERS} />
       <AutoFocusPlugin />
       <ListPlugin />
