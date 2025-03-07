@@ -208,7 +208,7 @@ export function MarkdownImageComponent({
         <div className="max-w-xl">
           <LazyImage
             className={cn(
-              "mr-1 mt-2 inline-block h-auto w-auto cursor-default rounded-md object-contain",
+              "pr-1 mt-2 h-auto w-auto cursor-default rounded-md object-contain",
               isFocused && "select-none outline outline-blue-500",
             )}
             src={src}
