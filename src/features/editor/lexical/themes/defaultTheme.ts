@@ -36,7 +36,7 @@ export const defaultTheme: EditorThemeClasses = {
     ol: "list-decimal ml-4 list-inside",
   },
   embedBlock: {
-    base: "p-8 cursor-default w-full border rounded-md",
+    base: "p-8 cursor-default w-full bg-background/50 flex justify-center border border-border/50 items-center rounded-md",
     focus: "ring-2 ring-blue-500 rounded-md",
   },
 
