@@ -20,7 +20,7 @@ import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPl
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { useAppState } from "~/store";
-import { type EditorState, type LexicalEditor } from "lexical";
+import type { EditorState, LexicalEditor } from "lexical";
 
 import AutoLinkPlugin from "../lexical/autolink/AutoLinkPlugin";
 import { MarkdownCodeBlockShortcutPlugin } from "../lexical/codeblock/MarkdownCodeBlockShortcutPlugin";
@@ -101,13 +101,13 @@ export const Editor = () => {
     });
   }
 
-  async function onBlur(event: FocusEvent, editor: LexicalEditor) {
-    await editor.read(async () => {
-      const markdown = $convertToMarkdownString(COMBINED_TRANSFORMERS);
-      setMarkdown(markdown);
-      // console.log("onBlur", markdown);
-    });
-  }
+  // async function onBlur(event: FocusEvent, editor: LexicalEditor) {
+  //   await editor.read(async () => {
+  //     const markdown = $convertToMarkdownString(COMBINED_TRANSFORMERS);
+  //     setMarkdown(markdown);
+  //     // console.log("onBlur", markdown);
+  //   });
+  // }
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -128,7 +128,7 @@ export const Editor = () => {
         />
       </div>
       <OnChangeDebouncePlugin onChange={onChange} debounceTime={500} />
-      <OnBlurPlugin onBlur={onBlur} />
+      {/* <OnBlurPlugin onBlur={onBlur} /> */}
       <TabKeyPlugin tabSize={2} useSpaces={true} />
       <MarkdownImageShortcutPlugin />
       <MarkdownShortcutPlugin transformers={COMBINED_TRANSFORMERS} />
