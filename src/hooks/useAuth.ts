@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { type UserWithKeys } from "~/types";
+import type { UserWithKeys } from "~/types";
 import { useSession } from "next-auth/react";
 
 const useAuth = () => {

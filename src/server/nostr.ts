@@ -6,43 +6,44 @@ import { finalizeEvent, nip19, type EventTemplate } from "nostr-tools";
 import { queryProfile } from "nostr-tools/nip05";
 
 import { getUser } from "./auth";
+import { parseUint8Array } from "~/lib/nostr";
 
 export async function getPublicKeyAndRelayHintFromNip05OrNpub(profile: string) {
-  profile = decodeURIComponent(profile);
+	profile = decodeURIComponent(profile);
 
-  let profilePublicKey;
-  let profileRelays;
+	let profilePublicKey: string | undefined;
+	let profileRelays: string[] | undefined;
 
-  if (!profile) {
-    console.error("Invalid profile", profile);
-    notFound();
-  }
+	if (!profile) {
+		console.error("Invalid profile", profile);
+		notFound();
+	}
 
-  if (profile.startsWith("npub")) {
-    try {
-      const decodeResult = nip19.decode(profile);
-      profilePublicKey = decodeResult.data as string;
-    } catch (error) {
-      console.error("Invalid npub", profile, error);
-      notFound();
-    }
-  }
+	if (profile.startsWith("npub")) {
+		try {
+			const decodeResult = nip19.decode(profile);
+			profilePublicKey = decodeResult.data as string;
+		} catch (error) {
+			console.error("Invalid npub", profile, error);
+			notFound();
+		}
+	}
 
-  if (!profilePublicKey) {
-    const nip05Profile = await queryProfile(profile);
-    profilePublicKey = nip05Profile?.pubkey;
-    profileRelays = nip05Profile?.relays;
-  }
+	if (!profilePublicKey) {
+		const nip05Profile = await queryProfile(profile);
+		profilePublicKey = nip05Profile?.pubkey;
+		profileRelays = nip05Profile?.relays;
+	}
 
-  if (!profilePublicKey) {
-    console.error("Invalid profile", profile);
-    notFound();
-  }
+	if (!profilePublicKey) {
+		console.error("Invalid profile", profile);
+		notFound();
+	}
 
-  return {
-    publicKey: profilePublicKey,
-    relays: profileRelays,
-  };
+	return {
+		publicKey: profilePublicKey,
+		relays: profileRelays,
+	};
 }
 
 // let newPool: SimplePool | null = null;
@@ -80,12 +81,17 @@ export async function getPublicKeyAndRelayHintFromNip05OrNpub(profile: string) {
 // }
 
 export async function finishEventWithSecretKey(t: EventTemplate) {
-  const user = await getUser();
-  if (!user) {
-    throw new Error("User not found");
-  }
+	const user = await getUser();
 
-  const secretKey = hexToBytes(user.secretKey);
+	if (!user) {
+		throw new Error("User not found");
+	}
 
-  return finalizeEvent(t, secretKey);
+	const secretKey = parseUint8Array(user.secretKey);
+
+	if (!secretKey) {
+		throw new Error("Secret key not found");
+	}
+
+	return finalizeEvent(t, secretKey);
 }

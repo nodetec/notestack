@@ -76,6 +76,8 @@ const handlePublish = async (
 		content: removeTitle(markdown),
 	};
 
+	console.log("eventTemplate", eventTemplate);
+
 	const publishedEvent = await publish(eventTemplate, relays);
 
 	if (publishedEvent) {
