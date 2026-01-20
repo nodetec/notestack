@@ -15,6 +15,7 @@ import {
   DecoratorNode,
 } from 'lexical';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 export interface NaddrPayload {
@@ -46,6 +47,7 @@ function NaddrComponent({
   nodeKey: NodeKey;
 }) {
   const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(naddr);
   const [editIsEmbed, setEditIsEmbed] = useState(isEmbed);
@@ -115,29 +117,31 @@ function NaddrComponent({
       >
         {displayText}
       </span>
-      <button
-        onClick={handleEditClick}
-        className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
-        title="Edit naddr"
-        aria-label="Edit naddr"
-      >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+      {isEditable && (
+        <button
+          onClick={handleEditClick}
+          className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
+          title="Edit naddr"
+          aria-label="Edit naddr"
         >
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-          <path d="m15 5 4 4" />
-        </svg>
-      </button>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+          </svg>
+        </button>
+      )}
 
-      {isEditing && (
+      {isEditing && isEditable && (
         <div
           ref={popupRef}
           className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 min-w-80"

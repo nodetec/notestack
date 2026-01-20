@@ -15,6 +15,7 @@ import {
   DecoratorNode,
 } from 'lexical';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditorContext, type NostrNote } from '../context/EditorContext';
 
@@ -47,6 +48,7 @@ function NeventComponent({
   nodeKey: NodeKey;
 }) {
   const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
   const { onNoteLookup } = useEditorContext();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(nevent);
@@ -141,7 +143,7 @@ function NeventComponent({
     : null;
 
   // Edit popup component (shared between both render modes)
-  const editPopup = isEditing && (
+  const editPopup = isEditing && isEditable && (
     <div
       ref={popupRef}
       className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 min-w-80"
@@ -214,27 +216,29 @@ function NeventComponent({
                   {note.authorName}
                 </span>
               )}
-              <button
-                onClick={handleEditClick}
-                className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded flex-shrink-0"
-                title="Edit nevent"
-                aria-label="Edit nevent"
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+              {isEditable && (
+                <button
+                  onClick={handleEditClick}
+                  className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded flex-shrink-0"
+                  title="Edit nevent"
+                  aria-label="Edit nevent"
                 >
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  <path d="m15 5 4 4" />
-                </svg>
-              </button>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </button>
+              )}
             </span>
             <span className="block text-sm text-zinc-600 dark:text-zinc-400 leading-snug">
               &ldquo;{truncatedContent}&rdquo;
@@ -255,27 +259,29 @@ function NeventComponent({
       >
         {isLoading ? 'Loading...' : displayText}
       </span>
-      <button
-        onClick={handleEditClick}
-        className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
-        title="Edit nevent"
-        aria-label="Edit nevent"
-      >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+      {isEditable && (
+        <button
+          onClick={handleEditClick}
+          className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
+          title="Edit nevent"
+          aria-label="Edit nevent"
         >
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-          <path d="m15 5 4 4" />
-        </svg>
-      </button>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+          </svg>
+        </button>
+      )}
       {editPopup}
     </span>
   );
