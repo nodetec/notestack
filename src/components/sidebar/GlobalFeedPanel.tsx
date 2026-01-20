@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useSidebar } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +61,16 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
   });
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
+
+  // Infinite scroll with intersection observer
+  const { ref: loadMoreRef } = useInView({
+    threshold: 0.1,
+    onChange: (inView) => {
+      if (inView && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+  });
 
   const handleBroadcast = async (blog: Blog, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -174,17 +184,10 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
           })}
         </ul>
 
-        {/* Load More Button */}
+        {/* Infinite scroll sentinel */}
         {hasNextPage && (
-          <div className="p-3">
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
-              {isFetchingNextPage ? 'Loading...' : 'Load More'}
-            </Button>
+          <div ref={loadMoreRef} className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+            {isFetchingNextPage && 'Loading...'}
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon, PenLineIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
@@ -9,7 +10,6 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useDraftStore } from '@/lib/stores/draftStore';
 import { useSidebar } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +68,16 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
   const isLoggedIn = isHydrated && !!pubkey;
+
+  // Infinite scroll with intersection observer
+  const { ref: loadMoreRef } = useInView({
+    threshold: 0.1,
+    onChange: (inView) => {
+      if (inView && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+  });
 
   const handleDelete = async (blog: Blog, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -218,17 +228,10 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
           })}
         </ul>
 
-        {/* Load More Button */}
+        {/* Infinite scroll sentinel */}
         {isLoggedIn && hasNextPage && (
-          <div className="p-3">
-            <Button
-              variant="secondary"
-              className="w-full"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
-              {isFetchingNextPage ? 'Loading...' : 'Load More'}
-            </Button>
+          <div ref={loadMoreRef} className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+            {isFetchingNextPage && 'Loading...'}
           </div>
         )}
       </div>
