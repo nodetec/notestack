@@ -71,7 +71,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
-    threshold: 0.1,
+    rootMargin: '200px',
     onChange: (inView) => {
       if (inView && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();

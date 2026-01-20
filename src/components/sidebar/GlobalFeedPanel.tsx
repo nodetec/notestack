@@ -7,6 +7,7 @@ import { XIcon, MoreVerticalIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useProfiles } from '@/lib/hooks/useProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -62,9 +63,13 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
 
+  // Fetch profiles for all blog authors (only when we have blogs)
+  const pubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
+  const { data: profiles } = useProfiles(pubkeys, activeRelay ?? undefined);
+
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
-    threshold: 0.1,
+    rootMargin: '200px',
     onChange: (inView) => {
       if (inView && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
@@ -129,6 +134,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
         <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
+            const profile = profiles?.get(blog.pubkey);
             return (
               <li key={blog.id} className="relative group">
                 <button
@@ -136,6 +142,26 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
                   className="w-full text-left p-3 pr-10 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      {profile?.picture ? (
+                        <img
+                          src={profile.picture}
+                          alt=""
+                          className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-zinc-300 dark:bg-zinc-700 flex-shrink-0" />
+                      )}
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                        {profile?.name || truncateNpub(blog.pubkey)}
+                      </span>
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                        &middot;
+                      </span>
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500 flex-shrink-0">
+                        {formatDate(blog.publishedAt || blog.createdAt)}
+                      </span>
+                    </div>
                     <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {blog.title || 'Untitled'}
                     </h3>
@@ -151,11 +177,6 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
                         className="max-h-32 rounded object-contain mt-2"
                       />
                     )}
-                    <div className="flex items-center gap-2 mt-2 text-xs text-zinc-400 dark:text-zinc-500">
-                      <span>{truncateNpub(blog.pubkey)}</span>
-                      <span>&middot;</span>
-                      <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-                    </div>
                   </div>
                 </button>
                 <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">

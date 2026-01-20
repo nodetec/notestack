@@ -4,6 +4,13 @@ import type { NostrProfile } from '@/components/editor';
 
 const DEFAULT_RELAY = 'wss://relay.damus.io';
 
+export interface Profile {
+  pubkey: string;
+  name?: string;
+  picture?: string;
+  nip05?: string;
+}
+
 interface ProfileEvent {
   pubkey: string;
   content: string;
@@ -151,4 +158,38 @@ export const profileBatcher = create({
  */
 export function lookupProfile(npub: string): Promise<NostrProfile | null> {
   return profileBatcher.fetch(npub);
+}
+
+/**
+ * Fetch profiles for multiple pubkeys from a relay
+ * Returns a map of pubkey -> Profile
+ */
+export async function fetchProfiles(
+  pubkeys: string[],
+  relay: string = DEFAULT_RELAY
+): Promise<Map<string, Profile>> {
+  const uniquePubkeys = [...new Set(pubkeys)];
+
+  if (uniquePubkeys.length === 0) {
+    return new Map();
+  }
+
+  const events = await fetchProfileEvents(uniquePubkeys, relay);
+  const result = new Map<string, Profile>();
+
+  for (const event of events) {
+    try {
+      const content = JSON.parse(event.content);
+      result.set(event.pubkey, {
+        pubkey: event.pubkey,
+        name: content.name || content.display_name,
+        picture: content.picture,
+        nip05: content.nip05,
+      });
+    } catch {
+      // Skip invalid profiles
+    }
+  }
+
+  return result;
 }
