@@ -1,0 +1,16 @@
+{
+  "name": "NoteStack",
+  "short_name": "NoteStack",
+  "description": "A beautiful Nostr long-form editor. Write, publish, and share your ideas on the decentralized web.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
