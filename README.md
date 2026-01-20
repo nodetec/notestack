@@ -1,47 +1,36 @@
-<div align="center"><p>
-    <h1>NoteStack 📓</h1>
-    <a href="https://github.com/nodetec/notestack/pulse">
-      <img alt="Last commit" src="https://img.shields.io/github/last-commit/nodetec/notestack?style=for-the-badge&logo=starship&color=8bd5ca&logoColor=D9E0EE&labelColor=302D41"/>
-    </a>
-    <a href="https://github.com/nodetec/notestack/stargazers">
-      <img alt="Stars" src="https://img.shields.io/github/stars/nodetec/notestack?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41" />
-    </a>
-    <a href="https://github.com/nodetec/notestack/issues">
-      <img alt="Issues" src="https://img.shields.io/github/issues/nodetec/notestack?style=for-the-badge&logo=bilibili&color=F5E0DC&logoColor=D9E0EE&labelColor=302D41" />
-    </a>
-    <a href="https://github.com/nodetec/notestack">
-      <img alt="Repo size" src="https://img.shields.io/github/repo-size/nodetec/notestack?color=%23DDB6F2&label=SIZE&logo=codesandbox&style=for-the-badge&logoColor=D9E0EE&labelColor=302D41" />
-    </a>
-</div>
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-[NoteStack](https://notestack.com/ "NoteStack") is a decentralized blogging platform using [Nostr](https://nostr.com/ "Nostr") relays with support for lightning tips ⚡.
+## Getting Started
 
-## Contribute
-
-First, install the dependencies:
-
-```bash
-npm install
-```
-
-Next, run the development server:
+First, run the development server:
 
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000 "http://localhost:3000") with your browser to see the site.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Tech Stack
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- [Next.js](https://nextjs.org/ "Next.js")
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-- [React Query](https://tanstack.com/query/latest/docs/framework/react/overview "React Query")
+## Learn More
 
-- [Zustand](https://zustand-demo.pmnd.rs/ "Zustand")
+To learn more about Next.js, take a look at the following resources:
 
-- [Tailwind CSS](https://tailwindcss.com/ "Tailwind CSS")
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- [shadcn/ui](https://ui.shadcn.com/ "shadcn/ui")
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-- [nostr-tools](https://github.com/nbd-wtf/nostr-tools "nostr-tools")
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
