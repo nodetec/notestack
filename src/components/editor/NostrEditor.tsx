@@ -73,7 +73,7 @@ export interface NostrEditorHandle {
 }
 
 // All transformers for markdown conversion
-const ALL_TRANSFORMERS = [
+export const ALL_TRANSFORMERS = [
   YOUTUBE_TRANSFORMER,
   TABLE,
   HORIZONTAL_RULE,

@@ -7,6 +7,8 @@ import {
   $getSelection,
   $isRangeSelection,
   $createParagraphNode,
+  $createTextNode,
+  $getRoot,
   FORMAT_TEXT_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
@@ -18,6 +20,7 @@ import {
 import { $isHeadingNode, $createHeadingNode, type HeadingTagType } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $isCodeNode, $createCodeNode } from '@lexical/code';
+import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
   BoldIcon,
@@ -30,7 +33,9 @@ import {
   ImageIcon,
   TableIcon,
   YoutubeIcon,
+  FileTextIcon,
 } from 'lucide-react';
+import { ALL_TRANSFORMERS } from '../NostrEditor';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -54,12 +59,20 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [blockType, setBlockType] = useState<BlockType>('paragraph');
+  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
+
+    // Check if we're in markdown mode (single markdown code block)
+    const root = $getRoot();
+    const firstChild = root.getFirstChild();
+    const inMarkdownMode = $isCodeNode(firstChild) && firstChild.getLanguage() === 'markdown' && root.getChildrenSize() === 1;
+    setIsMarkdownMode(inMarkdownMode);
+
     if ($isRangeSelection(selection)) {
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
@@ -171,6 +184,42 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   const openTableDialog = useCallback(() => {
     setShowTableDialog(true);
   }, []);
+
+  const toggleMarkdownMode = useCallback(() => {
+    editor.update(() => {
+      const root = $getRoot();
+      const firstChild = root.getFirstChild();
+
+      if ($isCodeNode(firstChild) && firstChild.getLanguage() === 'markdown') {
+        // Convert from markdown back to rich text
+        $convertFromMarkdownString(
+          firstChild.getTextContent(),
+          ALL_TRANSFORMERS,
+          undefined,
+          false
+        );
+        setIsMarkdownMode(false);
+        // Scroll to top after converting back to rich text
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        });
+      } else {
+        // Convert to markdown and display in a code block
+        const markdown = $convertToMarkdownString(
+          ALL_TRANSFORMERS,
+          undefined,
+          false
+        );
+        const codeNode = $createCodeNode('markdown');
+        codeNode.append($createTextNode(markdown));
+        root.clear().append(codeNode);
+        if (markdown.length === 0) {
+          codeNode.select();
+        }
+        setIsMarkdownMode(true);
+      }
+    });
+  }, [editor]);
 
   if (!portalContainer) {
     return null;
@@ -328,6 +377,23 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>Embed YouTube</TooltipContent>
+      </Tooltip>
+
+      <Separator orientation="vertical" className="mx-1 h-6 hidden md:block" />
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={toggleMarkdownMode}
+            aria-pressed={isMarkdownMode}
+            className={`hidden md:flex ${isMarkdownMode ? 'bg-accent' : ''}`}
+          >
+            <FileTextIcon className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{isMarkdownMode ? 'Rich Text' : 'Markdown'}</TooltipContent>
       </Tooltip>
 
       <ImageDialog
