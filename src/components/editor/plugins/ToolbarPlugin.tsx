@@ -267,7 +267,7 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
 
   const toolbar = (
     <div className="flex items-center gap-0.5" onMouseDown={(e) => e.preventDefault()}>
-      <HeadingSelect blockType={blockType} onSelect={handleBlockTypeChange} disabled={false} />
+      <HeadingSelect blockType={blockType} onSelect={handleBlockTypeChange} disabled={isMarkdownMode} />
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
@@ -277,8 +277,9 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => formatText('bold')}
+            disabled={isMarkdownMode}
             aria-pressed={isBold}
-                       className={isBold  ? 'bg-accent' : ''}
+            className={isBold && !isMarkdownMode ? 'bg-accent' : ''}
           >
             <BoldIcon className="size-4" />
           </Button>
@@ -292,8 +293,9 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => formatText('italic')}
+            disabled={isMarkdownMode}
             aria-pressed={isItalic}
-                       className={isItalic  ? 'bg-accent' : ''}
+            className={isItalic && !isMarkdownMode ? 'bg-accent' : ''}
           >
             <ItalicIcon className="size-4" />
           </Button>
@@ -307,8 +309,9 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => formatText('strikethrough')}
+            disabled={isMarkdownMode}
             aria-pressed={isStrikethrough}
-                       className={isStrikethrough  ? 'bg-accent' : ''}
+            className={isStrikethrough && !isMarkdownMode ? 'bg-accent' : ''}
           >
             <StrikethroughIcon className="size-4" />
           </Button>
@@ -322,8 +325,9 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => formatText('code')}
+            disabled={isMarkdownMode}
             aria-pressed={isCode}
-                       className={isCode  ? 'bg-accent' : ''}
+            className={isCode && !isMarkdownMode ? 'bg-accent' : ''}
           >
             <CodeIcon className="size-4" />
           </Button>
@@ -369,7 +373,8 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={insertCodeBlock}
-                       className="hidden md:flex"
+            disabled={isMarkdownMode}
+            className="hidden md:flex"
           >
             <CodeXmlIcon className="size-4" />
           </Button>
@@ -383,7 +388,8 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => setShowImageDialog(true)}
-                       className="hidden md:flex"
+            disabled={isMarkdownMode}
+            className="hidden md:flex"
           >
             <ImageIcon className="size-4" />
           </Button>
@@ -397,6 +403,7 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={openTableDialog}
+            disabled={isMarkdownMode}
             className="hidden md:flex"
           >
             <TableIcon className="size-4" />
@@ -411,6 +418,7 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
             variant="ghost"
             size="icon-sm"
             onClick={() => setShowYouTubeDialog(true)}
+            disabled={isMarkdownMode}
             className="hidden md:flex"
           >
             <YoutubeIcon className="size-4" />
