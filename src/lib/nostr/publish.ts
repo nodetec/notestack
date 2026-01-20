@@ -123,6 +123,127 @@ export async function broadcastEvent(
   return Promise.all(relays.map((relay) => publishToRelay(event, relay)));
 }
 
+// NIP-84: Publish a highlight (kind 9802)
+interface HighlightOptions {
+  content: string; // The highlighted text
+  context?: string; // Surrounding text for context
+  source: {
+    kind: number;
+    pubkey: string;
+    identifier: string; // d-tag for addressable events
+    relay?: string; // Relay hint
+  };
+  authorPubkey?: string; // Attribution to original author
+  relays: string[];
+}
+
+export interface PublishHighlightResult {
+  results: PublishResult[];
+  event: {
+    id: string;
+    pubkey: string;
+    createdAt: number;
+  };
+}
+
+export async function publishHighlight({
+  content,
+  context,
+  source,
+  authorPubkey,
+  relays,
+}: HighlightOptions): Promise<PublishHighlightResult> {
+  if (!window.nostr) {
+    throw new Error('No Nostr extension found');
+  }
+
+  const pubkey = await window.nostr.getPublicKey();
+  const createdAt = Math.floor(Date.now() / 1000);
+
+  // Build tags array for NIP-84
+  const eventTags: string[][] = [];
+
+  // Reference the source article with 'a' tag (for addressable events like kind:30023)
+  // Format: ["a", "<kind>:<pubkey>:<d-tag>", "<relay-url>"]
+  const aTagValue = `${source.kind}:${source.pubkey}:${source.identifier}`;
+  if (source.relay) {
+    eventTags.push(['a', aTagValue, source.relay]);
+  } else {
+    eventTags.push(['a', aTagValue]);
+  }
+
+  // Add author attribution if provided
+  if (authorPubkey) {
+    eventTags.push(['p', authorPubkey, '', 'author']);
+  }
+
+  // Add context if provided
+  if (context) {
+    eventTags.push(['context', context]);
+  }
+
+  const unsignedEvent = {
+    kind: 9802,
+    pubkey,
+    created_at: createdAt,
+    tags: eventTags,
+    content,
+  };
+
+  // Sign the event using NIP-07
+  const signedEvent = await window.nostr.signEvent(unsignedEvent) as NostrEvent;
+
+  // Publish to all relays
+  const results = await Promise.all(
+    relays.map((relay) => publishToRelay(signedEvent, relay))
+  );
+
+  return {
+    results,
+    event: {
+      id: signedEvent.id,
+      pubkey: signedEvent.pubkey,
+      createdAt: signedEvent.created_at,
+    },
+  };
+}
+
+// NIP-09: Delete a highlight
+export async function deleteHighlight({
+  eventId,
+  relays,
+}: {
+  eventId: string;
+  relays: string[];
+}): Promise<PublishResult[]> {
+  if (!window.nostr) {
+    throw new Error('No Nostr extension found');
+  }
+
+  const pubkey = await window.nostr.getPublicKey();
+  const createdAt = Math.floor(Date.now() / 1000);
+
+  // NIP-09: Deletion event (kind 5)
+  const unsignedEvent = {
+    kind: 5,
+    pubkey,
+    created_at: createdAt,
+    tags: [
+      ['e', eventId],
+      ['k', '9802'], // kind being deleted
+    ],
+    content: 'Highlight deleted',
+  };
+
+  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+
+  const results = await Promise.all(
+    relays.map((relay) => publishToRelay(signedEvent, relay))
+  );
+
+  return results;
+}
+
 async function publishToRelay(event: NostrEvent, relay: string): Promise<PublishResult> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);

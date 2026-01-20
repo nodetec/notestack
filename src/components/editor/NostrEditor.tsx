@@ -56,6 +56,18 @@ import { YOUTUBE_TRANSFORMER } from './transformers/YouTubeTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
+import HighlightPlugin from './plugins/HighlightPlugin';
+
+// Source information for NIP-84 highlights
+export interface HighlightSource {
+  kind: number;
+  pubkey: string;
+  identifier: string;
+  relay?: string;
+}
+
+// Re-export Highlight type for convenience
+export type { Highlight } from '@/lib/nostr/types';
 
 interface NostrEditorProps {
   placeholder?: string;
@@ -66,6 +78,10 @@ interface NostrEditorProps {
   onNoteLookup?: NoteLookupFn;
   toolbarContainer?: HTMLElement | null;
   readOnly?: boolean;
+  highlightSource?: HighlightSource; // For NIP-84 highlights when viewing articles
+  highlights?: import('@/lib/nostr/types').Highlight[]; // Existing highlights to display
+  onHighlightDeleted?: (highlightId: string) => void; // Callback when highlight is deleted
+  onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void; // Callback when highlight is created
 }
 
 export interface NostrEditorHandle {
@@ -96,6 +112,10 @@ function EditorInner({
   toolbarContainer,
   initialMarkdown,
   readOnly,
+  highlightSource,
+  highlights,
+  onHighlightDeleted,
+  onHighlightCreated,
 }: {
   editorRef: React.RefObject<NostrEditorHandle | null>;
   placeholder: string;
@@ -103,6 +123,10 @@ function EditorInner({
   toolbarContainer?: HTMLElement | null;
   initialMarkdown?: string;
   readOnly?: boolean;
+  highlightSource?: HighlightSource;
+  highlights?: import('@/lib/nostr/types').Highlight[];
+  onHighlightDeleted?: (highlightId: string) => void;
+  onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -156,6 +180,7 @@ function EditorInner({
       <TableActionMenuPlugin />
       <TableCellResizerPlugin />
       <CodeHighlightPlugin />
+      <HighlightPlugin source={highlightSource} highlights={highlights} onHighlightDeleted={onHighlightDeleted} onHighlightCreated={onHighlightCreated} />
     </>
   );
 }
@@ -170,6 +195,10 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
     onNoteLookup,
     toolbarContainer,
     readOnly = false,
+    highlightSource,
+    highlights,
+    onHighlightDeleted,
+    onHighlightCreated,
   },
   ref
 ) {
@@ -212,6 +241,10 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
               toolbarContainer={toolbarContainer}
               initialMarkdown={initialMarkdown}
               readOnly={readOnly}
+              highlightSource={highlightSource}
+              highlights={highlights}
+              onHighlightDeleted={onHighlightDeleted}
+              onHighlightCreated={onHighlightCreated}
             />
           </div>
         </div>

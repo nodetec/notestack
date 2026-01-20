@@ -2,14 +2,15 @@
 
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { NostrEditor, type NostrEditorHandle } from '@/components/editor';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import BlogListPanel from '@/components/sidebar/BlogListPanel';
 import DraftsPanel from '@/components/sidebar/DraftsPanel';
 import SettingsPanel from '@/components/sidebar/SettingsPanel';
 import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
+import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import LoginButton from '@/components/auth/LoginButton';
 import PublishDialog from '@/components/publish/PublishDialog';
 import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
@@ -19,7 +20,7 @@ import { useDraftStore } from '@/lib/stores/draftStore';
 import { useDraftAutoSave } from '@/lib/hooks/useDraftAutoSave';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { lookupNote } from '@/lib/nostr/notes';
-import { fetchBlogByAddress } from '@/lib/nostr/fetch';
+import { fetchBlogByAddress, fetchHighlights } from '@/lib/nostr/fetch';
 import { blogToNaddr, decodeNaddr } from '@/lib/nostr/naddr';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -74,6 +75,46 @@ function HomeContent() {
   useEffect(() => {
     selectedBlogRef.current = selectedBlog;
   }, [selectedBlog]);
+
+  // Fetch highlights when viewing a blog using React Query
+  const highlightsQueryKey = selectedBlog
+    ? ['highlights', selectedBlog.pubkey, selectedBlog.dTag, activeRelay]
+    : null;
+
+  const { data: highlights = [] } = useQuery({
+    queryKey: highlightsQueryKey!,
+    queryFn: () => fetchHighlights({
+      articlePubkey: selectedBlog!.pubkey,
+      articleIdentifier: selectedBlog!.dTag,
+      relay: activeRelay,
+    }),
+    enabled: !!selectedBlog,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+  });
+
+  // Handle highlight deletion - update cache optimistically
+  const handleHighlightDeleted = useCallback((highlightId: string) => {
+    // Update the article's highlights cache
+    if (highlightsQueryKey) {
+      queryClient.setQueryData<Highlight[]>(highlightsQueryKey, (old) =>
+        old ? old.filter((h) => h.id !== highlightId) : []
+      );
+    }
+    // Invalidate user highlights so the panel refreshes
+    queryClient.invalidateQueries({ queryKey: ['user-highlights'] });
+  }, [queryClient, highlightsQueryKey]);
+
+  // Handle highlight creation - update cache optimistically
+  const handleHighlightCreated = useCallback((highlight: Highlight) => {
+    // Update the article's highlights cache
+    if (highlightsQueryKey) {
+      queryClient.setQueryData<Highlight[]>(highlightsQueryKey, (old) =>
+        old ? [...old, highlight] : [highlight]
+      );
+    }
+    // Invalidate user highlights so the panel refreshes
+    queryClient.invalidateQueries({ queryKey: ['user-highlights'] });
+  }, [queryClient, highlightsQueryKey]);
 
   // Handle URL-based navigation
   useEffect(() => {
@@ -212,6 +253,18 @@ function HomeContent() {
     router.push(`/?draft=${draftId}`);
     if (isMobile) setActivePanel(null);
   }, [router, isMobile]);
+
+  const handleSelectHighlight = useCallback((highlight: Highlight) => {
+    // Navigate to the source article
+    if (highlight.source) {
+      const naddr = blogToNaddr(
+        { pubkey: highlight.source.pubkey, dTag: highlight.source.identifier },
+        relays
+      );
+      router.push(`/?blog=${naddr}`);
+      if (isMobile) setActivePanel(null);
+    }
+  }, [router, relays, isMobile]);
 
   const isLoggedIn = isHydrated && !!pubkey;
 
@@ -382,6 +435,9 @@ function HomeContent() {
       <div className={activePanel === 'drafts' ? '' : 'hidden'}>
         <DraftsPanel onSelectDraft={handleSelectDraft} onClose={handleClosePanel} />
       </div>
+      <div className={activePanel === 'highlights' ? '' : 'hidden'}>
+        <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} />
+      </div>
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />
       )}
@@ -454,6 +510,15 @@ function HomeContent() {
               onNoteLookup={lookupNote}
               toolbarContainer={selectedBlog ? null : toolbarElement}
               readOnly={!!selectedBlog}
+              highlightSource={selectedBlog ? {
+                kind: 30023,
+                pubkey: selectedBlog.pubkey,
+                identifier: selectedBlog.dTag,
+                relay: activeRelay,
+              } : undefined}
+              highlights={highlights}
+              onHighlightDeleted={handleHighlightDeleted}
+              onHighlightCreated={handleHighlightCreated}
             />
           </div>
           )}

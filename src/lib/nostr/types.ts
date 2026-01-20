@@ -9,6 +9,22 @@ export interface NostrEvent {
   sig: string;
 }
 
+// NIP-84 Highlight (kind 9802)
+export interface Highlight {
+  id: string;
+  pubkey: string;
+  createdAt: number;
+  content: string; // The highlighted text
+  context?: string; // Surrounding text for context
+  // Reference to the source (article)
+  source: {
+    kind: number;
+    pubkey: string;
+    identifier: string; // d-tag for addressable events
+  };
+  authorPubkey?: string; // Attribution to original author
+}
+
 // NIP-23 Long-form content (kind 30023)
 export interface Blog {
   id: string;

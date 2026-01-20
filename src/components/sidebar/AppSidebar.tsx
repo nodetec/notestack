@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon } from 'lucide-react';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Sidebar,
@@ -109,6 +109,16 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                 >
                   <FileEditIcon />
                   <span>Drafts</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Highlights"
+                  isActive={activePanel === 'highlights'}
+                  onClick={() => handleClick('highlights')}
+                >
+                  <HighlighterIcon />
+                  <span>Highlights</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

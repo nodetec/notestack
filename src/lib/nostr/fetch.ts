@@ -1,10 +1,38 @@
-import { NostrEvent, Blog, eventToBlog } from './types';
+import { NostrEvent, Blog, eventToBlog, Highlight } from './types';
 
 interface FetchBlogsOptions {
   limit?: number;
   until?: number;
   pubkey?: string;
   relay?: string;
+}
+
+function eventToHighlight(event: NostrEvent): Highlight | null {
+  // Parse the 'a' tag to get source info
+  const aTag = event.tags.find((t) => t[0] === 'a');
+  if (!aTag || !aTag[1]) return null;
+
+  const [kindStr, pubkey, identifier] = aTag[1].split(':');
+  const kind = parseInt(kindStr, 10);
+  if (!kind || !pubkey || !identifier) return null;
+
+  // Get context if present
+  const contextTag = event.tags.find((t) => t[0] === 'context');
+  const context = contextTag?.[1];
+
+  // Get author attribution
+  const authorTag = event.tags.find((t) => t[0] === 'p' && t[3] === 'author');
+  const authorPubkey = authorTag?.[1];
+
+  return {
+    id: event.id,
+    pubkey: event.pubkey,
+    createdAt: event.created_at,
+    content: event.content,
+    context,
+    source: { kind, pubkey, identifier },
+    authorPubkey,
+  };
 }
 
 export async function fetchBlogByAddress({
@@ -148,6 +176,151 @@ export async function fetchBlogs({
     ws.onerror = (error) => {
       clearTimeout(timeoutId);
       reject(error);
+    };
+  });
+}
+
+// Fetch user's highlights (for the highlights panel)
+export async function fetchUserHighlights({
+  pubkey,
+  relay = 'wss://relay.damus.io',
+  limit = 50,
+  until,
+}: {
+  pubkey: string;
+  relay?: string;
+  limit?: number;
+  until?: number;
+}): Promise<{ highlights: Highlight[]; nextCursor?: number }> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const events: NostrEvent[] = [];
+    const subId = `user-highlights-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+
+    ws.onopen = () => {
+      const filter: Record<string, unknown> = {
+        kinds: [9802],
+        authors: [pubkey],
+        limit,
+      };
+
+      if (until) {
+        filter.until = until;
+      }
+
+      ws.send(JSON.stringify(['REQ', subId, filter]));
+
+      timeoutId = setTimeout(() => {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        const highlights = events
+          .map(eventToHighlight)
+          .filter((h): h is Highlight => h !== null);
+        const nextCursor = highlights.length >= limit
+          ? Math.min(...highlights.map((h) => h.createdAt)) - 1
+          : undefined;
+        resolve({ highlights, nextCursor });
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 9802) {
+            events.push(event);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          const highlights = events
+            .map(eventToHighlight)
+            .filter((h): h is Highlight => h !== null);
+          const nextCursor = highlights.length >= limit
+            ? Math.min(...highlights.map((h) => h.createdAt)) - 1
+            : undefined;
+          resolve({ highlights, nextCursor });
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      clearTimeout(timeoutId);
+      resolve({ highlights: [] });
+    };
+  });
+}
+
+// Fetch NIP-84 highlights for an article
+export async function fetchHighlights({
+  articlePubkey,
+  articleIdentifier,
+  relay = 'wss://relay.damus.io',
+}: {
+  articlePubkey: string;
+  articleIdentifier: string;
+  relay?: string;
+}): Promise<Highlight[]> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const events: NostrEvent[] = [];
+    const subId = `highlights-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+
+    // Build the 'a' tag value to search for
+    const aTagValue = `30023:${articlePubkey}:${articleIdentifier}`;
+
+    ws.onopen = () => {
+      const filter = {
+        kinds: [9802],
+        '#a': [aTagValue],
+        limit: 100,
+      };
+
+      ws.send(JSON.stringify(['REQ', subId, filter]));
+
+      timeoutId = setTimeout(() => {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        const highlights = events
+          .map(eventToHighlight)
+          .filter((h): h is Highlight => h !== null);
+        resolve(highlights);
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 9802) {
+            events.push(event);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          const highlights = events
+            .map(eventToHighlight)
+            .filter((h): h is Highlight => h !== null);
+          resolve(highlights);
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      clearTimeout(timeoutId);
+      resolve([]);
     };
   });
 }
