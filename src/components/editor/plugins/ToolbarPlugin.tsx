@@ -9,6 +9,7 @@ import {
   $createParagraphNode,
   $createTextNode,
   $getRoot,
+  $insertNodes,
   FORMAT_TEXT_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
@@ -70,7 +71,9 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
     // Check if we're in markdown mode (single markdown code block)
     const root = $getRoot();
     const firstChild = root.getFirstChild();
-    const inMarkdownMode = $isCodeNode(firstChild) && firstChild.getLanguage() === 'markdown' && root.getChildrenSize() === 1;
+    const inMarkdownMode = $isCodeNode(firstChild) &&
+      firstChild.getLanguage() === 'markdown' &&
+      root.getChildrenSize() === 1;
     setIsMarkdownMode(inMarkdownMode);
 
     if ($isRangeSelection(selection)) {
@@ -171,11 +174,10 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   const insertImage = useCallback(
     (url: string, altText: string) => {
       editor.update(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const imageNode = $createImageNode({ src: url, altText });
-          selection.insertNodes([imageNode]);
-        }
+        const imageNode = $createImageNode({ src: url, altText });
+        const paragraphAfter = $createParagraphNode();
+        $insertNodes([imageNode, paragraphAfter]);
+        paragraphAfter.selectStart();
       });
     },
     [editor]
@@ -186,39 +188,77 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   }, []);
 
   const toggleMarkdownMode = useCallback(() => {
-    editor.update(() => {
-      const root = $getRoot();
-      const firstChild = root.getFirstChild();
+    try {
+      // First, check if we're currently in markdown mode by reading the state
+      let currentlyInMarkdownMode = false;
+      let markdownContent = '';
 
-      if ($isCodeNode(firstChild) && firstChild.getLanguage() === 'markdown') {
-        // Convert from markdown back to rich text
-        $convertFromMarkdownString(
-          firstChild.getTextContent(),
-          ALL_TRANSFORMERS,
-          undefined,
-          false
-        );
-        setIsMarkdownMode(false);
-        // Scroll to top after converting back to rich text
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: 0, behavior: 'instant' });
-        });
-      } else {
-        // Convert to markdown and display in a code block
-        const markdown = $convertToMarkdownString(
-          ALL_TRANSFORMERS,
-          undefined,
-          false
-        );
-        const codeNode = $createCodeNode('markdown');
-        codeNode.append($createTextNode(markdown));
-        root.clear().append(codeNode);
-        if (markdown.length === 0) {
-          codeNode.select();
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const firstChild = root.getFirstChild();
+        currentlyInMarkdownMode = $isCodeNode(firstChild) &&
+          firstChild.getLanguage() === 'markdown' &&
+          root.getChildrenSize() === 1;
+
+        if (currentlyInMarkdownMode && firstChild) {
+          markdownContent = firstChild.getTextContent();
+        } else {
+          // Convert current content to markdown
+          // Use try-catch in case of transformer errors
+          try {
+            markdownContent = $convertToMarkdownString(
+              ALL_TRANSFORMERS,
+              undefined,
+              false
+            );
+          } catch (err) {
+            console.error('Error converting to markdown:', err);
+            markdownContent = '';
+          }
         }
-        setIsMarkdownMode(true);
+      });
+
+      // Warn about very large content (e.g., base64 images)
+      if (markdownContent.length > 500000) {
+        console.warn('Markdown content is very large, this may cause performance issues');
       }
-    });
+
+      editor.update(() => {
+        const root = $getRoot();
+
+        if (currentlyInMarkdownMode) {
+          // Convert from markdown back to rich text
+          try {
+            $convertFromMarkdownString(
+              markdownContent,
+              ALL_TRANSFORMERS,
+              undefined,
+              false
+            );
+          } catch (err) {
+            console.error('Error converting from markdown:', err);
+            // Keep the code block if conversion fails
+            return;
+          }
+          setIsMarkdownMode(false);
+          // Scroll to top after converting back to rich text
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          });
+        } else {
+          // Display markdown in a code block with syntax highlighting
+          const codeNode = $createCodeNode('markdown');
+          codeNode.append($createTextNode(markdownContent));
+          root.clear().append(codeNode);
+          if (markdownContent.length === 0) {
+            codeNode.select();
+          }
+          setIsMarkdownMode(true);
+        }
+      });
+    } catch (err) {
+      console.error('Error toggling markdown mode:', err);
+    }
   }, [editor]);
 
   if (!portalContainer) {
@@ -395,25 +435,26 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
         </TooltipTrigger>
         <TooltipContent>{isMarkdownMode ? 'Rich Text' : 'Markdown'}</TooltipContent>
       </Tooltip>
+    </div>
+  );
 
+  return (
+    <>
+      {createPortal(toolbar, portalContainer)}
       <ImageDialog
         isOpen={showImageDialog}
         onClose={() => setShowImageDialog(false)}
         onInsert={insertImage}
       />
-
       <InsertTableDialog
         isOpen={showTableDialog}
         onClose={() => setShowTableDialog(false)}
         editor={editor}
       />
-
       <YouTubeDialog
         isOpen={showYouTubeDialog}
         onClose={() => setShowYouTubeDialog(false)}
       />
-    </div>
+    </>
   );
-
-  return createPortal(toolbar, portalContainer);
 }

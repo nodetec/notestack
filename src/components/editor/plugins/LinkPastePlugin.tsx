@@ -5,6 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $isTextNode,
   $getNodeByKey,
   PASTE_COMMAND,
   COMMAND_PRIORITY_HIGH,
@@ -23,6 +24,22 @@ function isYouTubeUrl(url: string): boolean {
     url.includes('youtu.be') ||
     url.includes('youtube-nocookie.com')
   );
+}
+
+// Check if cursor is inside markdown link/image syntax like [text]( or ![alt](
+function isInsideMarkdownLinkSyntax(selection: ReturnType<typeof $getSelection>): boolean {
+  if (!$isRangeSelection(selection)) return false;
+
+  const anchorNode = selection.anchor.getNode();
+  if (!$isTextNode(anchorNode)) return false;
+
+  const textContent = anchorNode.getTextContent();
+  const offset = selection.anchor.offset;
+  const textBeforeCursor = textContent.slice(0, offset);
+
+  // Check if we're right after ]( which indicates markdown link/image syntax
+  // Patterns: [text]( or ![alt](
+  return /\]\($/.test(textBeforeCursor);
 }
 
 async function fetchYouTubeTitle(url: string): Promise<string | null> {
@@ -55,6 +72,10 @@ export default function LinkPastePlugin() {
 
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return false;
+
+        // Don't intercept if we're inside markdown link/image syntax
+        // Let the user complete the markdown pattern manually
+        if (isInsideMarkdownLinkSyntax(selection)) return false;
 
         event.preventDefault();
 

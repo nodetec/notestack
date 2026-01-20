@@ -13,9 +13,9 @@ export const LINK: TextMatchTransformer = {
     // auto-converted by other transformers (e.g., YouTube)
     return `[${displayText || url}](${url})`;
   },
-  // Match [text](url) format
-  importRegExp: /\[([^\]]+)\]\(([^)]+)\)/,
-  regExp: /\[([^\]]+)\]\(([^)]+)\)$/,
+  // Match [text](url) format, but NOT ![text](url) which is an image
+  importRegExp: /(?<!!)\[([^\]]+)\]\(([^)]+)\)/,
+  regExp: /(?<!!)\[([^\]]+)\]\(([^)]+)\)$/,
   trigger: ')',
   replace: (textNode, match) => {
     const [, displayText, url] = match;
