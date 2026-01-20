@@ -219,11 +219,23 @@ function HomeContent() {
   const isEditing = !!draft?.linkedBlog;
 
   // Determine editor content and key
-  const editorContent = selectedBlog ? selectedBlog.content : (draft?.content ?? '');
   // Use consistent key format based on blog identity (pubkey:dTag) to prevent remount when transitioning from blog to draft
   const blogIdentityKey = selectedBlog ? `${selectedBlog.pubkey}:${selectedBlog.dTag}` : null;
   const linkedBlogKey = draft?.linkedBlog ? `${draft.linkedBlog.pubkey}:${draft.linkedBlog.dTag}` : null;
   const editorKey = blogIdentityKey || linkedBlogKey || currentDraftId || 'new';
+
+  // Store initial content in a ref to prevent re-renders from changing it
+  // Only update when the editor key changes (switching to a different blog/draft)
+  const initialContentRef = useRef<{ key: string; content: string }>({ key: '', content: '' });
+  if (initialContentRef.current.key !== editorKey) {
+    // Get content directly from the store (draft object is optimized and doesn't include content)
+    const draftContent = currentDraftId ? useDraftStore.getState().drafts[currentDraftId]?.content : '';
+    initialContentRef.current = {
+      key: editorKey,
+      content: selectedBlog ? selectedBlog.content : (draftContent ?? ''),
+    };
+  }
+  const editorContent = initialContentRef.current.content;
 
   // Reset hasUserTyped when switching to a different article
   useEffect(() => {

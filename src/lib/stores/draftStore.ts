@@ -58,7 +58,7 @@ export const useDraftStore = create<DraftState>()(
             lastSaved: state.drafts[id]?.lastSaved ?? Date.now(),
           },
         },
-        saveStatus: 'unsaved',
+        // Don't change saveStatus here - let the caller control it
       })),
 
       setSaveStatus: (status) => set({ saveStatus: status }),
