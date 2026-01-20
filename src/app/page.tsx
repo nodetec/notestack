@@ -44,6 +44,7 @@ function HomeContent() {
   const hasUserTyped = useRef(false);
   const checkBlogForEditsRef = useRef<() => void>(() => {});
   const draftSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const selectedBlogRef = useRef<Blog | null>(null); // Track current blog for useEffect without triggering re-runs
 
   // Connect toolbar ref to state once after mount
   useEffect(() => {
@@ -69,6 +70,11 @@ function HomeContent() {
     setIsHydrated(true);
   }, []);
 
+  // Keep selectedBlogRef in sync
+  useEffect(() => {
+    selectedBlogRef.current = selectedBlog;
+  }, [selectedBlog]);
+
   // Handle URL-based navigation
   useEffect(() => {
     if (!isHydrated) return;
@@ -86,11 +92,11 @@ function HomeContent() {
         }
 
         // Check if we already have this blog loaded
-        if (selectedBlog?.pubkey === naddrData.pubkey && selectedBlog?.dTag === naddrData.identifier) {
+        if (selectedBlogRef.current?.pubkey === naddrData.pubkey && selectedBlogRef.current?.dTag === naddrData.identifier) {
           return;
         }
 
-        // Load blog without creating a draft
+        // Load blog from relay (direct URL visit)
         setSelectedBlog(null);
         setCurrentDraftId(null);
         setIsLoadingBlog(true);
@@ -146,11 +152,19 @@ function HomeContent() {
       const newId = createDraft();
       router.replace(`/?draft=${newId}`);
     }
-  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, findDraftByLinkedBlog, router, relays, selectedBlog]);
+  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, findDraftByLinkedBlog, router, relays, activeRelay]);
 
   const handleSelectBlog = useCallback((blog: Blog) => {
     // Check for unsaved edits before navigating
     checkBlogForEditsRef.current();
+
+    // Set the blog directly since we already have the data
+    setSelectedBlog(blog);
+    selectedBlogRef.current = blog; // Also set ref synchronously for useEffect
+    setCurrentDraftId(null);
+    setIsLoadingBlog(false);
+
+    // Update URL for bookmarking
     const naddr = blogToNaddr(blog, relays);
     router.push(`/?blog=${naddr}`);
     if (isMobile) setActivePanel(null);
@@ -364,9 +378,17 @@ function HomeContent() {
         <header className="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between px-2 sm:px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 gap-2">
           <div className="flex items-center gap-2 flex-shrink-0">
             <SidebarTrigger className="md:hidden" />
-            <SaveStatusIndicator className="hidden sm:flex" />
+            {!selectedBlog && <SaveStatusIndicator className="hidden sm:flex" />}
           </div>
-          <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
+          {selectedBlog ? (
+            <div className="flex-1 min-w-0 text-center">
+              <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">
+                {selectedBlog.title || 'Untitled'}
+              </h1>
+            </div>
+          ) : (
+            <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
+          )}
           <div className="flex items-center gap-1 sm:gap-2 justify-end flex-shrink-0">
             {isLoggedIn && selectedBlog && !currentDraftId && (
               <Button
