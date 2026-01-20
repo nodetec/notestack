@@ -422,7 +422,7 @@ function HomeContent() {
             <LoginButton />
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto cursor-text">
+        <div className="flex-1 overflow-y-auto overscroll-auto cursor-text">
           {isLoadingBlog ? (
             <div className="flex items-center justify-center h-full text-zinc-500">
               Loading...
