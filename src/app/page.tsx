@@ -374,7 +374,10 @@ function HomeContent() {
         <SettingsPanel onClose={handleClosePanel} />
       )}
 
-      <SidebarInset className="bg-zinc-50 dark:bg-zinc-950">
+      <SidebarInset
+        className="bg-zinc-50 dark:bg-zinc-950 transition-[margin] duration-200 ease-linear"
+        style={{ marginLeft: activePanel && !isMobile ? '288px' : undefined }}
+      >
         <header className="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between px-2 sm:px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 gap-2">
           <div className="flex items-center gap-2 flex-shrink-0">
             <SidebarTrigger className="md:hidden" />
