@@ -39,6 +39,7 @@ import InitialContentPlugin from './plugins/InitialContentPlugin';
 import ImagePastePlugin from './plugins/ImagePastePlugin';
 import LinkPastePlugin from './plugins/LinkPastePlugin';
 import NostrPastePlugin from './plugins/NostrPastePlugin';
+import MarkdownPastePlugin from './plugins/MarkdownPastePlugin';
 import { ImageNode } from './nodes/ImageNode';
 import { LinkNode } from './nodes/LinkNode';
 import { NpubNode } from './nodes/NpubNode';
@@ -170,6 +171,7 @@ function EditorInner({
       <ImagePastePlugin />
       <LinkPastePlugin />
       <NostrPastePlugin />
+      <MarkdownPastePlugin />
       {initialMarkdown && <InitialContentPlugin markdown={initialMarkdown} />}
       <ScrollCenterCurrentLinePlugin />
       <ListBackspacePlugin />
