@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon } from 'lucide-react';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -20,6 +20,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useSession } from 'next-auth/react';
 import {
   Tooltip,
   TooltipContent,
@@ -37,6 +38,8 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
   const [mounted, setMounted] = useState(false);
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const activeRelay = useSettingsStore((state) => state.activeRelay);
+  const { status: sessionStatus } = useSession();
+  const isLoggedIn = sessionStatus === 'authenticated';
 
   // Tags section state
   const [isTagsOpen, setIsTagsOpen] = useState(true);
@@ -179,6 +182,18 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                   <span>Relays</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {isLoggedIn && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip="Profile"
+                    isActive={activePanel === 'profile'}
+                    onClick={() => handleClick('profile')}
+                  >
+                    <UserIcon />
+                    <span>Profile</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="New Article"

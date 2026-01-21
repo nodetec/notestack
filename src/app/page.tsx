@@ -12,6 +12,7 @@ import SettingsPanel from '@/components/sidebar/SettingsPanel';
 import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import StacksPanel from '@/components/sidebar/StacksPanel';
+import ProfilePanel from '@/components/sidebar/ProfilePanel';
 import StackButton from '@/components/stacks/StackButton';
 import ZapButton from '@/components/zap/ZapButton';
 import LoginButton from '@/components/auth/LoginButton';
@@ -452,6 +453,9 @@ function HomeContent() {
       </div>
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />
+      )}
+      {activePanel === 'profile' && pubkey && (
+        <ProfilePanel onClose={handleClosePanel} pubkey={pubkey} />
       )}
 
       <SidebarInset
