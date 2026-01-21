@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon } from 'lucide-react';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -265,6 +265,17 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Donate"
+              asChild
+            >
+              <a href="https://getalby.com/p/chrisatmachine" target="_blank" rel="noopener noreferrer">
+                <HeartIcon />
+                <span>Donate</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={mounted ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : 'Toggle theme'}

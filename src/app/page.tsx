@@ -463,8 +463,8 @@ function HomeContent() {
             {!selectedBlog && <SaveStatusIndicator className="hidden sm:flex" />}
           </div>
           {selectedBlog ? (
-            <div className="flex-1 min-w-0 text-center">
-              <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate">
+            <div className="flex-1 min-w-0 flex justify-center">
+              <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-md">
                 {selectedBlog.title || 'Untitled'}
               </h1>
             </div>
