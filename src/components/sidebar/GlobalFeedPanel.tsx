@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreVerticalIcon } from 'lucide-react';
+import { XIcon, MoreVerticalIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
@@ -56,6 +56,8 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: ['global-feed', activeRelay, activeTag],
     queryFn: ({ pageParam }) => fetchBlogs({ limit: 20, until: pageParam, relay: activeRelay, tag: activeTag || undefined }),
@@ -115,14 +117,25 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
             </button>
           )}
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            title="Refresh feed"
+            aria-label="Refresh feed"
+          >
+            <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            title="Close panel"
+            aria-label="Close panel"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Blog List */}
