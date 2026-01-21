@@ -324,7 +324,7 @@ function TableCellResizer() {
 
       const styles: Record<string, React.CSSProperties> = {
         bottom: {
-          backgroundColor: 'transparent',
+          background: 'transparent',
           cursor: 'row-resize',
           height: `${zoneWidth}px`,
           left: `${window.scrollX + left}px`,
@@ -332,7 +332,7 @@ function TableCellResizer() {
           width: `${width}px`,
         },
         right: {
-          backgroundColor: 'transparent',
+          background: 'transparent',
           cursor: 'col-resize',
           height: `${height}px`,
           left: `${window.scrollX + left + width - zoneWidth / 2}px`,
@@ -356,7 +356,7 @@ function TableCellResizer() {
           styles[draggingDirection].height = `${tableRect.height}px`;
         }
 
-        styles[draggingDirection].backgroundColor = '#adf';
+        styles[draggingDirection].background = '#adf';
       } else if (!draggingDirection && hoveredDirection === 'right') {
         const halfZoneWidth = zoneWidth / 2;
         const highlightWidth = 2;

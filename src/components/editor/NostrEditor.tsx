@@ -55,6 +55,7 @@ import { HORIZONTAL_RULE } from './transformers/HorizontalRuleTransformer';
 import { YOUTUBE_TRANSFORMER } from './transformers/YouTubeTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
+import TableClickOutsidePlugin from './plugins/TableClickOutsidePlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
 import HighlightPlugin from './plugins/HighlightPlugin';
 
@@ -179,6 +180,7 @@ function EditorInner({
       <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
       <TableActionMenuPlugin />
       <TableCellResizerPlugin />
+      <TableClickOutsidePlugin />
       <CodeHighlightPlugin />
       <HighlightPlugin source={highlightSource} highlights={highlights} onHighlightDeleted={onHighlightDeleted} onHighlightCreated={onHighlightCreated} />
     </>
