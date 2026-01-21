@@ -113,3 +113,86 @@ export function eventToStack(event: NostrEvent): Stack {
     items,
   };
 }
+
+// NIP-22 Comment (kind 1111)
+export interface Comment {
+  id: string;
+  pubkey: string;
+  createdAt: number;
+  content: string;
+  // Root article reference (uppercase tags)
+  root: {
+    kind: number;
+    pubkey: string;
+    identifier: string;
+    eventId?: string;
+  };
+  // Parent (article for top-level, comment for replies - lowercase tags)
+  parent: {
+    kind: number;
+    pubkey: string;
+    identifier?: string;
+    eventId?: string;
+  };
+  // Parent comment ID if this is a reply to another comment
+  replyTo?: string;
+}
+
+export function eventToComment(event: NostrEvent): Comment | null {
+  if (event.kind !== 1111) return null;
+
+  // Parse uppercase A tag (root scope - the article)
+  const ATag = event.tags.find((t) => t[0] === 'A');
+  if (!ATag || !ATag[1]) return null;
+
+  const [rootKindStr, rootPubkey, rootIdentifier] = ATag[1].split(':');
+  const rootKind = parseInt(rootKindStr, 10);
+  if (!rootKind || !rootPubkey || !rootIdentifier) return null;
+
+  // Parse uppercase E tag (root event ID)
+  const ETag = event.tags.find((t) => t[0] === 'E');
+  const rootEventId = ETag?.[1];
+
+  // Parse lowercase a tag (parent - could be article or comment)
+  const aTag = event.tags.find((t) => t[0] === 'a');
+  let parentKind = rootKind;
+  let parentPubkey = rootPubkey;
+  let parentIdentifier: string | undefined = rootIdentifier;
+
+  if (aTag && aTag[1]) {
+    const [pKindStr, pPubkey, pIdentifier] = aTag[1].split(':');
+    const pKind = parseInt(pKindStr, 10);
+    if (pKind && pPubkey) {
+      parentKind = pKind;
+      parentPubkey = pPubkey;
+      parentIdentifier = pIdentifier;
+    }
+  }
+
+  // Parse lowercase e tag (parent event ID)
+  const eTag = event.tags.find((t) => t[0] === 'e');
+  const parentEventId = eTag?.[1];
+
+  // If parent kind is 1111, this is a reply to another comment
+  const replyTo = parentKind === 1111 ? parentEventId : undefined;
+
+  return {
+    id: event.id,
+    pubkey: event.pubkey,
+    createdAt: event.created_at,
+    content: event.content,
+    root: {
+      kind: rootKind,
+      pubkey: rootPubkey,
+      identifier: rootIdentifier,
+      eventId: rootEventId,
+    },
+    parent: {
+      kind: parentKind,
+      pubkey: parentPubkey,
+      identifier: parentIdentifier,
+      eventId: parentEventId,
+    },
+    replyTo,
+  };
+}

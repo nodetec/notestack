@@ -28,6 +28,7 @@ import { blogToNaddr, decodeNaddr } from '@/lib/nostr/naddr';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { Blog } from '@/lib/nostr/types';
+import { CommentsSection } from '@/components/comments';
 
 
 function HomeContent() {
@@ -531,6 +532,17 @@ function HomeContent() {
               onHighlightDeleted={handleHighlightDeleted}
               onHighlightCreated={handleHighlightCreated}
             />
+            {selectedBlog && (
+              <div className="px-4 sm:px-8 md:px-16 lg:px-24 pb-8 max-w-3xl mx-auto w-full">
+                <CommentsSection
+                  article={{
+                    pubkey: selectedBlog.pubkey,
+                    identifier: selectedBlog.dTag,
+                    eventId: selectedBlog.id,
+                  }}
+                />
+              </div>
+            )}
           </div>
           )}
         </div>
