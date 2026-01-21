@@ -59,3 +59,57 @@ export function eventToBlog(event: NostrEvent): Blog {
     rawEvent: event, // Include full signed event for broadcasting
   };
 }
+
+// NIP-51 Stack item (article reference)
+export interface StackItem {
+  kind: number; // 30023 for articles
+  pubkey: string; // Article author pubkey
+  identifier: string; // Article d-tag
+  relay?: string; // Relay hint
+}
+
+// NIP-51 Bookmark Set (kind 30003)
+export interface Stack {
+  id: string; // Event ID
+  pubkey: string; // Owner pubkey
+  dTag: string; // Stack identifier (d tag)
+  name: string; // Display name (title tag)
+  description?: string;
+  image?: string;
+  createdAt: number;
+  items: StackItem[];
+}
+
+export function eventToStack(event: NostrEvent): Stack {
+  const getTag = (name: string) => event.tags.find((t) => t[0] === name)?.[1];
+
+  // Parse 'a' tags to get stack items (article references)
+  // Format: ["a", "30023:<pubkey>:<identifier>", "<relay>"]
+  const items: StackItem[] = event.tags
+    .filter((t) => t[0] === 'a')
+    .reduce<StackItem[]>((acc, t) => {
+      const parts = t[1]?.split(':');
+      if (!parts || parts.length < 3) return acc;
+      const [kindStr, pubkey, identifier] = parts;
+      const kind = parseInt(kindStr, 10);
+      if (isNaN(kind) || !pubkey || !identifier) return acc;
+      acc.push({
+        kind,
+        pubkey,
+        identifier,
+        relay: t[2],
+      });
+      return acc;
+    }, []);
+
+  return {
+    id: event.id,
+    pubkey: event.pubkey,
+    dTag: getTag('d') || '',
+    name: getTag('title') || 'Untitled Stack',
+    description: getTag('description'),
+    image: getTag('image'),
+    createdAt: event.created_at,
+    items,
+  };
+}

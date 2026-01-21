@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, HashIcon, ChevronDownIcon, XIcon } from 'lucide-react';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -157,6 +157,16 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                 >
                   <HighlighterIcon />
                   <span>Highlights</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Stacks"
+                  isActive={activePanel === 'stacks'}
+                  onClick={() => handleClick('stacks')}
+                >
+                  <LayersIcon />
+                  <span>Stacks</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>

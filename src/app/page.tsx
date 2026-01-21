@@ -11,6 +11,8 @@ import DraftsPanel from '@/components/sidebar/DraftsPanel';
 import SettingsPanel from '@/components/sidebar/SettingsPanel';
 import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
+import StacksPanel from '@/components/sidebar/StacksPanel';
+import StackButton from '@/components/stacks/StackButton';
 import LoginButton from '@/components/auth/LoginButton';
 import PublishDialog from '@/components/publish/PublishDialog';
 import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
@@ -441,6 +443,9 @@ function HomeContent() {
       <div className={activePanel === 'highlights' ? '' : 'hidden'}>
         <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} />
       </div>
+      <div className={activePanel === 'stacks' ? '' : 'hidden'}>
+        <StacksPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+      </div>
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />
       )}
@@ -464,6 +469,9 @@ function HomeContent() {
             <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
           )}
           <div className="flex items-center gap-1 sm:gap-2 justify-end flex-shrink-0">
+            {isLoggedIn && selectedBlog && (
+              <StackButton blog={selectedBlog} />
+            )}
             {isLoggedIn && selectedBlog && !currentDraftId && (
               <Button
                 size="sm"
