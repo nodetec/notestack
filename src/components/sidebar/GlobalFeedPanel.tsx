@@ -6,6 +6,7 @@ import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
+import { toast } from 'sonner';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useTagStore } from '@/lib/stores/tagStore';
 import { useProfiles } from '@/lib/hooks/useProfiles';
@@ -88,9 +89,26 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
 
     setBroadcastingBlogId(blog.id);
     try {
-      await broadcastEvent(blog.rawEvent, relays);
+      const results = await broadcastEvent(blog.rawEvent, relays);
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        const relayList = successfulRelays.map((r) => r.relay).join('\n');
+        toast.success('Article broadcast!', {
+          description: `Sent to ${successCount} relay${successCount !== 1 ? 's' : ''}:\n${relayList}`,
+          duration: 5000,
+        });
+      } else {
+        toast.error('Broadcast failed', {
+          description: 'Failed to broadcast to any relay',
+        });
+      }
     } catch (err) {
       console.error('Failed to broadcast blog:', err);
+      toast.error('Broadcast failed', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
     } finally {
       setBroadcastingBlogId(null);
     }
