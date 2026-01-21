@@ -15,14 +15,19 @@ export interface Profile {
 interface ProfileEvent {
   pubkey: string;
   content: string;
+  createdAt: number;
 }
 
 /**
  * Fetches profile events (kind 0) for multiple pubkeys from a relay
  */
-async function fetchProfileEvents(
+const PROFILE_FETCH_TIMEOUT_MS = 7000;
+const PROFILE_BATCH_SIZE = 100;
+
+async function fetchProfileEventsBatch(
   pubkeys: string[],
-  relay: string = DEFAULT_RELAY
+  relay: string,
+  timeoutMs: number
 ): Promise<ProfileEvent[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -31,17 +36,19 @@ async function fetchProfileEvents(
     let timeoutId: NodeJS.Timeout;
 
     ws.onopen = () => {
+      console.log('[profiles] relay', relay, 'batch size', pubkeys.length);
       ws.send(JSON.stringify(['REQ', subId, {
         kinds: [0],
         authors: pubkeys,
       }]));
 
-      // Timeout after 5 seconds
+      // Timeout after a short window to avoid hanging on slow relays
       timeoutId = setTimeout(() => {
+        console.log('[profiles] relay', relay, 'batch timeout', timeoutMs);
         ws.send(JSON.stringify(['CLOSE', subId]));
         ws.close();
         resolve(events);
-      }, 5000);
+      }, timeoutMs);
     };
 
     ws.onmessage = (msg) => {
@@ -54,10 +61,12 @@ async function fetchProfileEvents(
             events.push({
               pubkey: event.pubkey,
               content: event.content,
+              createdAt: event.created_at,
             });
           }
         } else if (data[0] === 'EOSE' && data[1] === subId) {
           clearTimeout(timeoutId);
+          console.log('[profiles] relay', relay, 'batch events', events.length);
           ws.send(JSON.stringify(['CLOSE', subId]));
           ws.close();
           resolve(events);
@@ -72,6 +81,35 @@ async function fetchProfileEvents(
       resolve(events);
     };
   });
+}
+
+/**
+ * Fetches profile events (kind 0) for multiple pubkeys from a relay, batching to avoid relay limits.
+ */
+async function fetchProfileEvents(
+  pubkeys: string[],
+  relay: string = DEFAULT_RELAY,
+  {
+    batchSize = PROFILE_BATCH_SIZE,
+    timeoutMs = PROFILE_FETCH_TIMEOUT_MS,
+  }: { batchSize?: number; timeoutMs?: number } = {}
+): Promise<ProfileEvent[]> {
+  if (pubkeys.length === 0) return [];
+
+  const batches: string[][] = [];
+  for (let i = 0; i < pubkeys.length; i += batchSize) {
+    batches.push(pubkeys.slice(i, i + batchSize));
+  }
+
+  console.log('[profiles] relay', relay, 'pubkeys', pubkeys.length, 'batches', batches.length);
+
+  const results: ProfileEvent[] = [];
+  for (const batch of batches) {
+    const batchEvents = await fetchProfileEventsBatch(batch, relay, timeoutMs);
+    results.push(...batchEvents);
+  }
+
+  return results;
 }
 
 /**
@@ -167,7 +205,7 @@ export function lookupProfile(npub: string): Promise<NostrProfile | null> {
  */
 export async function fetchProfiles(
   pubkeys: string[],
-  relay: string = DEFAULT_RELAY
+  relay: string | string[] = DEFAULT_RELAY
 ): Promise<Map<string, Profile>> {
   const uniquePubkeys = [...new Set(pubkeys)];
 
@@ -175,21 +213,41 @@ export async function fetchProfiles(
     return new Map();
   }
 
-  const events = await fetchProfileEvents(uniquePubkeys, relay);
-  const result = new Map<string, Profile>();
+  console.log('[profiles] fetchProfiles start', 'relay', relay, 'unique pubkeys', uniquePubkeys.length);
 
-  for (const event of events) {
-    try {
-      const content = JSON.parse(event.content);
-      result.set(event.pubkey, {
-        pubkey: event.pubkey,
-        name: content.name || content.display_name,
-        picture: content.picture,
-        nip05: content.nip05,
-      });
-    } catch {
-      // Skip invalid profiles
+  const result = new Map<string, Profile>();
+  const latestByPubkey = new Map<string, number>();
+  const relays = Array.isArray(relay) ? relay : [relay];
+  const relayResults = await Promise.all(
+    relays.map((relayUrl) => fetchProfileEvents(uniquePubkeys, relayUrl))
+  );
+
+  for (const events of relayResults) {
+    for (const event of events) {
+      const previousTimestamp = latestByPubkey.get(event.pubkey);
+      if (previousTimestamp !== undefined && previousTimestamp >= event.createdAt) {
+        continue;
+      }
+
+      try {
+        const content = JSON.parse(event.content);
+        result.set(event.pubkey, {
+          pubkey: event.pubkey,
+          name: content.name || content.display_name,
+          picture: content.picture,
+          nip05: content.nip05,
+        });
+        latestByPubkey.set(event.pubkey, event.createdAt);
+      } catch {
+        // Skip invalid profiles
+      }
     }
+  }
+
+  const missing = uniquePubkeys.filter((pubkey) => !result.has(pubkey));
+  console.log('[profiles] relay', relay, 'found', result.size, 'missing', missing.length);
+  if (missing.length > 0) {
+    console.log('[profiles] relay', relay, 'missing pubkeys', missing);
   }
 
   return result;

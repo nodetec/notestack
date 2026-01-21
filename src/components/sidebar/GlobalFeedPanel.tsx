@@ -71,7 +71,10 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
 
   // Fetch profiles for all blog authors (only when we have blogs)
   const pubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
-  const { data: profiles } = useProfiles(pubkeys, activeRelay ?? undefined);
+  const profileRelays = activeRelay
+    ? [activeRelay, 'wss://purplepag.es']
+    : [];
+  const { data: profiles } = useProfiles(pubkeys, profileRelays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
