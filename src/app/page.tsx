@@ -15,7 +15,8 @@ import LoginButton from '@/components/auth/LoginButton';
 import PublishDialog from '@/components/publish/PublishDialog';
 import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useSession } from 'next-auth/react';
+import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
 import { useDraftAutoSave } from '@/lib/hooks/useDraftAutoSave';
 import { lookupProfile } from '@/lib/nostr/profiles';
@@ -36,7 +37,9 @@ function HomeContent() {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
-  const pubkey = useAuthStore((state) => state.pubkey);
+  const { data: session, status: sessionStatus } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const editorRef = useRef<NostrEditorHandle>(null);
@@ -266,7 +269,7 @@ function HomeContent() {
     }
   }, [router, relays, isMobile]);
 
-  const isLoggedIn = isHydrated && !!pubkey;
+  const isLoggedIn = sessionStatus === 'authenticated' && !!pubkey;
 
   // Determine if we're editing an existing blog (only when we have a draft with actual edits)
   const isEditing = !!draft?.linkedBlog;

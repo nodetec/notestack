@@ -6,8 +6,9 @@ import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon, PenLineIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
@@ -40,7 +41,9 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
-  const pubkey = useAuthStore((state) => state.pubkey);
+  const { data: session } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();

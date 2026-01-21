@@ -6,8 +6,9 @@ import { useInView } from 'react-intersection-observer';
 import { XIcon, Trash2Icon, ExternalLinkIcon } from 'lucide-react';
 import { fetchUserHighlights } from '@/lib/nostr/fetch';
 import { deleteHighlight } from '@/lib/nostr/publish';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import type { UserWithKeys } from '@/types/auth';
 import { useSidebar } from '@/components/ui/sidebar';
 import type { Highlight } from '@/lib/nostr/types';
 
@@ -27,7 +28,9 @@ function formatDate(timestamp: number): string {
 export default function HighlightsPanel({ onSelectHighlight, onClose }: HighlightsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingHighlightId, setDeletingHighlightId] = useState<string | null>(null);
-  const pubkey = useAuthStore((state) => state.pubkey);
+  const { data: session } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();

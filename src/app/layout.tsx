@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Source_Serif_4, Merriweather } from "next/font/googl
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import SessionProvider from "@/components/providers/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -95,9 +96,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} ${merriweather.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

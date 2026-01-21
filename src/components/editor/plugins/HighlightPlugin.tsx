@@ -8,8 +8,9 @@ import { $getSelection, $isRangeSelection } from 'lexical';
 import { HighlighterIcon, Loader2Icon, Trash2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { publishHighlight, deleteHighlight } from '@/lib/nostr/publish';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import type { UserWithKeys } from '@/types/auth';
 import type { Highlight } from '@/lib/nostr/types';
 
 interface HighlightPluginProps {
@@ -161,7 +162,9 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
   const [deletePopoverPosition, setDeletePopoverPosition] = useState<{ top: number; left: number } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const pubkey = useAuthStore((state) => state.pubkey);
+  const { data: session } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const cleanupRef = useRef<(() => void) | null>(null);
   const rangeInfosRef = useRef<HighlightRangeInfo[]>([]);

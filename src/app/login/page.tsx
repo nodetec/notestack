@@ -1,0 +1,169 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { signIn } from 'next-auth/react';
+import { getPublicKey, nip19 } from 'nostr-tools';
+import { bytesToHex } from 'nostr-tools/utils';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
+const isValidNsec = (nsec: string) => {
+  try {
+    return nip19.decode(nsec).type === 'nsec';
+  } catch {
+    return false;
+  }
+};
+
+const formSchema = z.object({
+  nsec: z.string().refine(isValidNsec, {
+    message: 'Invalid nsec.',
+  }),
+});
+
+export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [extensionError, setExtensionError] = useState<string | null>(null);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nsec: '',
+    },
+  });
+
+  const signInWithExtension = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setExtensionError(null);
+
+    if (typeof window !== 'undefined' && typeof window.nostr !== 'undefined') {
+      try {
+        const publicKey = await window.nostr.getPublicKey();
+        await queryClient.invalidateQueries();
+        await signIn('credentials', {
+          publicKey: publicKey,
+          secretKey: '',
+          redirect: false,
+        });
+        router.push('/');
+      } catch (err) {
+        setExtensionError('Failed to get public key from extension');
+        console.error(err);
+      }
+    } else {
+      setExtensionError('No Nostr extension found. Install Alby or nos2x.');
+    }
+    setIsLoading(false);
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    const { nsec } = values;
+    const secretKeyUint8 = nip19.decode(nsec).data as Uint8Array;
+    const publicKey = getPublicKey(secretKeyUint8);
+    const secretKey = bytesToHex(secretKeyUint8);
+
+    await queryClient.invalidateQueries();
+    await signIn('credentials', {
+      publicKey,
+      secretKey,
+      redirect: false,
+    });
+    router.push('/');
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className="mx-auto grid w-[350px] gap-6">
+        <div className="flex w-full flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Sign in to NED
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Use your Nostr identity to sign in
+          </p>
+        </div>
+
+        <Button
+          className="flex gap-x-2"
+          variant="outline"
+          type="button"
+          onClick={signInWithExtension}
+          disabled={isLoading}
+        >
+          <svg
+            className="h-5 w-5 fill-current"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 256 256"
+          >
+            <path d="m210.81,116.2v83.23c0,3.13-2.54,5.67-5.67,5.67h-68.04c-3.13,0-5.67-2.54-5.67-5.67v-15.5c.31-19,2.32-37.2,6.54-45.48,2.53-4.98,6.7-7.69,11.49-9.14,9.05-2.72,24.93-.86,31.67-1.18,0,0,20.36.81,20.36-10.72,0-9.28-9.1-8.55-9.1-8.55-10.03.26-17.67-.42-22.62-2.37-8.29-3.26-8.57-9.24-8.6-11.24-.41-23.1-34.47-25.87-64.48-20.14-32.81,6.24.36,53.27.36,116.05v8.38c-.06,3.08-2.55,5.57-5.65,5.57h-33.69c-3.13,0-5.67-2.54-5.67-5.67V55.49c0-3.13,2.54-5.67,5.67-5.67h31.67c3.13,0,5.67,2.54,5.67,5.67,0,4.65,5.23,7.24,9.01,4.53,11.39-8.16,26.01-12.51,42.37-12.51,36.65,0,64.36,21.36,64.36,68.69Zm-60.84-16.89c0-6.7-5.43-12.13-12.13-12.13s-12.13,5.43-12.13,12.13,5.43,12.13,12.13,12.13,12.13-5.43,12.13-12.13Z" />
+          </svg>
+          Sign in with Extension
+        </Button>
+
+        {extensionError && (
+          <p className="text-sm text-red-500 text-center">{extensionError}</p>
+        )}
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-zinc-50 dark:bg-zinc-950 px-2 text-zinc-500 dark:text-zinc-400">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <Form {...form}>
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="nsec"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      disabled={isLoading}
+                      placeholder="nsec..."
+                      type="password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign in with nsec'}
+            </Button>
+          </form>
+        </Form>
+
+        <p className="text-xs text-center text-zinc-500 dark:text-zinc-400">
+          Your nsec is only stored in your browser session and never sent to any server.
+        </p>
+      </div>
+    </div>
+  );
+}

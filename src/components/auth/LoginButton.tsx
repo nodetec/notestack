@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { bech32 } from '@scure/base';
-import { useAuthStore } from '@/lib/stores/authStore';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,16 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { NostrProfile } from '@/components/editor';
-
-// NIP-07 window.nostr interface
-declare global {
-  interface Window {
-    nostr?: {
-      getPublicKey(): Promise<string>;
-      signEvent(event: object): Promise<object>;
-    };
-  }
-}
+import type { UserWithKeys } from '@/types/auth';
 
 interface LoginButtonProps {
   onLogin?: (pubkey: string) => void;
@@ -39,23 +31,19 @@ function formatNpub(npub: string): string {
 }
 
 export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
-  const { pubkey, setPubkey, logout } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const { data: session, status } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
+  const router = useRouter();
+
   const [profile, setProfile] = useState<NostrProfile | null>(null);
 
-  // Handle hydration to avoid mismatch between server and client
+  // Notify parent when pubkey changes
   useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // Notify parent when pubkey changes (including on hydration)
-  useEffect(() => {
-    if (isHydrated && pubkey) {
+    if (status === 'authenticated' && pubkey) {
       onLogin?.(pubkey);
     }
-  }, [isHydrated, pubkey, onLogin]);
+  }, [status, pubkey, onLogin]);
 
   // Fetch profile when pubkey is available
   useEffect(() => {
@@ -70,34 +58,17 @@ export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
     });
   }, [pubkey]);
 
-  const handleLogin = useCallback(async () => {
-    if (!window.nostr) {
-      setError('No Nostr extension found. Please install a NIP-07 extension like nos2x or Alby.');
-      return;
-    }
+  const handleLogin = useCallback(() => {
+    router.push('/login');
+  }, [router]);
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const pk = await window.nostr.getPublicKey();
-      setPubkey(pk);
-      onLogin?.(pk);
-    } catch (err) {
-      setError('Failed to get public key');
-      console.error('NIP-07 login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onLogin, setPubkey]);
-
-  const handleLogout = useCallback(() => {
-    logout();
+  const handleLogout = useCallback(async () => {
+    await signOut({ redirect: false });
     onLogout?.();
-  }, [onLogout, logout]);
+  }, [onLogout]);
 
-  // Show nothing until hydrated to avoid flash
-  if (!isHydrated) {
+  // Show skeleton while loading session
+  if (status === 'loading') {
     return <div className="h-7 w-20" />;
   }
 
@@ -147,41 +118,8 @@ export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {error && (
-        <span className="text-xs text-red-500 max-w-48 truncate" title={error}>
-          {error}
-        </span>
-      )}
-      <Button size="sm" onClick={handleLogin} disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <svg
-              className="animate-spin h-3.5 w-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Connecting...
-          </>
-        ) : (
-          'Login'
-        )}
-      </Button>
-    </div>
+    <Button size="sm" onClick={handleLogin}>
+      Login
+    </Button>
   );
 }
