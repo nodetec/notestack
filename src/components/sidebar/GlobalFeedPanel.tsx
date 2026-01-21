@@ -7,6 +7,7 @@ import { XIcon, MoreVerticalIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useTagStore } from '@/lib/stores/tagStore';
 import { useProfiles } from '@/lib/hooks/useProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
@@ -41,6 +42,8 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const relays = useSettingsStore((state) => state.relays);
   const { state: sidebarState, isMobile } = useSidebar();
+  const activeTag = useTagStore((state) => state.activeTag);
+  const setActiveTag = useTagStore((state) => state.setActiveTag);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -54,8 +57,8 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ['global-feed', activeRelay],
-    queryFn: ({ pageParam }) => fetchBlogs({ limit: 20, until: pageParam, relay: activeRelay }),
+    queryKey: ['global-feed', activeRelay, activeTag],
+    queryFn: ({ pageParam }) => fetchBlogs({ limit: 20, until: pageParam, relay: activeRelay, tag: activeTag || undefined }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: isHydrated && !!activeRelay,
@@ -98,9 +101,20 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-          Explore
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            Explore
+          </h2>
+          {activeTag && (
+            <button
+              onClick={() => setActiveTag(null)}
+              className="flex items-center gap-1 px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900"
+            >
+              #{activeTag}
+              <XIcon className="w-3 h-3" />
+            </button>
+          )}
+        </div>
         <button
           onClick={onClose}
           className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"

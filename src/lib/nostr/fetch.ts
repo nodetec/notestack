@@ -5,6 +5,7 @@ interface FetchBlogsOptions {
   until?: number;
   pubkey?: string;
   relay?: string;
+  tag?: string;
 }
 
 function eventToHighlight(event: NostrEvent): Highlight | null {
@@ -112,6 +113,7 @@ export async function fetchBlogs({
   until,
   pubkey,
   relay = 'wss://relay.damus.io',
+  tag,
 }: FetchBlogsOptions = {}): Promise<{ blogs: Blog[]; nextCursor?: number }> {
 
   return new Promise((resolve, reject) => {
@@ -132,6 +134,10 @@ export async function fetchBlogs({
 
       if (pubkey) {
         filter.authors = [pubkey];
+      }
+
+      if (tag) {
+        filter['#t'] = [tag.toLowerCase()];
       }
 
       ws.send(JSON.stringify(['REQ', subId, filter]));
