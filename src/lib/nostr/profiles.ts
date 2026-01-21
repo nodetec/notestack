@@ -36,7 +36,6 @@ async function fetchProfileEventsBatch(
     let timeoutId: NodeJS.Timeout;
 
     ws.onopen = () => {
-      console.log('[profiles] relay', relay, 'batch size', pubkeys.length);
       ws.send(JSON.stringify(['REQ', subId, {
         kinds: [0],
         authors: pubkeys,
@@ -44,7 +43,6 @@ async function fetchProfileEventsBatch(
 
       // Timeout after a short window to avoid hanging on slow relays
       timeoutId = setTimeout(() => {
-        console.log('[profiles] relay', relay, 'batch timeout', timeoutMs);
         ws.send(JSON.stringify(['CLOSE', subId]));
         ws.close();
         resolve(events);
@@ -66,7 +64,6 @@ async function fetchProfileEventsBatch(
           }
         } else if (data[0] === 'EOSE' && data[1] === subId) {
           clearTimeout(timeoutId);
-          console.log('[profiles] relay', relay, 'batch events', events.length);
           ws.send(JSON.stringify(['CLOSE', subId]));
           ws.close();
           resolve(events);
@@ -100,8 +97,6 @@ async function fetchProfileEvents(
   for (let i = 0; i < pubkeys.length; i += batchSize) {
     batches.push(pubkeys.slice(i, i + batchSize));
   }
-
-  console.log('[profiles] relay', relay, 'pubkeys', pubkeys.length, 'batches', batches.length);
 
   const results: ProfileEvent[] = [];
   for (const batch of batches) {
@@ -213,8 +208,6 @@ export async function fetchProfiles(
     return new Map();
   }
 
-  console.log('[profiles] fetchProfiles start', 'relay', relay, 'unique pubkeys', uniquePubkeys.length);
-
   const result = new Map<string, Profile>();
   const latestByPubkey = new Map<string, number>();
   const relays = Array.isArray(relay) ? relay : [relay];
@@ -242,12 +235,6 @@ export async function fetchProfiles(
         // Skip invalid profiles
       }
     }
-  }
-
-  const missing = uniquePubkeys.filter((pubkey) => !result.has(pubkey));
-  console.log('[profiles] relay', relay, 'found', result.size, 'missing', missing.length);
-  if (missing.length > 0) {
-    console.log('[profiles] relay', relay, 'missing pubkeys', missing);
   }
 
   return result;

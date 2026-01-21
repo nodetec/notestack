@@ -15,16 +15,7 @@ export function useProfiles(pubkeys: string[], relay?: string | string[]) {
     queryKey: ['profiles', relayKey, [...uniquePubkeys].sort().join(',')],
     queryFn: async () => {
       if (uniquePubkeys.length === 0) return new Map<string, Profile>();
-      console.log('[profiles] lookup pubkeys:', uniquePubkeys);
-      console.log('[profiles] lookup relay:', relayKey);
-      try {
-        const profiles = await fetchProfiles(uniquePubkeys, relay);
-        console.log('[profiles] lookup result size:', profiles.size);
-        return profiles;
-      } catch (error) {
-        console.error('[profiles] lookup failed:', error);
-        throw error;
-      }
+      return fetchProfiles(uniquePubkeys, relay);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: keepPreviousData, // Keep previous profiles while loading new ones
