@@ -168,28 +168,47 @@ export default function ClickOutsidePlugin() {
       const elementAtPoint = document.elementFromPoint(probeXCenter, clickY);
       const blockElement = elementAtPoint?.closest('p, h1, h2, h3, h4, h5, h6, li');
       let lineRect: DOMRect | null = null;
+      let lineRectCount = 0;
       if (blockElement && editorElement.contains(blockElement)) {
         const lineRange = document.createRange();
         lineRange.selectNodeContents(blockElement);
         const rects = Array.from(lineRange.getClientRects());
+        lineRectCount = rects.length;
         lineRect = rects.find((rect) => clickY >= rect.top && clickY <= rect.bottom) ?? null;
       }
 
       const probeX = lineRect
         ? (isLeftSide ? lineRect.left + 1 : lineRect.right - 1)
         : probeXCenter;
-      const range = getCaretRangeFromPoint(probeX, clickY);
+      let range: Range | null = null;
+      if (blockElement && lineRect && lineRectCount <= 1) {
+        range = document.createRange();
+        range.selectNodeContents(blockElement);
+        range.collapse(isLeftSide);
+      } else {
+        range = getCaretRangeFromPoint(probeX, clickY);
+      }
       if (!range || !editorElement.contains(range.startContainer)) return;
 
       e.preventDefault();
       editor.update(() => {
         const nearestNode = $getNearestNodeFromDOMNode(range.startContainer);
-        let decoratorRect: DOMRect | null = null;
+        let preferEndOfBlock = false;
         if (nearestNode && $isDecoratorNode(nearestNode)) {
+          const parent = nearestNode.getParent();
           const decoratorElement = editor.getElementByKey(nearestNode.getKey());
-          decoratorRect = decoratorElement?.getBoundingClientRect() ?? null;
-          let isLineBoundary = true;
-          if (decoratorElement && decoratorRect) {
+          const decoratorRect = decoratorElement?.getBoundingClientRect();
+          const hasLineRect = !!lineRect && !!decoratorRect;
+          const isAtLineStart = hasLineRect
+            ? Math.abs(decoratorRect!.left - lineRect!.left) <= 2
+            : true;
+          const isAtLineEnd = hasLineRect
+            ? Math.abs(decoratorRect!.right - lineRect!.right) <= 2
+            : true;
+          const shouldHandleDecorator = isLeftSide ? isAtLineStart : isAtLineEnd;
+
+          let hasTextAfterOnLine = false;
+          if (decoratorElement && lineRect && isAtLineStart && isRightSide) {
             const blockElement = decoratorElement.closest('p, h1, h2, h3, h4, h5, h6, li');
             if (blockElement) {
               const walker = document.createTreeWalker(
@@ -206,61 +225,43 @@ export default function ClickOutsidePlugin() {
                 for (let i = 0; i < rects.length; i++) {
                   const rect = rects[i];
                   const overlapsLine =
-                    rect.top <= decoratorRect.bottom &&
-                    rect.bottom >= decoratorRect.top;
+                    rect.top <= lineRect.bottom &&
+                    rect.bottom >= lineRect.top;
                   if (!overlapsLine) continue;
-                  const hasTextBefore = rect.right <= decoratorRect.left + 1;
-                  const hasTextAfter = rect.left >= decoratorRect.right - 1;
-                  if (isLeftSide && hasTextBefore) {
-                    isLineBoundary = false;
-                    break;
-                  }
-                  if (isRightSide && hasTextAfter) {
-                    isLineBoundary = false;
+                  if (rect.left >= decoratorRect!.right - 1) {
+                    hasTextAfterOnLine = true;
                     break;
                   }
                 }
-                if (!isLineBoundary) break;
+                if (hasTextAfterOnLine) break;
               }
             }
           }
 
-          if (isLineBoundary) {
-            const parent = nearestNode.getParent();
-            if (parent && $isElementNode(parent)) {
-              const selection = $createRangeSelection();
-              const index = nearestNode.getIndexWithinParent();
-              const offset = isLeftSide ? index : index + 1;
-              selection.anchor.set(parent.getKey(), offset, 'element');
-              selection.focus.set(parent.getKey(), offset, 'element');
-              $setSelection(selection);
-              editorElement.focus({ preventScroll: true });
-              return;
-            }
+          if (parent && $isElementNode(parent) && shouldHandleDecorator && !hasTextAfterOnLine) {
+            const selection = $createRangeSelection();
+            const index = nearestNode.getIndexWithinParent();
+            const offset = isLeftSide ? index : index + 1;
+            selection.anchor.set(parent.getKey(), offset, 'element');
+            selection.focus.set(parent.getKey(), offset, 'element');
+            $setSelection(selection);
+            editorElement.focus({ preventScroll: true });
+            return;
+          }
+
+          if (hasTextAfterOnLine) {
+            preferEndOfBlock = true;
           }
         }
 
         const domSelection = window.getSelection();
         domSelection?.removeAllRanges();
         let selectionRange = range;
-        if (nearestNode && $isDecoratorNode(nearestNode) && lineRect && decoratorRect) {
-          let alternateX = isLeftSide
-            ? decoratorRect.left - 2
-            : decoratorRect.right + 2;
-          const minX = lineRect.left + 1;
-          const maxX = lineRect.right - 1;
-          if (alternateX < minX || alternateX > maxX) {
-            alternateX = isLeftSide ? minX : maxX;
-          }
-          const alternateRange = getCaretRangeFromPoint(alternateX, clickY);
-          if (
-            alternateRange &&
-            editorElement.contains(alternateRange.startContainer)
-          ) {
-            selectionRange = alternateRange;
-          }
+        if (preferEndOfBlock && blockElement) {
+          selectionRange = document.createRange();
+          selectionRange.selectNodeContents(blockElement);
+          selectionRange.collapse(false);
         }
-
         domSelection?.addRange(selectionRange);
         if (domSelection && typeof domSelection.modify === 'function') {
           domSelection.modify(
