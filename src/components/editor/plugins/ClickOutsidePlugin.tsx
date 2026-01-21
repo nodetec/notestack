@@ -136,20 +136,48 @@ export default function ClickOutsidePlugin() {
       if (!isLeftSide && !isRightSide) return;
 
       const getCaretRangeFromPoint = (x: number, y: number) => {
-        if ('caretPositionFromPoint' in document) {
-          const position = document.caretPositionFromPoint(x, y);
+        const doc = document as Document & {
+          caretRangeFromPoint?: (x: number, y: number) => Range | null;
+          caretPositionFromPoint?: (x: number, y: number) => CaretPosition | null;
+        };
+        if (typeof doc.caretPositionFromPoint === 'function') {
+          const position = doc.caretPositionFromPoint(x, y);
           if (!position) return null;
           const range = document.createRange();
-          range.setStart(position.offsetNode, position.offset);
+          const { offsetNode, offset } = position;
+          if (offsetNode.nodeType === Node.ELEMENT_NODE) {
+            const element = offsetNode as Element;
+            const clampedOffset = Math.min(offset, element.childNodes.length);
+            range.setStart(element, clampedOffset);
+          } else if (offsetNode.nodeType === Node.TEXT_NODE) {
+            const text = offsetNode as Text;
+            const clampedOffset = Math.min(offset, text.data.length);
+            range.setStart(text, clampedOffset);
+          } else {
+            range.setStart(offsetNode, 0);
+          }
           range.collapse(true);
           return range;
         }
-        if ('caretRangeFromPoint' in document) {
-          return document.caretRangeFromPoint(x, y);
+        if (typeof doc.caretRangeFromPoint === 'function') {
+          return doc.caretRangeFromPoint(x, y);
         }
         return null;
       };
-      const probeX = editorRect.left + editorRect.width / 2;
+      const probeXCenter = editorRect.left + editorRect.width / 2;
+      const elementAtPoint = document.elementFromPoint(probeXCenter, clickY);
+      const blockElement = elementAtPoint?.closest('p, h1, h2, h3, h4, h5, h6, li');
+      let lineRect: DOMRect | null = null;
+      if (blockElement && editorElement.contains(blockElement)) {
+        const lineRange = document.createRange();
+        lineRange.selectNodeContents(blockElement);
+        const rects = Array.from(lineRange.getClientRects());
+        lineRect = rects.find((rect) => clickY >= rect.top && clickY <= rect.bottom) ?? null;
+      }
+
+      const probeX = lineRect
+        ? (isLeftSide ? lineRect.left + 1 : lineRect.right - 1)
+        : probeXCenter;
       const range = getCaretRangeFromPoint(probeX, clickY);
       if (!range || !editorElement.contains(range.startContainer)) return;
 
@@ -157,22 +185,82 @@ export default function ClickOutsidePlugin() {
       editor.update(() => {
         const nearestNode = $getNearestNodeFromDOMNode(range.startContainer);
         if (nearestNode && $isDecoratorNode(nearestNode)) {
-          const parent = nearestNode.getParent();
-          if (parent && $isElementNode(parent)) {
-            const selection = $createRangeSelection();
-            const index = nearestNode.getIndexWithinParent();
-            const offset = isLeftSide ? index : index + 1;
-            selection.anchor.set(parent.getKey(), offset, 'element');
-            selection.focus.set(parent.getKey(), offset, 'element');
-            $setSelection(selection);
-            editorElement.focus({ preventScroll: true });
-            return;
+          const decoratorElement = editor.getElementByKey(nearestNode.getKey());
+          const decoratorRect = decoratorElement?.getBoundingClientRect();
+          let isLineBoundary = true;
+          if (decoratorElement && decoratorRect) {
+            const blockElement = decoratorElement.closest('p, h1, h2, h3, h4, h5, h6, li');
+            if (blockElement) {
+              const walker = document.createTreeWalker(
+                blockElement,
+                NodeFilter.SHOW_TEXT,
+                null
+              );
+              let textNode: Text | null;
+              while ((textNode = walker.nextNode() as Text | null)) {
+                if (!textNode.textContent?.trim()) continue;
+                const textRange = document.createRange();
+                textRange.selectNodeContents(textNode);
+                const rects = textRange.getClientRects();
+                for (let i = 0; i < rects.length; i++) {
+                  const rect = rects[i];
+                  const overlapsLine =
+                    rect.top <= decoratorRect.bottom &&
+                    rect.bottom >= decoratorRect.top;
+                  if (!overlapsLine) continue;
+                  const hasTextBefore = rect.right <= decoratorRect.left + 1;
+                  const hasTextAfter = rect.left >= decoratorRect.right - 1;
+                  if (isLeftSide && hasTextBefore) {
+                    isLineBoundary = false;
+                    break;
+                  }
+                  if (isRightSide && hasTextAfter) {
+                    isLineBoundary = false;
+                    break;
+                  }
+                }
+                if (!isLineBoundary) break;
+              }
+            }
+          }
+
+          if (isLineBoundary) {
+            const parent = nearestNode.getParent();
+            if (parent && $isElementNode(parent)) {
+              const selection = $createRangeSelection();
+              const index = nearestNode.getIndexWithinParent();
+              const offset = isLeftSide ? index : index + 1;
+              selection.anchor.set(parent.getKey(), offset, 'element');
+              selection.focus.set(parent.getKey(), offset, 'element');
+              $setSelection(selection);
+              editorElement.focus({ preventScroll: true });
+              return;
+            }
           }
         }
 
         const domSelection = window.getSelection();
         domSelection?.removeAllRanges();
-        domSelection?.addRange(range);
+        let selectionRange = range;
+        if (nearestNode && $isDecoratorNode(nearestNode) && lineRect && decoratorRect) {
+          let alternateX = isLeftSide
+            ? decoratorRect.left - 2
+            : decoratorRect.right + 2;
+          const minX = lineRect.left + 1;
+          const maxX = lineRect.right - 1;
+          if (alternateX < minX || alternateX > maxX) {
+            alternateX = isLeftSide ? minX : maxX;
+          }
+          const alternateRange = getCaretRangeFromPoint(alternateX, clickY);
+          if (
+            alternateRange &&
+            editorElement.contains(alternateRange.startContainer)
+          ) {
+            selectionRange = alternateRange;
+          }
+        }
+
+        domSelection?.addRange(selectionRange);
         if (domSelection && typeof domSelection.modify === 'function') {
           domSelection.modify(
             'move',
