@@ -499,7 +499,7 @@ function HomeContent() {
               Loading...
             </div>
           ) : (
-          <div className="min-h-full w-full max-w-3xl mx-auto flex flex-col">
+          <div className="min-h-full w-full flex flex-col">
             <NostrEditor
               ref={editorRef}
               key={editorKey}

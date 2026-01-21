@@ -125,3 +125,12 @@
   }
 }
 
+.editor-root {
+  width: 100%;
+  padding-left: max(1rem, calc((100% - 44rem) / 2));
+  padding-right: max(1rem, calc((100% - 44rem) / 2));
+}
+
+.editor-placeholder {
+  left: max(1rem, calc((100% - 44rem) / 2));
+}

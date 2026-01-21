@@ -32,7 +32,6 @@ import { TableExtension } from '@lexical/table';
 
 import theme from './themes/default';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
-import ClickOutsidePlugin from './plugins/ClickOutsidePlugin';
 import ScrollCenterCurrentLinePlugin from './plugins/ScrollCenterCurrentLinePlugin';
 import ListBackspacePlugin from './plugins/ListBackspacePlugin';
 import CodeBlockShortcutPlugin from './plugins/CodeBlockShortcutPlugin';
@@ -149,10 +148,10 @@ function EditorInner({
     <>
       <LexicalErrorBoundary onError={(error) => console.error('Lexical error:', error)}>
         <ContentEditable
-          className="min-h-full flex-auto px-4 py-8 pb-[30%] outline-none text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-source-serif-4)] text-lg leading-relaxed"
+          className="editor-root min-h-full flex-auto py-8 pb-[30%] outline-none text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-source-serif-4)] text-lg leading-relaxed"
           aria-placeholder={placeholder}
           placeholder={
-            <div className="absolute top-8 left-4 text-zinc-400 dark:text-zinc-500 pointer-events-none select-none font-[family-name:var(--font-source-serif-4)]">
+            <div className="editor-placeholder absolute top-8 text-zinc-400 dark:text-zinc-500 pointer-events-none select-none font-[family-name:var(--font-source-serif-4)]">
               {placeholder}
             </div>
           }
@@ -168,7 +167,6 @@ function EditorInner({
           portalContainer={toolbarContainer}
         />
       )}
-      <ClickOutsidePlugin />
       <ImagePastePlugin />
       <LinkPastePlugin />
       <NostrPastePlugin />
