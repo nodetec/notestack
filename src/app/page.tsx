@@ -83,8 +83,9 @@ function HomeContent() {
   }, [selectedBlog]);
 
   // Fetch highlights when viewing a blog using React Query
-  const highlightsQueryKey = selectedBlog
-    ? ['highlights', selectedBlog.pubkey, selectedBlog.dTag, activeRelay]
+  // Only fetch the logged-in user's highlights
+  const highlightsQueryKey = selectedBlog && pubkey
+    ? ['highlights', selectedBlog.pubkey, selectedBlog.dTag, activeRelay, pubkey]
     : null;
 
   const { data: highlights = [] } = useQuery({
@@ -93,8 +94,9 @@ function HomeContent() {
       articlePubkey: selectedBlog!.pubkey,
       articleIdentifier: selectedBlog!.dTag,
       relay: activeRelay,
+      authors: [pubkey!],
     }),
-    enabled: !!selectedBlog,
+    enabled: !!selectedBlog && !!pubkey,
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 

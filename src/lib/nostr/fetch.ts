@@ -268,10 +268,12 @@ export async function fetchHighlights({
   articlePubkey,
   articleIdentifier,
   relay = 'wss://relay.damus.io',
+  authors,
 }: {
   articlePubkey: string;
   articleIdentifier: string;
   relay?: string;
+  authors?: string[];
 }): Promise<Highlight[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -283,11 +285,15 @@ export async function fetchHighlights({
     const aTagValue = `30023:${articlePubkey}:${articleIdentifier}`;
 
     ws.onopen = () => {
-      const filter = {
+      const filter: Record<string, unknown> = {
         kinds: [9802],
         '#a': [aTagValue],
         limit: 100,
       };
+
+      if (authors && authors.length > 0) {
+        filter.authors = authors;
+      }
 
       ws.send(JSON.stringify(['REQ', subId, filter]));
 
