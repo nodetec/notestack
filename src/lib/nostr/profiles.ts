@@ -1,6 +1,7 @@
 import { create, windowScheduler } from '@yornaath/batshit';
 import { nip19 } from 'nostr-tools';
 import type { NostrProfile } from '@/components/editor';
+import type { NostrEvent } from './types';
 
 const DEFAULT_RELAY = 'wss://relay.damus.io';
 
@@ -192,4 +193,72 @@ export async function fetchProfiles(
   }
 
   return result;
+}
+
+/**
+ * Fetch a single profile event (kind 0) by hex pubkey
+ * Returns the full NostrEvent for use with nostr-tools functions like getZapEndpoint
+ */
+export async function fetchProfileEvent(
+  pubkey: string,
+  relay: string = DEFAULT_RELAY
+): Promise<NostrEvent | null> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `profile-event-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+    let resolved = false;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(['REQ', subId, {
+        kinds: [0],
+        authors: [pubkey],
+        limit: 1,
+      }]));
+
+      timeoutId = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          resolve(null);
+        }
+      }, 5000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 0 && !resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            resolve(event);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            resolve(null);
+          }
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeoutId);
+        resolve(null);
+      }
+    };
+  });
 }

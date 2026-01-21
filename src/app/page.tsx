@@ -13,6 +13,7 @@ import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import StacksPanel from '@/components/sidebar/StacksPanel';
 import StackButton from '@/components/stacks/StackButton';
+import ZapButton from '@/components/zap/ZapButton';
 import LoginButton from '@/components/auth/LoginButton';
 import PublishDialog from '@/components/publish/PublishDialog';
 import { SaveStatusIndicator } from '@/components/SaveStatusIndicator';
@@ -472,6 +473,9 @@ function HomeContent() {
             <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
           )}
           <div className="flex items-center gap-1 sm:gap-2 justify-end flex-shrink-0">
+            {isLoggedIn && selectedBlog && (
+              <ZapButton blog={selectedBlog} />
+            )}
             {isLoggedIn && selectedBlog && (
               <StackButton blog={selectedBlog} />
             )}
