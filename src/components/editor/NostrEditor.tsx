@@ -148,7 +148,7 @@ function EditorInner({
     <>
       <LexicalErrorBoundary onError={(error) => console.error('Lexical error:', error)}>
         <ContentEditable
-          className="editor-root min-h-full flex-auto py-8 pb-[30%] outline-none text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-source-serif-4)] text-lg leading-relaxed"
+          className="editor-root relative min-h-full flex-auto py-8 pb-[30%] outline-none text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-source-serif-4)] text-lg leading-relaxed"
           aria-placeholder={placeholder}
           placeholder={
             <div className="editor-placeholder absolute top-8 text-zinc-400 dark:text-zinc-500 pointer-events-none select-none font-[family-name:var(--font-source-serif-4)]">
