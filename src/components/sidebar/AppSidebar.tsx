@@ -26,6 +26,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AppSidebarProps {
   activePanel: string | null;
@@ -37,7 +44,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
-  const activeRelay = useSettingsStore((state) => state.activeRelay);
+  const { relays, activeRelay, setActiveRelay } = useSettingsStore();
   const { status: sessionStatus } = useSession();
   const isLoggedIn = sessionStatus === 'authenticated';
 
@@ -100,23 +107,40 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
   return (
     <Sidebar collapsible="icon" className="border-r border-zinc-200 dark:border-zinc-800">
       <SidebarHeader className="border-b border-sidebar-border p-0.5">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 px-3 py-3 cursor-default">
-              <ServerIcon className="w-4 h-4 text-purple-500 flex-shrink-0" />
-              <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate">
-                {relayHost || 'No relay'}
-              </span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="right"
-            align="center"
-            hidden={sidebarState !== 'collapsed' || isMobile}
-          >
-            {activeRelay || 'No relay selected'}
-          </TooltipContent>
-        </Tooltip>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <button className="flex w-full items-center gap-2 px-3 py-3 hover:bg-sidebar-accent rounded-md transition-colors text-left">
+                  <ServerIcon className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">
+                    {relayHost || 'No relay'}
+                  </span>
+                  <ChevronDownIcon className="w-3 h-3 text-zinc-400 flex-shrink-0" />
+                </button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side="right"
+              align="center"
+              hidden={sidebarState !== 'collapsed' || isMobile}
+            >
+              {activeRelay || 'No relay selected'}
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuRadioGroup value={activeRelay} onValueChange={setActiveRelay}>
+              {relays.map((relay) => {
+                const host = new URL(relay).hostname;
+                return (
+                  <DropdownMenuRadioItem key={relay} value={relay}>
+                    {host}
+                  </DropdownMenuRadioItem>
+                );
+              })}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
