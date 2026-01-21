@@ -7,9 +7,8 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
-  $createParagraphNode,
 } from 'lexical';
-import { $createCodeNode, $isCodeNode } from '@lexical/code';
+import { $createCodeNode } from '@lexical/code';
 
 export default function CodeBlockShortcutPlugin() {
   const [editor] = useLexicalComposerContext();
