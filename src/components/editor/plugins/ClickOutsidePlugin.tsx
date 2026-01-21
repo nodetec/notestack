@@ -184,9 +184,10 @@ export default function ClickOutsidePlugin() {
       e.preventDefault();
       editor.update(() => {
         const nearestNode = $getNearestNodeFromDOMNode(range.startContainer);
+        let decoratorRect: DOMRect | null = null;
         if (nearestNode && $isDecoratorNode(nearestNode)) {
           const decoratorElement = editor.getElementByKey(nearestNode.getKey());
-          const decoratorRect = decoratorElement?.getBoundingClientRect();
+          decoratorRect = decoratorElement?.getBoundingClientRect() ?? null;
           let isLineBoundary = true;
           if (decoratorElement && decoratorRect) {
             const blockElement = decoratorElement.closest('p, h1, h2, h3, h4, h5, h6, li');
