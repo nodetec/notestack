@@ -1,6 +1,15 @@
 'use client';
 
-import { ChevronDownIcon, Heading1Icon, Heading2Icon, Heading3Icon, PilcrowIcon } from 'lucide-react';
+import {
+  ChevronDownIcon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  Heading4Icon,
+  Heading5Icon,
+  Heading6Icon,
+  PilcrowIcon,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,11 +31,14 @@ const BLOCK_TYPE_ICONS: Record<BlockType, React.ReactNode> = {
   h1: <Heading1Icon className="size-4" />,
   h2: <Heading2Icon className="size-4" />,
   h3: <Heading3Icon className="size-4" />,
+  h4: <Heading4Icon className="size-4" />,
+  h5: <Heading5Icon className="size-4" />,
+  h6: <Heading6Icon className="size-4" />,
   code: null,
 };
 
 export default function HeadingSelect({ blockType, onSelect, disabled = false }: HeadingSelectProps) {
-  const selectableTypes: BlockType[] = ['paragraph', 'h1', 'h2', 'h3'];
+  const selectableTypes: BlockType[] = ['paragraph', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
   return (
     <DropdownMenu>

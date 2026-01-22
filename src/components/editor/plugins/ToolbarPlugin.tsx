@@ -151,7 +151,14 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
         if ($isRangeSelection(selection)) {
           if (type === 'paragraph') {
             $setBlocksType(selection, () => $createParagraphNode());
-          } else if (type === 'h1' || type === 'h2' || type === 'h3') {
+          } else if (
+            type === 'h1' ||
+            type === 'h2' ||
+            type === 'h3' ||
+            type === 'h4' ||
+            type === 'h5' ||
+            type === 'h6'
+          ) {
             $setBlocksType(selection, () => $createHeadingNode(type as HeadingTagType));
           } else if (type === 'code') {
             $setBlocksType(selection, () => $createCodeNode());
