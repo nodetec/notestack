@@ -23,7 +23,7 @@ export default function ZapButton({ blog }: ZapButtonProps) {
         variant="ghost"
         title="Zap this article"
       >
-        <ZapIcon className="w-4 h-4" />
+        <ZapIcon className="w-4 h-4 text-red-500 dark:text-yellow-400" />
       </Button>
     </ZapDialog>
   );
