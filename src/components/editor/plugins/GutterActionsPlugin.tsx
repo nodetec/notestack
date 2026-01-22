@@ -677,7 +677,7 @@ export default function GutterActionsPlugin() {
         return (
           <div
             key={position.headingKey}
-            className={`heading-gutter-actions z-50 transition-opacity duration-200 ease-out ${headingVisible ? 'opacity-100' : 'opacity-0'}`}
+            className={`heading-gutter-actions z-20 transition-opacity duration-200 ease-out ${headingVisible ? 'opacity-100' : 'opacity-0'}`}
             style={{
               position: position.useFixedPosition ? 'fixed' : 'absolute',
               top: position.top,
@@ -701,7 +701,7 @@ export default function GutterActionsPlugin() {
       })}
       {activeHeadingRender && (
         <div
-          className={`heading-indicator z-50 transition-opacity duration-200 ease-out ${activeHeadingVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`heading-indicator z-20 transition-opacity duration-200 ease-out ${activeHeadingVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
             position: activeHeadingRender.useFixedPosition ? 'fixed' : 'absolute',
             top: activeHeadingRender.top,
@@ -715,7 +715,7 @@ export default function GutterActionsPlugin() {
       )}
       {codeRenderPosition && (
         <div
-          className={`code-gutter-actions z-50 transition-opacity duration-200 ease-out ${codeVisible ? 'opacity-100' : 'opacity-0'}`}
+          className={`code-gutter-actions z-20 transition-opacity duration-200 ease-out ${codeVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
             position: codeRenderPosition.useFixedPosition ? 'fixed' : 'absolute',
             top: codeRenderPosition.top,
