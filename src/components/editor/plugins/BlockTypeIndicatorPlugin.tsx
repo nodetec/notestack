@@ -98,7 +98,7 @@ export default function BlockTypeIndicatorPlugin() {
 
     const useFixedPosition = portalTarget === null || portalTarget === document.body;
     const indicatorSize = 24;
-    const indicatorOffset = 32;
+    const indicatorOffset = 28;
     const computedStyle = window.getComputedStyle(elementDOM);
     const lineHeight = Number.parseFloat(computedStyle.lineHeight || '') || rect.height;
     const bottomAlignedTop = rect.top + Math.min(lineHeight, rect.height) - indicatorSize;
@@ -163,7 +163,7 @@ export default function BlockTypeIndicatorPlugin() {
 
   return createPortal(
     <div
-      className="z-50 transition-opacity duration-150 ease-out pointer-events-none"
+      className="block-type-indicator z-50 transition-opacity duration-150 ease-out pointer-events-none"
       style={{
         position: position.useFixedPosition ? 'fixed' : 'absolute',
         top: position.top,

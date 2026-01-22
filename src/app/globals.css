@@ -127,11 +127,26 @@
 
 .editor-root {
   width: 100%;
-  padding-left: max(3rem, calc((100% - 44rem) / 2));
-  padding-right: max(3rem, calc((100% - 44rem) / 2));
+  padding-left: max(4.5rem, calc((100% - 44rem) / 2));
+  padding-right: max(4.5rem, calc((100% - 44rem) / 2));
 }
 
 .editor-placeholder {
   left: 0;
-  padding-left: max(3rem, calc((100% - 44rem) / 2));
+  padding-left: max(4.5rem, calc((100% - 44rem) / 2));
+}
+
+@media (max-width: 640px) {
+  .block-type-indicator {
+    display: none;
+  }
+
+  .editor-root {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .editor-placeholder {
+    padding-left: 1rem;
+  }
 }
