@@ -91,6 +91,7 @@ export default function GutterActionsPlugin() {
     null,
   );
   const [activeHeadingVisible, setActiveHeadingVisible] = useState(false);
+  const [isEditable, setIsEditable] = useState(editor.isEditable());
   const [codePositions, setCodePositions] = useState<CodePosition[]>([]);
   const [codeRenderPositions, setCodeRenderPositions] = useState<CodePosition[]>([]);
   const [codeVisible, setCodeVisible] = useState(false);
@@ -127,6 +128,16 @@ export default function GutterActionsPlugin() {
     }
     return null;
   }, []);
+
+  useEffect(() => {
+    setIsEditable(editor.isEditable());
+    return editor.registerEditableListener((nextEditable) => {
+      setIsEditable(nextEditable);
+      if (!nextEditable) {
+        activeHeadingKeyRef.current = null;
+      }
+    });
+  }, [editor]);
 
   useEffect(() => {
     return editor.registerRootListener((root) => {
@@ -393,18 +404,20 @@ export default function GutterActionsPlugin() {
       const scrollContainerRect = portalTarget?.getBoundingClientRect();
       let activeHeadingKey: string | null = null;
 
-      editor.getEditorState().read(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const anchorNode = selection.anchor.getNode();
-          const element =
-            anchorNode.getKey() === 'root' ? null : anchorNode.getTopLevelElementOrThrow();
-          if (element && $isHeadingNode(element)) {
-            activeHeadingKey = element.getKey();
+      if (isEditable) {
+        editor.getEditorState().read(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const anchorNode = selection.anchor.getNode();
+            const element =
+              anchorNode.getKey() === 'root' ? null : anchorNode.getTopLevelElementOrThrow();
+            if (element && $isHeadingNode(element)) {
+              activeHeadingKey = element.getKey();
+            }
           }
-        }
-      });
-      activeHeadingKeyRef.current = activeHeadingKey;
+        });
+      }
+      activeHeadingKeyRef.current = isEditable ? activeHeadingKey : null;
 
       const nextHeadingPositions: HeadingPosition[] = [];
       headingKeysRef.current.forEach((key) => {
@@ -668,7 +681,7 @@ export default function GutterActionsPlugin() {
 
 
   useEffect(() => {
-    if (!activeHeading) {
+    if (!activeHeading || !isEditable) {
       setActiveHeadingVisible(false);
       if (hideActiveHeadingTimeoutRef.current) {
         clearTimeout(hideActiveHeadingTimeoutRef.current);
@@ -683,7 +696,7 @@ export default function GutterActionsPlugin() {
 
     setActiveHeadingRender(activeHeading);
     setActiveHeadingVisible(true);
-  }, [activeHeading, activeHeadingRender]);
+  }, [activeHeading, activeHeadingRender, isEditable]);
 
   useEffect(() => {
     if (!codePositions.length) {
@@ -1073,7 +1086,7 @@ export default function GutterActionsPlugin() {
           </div>
         );
       })}
-      {activeHeadingRender && (
+      {isEditable && activeHeadingRender && (
         <div
           className={`heading-indicator z-20 transition-opacity duration-200 ease-out ${activeHeadingVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
