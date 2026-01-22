@@ -91,12 +91,13 @@ export default function GutterActionsPlugin() {
     null,
   );
   const [activeHeadingVisible, setActiveHeadingVisible] = useState(false);
-  const [codePosition, setCodePosition] = useState<CodePosition | null>(null);
-  const [codeRenderPosition, setCodeRenderPosition] = useState<CodePosition | null>(null);
+  const [codePositions, setCodePositions] = useState<CodePosition[]>([]);
+  const [codeRenderPositions, setCodeRenderPositions] = useState<CodePosition[]>([]);
   const [codeVisible, setCodeVisible] = useState(false);
   const [shouldListenMouseMove, setShouldListenMouseMove] = useState(false);
   const lastMouseEventRef = useRef<MouseEvent | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const headingKeysRef = useRef<Set<string>>(new Set());
   const codeKeysRef = useRef<Set<string>>(new Set());
@@ -384,7 +385,7 @@ export default function GutterActionsPlugin() {
 
       if (!isInGutter) {
         setHeadingPositions([]);
-        setCodePosition(null);
+        setCodePositions([]);
         return;
       }
 
@@ -452,10 +453,7 @@ export default function GutterActionsPlugin() {
 
       setHeadingPositions(nextHeadingPositions);
 
-      const y = event.clientY;
-      let closestCodeKey: string | null = null;
-      let closestCodeRect: DOMRect | null = null;
-      let closestCodeDistance: number = Number.POSITIVE_INFINITY;
+      const nextCodePositions: CodePosition[] = [];
 
       codeKeysRef.current.forEach((key) => {
         const element = editor.getElementByKey(key);
@@ -467,69 +465,48 @@ export default function GutterActionsPlugin() {
           return;
         }
         const rect = element.getBoundingClientRect();
-        let distance = 0;
-        if (y < rect.top) {
-          distance = rect.top - y;
-        } else if (y > rect.bottom) {
-          distance = y - rect.bottom;
+        if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) {
+          return;
         }
 
-        if (distance < closestCodeDistance) {
-          closestCodeKey = key;
-          closestCodeRect = rect;
-          closestCodeDistance = distance;
+        const codeStyle = window.getComputedStyle(element);
+        const codePaddingTop = Number.parseFloat(codeStyle.paddingTop || '0');
+        const codeLineHeight =
+          Number.parseFloat(codeStyle.lineHeight || '0') || CODE_ACTION_SIZE;
+        const codeTopOffset =
+          codePaddingTop + Math.max(0, (codeLineHeight - CODE_ACTION_SIZE) / 2);
+
+        if (useFixedPosition) {
+          nextCodePositions.push({
+            top: rect.top + codeTopOffset,
+            left: rect.left - CODE_ACTION_OFFSET,
+            nodeKey: key,
+            useFixedPosition,
+          });
+          return;
         }
-      });
 
-      if (!closestCodeKey || !closestCodeRect) {
-        setCodePosition(null);
-        return;
-      }
+        if (!scrollContainerRect || !portalTarget) {
+          return;
+        }
 
-      const resolvedCodeRect = closestCodeRect as DOMRect;
-
-      const codeElement = editor.getElementByKey(closestCodeKey);
-      if (!codeElement) {
-        setCodePosition(null);
-        return;
-      }
-
-      const codeStyle = window.getComputedStyle(codeElement);
-      const codePaddingTop = Number.parseFloat(codeStyle.paddingTop || '0');
-      const codeLineHeight =
-        Number.parseFloat(codeStyle.lineHeight || '0') || CODE_ACTION_SIZE;
-      const codeTopOffset =
-        codePaddingTop + Math.max(0, (codeLineHeight - CODE_ACTION_SIZE) / 2);
-
-      if (useFixedPosition) {
-        setCodePosition({
-          top: resolvedCodeRect.top + codeTopOffset,
-          left: resolvedCodeRect.left - CODE_ACTION_OFFSET,
-          nodeKey: closestCodeKey,
+        nextCodePositions.push({
+          top:
+            rect.top -
+            scrollContainerRect.top +
+            portalTarget.scrollTop +
+            codeTopOffset,
+          left:
+            rect.left -
+            scrollContainerRect.left +
+            portalTarget.scrollLeft -
+            CODE_ACTION_OFFSET,
+          nodeKey: key,
           useFixedPosition,
         });
-        return;
-      }
-
-      if (!scrollContainerRect || !portalTarget) {
-        setCodePosition(null);
-        return;
-      }
-
-      setCodePosition({
-        top:
-          resolvedCodeRect.top -
-          scrollContainerRect.top +
-          portalTarget.scrollTop +
-          codeTopOffset,
-        left:
-          resolvedCodeRect.left -
-          scrollContainerRect.left +
-          portalTarget.scrollLeft -
-          CODE_ACTION_OFFSET,
-        nodeKey: closestCodeKey,
-        useFixedPosition,
       });
+
+      setCodePositions(nextCodePositions);
     },
     [editor, portalTarget, rootElement],
   );
@@ -608,12 +585,45 @@ export default function GutterActionsPlugin() {
     };
 
     const handleScroll = () => {
-      setHeadingPositions([]);
-      setCodePosition(null);
+      if (!rootElement || !portalTarget) {
+        return;
+      }
+
+      const rootRect = rootElement.getBoundingClientRect();
+      const containerRect =
+        portalTarget === document.body
+          ? document.documentElement.getBoundingClientRect()
+          : portalTarget.getBoundingClientRect();
+      const rootStyle = window.getComputedStyle(rootElement);
+      const paddingLeft =
+        Number.parseFloat(rootStyle.paddingLeft || '0') || GUTTER_FALLBACK_WIDTH;
+      const gutterLeft = containerRect.left;
+      const gutterRight = rootRect.left + paddingLeft;
+      const gutterX = Math.min(gutterRight - 1, gutterLeft + 4);
+
+      const lastEvent = lastMouseEventRef.current;
+      const clientX =
+        lastEvent && lastEvent.clientX >= gutterLeft && lastEvent.clientX <= gutterRight
+          ? lastEvent.clientX
+          : gutterX;
+      const clientY = lastEvent ? lastEvent.clientY : rootRect.top + rootRect.height / 2;
+
+      const syntheticEvent = {
+        clientX,
+        clientY,
+      } as MouseEvent;
+
+      if (rafRef.current !== null) {
+        return;
+      }
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        updateFromMouseEvent(syntheticEvent);
+      });
     };
     const handleResize = () => {
       setHeadingPositions([]);
-      setCodePosition(null);
+      setCodePositions([]);
       updateActiveHeadingIndicator();
       if (lastMouseEventRef.current) {
         updateFromMouseEvent(lastMouseEventRef.current);
@@ -676,22 +686,22 @@ export default function GutterActionsPlugin() {
   }, [activeHeading, activeHeadingRender]);
 
   useEffect(() => {
-    if (!codePosition) {
+    if (!codePositions.length) {
       setCodeVisible(false);
       if (hideCodeTimeoutRef.current) {
         clearTimeout(hideCodeTimeoutRef.current);
       }
-      if (codeRenderPosition) {
+      if (codeRenderPositions.length) {
         hideCodeTimeoutRef.current = setTimeout(() => {
-          setCodeRenderPosition(null);
+          setCodeRenderPositions([]);
         }, 180);
       }
       return;
     }
 
-    setCodeRenderPosition(codePosition);
+    setCodeRenderPositions(codePositions);
     setCodeVisible(true);
-  }, [codePosition, codeRenderPosition]);
+  }, [codePositions, codeRenderPositions]);
 
   useEffect(() => {
     return () => {
@@ -1001,14 +1011,14 @@ export default function GutterActionsPlugin() {
     );
   }, [editor]);
 
-  const handleCopy = useCallback(() => {
-    if (!codeRenderPosition) {
+  const handleCopy = useCallback((nodeKey: string) => {
+    if (!nodeKey) {
       return;
     }
 
     let codeText = '';
     editor.read(() => {
-      const node = $getNodeByKey(codeRenderPosition.nodeKey);
+      const node = $getNodeByKey(nodeKey);
       if ($isCodeNode(node)) {
         codeText = node.getTextContent();
       }
@@ -1020,15 +1030,17 @@ export default function GutterActionsPlugin() {
 
     void navigator.clipboard.writeText(codeText);
     setCopied(true);
+    setCopiedKey(nodeKey);
     if (copyResetRef.current) {
       clearTimeout(copyResetRef.current);
     }
     copyResetRef.current = setTimeout(() => {
       setCopied(false);
+      setCopiedKey(null);
     }, 1200);
-  }, [editor, codeRenderPosition]);
+  }, [editor]);
 
-  if (!headingRenderPositions.length && !activeHeadingRender && !codeRenderPosition) {
+  if (!headingRenderPositions.length && !activeHeadingRender && !codeRenderPositions.length) {
     return null;
   }
 
@@ -1075,30 +1087,31 @@ export default function GutterActionsPlugin() {
           </div>
         </div>
       )}
-      {codeRenderPosition && (
+      {codeRenderPositions.map((position) => (
         <div
+          key={position.nodeKey}
           className={`code-gutter-actions z-20 transition-opacity duration-200 ease-out ${codeVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
-            position: codeRenderPosition.useFixedPosition ? 'fixed' : 'absolute',
-            top: codeRenderPosition.top,
-            left: codeRenderPosition.left,
+            position: position.useFixedPosition ? 'fixed' : 'absolute',
+            top: position.top,
+            left: position.left,
           }}
         >
           <button
             type="button"
             className="relative flex size-6 items-center justify-center rounded text-zinc-400 transition hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-            onClick={handleCopy}
+            onClick={() => handleCopy(position.nodeKey)}
             aria-label="Copy code block"
           >
             <CopyIcon
-              className={`size-4 transition-all duration-200 ${copied ? 'scale-75 opacity-0' : 'scale-100 opacity-100'}`}
+              className={`size-4 transition-all duration-200 ${copied && copiedKey === position.nodeKey ? 'scale-75 opacity-0' : 'scale-100 opacity-100'}`}
             />
             <CheckIcon
-              className={`absolute size-4 text-emerald-500 transition-all duration-200 ${copied ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+              className={`absolute size-4 text-emerald-500 transition-all duration-200 ${copied && copiedKey === position.nodeKey ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
             />
           </button>
         </div>
-      )}
+      ))}
     </>,
     portalTarget ?? document.body
   );
