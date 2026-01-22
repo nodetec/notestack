@@ -59,6 +59,7 @@ import TableClickOutsidePlugin from './plugins/TableClickOutsidePlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
 import HighlightPlugin from './plugins/HighlightPlugin';
 import BlockTypeIndicatorPlugin from './plugins/BlockTypeIndicatorPlugin';
+import CodeGutterActionsPlugin from './plugins/CodeGutterActionsPlugin';
 
 // Source information for NIP-84 highlights
 export interface HighlightSource {
@@ -161,6 +162,7 @@ function EditorInner({
         />
       </LexicalErrorBoundary>
       <BlockTypeIndicatorPlugin />
+      <CodeGutterActionsPlugin />
       {onChange && (
         <OnChangePlugin
           onChange={(editorState) => onChange(editorState)}

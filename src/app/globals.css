@@ -127,11 +127,11 @@
 
 .editor-root {
   width: 100%;
-  padding-left: max(1rem, calc((100% - 44rem) / 2));
-  padding-right: max(1rem, calc((100% - 44rem) / 2));
+  padding-left: max(3rem, calc((100% - 44rem) / 2));
+  padding-right: max(3rem, calc((100% - 44rem) / 2));
 }
 
 .editor-placeholder {
   left: 0;
-  padding-left: max(1rem, calc((100% - 44rem) / 2));
+  padding-left: max(3rem, calc((100% - 44rem) / 2));
 }
