@@ -209,7 +209,8 @@ export default function GutterActionsPlugin() {
   }, [editor, applyCollapsedState]);
 
   const updateActiveHeadingIndicator = useCallback(() => {
-    let nextActive: { key: string; tag: HeadingTagType } | null = null;
+    let nextActiveKey: string | null = null;
+    let nextActiveTag: HeadingTagType | null = null;
 
     editor.getEditorState().read(() => {
       const selection = $getSelection();
@@ -219,19 +220,20 @@ export default function GutterActionsPlugin() {
           ? null
           : anchorNode.getTopLevelElementOrThrow();
         if (element && $isHeadingNode(element)) {
-          nextActive = { key: element.getKey(), tag: element.getTag() };
+          nextActiveKey = element.getKey();
+          nextActiveTag = element.getTag();
         }
       }
     });
 
-    activeHeadingKeyRef.current = nextActive?.key ?? null;
+    activeHeadingKeyRef.current = nextActiveKey;
 
-    if (!nextActive) {
+    if (!nextActiveKey || !nextActiveTag) {
       setActiveHeading(null);
       return;
     }
 
-    const element = editor.getElementByKey(nextActive.key);
+    const element = editor.getElementByKey(nextActiveKey);
     if (!element || element.style.display === 'none') {
       setActiveHeading(null);
       return;
@@ -248,8 +250,8 @@ export default function GutterActionsPlugin() {
       setActiveHeading({
         top: rect.top + topOffset,
         left: rect.left - offset,
-        headingKey: nextActive.key,
-        tag: nextActive.tag,
+        headingKey: nextActiveKey,
+        tag: nextActiveTag,
         useFixedPosition,
       });
       return;
@@ -264,8 +266,8 @@ export default function GutterActionsPlugin() {
     setActiveHeading({
       top: rect.top - scrollContainerRect.top + portalTarget.scrollTop + topOffset,
       left: rect.left - scrollContainerRect.left + portalTarget.scrollLeft - offset,
-      headingKey: nextActive.key,
-      tag: nextActive.tag,
+      headingKey: nextActiveKey,
+      tag: nextActiveTag,
       useFixedPosition,
     });
   }, [editor, portalTarget]);
@@ -358,7 +360,9 @@ export default function GutterActionsPlugin() {
       setHeadingPositions(nextHeadingPositions);
 
       const y = event.clientY;
-      let closestCode: { key: string; rect: DOMRect; distance: number } | null = null;
+      let closestCodeKey: string | null = null;
+      let closestCodeRect: DOMRect | null = null;
+      let closestCodeDistance: number = Number.POSITIVE_INFINITY;
 
       codeKeysRef.current.forEach((key) => {
         const element = editor.getElementByKey(key);
@@ -377,17 +381,21 @@ export default function GutterActionsPlugin() {
           distance = y - rect.bottom;
         }
 
-        if (!closestCode || distance < closestCode.distance) {
-          closestCode = { key, rect, distance };
+        if (distance < closestCodeDistance) {
+          closestCodeKey = key;
+          closestCodeRect = rect;
+          closestCodeDistance = distance;
         }
       });
 
-      if (!closestCode) {
+      if (!closestCodeKey || !closestCodeRect) {
         setCodePosition(null);
         return;
       }
 
-      const codeElement = editor.getElementByKey(closestCode.key);
+      const resolvedCodeRect = closestCodeRect as DOMRect;
+
+      const codeElement = editor.getElementByKey(closestCodeKey);
       if (!codeElement) {
         setCodePosition(null);
         return;
@@ -402,9 +410,9 @@ export default function GutterActionsPlugin() {
 
       if (useFixedPosition) {
         setCodePosition({
-          top: closestCode.rect.top + codeTopOffset,
-          left: closestCode.rect.left - CODE_ACTION_OFFSET,
-          nodeKey: closestCode.key,
+          top: resolvedCodeRect.top + codeTopOffset,
+          left: resolvedCodeRect.left - CODE_ACTION_OFFSET,
+          nodeKey: closestCodeKey,
           useFixedPosition,
         });
         return;
@@ -416,13 +424,17 @@ export default function GutterActionsPlugin() {
       }
 
       setCodePosition({
-        top: closestCode.rect.top - scrollContainerRect.top + portalTarget.scrollTop + codeTopOffset,
+        top:
+          resolvedCodeRect.top -
+          scrollContainerRect.top +
+          portalTarget.scrollTop +
+          codeTopOffset,
         left:
-          closestCode.rect.left -
+          resolvedCodeRect.left -
           scrollContainerRect.left +
           portalTarget.scrollLeft -
           CODE_ACTION_OFFSET,
-        nodeKey: closestCode.key,
+        nodeKey: closestCodeKey,
         useFixedPosition,
       });
     },
@@ -482,7 +494,10 @@ export default function GutterActionsPlugin() {
       return;
     }
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handleMouseMove = (event: Event) => {
+      if (!(event instanceof MouseEvent)) {
+        return;
+      }
       if (rafRef.current !== null) {
         return;
       }
@@ -492,8 +507,10 @@ export default function GutterActionsPlugin() {
       });
     };
 
-    const handleMouseDown = (event: MouseEvent) => {
-      updateFromMouseEvent(event);
+    const handleMouseDown = (event: Event) => {
+      if (event instanceof MouseEvent) {
+        updateFromMouseEvent(event);
+      }
     };
 
     const handleScroll = () => {
@@ -616,8 +633,9 @@ export default function GutterActionsPlugin() {
       collapsed.add(headingKey);
     }
     applyCollapsedState();
-    if (lastMouseEventRef.current) {
-      requestAnimationFrame(() => updateFromMouseEvent(lastMouseEventRef.current));
+    const lastEvent = lastMouseEventRef.current;
+    if (lastEvent) {
+      requestAnimationFrame(() => updateFromMouseEvent(lastEvent));
     }
   }, [applyCollapsedState, updateFromMouseEvent]);
 
