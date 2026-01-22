@@ -15,16 +15,34 @@ import {
   Heading6Icon,
 } from 'lucide-react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $findMatchingParent } from '@lexical/utils';
 import {
   $getRoot,
   $getSelection,
   $getNodeByKey,
+  $createPoint,
+  $isElementNode,
   $isRangeSelection,
+  $isTextNode,
+  BEFORE_INPUT_COMMAND,
+  COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_LOW,
+  DELETE_CHARACTER_COMMAND,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+  REMOVE_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  type LexicalNode,
+  type TextNode,
 } from 'lexical';
 import { $isHeadingNode, HeadingNode, type HeadingTagType } from '@lexical/rich-text';
 import { $isCodeNode, CodeNode } from '@lexical/code';
+import {
+  $createCollapseIndicatorNode,
+  $isCollapseIndicatorNode,
+  CollapseIndicatorNode,
+  TOGGLE_HEADING_COLLAPSE_COMMAND,
+} from '../nodes/CollapseIndicatorNode';
 
 const HEADING_ACTION_SIZE = 20;
 const HEADING_ACTION_OFFSET = 32;
@@ -93,6 +111,22 @@ export default function GutterActionsPlugin() {
   const selectionRafRef = useRef<number | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
+  const getLastTextNode = useCallback((node: LexicalNode): TextNode | null => {
+    if ($isTextNode(node)) {
+      return node;
+    }
+    if ($isElementNode(node)) {
+      const children = node.getChildren();
+      for (let i = children.length - 1; i >= 0; i -= 1) {
+        const candidate = getLastTextNode(children[i]);
+        if (candidate) {
+          return candidate;
+        }
+      }
+    }
+    return null;
+  }, []);
+
   useEffect(() => {
     return editor.registerRootListener((root) => {
       if (!root) {
@@ -106,49 +140,44 @@ export default function GutterActionsPlugin() {
     });
   }, [editor]);
 
+  const syncCollapseIndicatorNodes = useCallback(() => {
+    let needsUpdate = false;
 
-  useEffect(() => {
-    return editor.registerMutationListener(
-      HeadingNode,
-      (mutations) => {
-        editor.getEditorState().read(() => {
-          for (const [key, type] of mutations) {
-            if (type === 'created') {
-              headingKeysRef.current.add(key);
-            } else if (type === 'destroyed') {
-              headingKeysRef.current.delete(key);
-              collapsedKeysRef.current.delete(key);
-            }
-          }
-        });
-        setShouldListenMouseMove(
-          headingKeysRef.current.size > 0 || codeKeysRef.current.size > 0,
-        );
-        applyCollapsedState();
-      },
-      { skipInitialization: false },
-    );
-  }, [editor]);
+    editor.getEditorState().read(() => {
+      headingKeysRef.current.forEach((key) => {
+        const node = $getNodeByKey(key);
+        if (!$isHeadingNode(node)) {
+          return;
+        }
+        const indicators = node.getChildren().filter($isCollapseIndicatorNode);
+        const shouldHave = collapsedKeysRef.current.has(key);
+        if (shouldHave ? indicators.length !== 1 : indicators.length !== 0) {
+          needsUpdate = true;
+        }
+      });
+    });
 
-  useEffect(() => {
-    return editor.registerMutationListener(
-      CodeNode,
-      (mutations) => {
-        editor.getEditorState().read(() => {
-          for (const [key, type] of mutations) {
-            if (type === 'created') {
-              codeKeysRef.current.add(key);
-            } else if (type === 'destroyed') {
-              codeKeysRef.current.delete(key);
-            }
-          }
-        });
-        setShouldListenMouseMove(
-          headingKeysRef.current.size > 0 || codeKeysRef.current.size > 0,
-        );
-      },
-      { skipInitialization: false },
-    );
+    if (!needsUpdate) {
+      return;
+    }
+
+    editor.update(() => {
+      headingKeysRef.current.forEach((key) => {
+        const node = $getNodeByKey(key);
+        if (!$isHeadingNode(node)) {
+          return;
+        }
+        const indicators = node.getChildren().filter($isCollapseIndicatorNode);
+        const shouldHave = collapsedKeysRef.current.has(key);
+
+        if (shouldHave) {
+          indicators.forEach((indicator) => indicator.remove());
+          node.append($createCollapseIndicatorNode(key));
+        } else if (indicators.length) {
+          indicators.forEach((indicator) => indicator.remove());
+        }
+      });
+    });
   }, [editor]);
 
   const applyCollapsedState = useCallback(() => {
@@ -199,8 +228,69 @@ export default function GutterActionsPlugin() {
       }
     });
 
+    headingKeysRef.current.forEach((key) => {
+      const element = editor.getElementByKey(key);
+      if (!element) {
+        return;
+      }
+      if (collapsedKeysRef.current.has(key)) {
+        element.setAttribute('data-collapsed', 'true');
+      } else {
+        element.removeAttribute('data-collapsed');
+      }
+    });
+
     hiddenKeysRef.current = nextHiddenKeys;
+    syncCollapseIndicatorNodes();
+  }, [editor, syncCollapseIndicatorNodes]);
+
+
+
+  useEffect(() => {
+    return editor.registerMutationListener(
+      HeadingNode,
+      (mutations) => {
+        editor.getEditorState().read(() => {
+          for (const [key, type] of mutations) {
+            if (type === 'created') {
+              headingKeysRef.current.add(key);
+            } else if (type === 'destroyed') {
+              headingKeysRef.current.delete(key);
+              collapsedKeysRef.current.delete(key);
+            }
+          }
+        });
+        setShouldListenMouseMove(
+          headingKeysRef.current.size > 0 || codeKeysRef.current.size > 0,
+        );
+        applyCollapsedState();
+      },
+      { skipInitialization: false },
+    );
   }, [editor]);
+
+  useEffect(() => {
+    return editor.registerMutationListener(
+      CodeNode,
+      (mutations) => {
+        editor.getEditorState().read(() => {
+          for (const [key, type] of mutations) {
+            if (type === 'created') {
+              codeKeysRef.current.add(key);
+            } else if (type === 'destroyed') {
+              codeKeysRef.current.delete(key);
+            }
+          }
+        });
+        setShouldListenMouseMove(
+          headingKeysRef.current.size > 0 || codeKeysRef.current.size > 0,
+        );
+      },
+      { skipInitialization: false },
+    );
+  }, [editor]);
+
+
 
   useEffect(() => {
     return editor.registerUpdateListener(() => {
@@ -271,6 +361,9 @@ export default function GutterActionsPlugin() {
       useFixedPosition,
     });
   }, [editor, portalTarget]);
+
+
+
 
   const updateFromMouseEvent = useCallback(
     (event: MouseEvent) => {
@@ -487,7 +580,8 @@ export default function GutterActionsPlugin() {
 
   useEffect(() => {
     updateActiveHeadingIndicator();
-  }, [updateActiveHeadingIndicator]);
+    syncCollapseIndicatorNodes();
+  }, [updateActiveHeadingIndicator, syncCollapseIndicatorNodes]);
 
   useEffect(() => {
     if (!shouldListenMouseMove) {
@@ -542,7 +636,7 @@ export default function GutterActionsPlugin() {
         rafRef.current = null;
       }
     };
-  }, [portalTarget, shouldListenMouseMove, updateFromMouseEvent]);
+  }, [portalTarget, shouldListenMouseMove, syncCollapseIndicatorNodes, updateFromMouseEvent, updateActiveHeadingIndicator]);
 
   useEffect(() => {
     if (!headingPositions.length) {
@@ -561,6 +655,7 @@ export default function GutterActionsPlugin() {
     setHeadingRenderPositions(headingPositions);
     setHeadingVisible(true);
   }, [headingPositions, headingRenderPositions]);
+
 
   useEffect(() => {
     if (!activeHeading) {
@@ -638,6 +733,273 @@ export default function GutterActionsPlugin() {
       requestAnimationFrame(() => updateFromMouseEvent(lastEvent));
     }
   }, [applyCollapsedState, updateFromMouseEvent]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      TOGGLE_HEADING_COLLAPSE_COMMAND,
+      (headingKey) => {
+        toggleCollapsed(headingKey);
+        return true;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+  }, [editor, toggleCollapsed]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const anchorNode = selection.anchor.getNode();
+        const heading = ($isHeadingNode(anchorNode)
+          ? anchorNode
+          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
+        if (!heading) {
+          return false;
+        }
+
+        if (heading.getChildren().some($isCollapseIndicatorNode)) {
+          editor.dispatchCommand(
+            TOGGLE_HEADING_COLLAPSE_COMMAND,
+            heading.getKey(),
+          );
+          return true;
+        }
+
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      REMOVE_TEXT_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const anchorNode = selection.anchor.getNode();
+        const heading = ($isHeadingNode(anchorNode)
+          ? anchorNode
+          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
+        if (!heading) {
+          return false;
+        }
+
+        if (heading.getChildren().some($isCollapseIndicatorNode)) {
+          editor.dispatchCommand(
+            TOGGLE_HEADING_COLLAPSE_COMMAND,
+            heading.getKey(),
+          );
+          return true;
+        }
+
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
+
+  useEffect(() => {
+    if (!rootElement) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Backspace' && event.key !== 'Delete') {
+        return;
+      }
+
+      let handled = false;
+      editor.update(() => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return;
+        }
+
+        const anchorNode = selection.anchor.getNode();
+        const heading = ($isHeadingNode(anchorNode)
+          ? anchorNode
+          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
+        if (!heading) {
+          return;
+        }
+
+        if (heading.getChildren().some($isCollapseIndicatorNode)) {
+          editor.dispatchCommand(
+            TOGGLE_HEADING_COLLAPSE_COMMAND,
+            heading.getKey(),
+          );
+          handled = true;
+        }
+      });
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    rootElement.addEventListener('keydown', handleKeyDown, true);
+    return () => {
+      rootElement.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [editor, rootElement]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      BEFORE_INPUT_COMMAND,
+      (event) => {
+        const inputType =
+          typeof event === 'object' && event && 'inputType' in event
+            ? String((event as InputEvent).inputType)
+            : '';
+        if (!inputType.startsWith('delete')) {
+          return false;
+        }
+
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const anchorNode = selection.anchor.getNode();
+        const heading = ($isHeadingNode(anchorNode)
+          ? anchorNode
+          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
+        if (!heading) {
+          return false;
+        }
+
+        if (heading.getChildren().some($isCollapseIndicatorNode)) {
+          editor.dispatchCommand(
+            TOGGLE_HEADING_COLLAPSE_COMMAND,
+            heading.getKey(),
+          );
+          return true;
+        }
+
+        return false;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      KEY_BACKSPACE_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const anchor = selection.anchor;
+        const anchorNode = anchor.getNode();
+        const nodes = selection.getNodes();
+        const indicatorNode = nodes.find($isCollapseIndicatorNode) ?? null;
+        const headingFromIndicator = indicatorNode
+          ? ($getNodeByKey((indicatorNode as CollapseIndicatorNode).getHeadingKey()) as
+              | HeadingNode
+              | null)
+          : null;
+        const heading = headingFromIndicator ??
+          (($isHeadingNode(anchorNode)
+            ? anchorNode
+            : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null);
+
+        if (!heading) {
+          return false;
+        }
+
+        const children = heading.getChildren();
+        const indicatorIndex = children.findIndex($isCollapseIndicatorNode);
+        if (indicatorIndex !== -1) {
+          editor.dispatchCommand(
+            TOGGLE_HEADING_COLLAPSE_COMMAND,
+            heading.getKey(),
+          );
+          return true;
+        }
+
+        if (indicatorIndex <= 0) {
+          return false;
+        }
+
+        const beforeIndicator = children[indicatorIndex - 1] ?? null;
+        if (!beforeIndicator) {
+          return false;
+        }
+
+        let shouldExpand = false;
+
+        const isTextBefore = $isTextNode(beforeIndicator);
+        const endOffset = isTextBefore
+          ? beforeIndicator.getTextContent().length
+          : $isElementNode(beforeIndicator)
+            ? beforeIndicator.getChildrenSize()
+            : 0;
+        const endPoint = $createPoint(
+          beforeIndicator.getKey(),
+          endOffset,
+          isTextBefore ? 'text' : 'element',
+        );
+
+        if (selection.anchor.is(endPoint)) {
+          shouldExpand = true;
+        }
+
+        if ($isElementNode(anchorNode) && anchor.type === 'element' && anchorNode === heading) {
+          shouldExpand = shouldExpand || anchor.offset >= indicatorIndex;
+        } else if ($isTextNode(anchorNode) && heading.isParentOf(anchorNode)) {
+          const lastText = getLastTextNode(beforeIndicator);
+          const isAtEnd = anchor.offset === anchorNode.getTextContent().length;
+          shouldExpand = shouldExpand || Boolean(lastText && anchorNode === lastText && isAtEnd);
+        }
+
+        if (!shouldExpand) {
+          return false;
+        }
+
+        editor.dispatchCommand(
+          TOGGLE_HEADING_COLLAPSE_COMMAND,
+          heading.getKey(),
+        );
+        return true;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor, getLastTextNode]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      KEY_DELETE_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+          return false;
+        }
+
+        const nodes = selection.getNodes();
+        const indicatorNode = nodes.find($isCollapseIndicatorNode) ?? null;
+        if (!indicatorNode) {
+          return false;
+        }
+
+        const headingKey = (indicatorNode as CollapseIndicatorNode).getHeadingKey();
+        editor.dispatchCommand(TOGGLE_HEADING_COLLAPSE_COMMAND, headingKey);
+        return true;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+  }, [editor]);
 
   const handleCopy = useCallback(() => {
     if (!codeRenderPosition) {

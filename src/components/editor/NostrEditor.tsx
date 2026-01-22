@@ -47,6 +47,7 @@ import { NprofileNode } from './nodes/NprofileNode';
 import { NeventNode } from './nodes/NeventNode';
 import { NaddrNode } from './nodes/NaddrNode';
 import { YouTubeNode } from './nodes/YouTubeNode';
+import { CollapseIndicatorNode } from './nodes/CollapseIndicatorNode';
 import { IMAGE } from './transformers/ImageTransformer';
 import { LINK } from './transformers/LinkTransformer';
 import { NOSTR_TRANSFORMERS } from './transformers/NostrTransformers';
@@ -212,7 +213,16 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
         name: 'NostrEditor',
         namespace: 'NostrEditor',
         theme,
-        nodes: [ImageNode, LinkNode, NpubNode, NprofileNode, NeventNode, NaddrNode, YouTubeNode],
+        nodes: [
+          ImageNode,
+          LinkNode,
+          NpubNode,
+          NprofileNode,
+          NeventNode,
+          NaddrNode,
+          YouTubeNode,
+          CollapseIndicatorNode,
+        ],
         onError: (error: Error) => console.error('Lexical error:', error),
         dependencies: [
           RichTextExtension,
