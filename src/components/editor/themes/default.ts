@@ -1,37 +1,37 @@
 import type { EditorThemeClasses } from 'lexical';
 
-// VS Code Dark+ theme colors
+// Light theme base + Dark+ overrides
 const codeHighlightClasses = {
-  atrule: 'text-[#C586C0]',           // pink/magenta - @rules
-  attr: 'text-[#9CDCFE]',             // light blue - attributes
-  boolean: 'text-[#569CD6]',          // blue - true/false
-  builtin: 'text-[#4EC9B0]',          // teal - built-in types
-  cdata: 'text-[#6A9955]',            // green - CDATA
-  char: 'text-[#CE9178]',             // orange - characters
-  class: 'text-[#4EC9B0]',            // teal - class names
-  'class-name': 'text-[#4EC9B0]',     // teal - class names
-  comment: 'text-[#6A9955]',          // green - comments
-  constant: 'text-[#4FC1FF]',         // bright blue - constants
-  deleted: 'text-[#CE9178]',          // orange - deleted
-  doctype: 'text-[#6A9955]',          // green - doctype
-  entity: 'text-[#569CD6]',           // blue - entities
-  function: 'text-[#DCDCAA]',         // yellow - functions
-  important: 'text-[#569CD6]',        // blue - important
-  inserted: 'text-[#B5CEA8]',         // light green - inserted
-  keyword: 'text-[#569CD6]',          // blue - keywords
-  namespace: 'text-[#4EC9B0]',        // teal - namespaces
-  number: 'text-[#B5CEA8]',           // light green - numbers
-  operator: 'text-[#D4D4D4]',         // light gray - operators
-  prolog: 'text-[#6A9955]',           // green - prolog
-  property: 'text-[#9CDCFE]',         // light blue - properties
-  punctuation: 'text-[#D4D4D4]',      // light gray - punctuation
-  regex: 'text-[#D16969]',            // red - regex
-  selector: 'text-[#D7BA7D]',         // gold - selectors
-  string: 'text-[#CE9178]',           // orange - strings
-  symbol: 'text-[#569CD6]',           // blue - symbols
-  tag: 'text-[#569CD6]',              // blue - tags
-  url: 'text-[#CE9178]',              // orange - urls
-  variable: 'text-[#9CDCFE]',         // light blue - variables
+  atrule: 'text-[#7C3AED] dark:text-[#C586C0]',           // purple - @rules
+  attr: 'text-[#0EA5E9] dark:text-[#9CDCFE]',             // blue - attributes
+  boolean: 'text-[#2563EB] dark:text-[#569CD6]',          // blue - true/false
+  builtin: 'text-[#0D9488] dark:text-[#4EC9B0]',          // teal - built-in types
+  cdata: 'text-[#15803D] dark:text-[#6A9955]',            // green - CDATA
+  char: 'text-[#B45309] dark:text-[#CE9178]',             // amber - characters
+  class: 'text-[#0D9488] dark:text-[#4EC9B0]',            // teal - class names
+  'class-name': 'text-[#0D9488] dark:text-[#4EC9B0]',     // teal - class names
+  comment: 'text-[#16A34A] dark:text-[#6A9955]',          // green - comments
+  constant: 'text-[#0284C7] dark:text-[#4FC1FF]',         // blue - constants
+  deleted: 'text-[#B45309] dark:text-[#CE9178]',          // amber - deleted
+  doctype: 'text-[#15803D] dark:text-[#6A9955]',          // green - doctype
+  entity: 'text-[#2563EB] dark:text-[#569CD6]',           // blue - entities
+  function: 'text-[#7C3AED] dark:text-[#DCDCAA]',         // purple (lighter in dark)
+  important: 'text-[#1D4ED8] dark:text-[#569CD6]',        // blue - important
+  inserted: 'text-[#15803D] dark:text-[#B5CEA8]',         // green - inserted
+  keyword: 'text-[#1D4ED8] dark:text-[#569CD6]',          // blue - keywords
+  namespace: 'text-[#0D9488] dark:text-[#4EC9B0]',        // teal - namespaces
+  number: 'text-[#0F766E] dark:text-[#B5CEA8]',           // teal - numbers
+  operator: 'text-[#334155] dark:text-[#D4D4D4]',         // slate - operators
+  prolog: 'text-[#15803D] dark:text-[#6A9955]',           // green - prolog
+  property: 'text-[#0EA5E9] dark:text-[#9CDCFE]',         // blue - properties
+  punctuation: 'text-[#1F2937] dark:text-[#D4D4D4]',      // darker gray - punctuation
+  regex: 'text-[#B91C1C] dark:text-[#D16969]',            // red - regex
+  selector: 'text-[#B45309] dark:text-[#D7BA7D]',         // amber - selectors
+  string: 'text-[#B45309] dark:text-[#CE9178]',           // amber - strings
+  symbol: 'text-[#2563EB] dark:text-[#569CD6]',           // blue - symbols
+  tag: 'text-[#1D4ED8] dark:text-[#569CD6]',              // blue - tags
+  url: 'text-[#B45309] dark:text-[#CE9178]',              // amber - urls
+  variable: 'text-[#0EA5E9] dark:text-[#9CDCFE]',         // blue - variables
 };
 
 const theme: EditorThemeClasses = {
