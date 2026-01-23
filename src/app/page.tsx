@@ -10,6 +10,7 @@ import BlogListPanel from '@/components/sidebar/BlogListPanel';
 import DraftsPanel from '@/components/sidebar/DraftsPanel';
 import SettingsPanel from '@/components/sidebar/SettingsPanel';
 import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
+import FollowingFeedPanel from '@/components/sidebar/FollowingFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import StacksPanel from '@/components/sidebar/StacksPanel';
 import ProfilePanel from '@/components/sidebar/ProfilePanel';
@@ -438,6 +439,9 @@ function HomeContent() {
       {/* Collapsible panels - kept mounted to preserve scroll position */}
       <div className={activePanel === 'explore' ? '' : 'hidden'}>
         <GlobalFeedPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+      </div>
+      <div className={activePanel === 'following' ? '' : 'hidden'}>
+        <FollowingFeedPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
       </div>
       <div className={activePanel === 'blogs' ? '' : 'hidden'}>
         <BlogListPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />

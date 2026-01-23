@@ -264,6 +264,153 @@ export async function fetchUserHighlights({
 }
 
 // Fetch NIP-84 highlights for an article
+// Fetch user's contacts (follow list) from kind 3 event (NIP-02)
+export async function fetchContacts({
+  pubkey,
+  relay = 'wss://relay.damus.io',
+}: {
+  pubkey: string;
+  relay?: string;
+}): Promise<string[]> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `contacts-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+    let resolved = false;
+
+    ws.onopen = () => {
+      const filter = {
+        kinds: [3],
+        authors: [pubkey],
+        limit: 1,
+      };
+
+      ws.send(JSON.stringify(['REQ', subId, filter]));
+
+      timeoutId = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          resolve([]);
+        }
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 3 && !resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            // Extract pubkeys from 'p' tags
+            const followedPubkeys = event.tags
+              .filter((t) => t[0] === 'p' && t[1])
+              .map((t) => t[1]);
+            resolve(followedPubkeys);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            resolve([]);
+          }
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeoutId);
+        resolve([]);
+      }
+    };
+  });
+}
+
+// Fetch blogs from multiple authors (for following feed)
+export async function fetchFollowingBlogs({
+  authors,
+  limit = 10,
+  until,
+  relay = 'wss://relay.damus.io',
+}: {
+  authors: string[];
+  limit?: number;
+  until?: number;
+  relay?: string;
+}): Promise<{ blogs: Blog[]; nextCursor?: number }> {
+  if (authors.length === 0) {
+    return { blogs: [] };
+  }
+
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(relay);
+    const events: NostrEvent[] = [];
+    const subId = `following-blogs-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+
+    ws.onopen = () => {
+      const filter: Record<string, unknown> = {
+        kinds: [30023],
+        authors,
+        limit,
+      };
+
+      if (until) {
+        filter.until = until;
+      }
+
+      ws.send(JSON.stringify(['REQ', subId, filter]));
+
+      timeoutId = setTimeout(() => {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        const blogs = events.map(eventToBlog);
+        const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
+        resolve({ blogs, nextCursor });
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 30023) {
+            events.push(event);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          const blogs = events.map(eventToBlog);
+          const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
+          resolve({ blogs, nextCursor });
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = (error) => {
+      clearTimeout(timeoutId);
+      reject(error);
+    };
+  });
+}
+
 export async function fetchHighlights({
   articlePubkey,
   articleIdentifier,
