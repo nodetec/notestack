@@ -584,7 +584,7 @@ function HomeContent() {
               <div className="h-5 w-48 bg-muted rounded animate-pulse" />
             </div>
           ) : (
-            <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
+            <div ref={toolbarRef} className="hidden lg:flex items-center justify-center flex-1 min-w-0" />
           )}
           <div className="flex items-center gap-1 lg:gap-2 justify-end flex-shrink-0">
             {isLoggedIn && selectedBlog && (
