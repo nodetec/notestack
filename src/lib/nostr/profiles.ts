@@ -3,7 +3,7 @@ import { nip19 } from 'nostr-tools';
 import type { NostrProfile } from '@/components/editor';
 import type { NostrEvent } from './types';
 
-const DEFAULT_RELAY = 'wss://relay.damus.io';
+const DEFAULT_RELAY = 'wss://purplepag.es';
 
 export interface Profile {
   pubkey: string;
