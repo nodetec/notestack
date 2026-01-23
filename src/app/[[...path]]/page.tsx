@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -36,7 +36,7 @@ import { CommentsSection } from '@/components/comments';
 
 function HomeContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
   const isMobile = useIsMobile();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -62,9 +62,19 @@ function HomeContent() {
   }, []);
   const queryClient = useQueryClient();
 
-  // Get draft ID from URL or create new one
-  const urlDraftId = searchParams.get('draft');
-  const urlBlogId = searchParams.get('blog');
+  // Parse path params to get draft or blog ID
+  const pathSegments = params.path as string[] | undefined;
+  let urlDraftId: string | null = null;
+  let urlBlogId: string | null = null;
+
+  if (pathSegments && pathSegments.length > 0) {
+    if (pathSegments[0] === 'draft' && pathSegments[1]) {
+      urlDraftId = pathSegments[1];
+    } else if (pathSegments[0]?.startsWith('naddr1')) {
+      urlBlogId = pathSegments[0];
+    }
+  }
+
   const createDraft = useDraftStore((state) => state.createDraft);
   const createDraftFromBlog = useDraftStore((state) => state.createDraftFromBlog);
   const getDraft = useDraftStore((state) => state.getDraft);
@@ -171,13 +181,13 @@ function HomeContent() {
           } else {
             // Blog not found on any relay, redirect to new draft
             const newId = createDraft();
-            router.replace(`/?draft=${newId}`);
+            router.replace(`/draft/${newId}`);
           }
         });
       } else {
         // Invalid naddr, redirect to new draft
         const newId = createDraft();
-        router.replace(`/?draft=${newId}`);
+        router.replace(`/draft/${newId}`);
       }
     } else if (urlDraftId) {
       // Viewing a draft
@@ -188,12 +198,12 @@ function HomeContent() {
       } else {
         // Draft doesn't exist, create new and redirect
         const newId = createDraft();
-        router.replace(`/?draft=${newId}`);
+        router.replace(`/draft/${newId}`);
       }
     } else {
       // No draft or blog in URL - create new draft
       const newId = createDraft();
-      router.replace(`/?draft=${newId}`);
+      router.replace(`/draft/${newId}`);
     }
   }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, router, relays, activeRelay]);
 
@@ -207,11 +217,12 @@ function HomeContent() {
     setCurrentDraftId(null);
     setIsLoadingBlog(false);
 
-    // Update URL for bookmarking
+    // Update URL for bookmarking without triggering navigation
+    // (router.push would cause re-render and potentially re-fetch)
     const naddr = blogToNaddr(blog, relays);
-    router.push(`/?blog=${naddr}`);
+    window.history.pushState(null, '', `/${naddr}`);
     if (isMobile) setActivePanel(null);
-  }, [router, relays, isMobile]);
+  }, [relays, isMobile]);
 
   const getEditorContent = useCallback(() => {
     return editorRef.current?.getMarkdown() ?? '';
@@ -235,7 +246,7 @@ function HomeContent() {
       }
       setSelectedBlog(null);
       const newId = createDraft();
-      router.replace(`/?draft=${newId}`);
+      router.replace(`/draft/${newId}`);
     }
   }, [justPublished, currentDraftId, deleteDraft, createDraft, router]);
 
@@ -246,15 +257,21 @@ function HomeContent() {
   const handleNewArticle = useCallback(() => {
     checkBlogForEditsRef.current();
     const newId = createDraft();
-    router.push(`/?draft=${newId}`);
+    // Update state directly and URL without triggering navigation
+    setSelectedBlog(null);
+    setCurrentDraftId(newId);
+    window.history.pushState(null, '', `/draft/${newId}`);
     if (isMobile) setActivePanel(null);
-  }, [createDraft, router, isMobile]);
+  }, [createDraft, isMobile]);
 
   const handleSelectDraft = useCallback((draftId: string) => {
     checkBlogForEditsRef.current();
-    router.push(`/?draft=${draftId}`);
+    // Update state directly and URL without triggering navigation
+    setSelectedBlog(null);
+    setCurrentDraftId(draftId);
+    window.history.pushState(null, '', `/draft/${draftId}`);
     if (isMobile) setActivePanel(null);
-  }, [router, isMobile]);
+  }, [isMobile]);
 
   const handleSelectHighlight = useCallback((highlight: Highlight) => {
     // Navigate to the source article
@@ -263,7 +280,7 @@ function HomeContent() {
         { pubkey: highlight.source.pubkey, dTag: highlight.source.identifier },
         relays
       );
-      router.push(`/?blog=${naddr}`);
+      router.push(`/${naddr}`);
       if (isMobile) setActivePanel(null);
     }
   }, [router, relays, isMobile]);
@@ -325,7 +342,7 @@ function HomeContent() {
           image: selectedBlog.image,
           tags: selectedBlog.tags,
         });
-        router.replace(`/?draft=${draftId}`);
+        router.replace(`/draft/${draftId}`);
       }, 0);
     }
   }, [selectedBlog, createDraftFromBlog, router]);
@@ -397,7 +414,7 @@ function HomeContent() {
         image: selectedBlog.image,
         tags: selectedBlog.tags,
       });
-      router.replace(`/?draft=${draftId}`);
+      router.replace(`/draft/${draftId}`);
     }
   }, [selectedBlog, createDraftFromBlog, router]);
 
@@ -492,7 +509,14 @@ function HomeContent() {
                     image: selectedBlog.image,
                     tags: selectedBlog.tags,
                   });
-                  router.replace(`/?draft=${draftId}`);
+                  // Update state directly and URL without triggering navigation
+                  setSelectedBlog(null);
+                  setCurrentDraftId(draftId);
+                  window.history.replaceState(null, '', `/draft/${draftId}`);
+                  // Switch to drafts panel if a panel is open
+                  if (activePanel) {
+                    setActivePanel('drafts');
+                  }
                 }}
               >
                 Edit
