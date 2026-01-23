@@ -148,7 +148,7 @@ export default function LandingPage() {
                 onClick={handleExplore}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Explore
+                Explore Articles
               </button>
             </nav>
           </div>
@@ -186,7 +186,7 @@ export default function LandingPage() {
             Start Writing
           </Button>
           <Button size="lg" variant="outline" onClick={handleExplore} className="text-base px-8">
-            Explore the Feed
+            Explore Articles
           </Button>
         </div>
       </section>
@@ -283,7 +283,7 @@ export default function LandingPage() {
           <AnimatedSection>
             <div className="flex items-center justify-between mb-10">
               <h3 className="text-3xl font-bold text-foreground" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
-                From the feed
+                Latest Articles
               </h3>
               <button
                 onClick={handleExplore}
