@@ -465,6 +465,16 @@ function HomeContent() {
     }
   }, [selectedBlog, createDraftFromBlog, router]);
 
+  // Extract first H1 heading from markdown content
+  const getFirstH1 = (content: string): string | null => {
+    const match = content.match(/^#\s+(.+)$/m);
+    return match ? match[1].trim() : null;
+  };
+
+  // Check if we should show the title above the editor
+  const shouldShowTitle = selectedBlog?.title &&
+    getFirstH1(selectedBlog.content)?.toLowerCase() !== selectedBlog.title.toLowerCase();
+
   // Normalize content for comparison - aggressively strip formatting differences
   const normalizeForComparison = (content: string) => {
     return content
@@ -644,24 +654,7 @@ function HomeContent() {
               </div>
             )}
           </div>
-          {selectedBlog ? (
-            <div className="flex-1 min-w-0 flex justify-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <h1 className="text-sm font-medium text-foreground/80 truncate max-w-md cursor-default">
-                    {selectedBlog.title || 'Untitled'}
-                  </h1>
-                </TooltipTrigger>
-                <TooltipContent>{selectedBlog.title || 'Untitled'}</TooltipContent>
-              </Tooltip>
-            </div>
-          ) : isLoadingBlog ? (
-            <div className="flex-1 min-w-0 flex justify-center">
-              <div className="h-5 w-48 bg-muted rounded animate-pulse" />
-            </div>
-          ) : (
-            <div className="flex-1 min-w-0" />
-          )}
+          <div className="flex-1 min-w-0" />
           <div className="flex items-center gap-1 lg:gap-2 justify-end flex-shrink-0">
             {isLoggedIn && selectedBlog && (
               <ZapButton blog={selectedBlog} />
@@ -763,6 +756,13 @@ function HomeContent() {
             </div>
           ) : (
           <div className="min-h-full w-full flex flex-col">
+            {shouldShowTitle && (
+              <div className="editor-root pt-8">
+                <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-source-serif-4)]">
+                  {selectedBlog?.title}
+                </h1>
+              </div>
+            )}
             {isMarkdownMode && !selectedBlog ? (
               <MarkdownEditor
                 ref={markdownEditorRef}
