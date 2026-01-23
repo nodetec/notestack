@@ -216,18 +216,16 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                   <span>Relays</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {isLoggedIn && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    tooltip="Profile"
-                    isActive={activePanel === 'profile'}
-                    onClick={() => handleClick('profile')}
-                  >
-                    <UserIcon />
-                    <span>Profile</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Profile"
+                  isActive={activePanel === 'profile'}
+                  onClick={() => handleClick('profile')}
+                >
+                  <UserIcon />
+                  <span>Profile</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="New Article"

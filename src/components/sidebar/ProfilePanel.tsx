@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, Loader2Icon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { XIcon, Loader2Icon, UserIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,16 +30,17 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfilePanelProps {
   onClose: () => void;
-  pubkey: string;
+  pubkey?: string;
 }
 
 export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
+  const router = useRouter();
   const { state: sidebarState, isMobile } = useSidebar();
   const relays = useSettingsStore((state) => state.relays);
   const { secretKey } = useAuth();
   const queryClient = useQueryClient();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!!pubkey);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingProfile, setExistingProfile] = useState<ProfileContent | null>(null);
 
@@ -63,11 +65,14 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
   // Fetch existing profile on mount
   useEffect(() => {
+    if (!pubkey) return;
+
+    const currentPubkey = pubkey;
     async function loadProfile() {
       setIsLoading(true);
       try {
         // Try to fetch from the first relay
-        const event = await fetchProfileEvent(pubkey, relays[0]);
+        const event = await fetchProfileEvent(currentPubkey, relays[0]);
         if (event) {
           const content = parseProfileContent(event);
           setExistingProfile(content);
@@ -157,7 +162,22 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto overscroll-none p-3">
-        {isLoading ? (
+        {!pubkey ? (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+              <UserIcon className="w-8 h-8 text-zinc-400" />
+            </div>
+            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              Sign in to manage your profile
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+              Connect with your Nostr account to edit your profile settings
+            </p>
+            <Button onClick={() => router.push('/login')}>
+              Sign In
+            </Button>
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2Icon className="w-5 h-5 animate-spin text-zinc-500" />
           </div>
