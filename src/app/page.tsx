@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
 import { useInView } from 'react-intersection-observer';
 import { useSession } from 'next-auth/react';
-import { SunIcon, MoonIcon, PenLineIcon, ShieldIcon, ZapIcon, KeyIcon, ServerIcon } from 'lucide-react';
+import { SunIcon, MoonIcon, PenLineIcon, ShieldIcon, ZapIcon, KeyIcon, ServerIcon, LayersIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoginButton from '@/components/auth/LoginButton';
 import { fetchBlogs } from '@/lib/nostr/fetch';
@@ -139,7 +139,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
+            <h1 className="flex items-center gap-2 text-xl font-bold text-foreground" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
+              <LayersIcon className="w-5 h-5" />
               NoteStack
             </h1>
             <nav className="hidden sm:flex items-center gap-6">
