@@ -21,10 +21,7 @@ import {
   $getSelection,
   $getNodeByKey,
   $isRangeSelection,
-  COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_LOW,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
 import { $isHeadingNode, HeadingNode, type HeadingTagType } from '@lexical/rich-text';
@@ -231,8 +228,6 @@ export default function GutterActionsPlugin() {
     syncCollapseIndicatorNodes();
   }, [editor, syncCollapseIndicatorNodes]);
 
-
-
   useEffect(() => {
     return editor.registerMutationListener(
       HeadingNode,
@@ -254,7 +249,7 @@ export default function GutterActionsPlugin() {
       },
       { skipInitialization: false },
     );
-  }, [editor]);
+  }, [editor, applyCollapsedState]);
 
   useEffect(() => {
     return editor.registerMutationListener(
@@ -276,8 +271,6 @@ export default function GutterActionsPlugin() {
       { skipInitialization: false },
     );
   }, [editor]);
-
-
 
   useEffect(() => {
     return editor.registerUpdateListener(() => {
@@ -348,9 +341,6 @@ export default function GutterActionsPlugin() {
       useFixedPosition,
     });
   }, [editor, portalTarget]);
-
-
-
 
   const updateFromMouseEvent = useCallback(
     (event: MouseEvent) => {
@@ -496,7 +486,7 @@ export default function GutterActionsPlugin() {
 
       setCodePositions(nextCodePositions);
     },
-    [editor, portalTarget, rootElement],
+    [editor, isEditable, portalTarget, rootElement],
   );
 
   useEffect(() => {
@@ -634,7 +624,7 @@ export default function GutterActionsPlugin() {
         rafRef.current = null;
       }
     };
-  }, [portalTarget, shouldListenMouseMove, syncCollapseIndicatorNodes, updateFromMouseEvent, updateActiveHeadingIndicator]);
+  }, [portalTarget, rootElement, shouldListenMouseMove, updateFromMouseEvent, updateActiveHeadingIndicator]);
 
   useEffect(() => {
     if (!headingPositions.length) {
@@ -653,7 +643,6 @@ export default function GutterActionsPlugin() {
     setHeadingRenderPositions(headingPositions);
     setHeadingVisible(true);
   }, [headingPositions, headingRenderPositions]);
-
 
   useEffect(() => {
     if (!activeHeading || !isEditable) {
