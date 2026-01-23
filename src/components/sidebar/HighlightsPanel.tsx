@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import type { UserWithKeys } from '@/types/auth';
 import { useSidebar } from '@/components/ui/sidebar';
+import PanelRail from './PanelRail';
 import type { Highlight } from '@/lib/nostr/types';
 
 interface HighlightsPanelProps {
@@ -114,6 +115,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
       className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
       style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
     >
+      <PanelRail onClose={onClose} />
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
         <h2 className="text-sm font-semibold text-foreground/80">

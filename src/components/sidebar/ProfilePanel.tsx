@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import * as z from 'zod';
 import { useSidebar } from '@/components/ui/sidebar';
+import PanelRail from './PanelRail';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -145,6 +146,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
       className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
       style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
     >
+      <PanelRail onClose={onClose} />
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
         <h2 className="text-sm font-semibold text-foreground/80">
