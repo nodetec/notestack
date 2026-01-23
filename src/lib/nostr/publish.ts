@@ -295,6 +295,34 @@ export async function deleteHighlight({
   return results;
 }
 
+// NIP-02: Publish updated contact/follow list (kind 3)
+interface ContactListOptions {
+  tags: string[][]; // Full list of p tags (and any other tags)
+  content?: string; // Usually empty, but some clients store relay list here
+  relays: string[];
+  secretKey?: string;
+}
+
+export async function publishContactList({
+  tags,
+  content = '',
+  relays,
+  secretKey,
+}: ContactListOptions): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+
+  const unsignedEvent = {
+    kind: 3,
+    created_at: createdAt,
+    tags,
+    content,
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
+}
+
 async function publishToRelay(event: NostrEvent, relay: string): Promise<PublishResult> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);

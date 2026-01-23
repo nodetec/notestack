@@ -24,7 +24,7 @@ import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
 import { useDraftAutoSave } from '@/lib/hooks/useDraftAutoSave';
-import { lookupProfile } from '@/lib/nostr/profiles';
+import { lookupProfile, fetchProfiles } from '@/lib/nostr/profiles';
 import { lookupNote } from '@/lib/nostr/notes';
 import { fetchBlogByAddress, fetchHighlights } from '@/lib/nostr/fetch';
 import { blogToNaddr, decodeNaddr } from '@/lib/nostr/naddr';
@@ -32,6 +32,12 @@ import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { Blog } from '@/lib/nostr/types';
 import { CommentsSection } from '@/components/comments';
+import AuthorDropdown from '@/components/author/AuthorDropdown';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 
 function HomeContent() {
@@ -115,6 +121,25 @@ function HomeContent() {
     enabled: !!selectedBlog && !!pubkey,
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
+
+  // Fetch author profile when viewing a blog (only if not already embedded)
+  const hasEmbeddedAuthor = !!(selectedBlog?.authorName || selectedBlog?.authorPicture);
+  const { data: fetchedAuthorProfile, isLoading: isLoadingAuthor } = useQuery({
+    queryKey: ['profile', selectedBlog?.pubkey, activeRelay],
+    queryFn: async () => {
+      // Try active relay and purplepag.es for profiles
+      const relaysToTry = [activeRelay, 'wss://purplepag.es'];
+      const profiles = await fetchProfiles([selectedBlog!.pubkey], relaysToTry);
+      return profiles.get(selectedBlog!.pubkey) || null;
+    },
+    enabled: !!selectedBlog && !hasEmbeddedAuthor,
+    staleTime: 60000, // Cache profile for 1 minute
+  });
+
+  // Use embedded author info if available, otherwise use fetched profile
+  const authorProfile = hasEmbeddedAuthor
+    ? { name: selectedBlog?.authorName, picture: selectedBlog?.authorPicture }
+    : fetchedAuthorProfile;
 
   // Handle highlight deletion - update cache optimistically
   const handleHighlightDeleted = useCallback((highlightId: string) => {
@@ -517,15 +542,42 @@ function HomeContent() {
         style={{ marginLeft: activePanel && !isMobile ? '288px' : undefined }}
       >
         <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 gap-2">
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <SidebarTrigger className="lg:hidden" />
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
+            {selectedBlog && (
+              <div className="hidden lg:flex items-center gap-2 min-w-0">
+                {isLoadingAuthor && !hasEmbeddedAuthor ? (
+                  <>
+                    <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse flex-shrink-0" />
+                    <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+                  </>
+                ) : (
+                  <AuthorDropdown
+                    authorPubkey={selectedBlog.pubkey}
+                    authorName={authorProfile?.name}
+                    authorPicture={authorProfile?.picture}
+                  />
+                )}
+              </div>
+            )}
+            {isLoadingBlog && (
+              <div className="hidden lg:flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse flex-shrink-0" />
+                <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+              </div>
+            )}
           </div>
           {selectedBlog ? (
             <div className="flex-1 min-w-0 flex justify-center">
-              <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-md">
-                {selectedBlog.title || 'Untitled'}
-              </h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-md cursor-default">
+                    {selectedBlog.title || 'Untitled'}
+                  </h1>
+                </TooltipTrigger>
+                <TooltipContent>{selectedBlog.title || 'Untitled'}</TooltipContent>
+              </Tooltip>
             </div>
           ) : isLoadingBlog ? (
             <div className="flex-1 min-w-0 flex justify-center">

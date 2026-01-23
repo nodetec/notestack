@@ -264,6 +264,75 @@ export async function fetchUserHighlights({
 }
 
 // Fetch NIP-84 highlights for an article
+
+// Fetch user's full contact list event (kind 3) - returns the full event for modification
+export async function fetchContactListEvent({
+  pubkey,
+  relay = 'wss://relay.damus.io',
+}: {
+  pubkey: string;
+  relay?: string;
+}): Promise<NostrEvent | null> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `contact-event-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+    let resolved = false;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(['REQ', subId, {
+        kinds: [3],
+        authors: [pubkey],
+        limit: 1,
+      }]));
+
+      timeoutId = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          resolve(null);
+        }
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 3 && !resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            resolve(event);
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            ws.send(JSON.stringify(['CLOSE', subId]));
+            ws.close();
+            resolve(null);
+          }
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeoutId);
+        resolve(null);
+      }
+    };
+  });
+}
+
 // Fetch user's contacts (follow list) from kind 3 event (NIP-02)
 export async function fetchContacts({
   pubkey,

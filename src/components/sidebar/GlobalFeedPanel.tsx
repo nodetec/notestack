@@ -119,7 +119,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
 
   return (
     <div
-      className="fixed inset-y-0 z-20 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
+      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
       style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
     >
       {/* Header */}
@@ -186,7 +186,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
             return (
               <li key={blog.id} className="relative group">
                 <button
-                  onClick={() => onSelectBlog?.(blog)}
+                  onClick={() => onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture })}
                   className="w-full text-left p-3 pr-10 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <div>
