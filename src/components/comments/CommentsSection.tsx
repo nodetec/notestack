@@ -57,6 +57,7 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const currentUserPubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
   const isLoggedIn = !!currentUserPubkey;
 
   const relays = useSettingsStore((state) => state.relays);
@@ -101,13 +102,14 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
       content,
       article,
       relays,
+      secretKey,
     });
 
     // Optimistic update
     queryClient.setQueryData<Comment[]>(commentsQueryKey, (old) =>
       old ? [...old, result.comment] : [result.comment]
     );
-  }, [article, relays, queryClient, commentsQueryKey]);
+  }, [article, relays, secretKey, queryClient, commentsQueryKey]);
 
   // Handle reply to a comment
   const handleReply = useCallback(async (
@@ -119,19 +121,21 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
       article,
       parentComment,
       relays,
+      secretKey,
     });
 
     // Optimistic update
     queryClient.setQueryData<Comment[]>(commentsQueryKey, (old) =>
       old ? [...old, result.comment] : [result.comment]
     );
-  }, [article, relays, queryClient, commentsQueryKey]);
+  }, [article, relays, secretKey, queryClient, commentsQueryKey]);
 
   // Handle delete
   const handleDelete = useCallback(async (commentId: string) => {
     await deleteComment({
       eventId: commentId,
       relays,
+      secretKey,
     });
 
     // Optimistic update - remove comment and its replies
@@ -153,7 +157,7 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
       collectReplies(commentId);
       return old.filter((c) => !idsToRemove.has(c.id));
     });
-  }, [relays, queryClient, commentsQueryKey]);
+  }, [relays, secretKey, queryClient, commentsQueryKey]);
 
   const commentCount = comments.length;
 

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { publishArticle } from '@/lib/nostr/publish';
 import type { LinkedBlog } from '@/lib/stores/draftStore';
 
@@ -38,6 +39,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
   const [relayStatuses, setRelayStatuses] = useState<RelayStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
   const relays = useSettingsStore((state) => state.relays);
+  const { secretKey } = useAuth();
 
   const isEditing = !!linkedBlog;
 
@@ -115,6 +117,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
         tags,
         relays,
         dTag: linkedBlog?.dTag, // Use existing d tag for edits
+        secretKey,
       });
 
       setRelayStatuses(

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { fetchProfileEvent } from '@/lib/nostr/profiles';
 import { parseProfileContent, publishProfile, type ProfileContent } from '@/lib/nostr/profile';
 
@@ -34,6 +35,7 @@ interface ProfilePanelProps {
 export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
   const { state: sidebarState, isMobile } = useSidebar();
   const relays = useSettingsStore((state) => state.relays);
+  const { secretKey } = useAuth();
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +110,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
         }
       });
 
-      const results = await publishProfile(content, relays);
+      const results = await publishProfile(content, relays, secretKey);
       const successCount = results.filter((r) => r.success).length;
 
       if (successCount > 0) {

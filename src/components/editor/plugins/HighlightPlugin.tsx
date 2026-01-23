@@ -165,6 +165,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
   const relays = useSettingsStore((state) => state.relays);
   const cleanupRef = useRef<(() => void) | null>(null);
   const rangeInfosRef = useRef<HighlightRangeInfo[]>([]);
@@ -289,6 +290,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
       await deleteHighlight({
         eventId: clickedHighlight.id,
         relays,
+        secretKey,
       });
 
       // Notify parent to remove from local state
@@ -394,6 +396,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
         },
         authorPubkey: source.pubkey, // Attribute to the article author
         relays,
+        secretKey,
       });
 
       // Create local highlight object and notify parent

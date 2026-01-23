@@ -1,4 +1,5 @@
 import type { NostrEvent } from './types';
+import { signEvent, getSignerPublicKey } from './signing';
 
 function generateId(): string {
   const array = new Uint8Array(16);
@@ -14,12 +15,25 @@ interface PublishOptions {
   tags?: string[];
   relays: string[];
   dTag?: string; // For editing existing articles - must match original d tag
+  secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
 export interface PublishResult {
   relay: string;
   success: boolean;
   message?: string;
+}
+
+interface CodeSnippetOptions {
+  content: string;
+  language?: string;
+  name?: string;
+  extension?: string;
+  description?: string;
+  license?: string;
+  licenseUrl?: string;
+  relays: string[];
+  secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
 export async function publishArticle({
@@ -30,12 +44,8 @@ export async function publishArticle({
   tags = [],
   relays,
   dTag: existingDTag,
+  secretKey,
 }: PublishOptions): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
   // Use existing d tag for edits, or generate a random one for new articles
   const dTag = existingDTag || generateId();
@@ -62,14 +72,13 @@ export async function publishArticle({
 
   const unsignedEvent = {
     kind: 30023,
-    pubkey,
     created_at: createdAt,
     tags: eventTags,
     content,
   };
 
-  // Sign the event using NIP-07
-  const signedEvent = await window.nostr.signEvent(unsignedEvent) as NostrEvent;
+  // Sign the event using secret key or NIP-07
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   // Publish to all relays
   const results = await Promise.all(
@@ -82,15 +91,12 @@ export async function publishArticle({
 export async function deleteArticle({
   eventId,
   relays,
+  secretKey,
 }: {
   eventId: string;
   relays: string[];
+  secretKey?: string;
 }): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // NIP-09: Deletion event (kind 5)
@@ -98,7 +104,6 @@ export async function deleteArticle({
   // Include 'k' tag specifying the kind being deleted
   const unsignedEvent = {
     kind: 5,
-    pubkey,
     created_at: createdAt,
     tags: [
       ['e', eventId],
@@ -107,7 +112,7 @@ export async function deleteArticle({
     content: '',
   };
 
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   const results = await Promise.all(
     relays.map((relay) => publishToRelay(signedEvent, relay))
@@ -135,6 +140,7 @@ interface HighlightOptions {
   };
   authorPubkey?: string; // Attribution to original author
   relays: string[];
+  secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
 export interface PublishHighlightResult {
@@ -152,12 +158,8 @@ export async function publishHighlight({
   source,
   authorPubkey,
   relays,
+  secretKey,
 }: HighlightOptions): Promise<PublishHighlightResult> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // Build tags array for NIP-84
@@ -184,14 +186,13 @@ export async function publishHighlight({
 
   const unsignedEvent = {
     kind: 9802,
-    pubkey,
     created_at: createdAt,
     tags: eventTags,
     content,
   };
 
-  // Sign the event using NIP-07
-  const signedEvent = await window.nostr.signEvent(unsignedEvent) as NostrEvent;
+  // Sign the event using secret key or NIP-07
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   // Publish to all relays
   const results = await Promise.all(
@@ -208,25 +209,68 @@ export async function publishHighlight({
   };
 }
 
+export async function publishCodeSnippet({
+  content,
+  language,
+  name,
+  extension,
+  description,
+  license,
+  licenseUrl,
+  relays,
+  secretKey,
+}: CodeSnippetOptions): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+
+  const eventTags: string[][] = [];
+
+  if (language) {
+    eventTags.push(['l', language.toLowerCase()]);
+  }
+  if (name) {
+    eventTags.push(['name', name]);
+  }
+  if (extension) {
+    eventTags.push(['extension', extension.replace(/^\./, '')]);
+  }
+  if (description) {
+    eventTags.push(['description', description]);
+  }
+  if (license) {
+    if (licenseUrl) {
+      eventTags.push(['license', license, licenseUrl]);
+    } else {
+      eventTags.push(['license', license]);
+    }
+  }
+
+  const unsignedEvent = {
+    kind: 1337,
+    created_at: createdAt,
+    tags: eventTags,
+    content,
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
+}
+
 // NIP-09: Delete a highlight
 export async function deleteHighlight({
   eventId,
   relays,
+  secretKey,
 }: {
   eventId: string;
   relays: string[];
+  secretKey?: string;
 }): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // NIP-09: Deletion event (kind 5)
   const unsignedEvent = {
     kind: 5,
-    pubkey,
     created_at: createdAt,
     tags: [
       ['e', eventId],
@@ -235,7 +279,7 @@ export async function deleteHighlight({
     content: 'Highlight deleted',
   };
 
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   const results = await Promise.all(
     relays.map((relay) => publishToRelay(signedEvent, relay))

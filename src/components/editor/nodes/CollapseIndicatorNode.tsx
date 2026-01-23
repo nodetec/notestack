@@ -25,7 +25,7 @@ export interface SerializedCollapseIndicatorNode extends SerializedLexicalNode {
   version: 1;
 }
 
-export class CollapseIndicatorNode extends DecoratorNode<JSX.Element> {
+export class CollapseIndicatorNode extends DecoratorNode<React.JSX.Element> {
   __headingKey: string;
 
   static getType(): string {
@@ -70,7 +70,7 @@ export class CollapseIndicatorNode extends DecoratorNode<JSX.Element> {
     return $createCollapseIndicatorNode(serializedNode.headingKey);
   }
 
-  decorate(): JSX.Element {
+  decorate(): React.JSX.Element {
     return <CollapseIndicator headingKey={this.__headingKey} />;
   }
 }

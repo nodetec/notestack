@@ -1,6 +1,7 @@
 import type { NostrEvent, Comment } from './types';
 import { eventToComment } from './types';
 import type { PublishResult } from './publish';
+import { signEvent } from './signing';
 
 interface FetchCommentsOptions {
   articlePubkey: string;
@@ -83,6 +84,7 @@ interface PublishCommentOptions {
     pubkey: string;
   };
   relays: string[];
+  secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
 export interface PublishCommentResult {
@@ -95,12 +97,8 @@ export async function publishComment({
   article,
   parentComment,
   relays,
+  secretKey,
 }: PublishCommentOptions): Promise<PublishCommentResult> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // Build NIP-22 tags
@@ -133,14 +131,13 @@ export async function publishComment({
 
   const unsignedEvent = {
     kind: 1111,
-    pubkey,
     created_at: createdAt,
     tags: eventTags,
     content,
   };
 
-  // Sign the event using NIP-07
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  // Sign the event using secret key or NIP-07
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   // Publish to all relays
   const results = await Promise.all(
@@ -181,21 +178,17 @@ export async function publishComment({
 export async function deleteComment({
   eventId,
   relays,
+  secretKey,
 }: {
   eventId: string;
   relays: string[];
+  secretKey?: string;
 }): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // NIP-09: Deletion event (kind 5)
   const unsignedEvent = {
     kind: 5,
-    pubkey,
     created_at: createdAt,
     tags: [
       ['e', eventId],
@@ -204,7 +197,7 @@ export async function deleteComment({
     content: 'Comment deleted',
   };
 
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   const results = await Promise.all(
     relays.map((relay) => publishToRelay(signedEvent, relay))

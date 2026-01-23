@@ -45,6 +45,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();
@@ -89,7 +90,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
 
     setDeletingBlogId(blog.id);
     try {
-      await deleteArticle({ eventId: blog.id, relays });
+      await deleteArticle({ eventId: blog.id, relays, secretKey });
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
     } catch (err) {
       console.error('Failed to delete blog:', err);

@@ -1,5 +1,6 @@
 import type { NostrEvent, Stack, StackItem } from './types';
 import { eventToStack } from './types';
+import { signEvent, getSignerPublicKey } from './signing';
 
 interface FetchStacksOptions {
   pubkey: string;
@@ -13,6 +14,7 @@ interface PublishStackOptions {
   image?: string;
   items: StackItem[];
   relays: string[];
+  secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
 export interface PublishResult {
@@ -111,12 +113,8 @@ export async function publishStack({
   image,
   items,
   relays,
+  secretKey,
 }: PublishStackOptions): Promise<PublishStackResult> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   // Build tags array for NIP-51 bookmark set
@@ -145,14 +143,13 @@ export async function publishStack({
 
   const unsignedEvent = {
     kind: 30003,
-    pubkey,
     created_at: createdAt,
     tags: eventTags,
     content: '', // NIP-51 bookmark sets typically have empty content
   };
 
-  // Sign the event using NIP-07
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  // Sign the event using secret key or NIP-07
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   // Publish to all relays
   const results = await Promise.all(
@@ -175,23 +172,22 @@ export async function deleteStack({
   eventId,
   dTag,
   relays,
+  secretKey,
 }: {
   eventId: string;
   dTag: string;
   relays: string[];
+  secretKey?: string;
 }): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
+
+  // Get the pubkey first for the 'a' tag
+  const pubkey = await getSignerPublicKey(secretKey);
 
   // NIP-09: Deletion event (kind 5)
   // For addressable events (like 30003), use 'a' tag
   const unsignedEvent = {
     kind: 5,
-    pubkey,
     created_at: createdAt,
     tags: [
       ['e', eventId],
@@ -201,7 +197,7 @@ export async function deleteStack({
     content: 'Stack deleted',
   };
 
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
 }

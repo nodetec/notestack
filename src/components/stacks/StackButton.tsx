@@ -30,6 +30,7 @@ export default function StackButton({ blog }: StackButtonProps) {
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
 
   const {
     stacks,
@@ -103,6 +104,7 @@ export default function StackButton({ blog }: StackButtonProps) {
         image: stack.image,
         items: currentStack.items,
         relays,
+        secretKey,
       });
     } catch (err) {
       console.error('Failed to update stack:', err);
@@ -140,6 +142,7 @@ export default function StackButton({ blog }: StackButtonProps) {
         name: newStackName.trim(),
         items: [item],
         relays,
+        secretKey,
       });
 
       // Add to store

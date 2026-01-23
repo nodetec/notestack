@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { sendZap, type ZapRequest } from '@/lib/nostr/zap';
 import { fetchProfileEvent } from '@/lib/nostr/profiles';
 import type { NostrEvent } from '@/lib/nostr/types';
@@ -43,6 +44,7 @@ export default function ZapDialog({
 
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
+  const { secretKey } = useAuth();
 
   // Fetch recipient profile when dialog opens
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function ZapDialog({
         eventId,
       };
 
-      await sendZap(zapRequest, profileEvent);
+      await sendZap(zapRequest, profileEvent, secretKey);
 
       toast.success('Zap sent!', {
         description: `${sats.toLocaleString()} sats sent successfully`,

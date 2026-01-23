@@ -1,5 +1,6 @@
 import { getZapEndpoint } from 'nostr-tools/nip57';
 import type { NostrEvent } from './types';
+import { signEvent } from './signing';
 
 export interface InvoiceResponse {
   pr: string;
@@ -137,24 +138,20 @@ export async function payInvoice(invoice: string): Promise<{ preimage: string }>
 
 export async function sendZap(
   zapRequest: ZapRequest,
-  profileEvent: NostrEvent
+  profileEvent: NostrEvent,
+  secretKey?: string
 ): Promise<{ preimage: string }> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found. Please install a Nostr signer like nos2x or Alby.');
-  }
-
   // Create the unsigned zap request
   const zapRequestTemplate = makeZapRequest(zapRequest);
 
-  // Get sender pubkey and sign with NIP-07
-  const pubkey = await window.nostr.getPublicKey();
-
-  const unsignedEvent: UnsignedEvent = {
-    ...zapRequestTemplate,
-    pubkey,
+  const unsignedEvent = {
+    kind: zapRequestTemplate.kind,
+    created_at: zapRequestTemplate.created_at,
+    tags: zapRequestTemplate.tags,
+    content: zapRequestTemplate.content,
   };
 
-  const signedEvent = (await window.nostr.signEvent(unsignedEvent)) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   if (!signedEvent) {
     throw new Error('Failed to sign zap request');

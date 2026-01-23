@@ -31,6 +31,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();
@@ -82,6 +83,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
       await deleteHighlight({
         eventId: highlight.id,
         relays,
+        secretKey,
       });
 
       // Remove from cache

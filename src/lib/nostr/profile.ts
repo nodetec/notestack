@@ -1,5 +1,6 @@
 import type { NostrEvent } from './types';
 import type { PublishResult } from './publish';
+import { signEvent } from './signing';
 
 // NIP-01 kind 0 profile content
 export interface ProfileContent {
@@ -29,24 +30,19 @@ export function parseProfileContent(event: NostrEvent): ProfileContent {
  */
 export async function publishProfile(
   content: ProfileContent,
-  relays: string[]
+  relays: string[],
+  secretKey?: string
 ): Promise<PublishResult[]> {
-  if (!window.nostr) {
-    throw new Error('No Nostr extension found');
-  }
-
-  const pubkey = await window.nostr.getPublicKey();
   const createdAt = Math.floor(Date.now() / 1000);
 
   const unsignedEvent = {
     kind: 0,
-    pubkey,
     created_at: createdAt,
     tags: [],
     content: JSON.stringify(content),
   };
 
-  const signedEvent = await window.nostr.signEvent(unsignedEvent) as NostrEvent;
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
   const results = await Promise.all(
     relays.map((relay) => publishToRelay(signedEvent, relay))

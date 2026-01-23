@@ -195,6 +195,7 @@ export default function StacksPanel({ onSelectBlog, onClose }: StacksPanelProps)
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const secretKey = user?.secretKey;
 
   const {
     stacks,
@@ -262,6 +263,7 @@ export default function StacksPanel({ onSelectBlog, onClose }: StacksPanelProps)
         eventId: stack.id,
         dTag: stack.dTag,
         relays,
+        secretKey,
       });
       removeStack(stack.dTag);
     } catch (err) {
@@ -295,6 +297,7 @@ export default function StacksPanel({ onSelectBlog, onClose }: StacksPanelProps)
         image: stack.image,
         items: currentStack.items,
         relays,
+        secretKey,
       });
     } catch (err) {
       console.error('Failed to remove item from stack:', err);
