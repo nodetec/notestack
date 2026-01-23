@@ -20,27 +20,18 @@ import {
   $getRoot,
   $getSelection,
   $getNodeByKey,
-  $createPoint,
-  $isElementNode,
   $isRangeSelection,
-  $isTextNode,
-  BEFORE_INPUT_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_LOW,
-  DELETE_CHARACTER_COMMAND,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
-  REMOVE_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
-  type LexicalNode,
-  type TextNode,
 } from 'lexical';
 import { $isHeadingNode, HeadingNode, type HeadingTagType } from '@lexical/rich-text';
 import { $isCodeNode, CodeNode } from '@lexical/code';
 import {
   $createCollapseIndicatorNode,
   $isCollapseIndicatorNode,
-  CollapseIndicatorNode,
   TOGGLE_HEADING_COLLAPSE_COMMAND,
 } from '../nodes/CollapseIndicatorNode';
 
@@ -112,22 +103,6 @@ export default function GutterActionsPlugin() {
   const activeHeadingKeyRef = useRef<string | null>(null);
   const selectionRafRef = useRef<number | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-
-  const getLastTextNode = useCallback((node: LexicalNode): TextNode | null => {
-    if ($isTextNode(node)) {
-      return node;
-    }
-    if ($isElementNode(node)) {
-      const children = node.getChildren();
-      for (let i = children.length - 1; i >= 0; i -= 1) {
-        const candidate = getLastTextNode(children[i]);
-        if (candidate) {
-          return candidate;
-        }
-      }
-    }
-    return null;
-  }, []);
 
   useEffect(() => {
     setIsEditable(editor.isEditable());
@@ -768,68 +743,7 @@ export default function GutterActionsPlugin() {
     );
   }, [editor, toggleCollapsed]);
 
-  useEffect(() => {
-    return editor.registerCommand(
-      DELETE_CHARACTER_COMMAND,
-      () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        const heading = ($isHeadingNode(anchorNode)
-          ? anchorNode
-          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
-        if (!heading) {
-          return false;
-        }
-
-        if (heading.getChildren().some($isCollapseIndicatorNode)) {
-          editor.dispatchCommand(
-            TOGGLE_HEADING_COLLAPSE_COMMAND,
-            heading.getKey(),
-          );
-          return true;
-        }
-
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      REMOVE_TEXT_COMMAND,
-      () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        const heading = ($isHeadingNode(anchorNode)
-          ? anchorNode
-          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
-        if (!heading) {
-          return false;
-        }
-
-        if (heading.getChildren().some($isCollapseIndicatorNode)) {
-          editor.dispatchCommand(
-            TOGGLE_HEADING_COLLAPSE_COMMAND,
-            heading.getKey(),
-          );
-          return true;
-        }
-
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor]);
-
+  // Intercept backspace/delete at DOM level when cursor is AFTER the collapse indicator
   useEffect(() => {
     if (!rootElement) {
       return;
@@ -840,33 +754,69 @@ export default function GutterActionsPlugin() {
         return;
       }
 
-      let handled = false;
-      editor.update(() => {
+      let shouldHandle = false;
+      let headingKey: string | null = null;
+
+      editor.getEditorState().read(() => {
         const selection = $getSelection();
         if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
           return;
         }
 
-        const anchorNode = selection.anchor.getNode();
+        const anchor = selection.anchor;
+        const anchorNode = anchor.getNode();
+
         const heading = ($isHeadingNode(anchorNode)
           ? anchorNode
           : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
+
         if (!heading) {
           return;
         }
 
-        if (heading.getChildren().some($isCollapseIndicatorNode)) {
-          editor.dispatchCommand(
-            TOGGLE_HEADING_COLLAPSE_COMMAND,
-            heading.getKey(),
-          );
-          handled = true;
+        const children = heading.getChildren();
+        const indicatorIndex = children.findIndex($isCollapseIndicatorNode);
+
+        if (indicatorIndex === -1) {
+          return;
+        }
+
+        // Only handle when cursor is AFTER the indicator
+        if (
+          anchor.type === 'element' &&
+          anchorNode === heading &&
+          anchor.offset === indicatorIndex + 1
+        ) {
+          shouldHandle = true;
+          headingKey = heading.getKey();
         }
       });
 
-      if (handled) {
+      if (shouldHandle && headingKey) {
         event.preventDefault();
         event.stopPropagation();
+
+        const keyToUncollapse = headingKey;
+
+        // Uncollapse the heading
+        collapsedKeysRef.current.delete(keyToUncollapse);
+
+        editor.update(() => {
+          const heading = $getNodeByKey(keyToUncollapse) as HeadingNode | null;
+          if (!heading) return;
+
+          // Remove the indicator
+          const indicator = heading.getChildren().find($isCollapseIndicatorNode);
+          if (indicator) {
+            indicator.remove();
+          }
+
+          // Position cursor at end of heading
+          heading.selectEnd();
+        });
+
+        // Update visibility of collapsed content
+        applyCollapsedState();
       }
     };
 
@@ -874,155 +824,7 @@ export default function GutterActionsPlugin() {
     return () => {
       rootElement.removeEventListener('keydown', handleKeyDown, true);
     };
-  }, [editor, rootElement]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      BEFORE_INPUT_COMMAND,
-      (event) => {
-        const inputType =
-          typeof event === 'object' && event && 'inputType' in event
-            ? String((event as InputEvent).inputType)
-            : '';
-        if (!inputType.startsWith('delete')) {
-          return false;
-        }
-
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        const heading = ($isHeadingNode(anchorNode)
-          ? anchorNode
-          : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null;
-        if (!heading) {
-          return false;
-        }
-
-        if (heading.getChildren().some($isCollapseIndicatorNode)) {
-          editor.dispatchCommand(
-            TOGGLE_HEADING_COLLAPSE_COMMAND,
-            heading.getKey(),
-          );
-          return true;
-        }
-
-        return false;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      KEY_BACKSPACE_COMMAND,
-      () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const anchor = selection.anchor;
-        const anchorNode = anchor.getNode();
-        const nodes = selection.getNodes();
-        const indicatorNode = nodes.find($isCollapseIndicatorNode) ?? null;
-        const headingFromIndicator = indicatorNode
-          ? ($getNodeByKey((indicatorNode as CollapseIndicatorNode).getHeadingKey()) as
-              | HeadingNode
-              | null)
-          : null;
-        const heading = headingFromIndicator ??
-          (($isHeadingNode(anchorNode)
-            ? anchorNode
-            : $findMatchingParent(anchorNode, $isHeadingNode)) as HeadingNode | null);
-
-        if (!heading) {
-          return false;
-        }
-
-        const children = heading.getChildren();
-        const indicatorIndex = children.findIndex($isCollapseIndicatorNode);
-        if (indicatorIndex !== -1) {
-          editor.dispatchCommand(
-            TOGGLE_HEADING_COLLAPSE_COMMAND,
-            heading.getKey(),
-          );
-          return true;
-        }
-
-        if (indicatorIndex <= 0) {
-          return false;
-        }
-
-        const beforeIndicator = children[indicatorIndex - 1] ?? null;
-        if (!beforeIndicator) {
-          return false;
-        }
-
-        let shouldExpand = false;
-
-        const isTextBefore = $isTextNode(beforeIndicator);
-        const endOffset = isTextBefore
-          ? beforeIndicator.getTextContent().length
-          : $isElementNode(beforeIndicator)
-            ? beforeIndicator.getChildrenSize()
-            : 0;
-        const endPoint = $createPoint(
-          beforeIndicator.getKey(),
-          endOffset,
-          isTextBefore ? 'text' : 'element',
-        );
-
-        if (selection.anchor.is(endPoint)) {
-          shouldExpand = true;
-        }
-
-        if ($isElementNode(anchorNode) && anchor.type === 'element' && anchorNode === heading) {
-          shouldExpand = shouldExpand || anchor.offset >= indicatorIndex;
-        } else if ($isTextNode(anchorNode) && heading.isParentOf(anchorNode)) {
-          const lastText = getLastTextNode(beforeIndicator);
-          const isAtEnd = anchor.offset === anchorNode.getTextContent().length;
-          shouldExpand = shouldExpand || Boolean(lastText && anchorNode === lastText && isAtEnd);
-        }
-
-        if (!shouldExpand) {
-          return false;
-        }
-
-        editor.dispatchCommand(
-          TOGGLE_HEADING_COLLAPSE_COMMAND,
-          heading.getKey(),
-        );
-        return true;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor, getLastTextNode]);
-
-  useEffect(() => {
-    return editor.registerCommand(
-      KEY_DELETE_COMMAND,
-      () => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-          return false;
-        }
-
-        const nodes = selection.getNodes();
-        const indicatorNode = nodes.find($isCollapseIndicatorNode) ?? null;
-        if (!indicatorNode) {
-          return false;
-        }
-
-        const headingKey = (indicatorNode as CollapseIndicatorNode).getHeadingKey();
-        editor.dispatchCommand(TOGGLE_HEADING_COLLAPSE_COMMAND, headingKey);
-        return true;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-  }, [editor]);
+  }, [editor, rootElement, applyCollapsedState]);
 
   const handleCopy = useCallback((nodeKey: string) => {
     if (!nodeKey) {
