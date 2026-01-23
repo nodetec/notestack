@@ -10,11 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { fetchContactListEvent } from '@/lib/nostr/fetch';
 import { publishContactList } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
@@ -142,14 +137,9 @@ export default function AuthorDropdown({
         ) : (
           <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
         )}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-sm text-muted-foreground truncate max-w-[120px]">
-              {displayName}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{displayName}</TooltipContent>
-        </Tooltip>
+        <span className="text-sm text-muted-foreground truncate">
+          {displayName}
+        </span>
       </div>
     );
   }
@@ -170,7 +160,7 @@ export default function AuthorDropdown({
           ) : (
             <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
           )}
-          <span className="text-sm text-muted-foreground truncate max-w-[120px]">
+          <span className="text-sm text-muted-foreground truncate">
             {displayName}
           </span>
           <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
