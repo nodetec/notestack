@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import BlogListPanel from '@/components/sidebar/BlogListPanel';
 import DraftsPanel from '@/components/sidebar/DraftsPanel';
@@ -38,8 +38,42 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { BoldIcon, ItalicIcon, PencilRulerIcon, PenToolIcon, ToolCaseIcon, UnderlineIcon } from 'lucide-react';
+import { PencilRulerIcon } from 'lucide-react';
 
+interface FloatingToolbarProps {
+  show: boolean;
+  activePanel: string | null;
+  toolbarRef: React.RefObject<HTMLDivElement | null>;
+}
+
+function FloatingToolbar({ show, activePanel, toolbarRef }: FloatingToolbarProps) {
+  const { state: sidebarState, isMobile } = useSidebar();
+  const sidebarWidth = sidebarState === 'collapsed' ? '3rem' : '16rem';
+  const panelWidth = '18rem';
+
+  // Calculate left margin based on sidebar state and panel
+  let marginLeft = '0';
+  if (!isMobile) {
+    if (activePanel) {
+      marginLeft = `calc(${sidebarWidth} + ${panelWidth})`;
+    } else {
+      marginLeft = sidebarWidth;
+    }
+  }
+
+  return (
+    <div
+      className={`fixed bottom-4 left-0 right-0 z-40 transition-all duration-200 ease-out ${
+        show ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}
+      style={{ marginLeft }}
+    >
+      <div className="editor-root flex justify-center">
+        <div ref={toolbarRef} />
+      </div>
+    </div>
+  );
+}
 
 function HomeContent() {
   const router = useRouter();
@@ -70,12 +104,16 @@ function HomeContent() {
 
   // Connect floating toolbar ref to state when visible
   useEffect(() => {
-    if (showFloatingToolbar) {
-      setFloatingToolbarElement(floatingToolbarRef.current);
+    if (showFloatingToolbar && !selectedBlog && !isLoadingBlog) {
+      // Small delay to ensure ref is attached after mount
+      const timer = setTimeout(() => {
+        setFloatingToolbarElement(floatingToolbarRef.current);
+      }, 0);
+      return () => clearTimeout(timer);
     } else {
       setFloatingToolbarElement(null);
     }
-  }, [showFloatingToolbar]);
+  }, [showFloatingToolbar, selectedBlog, isLoadingBlog]);
   const queryClient = useQueryClient();
 
   // Parse path params to get draft or blog ID
@@ -728,15 +766,11 @@ function HomeContent() {
 
         {/* Floating Toolbar */}
         {!selectedBlog && !isLoadingBlog && (
-          <div
-            className={`absolute bottom-4 left-0 right-0 z-40 transition-all duration-200 ease-out ${
-              showFloatingToolbar ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
-          >
-            <div className="editor-root flex justify-center">
-              <div ref={floatingToolbarRef} />
-            </div>
-          </div>
+          <FloatingToolbar
+            show={showFloatingToolbar}
+            activePanel={activePanel}
+            toolbarRef={floatingToolbarRef}
+          />
         )}
       </SidebarInset>
 
