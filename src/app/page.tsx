@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
 import { useInView } from 'react-intersection-observer';
 import { useSession } from 'next-auth/react';
+import { nip19 } from 'nostr-tools';
 import { SunIcon, MoonIcon, PenLineIcon, ShieldIcon, ZapIcon, KeyIcon, ServerIcon, LayersIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoginButton from '@/components/auth/LoginButton';
@@ -14,6 +15,7 @@ import { useProfiles } from '@/lib/hooks/useProfiles';
 import { blogToNaddr } from '@/lib/nostr/naddr';
 import { useSettingsStore, DEFAULT_RELAYS } from '@/lib/stores/settingsStore';
 import { useDraftStore } from '@/lib/stores/draftStore';
+import { generateAvatar } from '@/lib/avatar';
 import type { Blog } from '@/lib/nostr/types';
 
 function formatDate(timestamp: number): string {
@@ -25,7 +27,8 @@ function formatDate(timestamp: number): string {
 }
 
 function truncatePubkey(pubkey: string): string {
-  return `${pubkey.slice(0, 8)}...`;
+  const npub = nip19.npubEncode(pubkey);
+  return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
 // Animated section wrapper
@@ -51,6 +54,8 @@ function AnimatedSection({ children, className = '', delay = 0 }: { children: Re
 function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?: string; picture?: string }; relays: string[] }) {
   const router = useRouter();
   const naddr = blogToNaddr(blog, relays);
+  const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
+  const displayName = profile?.name || truncatePubkey(blog.pubkey);
 
   return (
     <button
@@ -58,17 +63,13 @@ function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?:
       className="text-left p-6 bg-card border border-border rounded-lg hover:border-primary/50 transition-colors group h-full w-full flex flex-col"
     >
       <div className="flex items-center gap-2 mb-3">
-        {profile?.picture ? (
-          <img
-            src={profile.picture}
-            alt=""
-            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-          />
-        ) : (
-          <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
-        )}
-        <span className="text-sm text-muted-foreground truncate max-w-[120px]">
-          {profile?.name || truncatePubkey(blog.pubkey)}
+        <img
+          src={avatarUrl}
+          alt=""
+          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+        />
+        <span className="text-sm text-muted-foreground truncate">
+          {displayName}
         </span>
         <span className="text-sm text-muted-foreground/70 flex-shrink-0">&middot;</span>
         <span className="text-sm text-muted-foreground/70 flex-shrink-0 whitespace-nowrap">
@@ -78,7 +79,7 @@ function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?:
       <h3 className="text-lg font-semibold text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2">
         {blog.title || 'Untitled'}
       </h3>
-      <p className="text-muted-foreground mt-2 line-clamp-2 text-sm flex-1">
+      <p className="text-muted-foreground mt-2 line-clamp-4 text-sm flex-1">
         {blog.summary || ''}
       </p>
     </button>
