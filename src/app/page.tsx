@@ -69,7 +69,6 @@ function HomeContent() {
   const createDraftFromBlog = useDraftStore((state) => state.createDraftFromBlog);
   const getDraft = useDraftStore((state) => state.getDraft);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
-  const findDraftByLinkedBlog = useDraftStore((state) => state.findDraftByLinkedBlog);
 
   // Determine current draft ID
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -132,17 +131,9 @@ function HomeContent() {
     if (!isHydrated) return;
 
     if (urlBlogId) {
-      // Viewing a blog - check if we already have a draft for it
+      // Viewing a blog
       const naddrData = decodeNaddr(urlBlogId);
       if (naddrData) {
-        // Check if we already have a draft for this blog
-        const existingDraft = findDraftByLinkedBlog(naddrData.pubkey, naddrData.identifier);
-        if (existingDraft) {
-          // Redirect to existing draft
-          router.replace(`/?draft=${existingDraft.id}`);
-          return;
-        }
-
         // Check if we already have this blog loaded
         if (selectedBlogRef.current?.pubkey === naddrData.pubkey && selectedBlogRef.current?.dTag === naddrData.identifier) {
           return;
@@ -204,7 +195,7 @@ function HomeContent() {
       const newId = createDraft();
       router.replace(`/?draft=${newId}`);
     }
-  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, findDraftByLinkedBlog, router, relays, activeRelay]);
+  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, router, relays, activeRelay]);
 
   const handleSelectBlog = useCallback((blog: Blog) => {
     // Check for unsaved edits before navigating
