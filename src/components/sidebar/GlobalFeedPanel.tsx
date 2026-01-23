@@ -125,13 +125,13 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+          <h2 className="text-sm font-semibold text-foreground/80">
             Explore
           </h2>
           {activeTag && (
             <button
               onClick={() => setActiveTag(null)}
-              className="flex items-center gap-1 px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900"
+              className="flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
             >
               #{activeTag}
               <XIcon className="w-3 h-3" />
@@ -142,7 +142,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
             title="Refresh feed"
             aria-label="Refresh feed"
           >
@@ -150,7 +150,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
           </button>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
             title="Close panel"
             aria-label="Close panel"
           >
@@ -162,7 +162,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
       {/* Blog List */}
       <div className="flex-1 overflow-y-auto overscroll-none">
         {isLoading && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             Loading blogs...
           </div>
         )}
@@ -174,12 +174,12 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
         )}
 
         {!isLoading && blogs.length === 0 && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             No blogs found
           </div>
         )}
 
-        <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <ul className="divide-y divide-border">
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
             const profile = profiles?.get(blog.pubkey);
@@ -187,7 +187,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
               <li key={blog.id} className="relative group">
                 <button
                   onClick={() => onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture })}
-                  className="w-full text-left p-3 pr-10 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                  className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -198,23 +198,23 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
                           className="w-5 h-5 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-zinc-300 dark:bg-zinc-700 flex-shrink-0" />
+                        <div className="w-5 h-5 rounded-full bg-muted flex-shrink-0" />
                       )}
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                      <span className="text-xs text-muted-foreground truncate">
                         {profile?.name || truncateNpub(blog.pubkey)}
                       </span>
-                      <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                      <span className="text-xs text-muted-foreground/70">
                         &middot;
                       </span>
-                      <span className="text-xs text-zinc-400 dark:text-zinc-500 flex-shrink-0">
+                      <span className="text-xs text-muted-foreground/70 flex-shrink-0">
                         {formatDate(blog.publishedAt || blog.createdAt)}
                       </span>
                     </div>
-                    <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                    <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
                     </h3>
                     {blog.summary && (
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {blog.summary}
                       </p>
                     )}
@@ -232,7 +232,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
                     <DropdownMenuTrigger asChild>
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="p-1 rounded hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400"
+                        className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
                         aria-label="More options"
                       >
                         <MoreVerticalIcon className="w-4 h-4" />
@@ -255,7 +255,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
 
         {/* Infinite scroll sentinel */}
         {hasNextPage && (
-          <div ref={loadMoreRef} className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div ref={loadMoreRef} className="p-4 text-center text-muted-foreground text-sm">
             {isFetchingNextPage && 'Loading...'}
           </div>
         )}

@@ -170,7 +170,7 @@ export default function BlockTypeIndicatorPlugin() {
         left: position.left,
       }}
     >
-      <div className="flex items-center justify-center size-6 text-zinc-400 dark:text-zinc-500">
+      <div className="flex items-center justify-center size-6 text-muted-foreground">
         {HEADING_ICONS[position.tag]}
       </div>
     </div>,

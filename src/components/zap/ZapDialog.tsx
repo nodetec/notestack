@@ -181,10 +181,10 @@ export default function ZapDialog({
 
         {loadingProfile ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="w-6 h-6 animate-spin text-zinc-400" />
+            <Loader2Icon className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         ) : noLightningAddress ? (
-          <div className="py-8 text-center text-zinc-500">
+          <div className="py-8 text-center text-muted-foreground">
             <p className="mb-2">This author has no Lightning address set up.</p>
             <p className="text-sm">They need to add a Lightning address (lud16) to their Nostr profile to receive zaps.</p>
           </div>
@@ -192,7 +192,7 @@ export default function ZapDialog({
           <div className="space-y-4">
             {/* Amount input */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Amount (sats)
               </label>
               <Input
@@ -225,7 +225,7 @@ export default function ZapDialog({
 
             {/* Comment input */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Comment (optional)
               </label>
               <Input

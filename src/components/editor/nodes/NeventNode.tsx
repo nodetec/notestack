@@ -146,12 +146,12 @@ function NeventComponent({
   const editPopup = isEditing && isEditable && (
     <div
       ref={popupRef}
-      className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 min-w-80"
+      className="absolute left-0 top-full mt-1 z-50 bg-card border border-border rounded-lg shadow-lg p-3 min-w-80"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex flex-col gap-2">
         <div>
-          <label className="block text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+          <label className="block text-xs text-muted-foreground mb-1">
             Nevent
           </label>
           <input
@@ -160,7 +160,7 @@ function NeventComponent({
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="nevent1..."
-            className="w-full px-2 py-1 text-sm border border-zinc-200 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 outline-none focus:border-blue-500 font-mono"
+            className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground outline-none focus:border-primary font-mono"
             autoFocus
             autoComplete="off"
           />
@@ -172,20 +172,20 @@ function NeventComponent({
             onChange={(e) => setEditIsEmbed(e.target.checked)}
             className="w-4 h-4 rounded"
           />
-          <span className="text-xs text-zinc-600 dark:text-zinc-400">
+          <span className="text-xs text-muted-foreground">
             Show as embed (nostr: prefix)
           </span>
         </label>
         <div className="flex gap-2 justify-end mt-1">
           <button
             onClick={handleCancel}
-            className="px-2 py-1 text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
+            className="px-2 py-1 text-xs text-muted-foreground hover:bg-muted rounded"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-2 py-1 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded"
+            className="px-2 py-1 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded"
           >
             Save
           </button>
@@ -199,7 +199,7 @@ function NeventComponent({
     return (
       <span ref={containerRef} className="relative inline-block align-middle">
         <span
-          className="inline-flex items-start gap-2 p-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 rounded-lg max-w-md mx-1"
+          className="inline-flex items-start gap-2 p-2 border border-border bg-muted rounded-lg max-w-md mx-1"
           title={nevent}
         >
           {note.authorPicture && (
@@ -212,14 +212,14 @@ function NeventComponent({
           <span className="flex-1 min-w-0">
             <span className="flex items-center gap-1">
               {note.authorName && (
-                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate">
+                <span className="text-xs font-medium text-foreground truncate">
                   {note.authorName}
                 </span>
               )}
               {isEditable && (
                 <button
                   onClick={handleEditClick}
-                  className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded flex-shrink-0"
+                  className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-foreground rounded flex-shrink-0"
                   title="Edit nevent"
                   aria-label="Edit nevent"
                 >
@@ -240,7 +240,7 @@ function NeventComponent({
                 </button>
               )}
             </span>
-            <span className="block text-sm text-zinc-600 dark:text-zinc-400 leading-snug">
+            <span className="block text-sm text-muted-foreground leading-snug">
               &ldquo;{truncatedContent}&rdquo;
             </span>
           </span>
@@ -254,7 +254,7 @@ function NeventComponent({
   return (
     <span ref={containerRef} className="relative inline-flex items-center gap-1">
       <span
-        className="text-blue-500 cursor-default"
+        className="text-primary cursor-default"
         title={nevent}
       >
         {isLoading ? 'Loading...' : displayText}
@@ -262,7 +262,7 @@ function NeventComponent({
       {isEditable && (
         <button
           onClick={handleEditClick}
-          className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
+          className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-foreground rounded"
           title="Edit nevent"
           aria-label="Edit nevent"
         >

@@ -873,7 +873,7 @@ export default function GutterActionsPlugin() {
           >
             <button
               type="button"
-              className="flex size-5 items-center justify-center rounded text-zinc-400 transition hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              className="flex size-5 items-center justify-center rounded text-muted-foreground transition hover:bg-muted hover:text-foreground"
               onClick={() => toggleCollapsed(position.headingKey)}
               aria-label={isCollapsed ? 'Expand section' : 'Collapse section'}
             >
@@ -895,7 +895,7 @@ export default function GutterActionsPlugin() {
             left: activeHeadingRender.left,
           }}
         >
-          <div className="flex size-5 items-center justify-center text-zinc-400">
+          <div className="flex size-5 items-center justify-center text-muted-foreground">
             {HEADING_ICONS[activeHeadingRender.tag]}
           </div>
         </div>
@@ -912,7 +912,7 @@ export default function GutterActionsPlugin() {
         >
           <button
             type="button"
-            className="relative flex size-6 items-center justify-center rounded text-zinc-400 transition hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            className="relative flex size-6 items-center justify-center rounded text-muted-foreground transition hover:bg-muted hover:text-foreground"
             onClick={() => handleCopy(position.nodeKey)}
             aria-label="Copy code block"
           >

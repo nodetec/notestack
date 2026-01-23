@@ -111,7 +111,7 @@ function CollapseIndicator({ headingKey }: { headingKey: string }) {
     >
       <button
         type="button"
-        className="inline-flex items-center justify-center text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-full h-3.5 px-1.5 bg-zinc-100/80 dark:bg-zinc-800/70 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/70"
+        className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground rounded-full h-3.5 px-1.5 bg-muted/80 hover:bg-muted"
         onClick={() => editor.dispatchCommand(TOGGLE_HEADING_COLLAPSE_COMMAND, headingKey)}
         aria-label="Expand section"
       >

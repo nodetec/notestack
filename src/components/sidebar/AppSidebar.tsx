@@ -105,18 +105,18 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
   const relayHost = activeRelay ? new URL(activeRelay).hostname : null;
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-zinc-200 dark:border-zinc-800">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-0.5">
         <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
                 <button className="flex w-full items-center gap-2 px-3 py-3 hover:bg-sidebar-accent rounded-md transition-colors text-left">
-                  <ServerIcon className="w-4 h-4 text-purple-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 truncate flex-1">
+                  <ServerIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm font-semibold text-foreground/80 truncate flex-1">
                     {relayHost || 'No relay'}
                   </span>
-                  <ChevronDownIcon className="w-3 h-3 text-zinc-400 flex-shrink-0" />
+                  <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                 </button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
@@ -230,7 +230,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                 <SidebarMenuButton
                   tooltip="New Article"
                   onClick={handleNewArticle}
-                  className="bg-purple-600 text-white hover:bg-purple-700 hover:text-white dark:bg-purple-600 dark:hover:bg-purple-700"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                 >
                   <PlusIcon />
                   <span>New Article</span>
@@ -246,7 +246,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
             <SidebarSeparator />
             <SidebarGroup>
               <Collapsible open={isTagsOpen} onOpenChange={setIsTagsOpen}>
-                <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300">
+                <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground/80">
                   <div className="flex items-center gap-2">
                     <HashIcon className="w-4 h-4" />
                     <span>Tags</span>
@@ -269,7 +269,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                               e.stopPropagation();
                               removeTag(tag);
                             }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-500"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-sidebar-accent text-muted-foreground"
                             aria-label={`Remove ${tag}`}
                           >
                             <XIcon className="w-3 h-3" />
@@ -279,7 +279,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                       <SidebarMenuItem>
                         {isAddingTag ? (
                           <div className="flex items-center gap-1 px-2 py-1">
-                            <span className="text-zinc-500">#</span>
+                            <span className="text-muted-foreground">#</span>
                             <input
                               type="text"
                               value={newTagInput}
@@ -292,7 +292,7 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                               }}
                               placeholder="tag name"
                               autoFocus
-                              className="flex-1 bg-transparent text-sm outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+                              className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground"
                             />
                           </div>
                         ) : (

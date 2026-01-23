@@ -120,7 +120,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Code</label>
+            <label className="text-sm font-medium text-foreground">Code</label>
             <Textarea
               value={code}
               readOnly
@@ -130,7 +130,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Language</label>
+              <label className="text-sm font-medium text-foreground">Language</label>
               <Input
                 value={languageValue}
                 onChange={(event) => setLanguageValue(event.target.value)}
@@ -138,7 +138,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Extension</label>
+              <label className="text-sm font-medium text-foreground">Extension</label>
               <Input
                 value={extension}
                 onChange={(event) => setExtension(event.target.value)}
@@ -146,7 +146,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Name</label>
+              <label className="text-sm font-medium text-foreground">Name</label>
               <Input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
@@ -155,7 +155,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Description</label>
+            <label className="text-sm font-medium text-foreground">Description</label>
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -165,7 +165,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">License</label>
+              <label className="text-sm font-medium text-foreground">License</label>
               <Input
                 value={license}
                 onChange={(event) => setLicense(event.target.value)}
@@ -173,7 +173,7 @@ export default function CodeSnippetDialog({ isOpen, onClose, code, language }: C
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200">License URL</label>
+              <label className="text-sm font-medium text-foreground">License URL</label>
               <Input
                 value={licenseUrl}
                 onChange={(event) => setLicenseUrl(event.target.value)}

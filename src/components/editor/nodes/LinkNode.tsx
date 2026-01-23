@@ -155,7 +155,7 @@ function LinkComponent({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-500 hover:underline"
+        className="text-primary hover:underline"
         onClick={(e) => e.stopPropagation()}
       >
         {resolvedDisplayText}
@@ -163,7 +163,7 @@ function LinkComponent({
       {isEditable && (
         <button
           onClick={handleEditClick}
-          className="inline-flex items-center justify-center w-4 h-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded"
+          className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-foreground rounded"
           title="Edit link"
           aria-label="Edit link"
         >
@@ -187,12 +187,12 @@ function LinkComponent({
       {isEditing && isEditable && (
         <div
           ref={popupRef}
-          className="absolute left-0 top-full mt-1 z-50 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg p-3 min-w-64"
+          className="absolute left-0 top-full mt-1 z-50 bg-card border border-border rounded-lg shadow-lg p-3 min-w-64"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col gap-2">
             <div>
-              <label className="block text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 Display Text
               </label>
               <input
@@ -201,13 +201,13 @@ function LinkComponent({
                 onChange={(e) => setEditDisplayText(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={getDisplayTextFromUrl(editUrl)}
-                className="w-full px-2 py-1 text-sm border border-zinc-200 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 outline-none focus:border-blue-500"
+                className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground outline-none focus:border-primary"
                 autoFocus
                 autoComplete="off"
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 URL
               </label>
               <input
@@ -215,14 +215,14 @@ function LinkComponent({
                 value={editUrl}
                 onChange={(e) => setEditUrl(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full px-2 py-1 text-sm border border-zinc-200 dark:border-zinc-600 rounded bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 outline-none focus:border-blue-500"
+                className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground outline-none focus:border-primary"
                 autoComplete="url"
               />
             </div>
             {isYouTube && (
               <button
                 onClick={handleConvertToEmbed}
-                className="w-full px-2 py-1.5 text-xs text-left text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded flex items-center gap-2"
+                className="w-full px-2 py-1.5 text-xs text-left text-foreground hover:bg-muted rounded flex items-center gap-2"
               >
                 <svg
                   width="14"
@@ -239,13 +239,13 @@ function LinkComponent({
             <div className="flex gap-2 justify-end mt-1">
               <button
                 onClick={handleCancel}
-                className="px-2 py-1 text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
+                className="px-2 py-1 text-xs text-muted-foreground hover:bg-muted rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="px-2 py-1 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded"
+                className="px-2 py-1 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded"
               >
                 Save
               </button>

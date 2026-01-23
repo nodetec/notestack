@@ -45,12 +45,12 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-sm font-semibold text-foreground/80">
           Relays
         </h2>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
           title="Close panel"
           aria-label="Close panel"
         >
@@ -70,16 +70,16 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                     key={relay}
                     className={`flex items-center justify-between gap-2 p-2 rounded text-xs cursor-pointer transition-colors ${
                       isActive
-                        ? 'bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700'
-                        : 'bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700'
+                        ? 'bg-primary/10 dark:bg-primary/20 border border-primary/30 dark:border-primary/40'
+                        : 'bg-muted hover:bg-sidebar-accent'
                     }`}
                     onClick={() => setActiveRelay(relay)}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       {isActive && (
-                        <CheckIcon className="w-3 h-3 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                        <CheckIcon className="w-3 h-3 text-primary flex-shrink-0" />
                       )}
-                      <span className={`truncate ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                      <span className={`truncate ${isActive ? 'text-primary' : 'text-foreground/80'}`}>
                         {relay}
                       </span>
                     </div>
@@ -88,7 +88,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                         e.stopPropagation();
                         removeRelay(relay);
                       }}
-                      className="p-1 rounded hover:bg-zinc-400/50 dark:hover:bg-zinc-600/50 text-zinc-500 dark:text-zinc-400 flex-shrink-0"
+                      className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground flex-shrink-0"
                       title="Remove relay"
                       aria-label="Remove relay"
                     >
@@ -101,7 +101,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide block mb-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-2">
               Add Relay
             </label>
             <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                 onChange={(e) => setNewRelay(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="wss://relay.example.com"
-                className="flex-1 px-2 py-1.5 text-xs bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="flex-1 px-2 py-1.5 text-xs bg-card border border-border rounded text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 autoComplete="url"
               />
               <Button

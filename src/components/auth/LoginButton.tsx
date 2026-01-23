@@ -88,9 +88,9 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {isLoadingProfile ? (
-            <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse" />
+            <div className="w-7 h-7 rounded-full bg-muted animate-pulse" />
           ) : (
-            <button className="w-7 h-7 rounded-full overflow-hidden hover:ring-2 hover:ring-zinc-300 dark:hover:ring-zinc-600 transition-shadow">
+            <button className="w-7 h-7 rounded-full overflow-hidden hover:ring-2 hover:ring-border transition-shadow">
               <img
                 src={avatarSrc!}
                 alt={profile?.name || 'Profile'}

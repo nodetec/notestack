@@ -176,7 +176,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                 </svg>
               </div>
             </div>
-            <p className="text-center text-zinc-600 dark:text-zinc-400">
+            <p className="text-center text-muted-foreground">
               Successfully published to {successCount} relay{successCount !== 1 ? 's' : ''}
             </p>
 
@@ -185,7 +185,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
               {relayStatuses.map((rs) => (
                 <div
                   key={rs.relay}
-                  className="flex items-center gap-2 px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 rounded"
+                  className="flex items-center gap-2 px-2 py-1 text-xs bg-muted rounded"
                 >
                   {rs.status === 'success' ? (
                     <svg
@@ -217,7 +217,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                       <path d="m9 9 6 6" />
                     </svg>
                   )}
-                  <span className={`truncate ${rs.status === 'success' ? 'text-zinc-600 dark:text-zinc-400' : 'text-red-500'}`}>
+                  <span className={`truncate ${rs.status === 'success' ? 'text-muted-foreground' : 'text-red-500'}`}>
                     {rs.relay}
                   </span>
                   {rs.message && (
@@ -244,7 +244,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
 
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -253,7 +253,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Article title"
                 disabled={isPublishing}
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
                 required
                 autoComplete="off"
               />
@@ -261,7 +261,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
 
             {/* Summary */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Summary
               </label>
               <textarea
@@ -270,14 +270,14 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                 placeholder="Brief description of your article"
                 rows={3}
                 disabled={isPublishing}
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none disabled:opacity-50"
                 autoComplete="off"
               />
             </div>
 
             {/* Thumbnail Image */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Thumbnail Image URL
               </label>
               <input
@@ -286,14 +286,14 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                 onChange={(e) => setImage(e.target.value)}
                 placeholder="https://example.com/image.jpg"
                 disabled={isPublishing}
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
                 autoComplete="url"
               />
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Tags
               </label>
               <div className="flex gap-2 mb-2">
@@ -304,7 +304,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                   onKeyDown={handleTagKeyDown}
                   placeholder="Add a tag"
                   disabled={isPublishing}
-                  className="flex-1 px-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                  className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
                   autoComplete="off"
                 />
                 <Button
@@ -321,7 +321,7 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-muted text-foreground rounded"
                     >
                       #{tag}
                       <button
@@ -354,19 +354,19 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
 
             {/* Relays */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Publishing to {relays.length} relay{relays.length !== 1 ? 's' : ''}
               </label>
               <div className="space-y-1 max-h-24 overflow-y-auto">
                 {(isPublishing ? relayStatuses : relays.map((relay) => ({ relay, status: 'pending' as const }))).map((rs) => (
                   <div
                     key={rs.relay}
-                    className="flex items-center gap-2 px-2 py-1 text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded"
+                    className="flex items-center gap-2 px-2 py-1 text-xs bg-muted text-muted-foreground rounded"
                   >
                     {isPublishing ? (
                       rs.status === 'pending' ? (
                         <svg
-                          className="animate-spin h-3 w-3 text-purple-500 flex-shrink-0"
+                          className="animate-spin h-3 w-3 text-primary flex-shrink-0"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"

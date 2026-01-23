@@ -538,10 +538,10 @@ function HomeContent() {
       )}
 
       <SidebarInset
-        className="bg-zinc-50 dark:bg-zinc-950 transition-[margin] duration-200 ease-linear"
+        className="bg-background transition-[margin] duration-200 ease-linear"
         style={{ marginLeft: activePanel && !isMobile ? '288px' : undefined }}
       >
-        <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 gap-2">
+        <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-border bg-background gap-2">
           <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <SidebarTrigger className="lg:hidden" />
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
@@ -549,8 +549,8 @@ function HomeContent() {
               <div className="hidden lg:flex items-center gap-2 min-w-0">
                 {isLoadingAuthor && !hasEmbeddedAuthor ? (
                   <>
-                    <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse flex-shrink-0" />
-                    <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                    <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                   </>
                 ) : (
                   <AuthorDropdown
@@ -563,8 +563,8 @@ function HomeContent() {
             )}
             {isLoadingBlog && (
               <div className="hidden lg:flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse flex-shrink-0" />
-                <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+                <div className="w-6 h-6 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                <div className="h-4 w-20 bg-muted rounded animate-pulse" />
               </div>
             )}
           </div>
@@ -572,7 +572,7 @@ function HomeContent() {
             <div className="flex-1 min-w-0 flex justify-center">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-md cursor-default">
+                  <h1 className="text-sm font-medium text-foreground/80 truncate max-w-md cursor-default">
                     {selectedBlog.title || 'Untitled'}
                   </h1>
                 </TooltipTrigger>
@@ -581,7 +581,7 @@ function HomeContent() {
             </div>
           ) : isLoadingBlog ? (
             <div className="flex-1 min-w-0 flex justify-center">
-              <div className="h-5 w-48 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+              <div className="h-5 w-48 bg-muted rounded animate-pulse" />
             </div>
           ) : (
             <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
@@ -657,16 +657,16 @@ function HomeContent() {
             <div className="min-h-full w-full flex flex-col">
               <div className="w-full py-8 editor-root">
                 {/* Title skeleton */}
-                <div className="h-10 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-8" />
+                <div className="h-10 w-3/4 bg-muted rounded animate-pulse mb-8" />
                 {/* Content skeletons */}
                 <div className="space-y-4">
-                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-4/5 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-                  <div className="h-4 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-5/6 bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-4/5 bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                  <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
                 </div>
               </div>
             </div>

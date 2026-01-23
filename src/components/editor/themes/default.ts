@@ -1,44 +1,44 @@
 import type { EditorThemeClasses } from 'lexical';
 
-// Light theme base + Dark+ overrides
+// Golden Hour light theme + Dark+ overrides
 const codeHighlightClasses = {
-  atrule: 'text-[#7C3AED] dark:text-[#C586C0]',           // purple - @rules
-  attr: 'text-[#0EA5E9] dark:text-[#9CDCFE]',             // blue - attributes
-  boolean: 'text-[#2563EB] dark:text-[#569CD6]',          // blue - true/false
+  atrule: 'text-[#B45309] dark:text-[#C586C0]',           // amber - @rules
+  attr: 'text-[#0369A1] dark:text-[#9CDCFE]',             // deep blue - attributes
+  boolean: 'text-[#0369A1] dark:text-[#569CD6]',          // deep blue - true/false
   builtin: 'text-[#0D9488] dark:text-[#4EC9B0]',          // teal - built-in types
-  cdata: 'text-[#15803D] dark:text-[#6A9955]',            // green - CDATA
-  char: 'text-[#B45309] dark:text-[#CE9178]',             // amber - characters
+  cdata: 'text-[#4D7C0F] dark:text-[#6A9955]',            // olive green - CDATA
+  char: 'text-[#C2410C] dark:text-[#CE9178]',             // burnt orange - characters
   class: 'text-[#0D9488] dark:text-[#4EC9B0]',            // teal - class names
   'class-name': 'text-[#0D9488] dark:text-[#4EC9B0]',     // teal - class names
-  comment: 'text-[#16A34A] dark:text-[#6A9955]',          // green - comments
-  constant: 'text-[#0284C7] dark:text-[#4FC1FF]',         // blue - constants
-  deleted: 'text-[#B45309] dark:text-[#CE9178]',          // amber - deleted
-  doctype: 'text-[#15803D] dark:text-[#6A9955]',          // green - doctype
-  entity: 'text-[#2563EB] dark:text-[#569CD6]',           // blue - entities
-  function: 'text-[#7C3AED] dark:text-[#DCDCAA]',         // purple (lighter in dark)
-  important: 'text-[#1D4ED8] dark:text-[#569CD6]',        // blue - important
-  inserted: 'text-[#15803D] dark:text-[#B5CEA8]',         // green - inserted
-  keyword: 'text-[#1D4ED8] dark:text-[#569CD6]',          // blue - keywords
+  comment: 'text-[#6B7280] dark:text-[#6A9955]',          // muted gray - comments
+  constant: 'text-[#0369A1] dark:text-[#4FC1FF]',         // deep blue - constants
+  deleted: 'text-[#B91C1C] dark:text-[#CE9178]',          // red - deleted
+  doctype: 'text-[#4D7C0F] dark:text-[#6A9955]',          // olive green - doctype
+  entity: 'text-[#0369A1] dark:text-[#569CD6]',           // deep blue - entities
+  function: 'text-[#B45309] dark:text-[#DCDCAA]',         // amber - functions
+  important: 'text-[#B45309] dark:text-[#569CD6]',        // amber - important
+  inserted: 'text-[#4D7C0F] dark:text-[#B5CEA8]',         // olive green - inserted
+  keyword: 'text-[#B45309] dark:text-[#569CD6]',          // amber - keywords
   namespace: 'text-[#0D9488] dark:text-[#4EC9B0]',        // teal - namespaces
-  number: 'text-[#0F766E] dark:text-[#B5CEA8]',           // teal - numbers
-  operator: 'text-[#334155] dark:text-[#D4D4D4]',         // slate - operators
-  prolog: 'text-[#15803D] dark:text-[#6A9955]',           // green - prolog
-  property: 'text-[#0EA5E9] dark:text-[#9CDCFE]',         // blue - properties
-  punctuation: 'text-[#1F2937] dark:text-[#D4D4D4]',      // darker gray - punctuation
+  number: 'text-[#C2410C] dark:text-[#B5CEA8]',           // burnt orange - numbers
+  operator: 'text-[#4A403A] dark:text-[#D4D4D4]',         // chocolate - operators
+  prolog: 'text-[#4D7C0F] dark:text-[#6A9955]',           // olive green - prolog
+  property: 'text-[#0369A1] dark:text-[#9CDCFE]',         // deep blue - properties
+  punctuation: 'text-[#4A403A] dark:text-[#D4D4D4]',      // chocolate - punctuation
   regex: 'text-[#B91C1C] dark:text-[#D16969]',            // red - regex
-  selector: 'text-[#B45309] dark:text-[#D7BA7D]',         // amber - selectors
-  string: 'text-[#B45309] dark:text-[#CE9178]',           // amber - strings
-  symbol: 'text-[#2563EB] dark:text-[#569CD6]',           // blue - symbols
-  tag: 'text-[#1D4ED8] dark:text-[#569CD6]',              // blue - tags
-  url: 'text-[#B45309] dark:text-[#CE9178]',              // amber - urls
-  variable: 'text-[#0EA5E9] dark:text-[#9CDCFE]',         // blue - variables
+  selector: 'text-[#C2410C] dark:text-[#D7BA7D]',         // burnt orange - selectors
+  string: 'text-[#4D7C0F] dark:text-[#CE9178]',           // olive green - strings
+  symbol: 'text-[#0369A1] dark:text-[#569CD6]',           // deep blue - symbols
+  tag: 'text-[#B45309] dark:text-[#569CD6]',              // amber - tags
+  url: 'text-[#C2410C] dark:text-[#CE9178]',              // burnt orange - urls
+  variable: 'text-[#0369A1] dark:text-[#9CDCFE]',         // deep blue - variables
 };
 
 const theme: EditorThemeClasses = {
   ltr: 'text-left',
   rtl: 'text-right',
   paragraph: 'mb-2 last:mb-0',
-  quote: 'border-l-4 border-zinc-300 pl-4 italic text-zinc-600 dark:border-zinc-600 dark:text-zinc-400',
+  quote: 'border-l-4 border-primary/30 pl-4 italic text-muted-foreground',
   heading: {
     h1: 'text-3xl font-bold mb-4',
     h2: 'text-2xl font-bold mb-3',
@@ -54,7 +54,7 @@ const theme: EditorThemeClasses = {
     ol: 'list-decimal ml-6 mb-2',
     ul: 'list-disc ml-6 mb-2',
     listitem: 'mb-1',
-    listitemChecked: 'line-through text-zinc-500',
+    listitemChecked: 'line-through text-muted-foreground',
     listitemUnchecked: '',
   },
   link: 'inline',
@@ -64,18 +64,18 @@ const theme: EditorThemeClasses = {
     underline: 'underline',
     strikethrough: 'line-through',
     underlineStrikethrough: 'underline line-through',
-    code: 'bg-zinc-100 dark:bg-zinc-800 rounded px-1 py-0.5 font-mono text-sm',
+    code: 'bg-muted rounded px-1 py-0.5 font-mono text-sm',
   },
-  code: 'bg-zinc-100 dark:bg-[#1E1E1E] rounded-lg p-4 font-mono text-sm block mb-2 overflow-x-auto',
+  code: 'bg-muted dark:bg-[#1E1E1E] rounded-lg p-4 font-mono text-sm block mb-2 overflow-x-auto',
   codeHighlight: codeHighlightClasses,
   image: 'inline-block my-2',
-  hr: 'my-6 border-t border-zinc-300 dark:border-zinc-600',
-  table: 'border-collapse border border-zinc-300 dark:border-zinc-700 my-4 w-full',
-  tableCell: 'border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left align-top',
-  tableCellHeader: 'border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-left font-bold bg-zinc-100 dark:bg-zinc-800',
+  hr: 'my-6 border-t border-border',
+  table: 'border-collapse border border-border my-4 w-full',
+  tableCell: 'border border-border px-3 py-2 text-left align-top',
+  tableCellHeader: 'border border-border px-3 py-2 text-left font-bold bg-muted',
   tableRow: '',
-  tableSelected: 'bg-blue-100 dark:bg-blue-900/30',
-  tableCellSelected: 'bg-blue-100 dark:bg-blue-900/30',
+  tableSelected: 'bg-primary/10 dark:bg-primary/20',
+  tableCellSelected: 'bg-primary/10 dark:bg-primary/20',
 };
 
 export default theme;

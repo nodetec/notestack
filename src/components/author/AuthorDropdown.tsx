@@ -140,11 +140,11 @@ export default function AuthorDropdown({
             className="w-6 h-6 rounded-full object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-6 h-6 rounded-full bg-zinc-300 dark:bg-zinc-600 flex-shrink-0" />
+          <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
         )}
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate max-w-[120px]">
+            <span className="text-sm text-muted-foreground truncate max-w-[120px]">
               {displayName}
             </span>
           </TooltipTrigger>
@@ -158,7 +158,7 @@ export default function AuthorDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-2 min-w-0 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
+          className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
           title={displayName}
         >
           {authorPicture ? (
@@ -168,12 +168,12 @@ export default function AuthorDropdown({
               className="w-6 h-6 rounded-full object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-zinc-300 dark:bg-zinc-600 flex-shrink-0" />
+            <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
           )}
-          <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate max-w-[120px]">
+          <span className="text-sm text-muted-foreground truncate max-w-[120px]">
             {displayName}
           </span>
-          <ChevronDownIcon className="w-3 h-3 text-zinc-400 flex-shrink-0" />
+          <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">

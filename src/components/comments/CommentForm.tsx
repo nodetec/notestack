@@ -40,7 +40,7 @@ export default function CommentForm({
 
   if (!isLoggedIn) {
     return (
-      <div className="text-sm text-zinc-500 dark:text-zinc-400 py-3 text-center">
+      <div className="text-sm text-muted-foreground py-3 text-center">
         Sign in to comment
       </div>
     );

@@ -184,18 +184,18 @@ export default function StackButton({ blog }: StackButtonProps) {
           {isInAnyStack ? (
             <CheckIcon className="w-2.5 h-2.5 absolute bottom-1 right-1 text-green-500" />
           ) : (
-            <PlusIcon className="w-2.5 h-2.5 absolute bottom-1 right-1 text-zinc-400" />
+            <PlusIcon className="w-2.5 h-2.5 absolute bottom-1 right-1 text-muted-foreground" />
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {isLoading ? (
-          <div className="flex items-center justify-center py-4 text-sm text-zinc-500">
+          <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
             <Loader2Icon className="w-4 h-4 animate-spin mr-2" />
             Loading stacks...
           </div>
         ) : stacksList.length === 0 ? (
-          <div className="px-2 py-3 text-sm text-zinc-500 text-center">
+          <div className="px-2 py-3 text-sm text-muted-foreground text-center">
             No stacks yet
           </div>
         ) : (
@@ -212,7 +212,7 @@ export default function StackButton({ blog }: StackButtonProps) {
                 onSelect={(e) => e.preventDefault()}
               >
                 <span className="flex-1 truncate">{stack.name}</span>
-                <span className="text-xs text-zinc-400 ml-2">
+                <span className="text-xs text-muted-foreground ml-2">
                   {isSaving ? (
                     <Loader2Icon className="w-3 h-3 animate-spin" />
                   ) : (
@@ -234,7 +234,7 @@ export default function StackButton({ blog }: StackButtonProps) {
               onChange={(e) => setNewStackName(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="New stack name..."
-              className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-zinc-400"
+              className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
               disabled={isCreating}
             />
             <Button

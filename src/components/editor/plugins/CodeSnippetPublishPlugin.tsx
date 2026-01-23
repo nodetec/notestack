@@ -206,7 +206,7 @@ export default function CodeSnippetPublishPlugin() {
       >
         <button
           type="button"
-          className="group flex size-7 items-center justify-center rounded-md bg-white/90 text-zinc-500 shadow-sm ring-1 ring-zinc-200/70 transition hover:text-zinc-900 hover:ring-zinc-300 dark:bg-zinc-900/80 dark:text-zinc-400 dark:ring-zinc-700/60 dark:hover:text-zinc-100"
+          className="group flex size-7 items-center justify-center rounded-md bg-card/90 text-muted-foreground shadow-sm ring-1 ring-border/70 transition hover:text-foreground hover:ring-border"
           onClick={openDialog}
           aria-label="Publish code snippet"
         >

@@ -147,12 +147,12 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-sm font-semibold text-foreground/80">
           Profile
         </h2>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
           title="Close panel"
           aria-label="Close panel"
         >
@@ -164,13 +164,13 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
       <div className="flex-1 overflow-y-auto overscroll-none p-3">
         {!pubkey ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <UserIcon className="w-8 h-8 text-zinc-400" />
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+              <UserIcon className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <h3 className="text-sm font-medium text-foreground/80 mb-2">
               Sign in to manage your profile
             </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+            <p className="text-xs text-muted-foreground mb-4">
               Connect with your Nostr account to edit your profile settings
             </p>
             <Button onClick={() => router.push('/login')}>
@@ -179,13 +179,13 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2Icon className="w-5 h-5 animate-spin text-zinc-500" />
+            <Loader2Icon className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Username */}
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              <Label htmlFor="name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Username
               </Label>
               <Input
@@ -201,7 +201,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
             {/* Picture URL with preview */}
             <div className="space-y-1.5">
-              <Label htmlFor="picture" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              <Label htmlFor="picture" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Picture URL
               </Label>
               <div className="flex items-center gap-3">
@@ -229,7 +229,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
             {/* Bio */}
             <div className="space-y-1.5">
-              <Label htmlFor="about" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              <Label htmlFor="about" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Bio
               </Label>
               <Textarea
@@ -245,7 +245,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
             {/* Website */}
             <div className="space-y-1.5">
-              <Label htmlFor="website" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              <Label htmlFor="website" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Website
               </Label>
               <Input
@@ -261,7 +261,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
 
             {/* Lightning Address */}
             <div className="space-y-1.5">
-              <Label htmlFor="lud16" className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+              <Label htmlFor="lud16" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Lightning Address
               </Label>
               <Input
@@ -270,7 +270,7 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
                 {...register('lud16')}
                 className="text-sm"
               />
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-muted-foreground">
                 Link your Lightning Address to receive zaps
               </p>
               {errors.lud16 && (

@@ -116,14 +116,14 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-sm font-semibold text-foreground/80">
           My Highlights
         </h2>
         <div className="flex items-center gap-1">
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
             title="Refresh highlights"
             aria-label="Refresh highlights"
           >
@@ -131,7 +131,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
           </button>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
             title="Close panel"
             aria-label="Close panel"
           >
@@ -143,13 +143,13 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
       {/* Highlights List */}
       <div className="flex-1 overflow-y-auto overscroll-none">
         {!isLoggedIn && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             Log in to see your highlights
           </div>
         )}
 
         {isLoggedIn && isLoading && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             Loading highlights...
           </div>
         )}
@@ -161,29 +161,29 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
         )}
 
         {isLoggedIn && !isLoading && highlights.length === 0 && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             No highlights yet. Select text while reading an article to create highlights.
           </div>
         )}
 
-        <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <ul className="divide-y divide-border">
           {highlights.map((highlight) => (
             <li key={highlight.id} className="relative group">
               <button
                 onClick={() => onSelectHighlight?.(highlight)}
-                className="w-full text-left p-3 pr-10 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    <span className="text-xs text-muted-foreground/70">
                       {formatDate(highlight.createdAt)}
                     </span>
                   </div>
-                  <p className="text-sm text-zinc-900 dark:text-zinc-100 line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">
+                  <p className="text-sm text-foreground line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">
                     "{highlight.content}"
                   </p>
                   {highlight.context && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 italic">
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 italic">
                       ...{highlight.context.slice(0, 100)}...
                     </p>
                   )}
@@ -193,7 +193,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
                 <button
                   onClick={(e) => handleDelete(highlight, e)}
                   disabled={deletingHighlightId === highlight.id}
-                  className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 disabled:opacity-50"
+                  className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
                   title="Delete highlight"
                   aria-label="Delete highlight"
                 >
@@ -206,7 +206,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
 
         {/* Infinite scroll sentinel */}
         {hasNextPage && (
-          <div ref={loadMoreRef} className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div ref={loadMoreRef} className="p-4 text-center text-muted-foreground text-sm">
             {isFetchingNextPage && 'Loading...'}
           </div>
         )}

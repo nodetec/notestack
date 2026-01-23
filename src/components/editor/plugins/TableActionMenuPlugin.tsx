@@ -412,7 +412,7 @@ function TableCellActionMenuContainer({ anchorElem }: { anchorElem: HTMLElement 
             <Button
               variant="ghost"
               size="icon"
-              className="size-6 bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-700"
+              className="size-6 bg-card shadow-sm border border-border"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();

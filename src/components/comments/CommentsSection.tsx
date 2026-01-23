@@ -162,11 +162,11 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
   const commentCount = comments.length;
 
   return (
-    <div className="border-t border-zinc-200 dark:border-zinc-800 mt-8 pt-6">
+    <div className="border-t border-border mt-8 pt-6">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquareIcon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <MessageSquareIcon className="w-5 h-5 text-muted-foreground" />
+        <h2 className="text-lg font-semibold text-foreground">
           Comments {commentCount > 0 && `(${commentCount})`}
         </h2>
       </div>
@@ -182,15 +182,15 @@ export default function CommentsSection({ article }: CommentsSectionProps) {
 
       {/* Comments list */}
       {isLoading ? (
-        <div className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
+        <div className="text-sm text-muted-foreground text-center py-4">
           Loading comments...
         </div>
       ) : commentTree.length === 0 ? (
-        <div className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
+        <div className="text-sm text-muted-foreground text-center py-4">
           No comments yet. Be the first to comment!
         </div>
       ) : (
-        <div className="space-y-1 divide-y divide-zinc-100 dark:divide-zinc-800/50">
+        <div className="space-y-1 divide-y divide-border">
           {commentTree.map((comment) => (
             <CommentItem
               key={comment.id}

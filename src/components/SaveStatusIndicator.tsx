@@ -12,7 +12,7 @@ export function SaveStatusIndicator({ className }: SaveStatusIndicatorProps) {
   const saveStatus = useDraftStore((state) => state.saveStatus);
 
   return (
-    <div className={cn("flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 w-16", className)}>
+    <div className={cn("flex items-center gap-1.5 text-xs text-muted-foreground w-16", className)}>
       {saveStatus === 'unsaved' && (
         <>
           <Circle className="h-2 w-2 fill-current flex-shrink-0" />

@@ -439,7 +439,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
       <Button
         size="sm"
         variant="secondary"
-        className="shadow-lg border border-zinc-200 dark:border-zinc-700 gap-1.5"
+        className="shadow-lg border border-border gap-1.5"
         onClick={handleHighlight}
         disabled={isPublishing}
       >

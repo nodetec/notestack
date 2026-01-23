@@ -157,7 +157,7 @@ function ImageComponent({
 
   if (isLoadError) {
     return (
-      <span className="inline p-2 bg-zinc-100 dark:bg-zinc-800 rounded text-zinc-500 text-sm">
+      <span className="inline p-2 bg-muted rounded text-muted-foreground text-sm">
         Failed to load image
       </span>
     );
@@ -174,7 +174,7 @@ function ImageComponent({
         width: width ? `${width}px` : undefined,
       }}
       className={`rounded-lg cursor-default ${
-        isFocused ? 'outline outline-2 outline-blue-500 outline-offset-2' : ''
+        isFocused ? 'outline outline-2 outline-primary outline-offset-2' : ''
       }`}
       draggable="false"
       onError={() => setIsLoadError(true)}

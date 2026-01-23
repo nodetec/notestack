@@ -74,7 +74,7 @@ export default function CommentItem({
   const shouldNest = depth < maxDepth;
 
   return (
-    <div className={depth > 0 ? 'pl-4 border-l border-zinc-200 dark:border-zinc-700' : ''}>
+    <div className={depth > 0 ? 'pl-4 border-l border-border' : ''}>
       <div className="py-3">
         {/* Author info */}
         <div className="flex items-center gap-2 mb-1">
@@ -85,20 +85,20 @@ export default function CommentItem({
               className="w-6 h-6 rounded-full object-cover"
             />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-medium">
+            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium">
               {displayName.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          <span className="text-sm font-medium text-foreground">
             {displayName}
           </span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="text-xs text-muted-foreground">
             {formatRelativeTime(comment.createdAt)}
           </span>
         </div>
 
         {/* Comment content */}
-        <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap break-words">
+        <p className="text-sm text-foreground/80 whitespace-pre-wrap break-words">
           {comment.content}
         </p>
 
@@ -107,7 +107,7 @@ export default function CommentItem({
           {isLoggedIn && (
             <button
               onClick={() => setShowReplyForm(!showReplyForm)}
-              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <MessageSquareIcon className="w-3.5 h-3.5" />
               Reply
@@ -117,7 +117,7 @@ export default function CommentItem({
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="flex items-center gap-1 text-xs text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
             >
               <Trash2Icon className="w-3.5 h-3.5" />
               {isDeleting ? 'Deleting...' : 'Delete'}

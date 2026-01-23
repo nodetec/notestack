@@ -139,14 +139,14 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-sm font-semibold text-foreground/80">
           My Blogs
         </h2>
         <div className="flex items-center gap-1">
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
             title="Refresh blogs"
             aria-label="Refresh blogs"
           >
@@ -154,7 +154,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
           </button>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
             title="Close panel"
             aria-label="Close panel"
           >
@@ -166,13 +166,13 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
       {/* Blog List */}
       <div className="flex-1 overflow-y-auto overscroll-none">
         {!isLoggedIn && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             <p>Sign in to see your blogs here.</p>
           </div>
         )}
 
         {isLoggedIn && isLoading && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             Loading blogs...
           </div>
         )}
@@ -184,12 +184,12 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
         )}
 
         {isLoggedIn && !isLoading && blogs.length === 0 && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             No blogs found
           </div>
         )}
 
-        <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <ul className="divide-y divide-border">
           {blogs.map((blog) => {
             const hasDraftEdit = !!findDraftByLinkedBlog(blog.pubkey, blog.dTag);
             const thumbnail = blog.image || extractFirstImage(blog.content);
@@ -197,22 +197,22 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
             <li key={blog.id} className="relative group">
               <button
                 onClick={() => onSelectBlog?.(blog)}
-                className="w-full text-left p-3 pr-10 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                    <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title}
                     </h3>
                     {hasDraftEdit && (
-                      <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded" title="Has unpublished edits">
+                      <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 dark:bg-primary/20 text-primary rounded" title="Has unpublished edits">
                         <PenLineIcon className="w-3 h-3" />
                         Editing
                       </span>
                     )}
                   </div>
                   {blog.summary && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                       {blog.summary}
                     </p>
                   )}
@@ -223,7 +223,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
                       className="max-h-32 rounded object-contain mt-2"
                     />
                   )}
-                  <div className="flex items-center gap-2 mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground/70">
                     <span>{truncateNpub(blog.pubkey)}</span>
                     <span>&middot;</span>
                     <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
@@ -235,7 +235,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
                   <DropdownMenuTrigger asChild>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1 rounded hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400"
+                      className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
                       aria-label="More options"
                     >
                       <MoreVerticalIcon className="w-4 h-4" />
@@ -265,7 +265,7 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
 
         {/* Infinite scroll sentinel */}
         {isLoggedIn && hasNextPage && (
-          <div ref={loadMoreRef} className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div ref={loadMoreRef} className="p-4 text-center text-muted-foreground text-sm">
             {isFetchingNextPage && 'Loading...'}
           </div>
         )}

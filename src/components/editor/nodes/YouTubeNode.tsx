@@ -162,8 +162,8 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
         ref={containerRef}
         className={`relative block rounded-lg border-2 transition-colors p-10 mx-1 ${
           isFocused
-            ? 'border-blue-500'
-            : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
+            ? 'border-primary'
+            : 'border-border hover:border-muted-foreground/30'
         }`}
       >
         <span className="relative block w-full overflow-hidden rounded" style={{ paddingBottom: '56.25%' }}>
@@ -179,7 +179,7 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
         {/* X button to delete - top right, always visible in edit mode */}
         {isEditable && (
           <button
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-500 dark:bg-zinc-600 text-white dark:text-zinc-200 hover:bg-zinc-600 dark:hover:bg-zinc-500 transition-colors z-50 shadow-md"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-50 shadow-md"
             onClick={(e) => {
               e.stopPropagation();
               deleteNode();
@@ -196,7 +196,7 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-500 dark:bg-zinc-600 text-white dark:text-zinc-200 hover:bg-zinc-600 dark:hover:bg-zinc-500 transition-colors z-50 shadow-md"
+                className="absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-50 shadow-md"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="More options"
                 type="button"

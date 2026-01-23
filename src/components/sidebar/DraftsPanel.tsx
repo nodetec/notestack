@@ -70,12 +70,12 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-sm font-semibold text-foreground/80">
           Drafts
         </h2>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
           title="Close panel"
           aria-label="Close panel"
         >
@@ -86,13 +86,13 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
       {/* Drafts List */}
       <div className="flex-1 overflow-y-auto overscroll-none">
         {!isHydrated && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             Loading...
           </div>
         )}
 
         {isHydrated && !hasDrafts && (
-          <div className="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+          <div className="p-4 text-center text-muted-foreground text-sm">
             <FileEditIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No drafts</p>
             <p className="text-xs mt-1">Start writing and your work will be auto-saved here.</p>
@@ -113,18 +113,18 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                        <h3 className="text-sm font-medium text-foreground truncate">
                           {title}
                         </h3>
                         {isLinked && (
-                          <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded" title="Editing published article">
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 dark:bg-primary/20 text-primary rounded" title="Editing published article">
                             <PenLineIcon className="w-3 h-3" />
                             Editing
                           </span>
                         )}
                       </div>
                       {preview && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                           {preview}
                         </p>
                       )}
@@ -135,14 +135,14 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
                           className="max-h-32 rounded object-contain mt-2"
                         />
                       )}
-                      <div className="flex items-center gap-2 mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground/70">
                         <span>Last saved {formatDate(draft.lastSaved)}</span>
                       </div>
                     </div>
                   </button>
                   <button
                     onClick={(e) => handleDelete(draft.id, e)}
-                    className="absolute right-2 top-3 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-red-500 transition-all"
+                    className="absolute right-2 top-3 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-sidebar-accent text-muted-foreground hover:text-red-500 transition-all"
                     aria-label="Delete draft"
                   >
                     <Trash2Icon className="w-4 h-4" />

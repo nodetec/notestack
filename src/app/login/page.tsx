@@ -91,13 +91,13 @@ function LoginContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="mx-auto grid w-[350px] gap-6">
         <div className="flex w-full flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Sign in to NED
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             Use your Nostr identity to sign in
           </p>
         </div>
@@ -125,10 +125,10 @@ function LoginContent() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+            <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-zinc-50 dark:bg-zinc-950 px-2 text-zinc-500 dark:text-zinc-400">
+            <span className="bg-background px-2 text-muted-foreground">
               Or continue with
             </span>
           </div>
@@ -162,7 +162,7 @@ function LoginContent() {
           </form>
         </Form>
 
-        <p className="text-xs text-center text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs text-center text-muted-foreground">
           Your nsec is only stored in your browser session and never sent to any server.
         </p>
       </div>
