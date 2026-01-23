@@ -277,17 +277,55 @@ function HomeContent() {
     if (isMobile) setActivePanel(null);
   }, [isMobile]);
 
-  const handleSelectHighlight = useCallback((highlight: Highlight) => {
-    // Navigate to the source article
+  const handleSelectHighlight = useCallback(async (highlight: Highlight) => {
+    // Load the source article directly instead of navigating
     if (highlight.source) {
-      const naddr = blogToNaddr(
-        { pubkey: highlight.source.pubkey, dTag: highlight.source.identifier },
-        relays
-      );
-      router.push(`/${naddr}`);
+      checkBlogForEditsRef.current();
+
+      // Try to find the blog in the query cache first
+      const cachedQueries = queryClient.getQueriesData<{ blogs: Blog[] }>({ queryKey: ['blogs'] });
+      let cachedBlog: Blog | undefined;
+      for (const [, data] of cachedQueries) {
+        if (data?.blogs) {
+          cachedBlog = data.blogs.find(
+            (b) => b.pubkey === highlight.source!.pubkey && b.dTag === highlight.source!.identifier
+          );
+          if (cachedBlog) break;
+        }
+      }
+
+      if (cachedBlog) {
+        // Use cached blog directly - no loading needed
+        setSelectedBlog(cachedBlog);
+        selectedBlogRef.current = cachedBlog;
+        setCurrentDraftId(null);
+        const naddr = blogToNaddr(cachedBlog, relays);
+        window.history.pushState(null, '', `/${naddr}`);
+      } else {
+        // Fetch the blog if not in cache
+        setIsLoadingBlog(true);
+        setSelectedBlog(null);
+        setCurrentDraftId(null);
+
+        const blog = await fetchBlogByAddress({
+          pubkey: highlight.source.pubkey,
+          identifier: highlight.source.identifier,
+          relay: activeRelay,
+        });
+
+        setIsLoadingBlog(false);
+
+        if (blog) {
+          setSelectedBlog(blog);
+          selectedBlogRef.current = blog;
+          const naddr = blogToNaddr(blog, relays);
+          window.history.pushState(null, '', `/${naddr}`);
+        }
+      }
+
       if (isMobile) setActivePanel(null);
     }
-  }, [router, relays, isMobile]);
+  }, [relays, isMobile, activeRelay, queryClient]);
 
   const isLoggedIn = sessionStatus === 'authenticated' && !!pubkey;
 
