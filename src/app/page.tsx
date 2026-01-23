@@ -60,15 +60,15 @@ function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?:
   return (
     <button
       onClick={() => router.push(`/${naddr}`)}
-      className="text-left p-6 bg-card border border-border rounded-lg hover:border-primary/50 transition-colors group h-full w-full flex flex-col"
+      className="text-left p-6 bg-card border border-border rounded-lg hover:border-primary/50 transition-colors group h-full w-full flex flex-col min-w-0 overflow-hidden"
     >
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 min-w-0">
         <img
           src={avatarUrl}
           alt=""
           className="w-6 h-6 rounded-full object-cover flex-shrink-0"
         />
-        <span className="text-sm text-muted-foreground truncate">
+        <span className="text-sm text-muted-foreground truncate min-w-0">
           {displayName}
         </span>
         <span className="text-sm text-muted-foreground/70 flex-shrink-0">&middot;</span>
@@ -76,10 +76,10 @@ function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?:
           {formatDate(blog.publishedAt || blog.createdAt)}
         </span>
       </div>
-      <h3 className="text-lg font-semibold text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2">
+      <h3 className="text-lg font-semibold text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2 break-words">
         {blog.title || 'Untitled'}
       </h3>
-      <p className="text-muted-foreground mt-2 line-clamp-4 text-sm flex-1">
+      <p className="text-muted-foreground mt-2 line-clamp-4 text-sm flex-1 break-words">
         {blog.summary || ''}
       </p>
     </button>
@@ -135,12 +135,12 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <h1 className="flex items-center gap-2 text-xl font-bold text-foreground" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+            <h1 className="flex items-center gap-2 text-xl font-bold text-foreground flex-shrink-0" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
               <LayersIcon className="w-5 h-5" />
               NoteStack
             </h1>
@@ -153,7 +153,7 @@ export default function LandingPage() {
               </button>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors"
@@ -172,9 +172,9 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
+      <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center overflow-hidden">
         <h2
-          className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground tracking-tight"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight"
           style={{ fontFamily: 'var(--font-source-serif-4)' }}
         >
           Write without permission.
@@ -182,19 +182,19 @@ export default function LandingPage() {
         <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           A long-form editor built on Nostr—the decentralized protocol where you own your content, your audience, and your identity.
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="lg" onClick={handleStartWriting} className="text-base px-8">
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xs sm:max-w-none mx-auto">
+          <Button size="lg" onClick={handleStartWriting} className="text-base px-8 w-full sm:w-auto">
             Start Writing
           </Button>
-          <Button size="lg" variant="outline" onClick={handleExplore} className="text-base px-8">
+          <Button size="lg" variant="outline" onClick={handleExplore} className="text-base px-8 w-full sm:w-auto">
             Explore Articles
           </Button>
         </div>
       </section>
 
       {/* Feature Triptych */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
+      <section className="max-w-6xl mx-auto px-6 py-20 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-8 border border-border rounded-lg">
             <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center mb-6">
               <PenLineIcon className="w-6 h-6 text-primary dark:text-primary" />
@@ -232,13 +232,13 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="max-w-4xl mx-auto px-6 py-20 border-t border-border">
+      <section className="max-w-4xl mx-auto px-6 py-20 border-t border-border overflow-hidden">
         <AnimatedSection>
           <h3 className="text-3xl font-bold text-center text-foreground mb-16" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
             How it works
           </h3>
         </AnimatedSection>
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <AnimatedSection delay={0}>
             <div className="text-center">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
@@ -280,21 +280,21 @@ export default function LandingPage() {
 
       {/* Live Feed Preview */}
       {blogs.length > 0 && (
-        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-border">
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-border overflow-hidden">
           <AnimatedSection>
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-10 gap-4">
               <h3 className="text-3xl font-bold text-foreground" style={{ fontFamily: 'var(--font-source-serif-4)' }}>
                 Latest Articles
               </h3>
               <button
                 onClick={handleExplore}
-                className="text-sm text-primary hover:text-primary/80 font-medium"
+                className="text-sm text-primary hover:text-primary/80 font-medium flex-shrink-0"
               >
                 See more on Explore
               </button>
             </div>
           </AnimatedSection>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             {blogs.slice(0, 6).map((blog, index) => (
               <AnimatedSection key={blog.id} delay={index * 50} className="h-full">
                 <ArticleCard
