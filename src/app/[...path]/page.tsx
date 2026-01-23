@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
+import MarkdownEditor, { type MarkdownEditorHandle } from '@/components/editor/MarkdownEditor';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import BlogListPanel from '@/components/sidebar/BlogListPanel';
@@ -94,6 +95,7 @@ function HomeContent() {
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const editorRef = useRef<NostrEditorHandle>(null);
+  const markdownEditorRef = useRef<MarkdownEditorHandle>(null);
   const [showFloatingToolbar, setShowFloatingToolbar] = useState(false);
   const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const floatingToolbarRef = useRef<HTMLDivElement>(null);
@@ -134,7 +136,6 @@ function HomeContent() {
   const createDraftFromBlog = useDraftStore((state) => state.createDraftFromBlog);
   const getDraft = useDraftStore((state) => state.getDraft);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
-  const setDraftMarkdownMode = useDraftStore((state) => state.setDraftMarkdownMode);
 
   // Determine current draft ID
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -300,8 +301,11 @@ function HomeContent() {
   }, [relays, isMobile]);
 
   const getEditorContent = useCallback(() => {
+    if (isMarkdownMode) {
+      return markdownEditorRef.current?.getMarkdown() ?? '';
+    }
     return editorRef.current?.getMarkdown() ?? '';
-  }, []);
+  }, [isMarkdownMode]);
 
   const [justPublished, setJustPublished] = useState(false);
 
@@ -410,13 +414,14 @@ function HomeContent() {
   const editorKey = blogIdentityKey || linkedBlogKey || currentDraftId || 'new';
 
   // Store initial content in a ref to prevent re-renders from changing it
-  // Only update when the editor key changes (switching to a different blog/draft)
+  // Only update when the editor key changes (switching to a different blog/draft) or mode changes
+  const editorContentKey = `${editorKey}-${isMarkdownMode ? 'md' : 'rich'}`;
   const initialContentRef = useRef<{ key: string; content: string }>({ key: '', content: '' });
-  if (initialContentRef.current.key !== editorKey) {
+  if (initialContentRef.current.key !== editorContentKey) {
     // Get content directly from the store (draft object is optimized and doesn't include content)
     const draftContent = currentDraftId ? useDraftStore.getState().drafts[currentDraftId]?.content : '';
     initialContentRef.current = {
-      key: editorKey,
+      key: editorContentKey,
       content: selectedBlog ? selectedBlog.content : (draftContent ?? ''),
     };
   }
@@ -425,15 +430,7 @@ function HomeContent() {
   // Reset state when switching to a different article
   useEffect(() => {
     hasUserTyped.current = false;
-
-    // Load markdown mode from draft store first for immediate UI
-    if (currentDraftId) {
-      const draftData = getDraft(currentDraftId);
-      setIsMarkdownMode(draftData?.isMarkdownMode ?? false);
-    } else {
-      setIsMarkdownMode(false);
-    }
-  }, [editorKey, currentDraftId, getDraft]);
+  }, [editorKey]);
 
   // Track when user actually types and create draft on first edit
   const handleEditorKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -555,11 +552,13 @@ function HomeContent() {
         clearTimeout(draftSaveTimeoutRef.current);
       }
       draftSaveTimeoutRef.current = setTimeout(() => {
-        const markdown = editorRef.current?.getMarkdown() ?? '';
+        const markdown = isMarkdownMode
+          ? markdownEditorRef.current?.getMarkdown() ?? ''
+          : editorRef.current?.getMarkdown() ?? '';
         handleContentChange(markdown);
       }, 300);
     }
-  }, [selectedBlog, currentDraftId, handleContentChange]);
+  }, [selectedBlog, currentDraftId, handleContentChange, isMarkdownMode]);
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -604,15 +603,15 @@ function HomeContent() {
                     size="sm"
                     variant={isMarkdownMode ? 'secondary' : 'ghost'}
                     onClick={() => {
-                      editorRef.current?.toggleMarkdownMode();
-                      const newMode = !isMarkdownMode;
-                      setIsMarkdownMode(newMode);
-                      setDraftMarkdownMode(currentDraftId, newMode);
-                      // Save content after toggling to persist the change
-                      setTimeout(() => {
-                        const markdown = editorRef.current?.getMarkdown() ?? '';
-                        handleContentChange(markdown);
-                      }, 50);
+                      // Get content from current editor before switching
+                      const currentContent = isMarkdownMode
+                        ? markdownEditorRef.current?.getMarkdown() ?? ''
+                        : editorRef.current?.getMarkdown() ?? '';
+
+                      setIsMarkdownMode(!isMarkdownMode);
+
+                      // Save content to persist it for the other editor to load
+                      handleContentChange(currentContent);
                     }}
                   >
                     <CodeXmlIcon className="w-4 h-4" />
@@ -764,26 +763,36 @@ function HomeContent() {
             </div>
           ) : (
           <div className="min-h-full w-full flex flex-col">
-            <NostrEditor
-              ref={editorRef}
-              key={editorKey}
-              placeholder="What's on your mind?"
-              initialMarkdown={editorContent}
-              onChange={handleEditorChange}
-              onProfileLookup={lookupProfile}
-              onNoteLookup={lookupNote}
-              toolbarContainer={selectedBlog ? null : floatingToolbarElement}
-              readOnly={!!selectedBlog}
-              highlightSource={selectedBlog ? {
-                kind: 30023,
-                pubkey: selectedBlog.pubkey,
-                identifier: selectedBlog.dTag,
-                relay: activeRelay,
-              } : undefined}
-              highlights={highlights}
-              onHighlightDeleted={handleHighlightDeleted}
-              onHighlightCreated={handleHighlightCreated}
-            />
+            {isMarkdownMode && !selectedBlog ? (
+              <MarkdownEditor
+                ref={markdownEditorRef}
+                key={`${editorKey}-markdown`}
+                initialContent={editorContent}
+                onChange={handleEditorChange}
+                placeholder="Write in markdown..."
+              />
+            ) : (
+              <NostrEditor
+                ref={editorRef}
+                key={editorKey}
+                placeholder="What's on your mind?"
+                initialMarkdown={editorContent}
+                onChange={handleEditorChange}
+                onProfileLookup={lookupProfile}
+                onNoteLookup={lookupNote}
+                toolbarContainer={selectedBlog ? null : floatingToolbarElement}
+                readOnly={!!selectedBlog}
+                highlightSource={selectedBlog ? {
+                  kind: 30023,
+                  pubkey: selectedBlog.pubkey,
+                  identifier: selectedBlog.dTag,
+                  relay: activeRelay,
+                } : undefined}
+                highlights={highlights}
+                onHighlightDeleted={handleHighlightDeleted}
+                onHighlightCreated={handleHighlightCreated}
+              />
+            )}
             {selectedBlog && (
               <div className="px-4 sm:px-8 md:px-16 lg:px-24 pb-8 max-w-3xl mx-auto w-full">
                 <CommentsSection
