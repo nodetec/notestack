@@ -87,6 +87,7 @@ export default function GutterActionsPlugin() {
   const lastMouseEventRef = useRef<MouseEvent | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [collapsedKeysForRender, setCollapsedKeysForRender] = useState<Set<string>>(new Set());
 
   const headingKeysRef = useRef<Set<string>>(new Set());
   const codeKeysRef = useRef<Set<string>>(new Set());
@@ -232,16 +233,22 @@ export default function GutterActionsPlugin() {
     return editor.registerMutationListener(
       HeadingNode,
       (mutations) => {
+        let collapsedChanged = false;
         editor.getEditorState().read(() => {
           for (const [key, type] of mutations) {
             if (type === 'created') {
               headingKeysRef.current.add(key);
             } else if (type === 'destroyed') {
               headingKeysRef.current.delete(key);
-              collapsedKeysRef.current.delete(key);
+              if (collapsedKeysRef.current.delete(key)) {
+                collapsedChanged = true;
+              }
             }
           }
         });
+        if (collapsedChanged) {
+          setCollapsedKeysForRender(new Set(collapsedKeysRef.current));
+        }
         setShouldListenMouseMove(
           headingKeysRef.current.size > 0 || codeKeysRef.current.size > 0,
         );
@@ -714,6 +721,7 @@ export default function GutterActionsPlugin() {
     } else {
       collapsed.add(headingKey);
     }
+    setCollapsedKeysForRender(new Set(collapsed));
     applyCollapsedState();
     const lastEvent = lastMouseEventRef.current;
     if (lastEvent) {
@@ -789,6 +797,7 @@ export default function GutterActionsPlugin() {
 
         // Uncollapse the heading
         collapsedKeysRef.current.delete(keyToUncollapse);
+        setCollapsedKeysForRender(new Set(collapsedKeysRef.current));
 
         editor.update(() => {
           const heading = $getNodeByKey(keyToUncollapse) as HeadingNode | null;
@@ -851,7 +860,7 @@ export default function GutterActionsPlugin() {
   return createPortal(
     <>
       {headingRenderPositions.map((position) => {
-        const isCollapsed = collapsedKeysRef.current.has(position.headingKey);
+        const isCollapsed = collapsedKeysForRender.has(position.headingKey);
         return (
           <div
             key={position.headingKey}
