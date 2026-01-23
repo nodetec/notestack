@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, Trash2Icon, ExternalLinkIcon } from 'lucide-react';
+import { XIcon, Trash2Icon, ExternalLinkIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchUserHighlights } from '@/lib/nostr/fetch';
 import { deleteHighlight } from '@/lib/nostr/publish';
 import { useSession } from 'next-auth/react';
@@ -48,6 +48,8 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: ['user-highlights', pubkey, activeRelay],
     queryFn: ({ pageParam }) => fetchUserHighlights({
@@ -117,14 +119,25 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
         <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           My Highlights
         </h2>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            title="Refresh highlights"
+            aria-label="Refresh highlights"
+          >
+            <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            title="Close panel"
+            aria-label="Close panel"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Highlights List */}

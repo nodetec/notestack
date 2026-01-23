@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreVerticalIcon, PenLineIcon } from 'lucide-react';
+import { XIcon, MoreVerticalIcon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -63,6 +63,8 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: ['blogs', pubkey, activeRelay],
     queryFn: ({ pageParam }) => fetchBlogs({ limit: 10, until: pageParam, pubkey: pubkey ?? undefined, relay: activeRelay }),
@@ -140,14 +142,25 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
         <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           My Blogs
         </h2>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 disabled:opacity-50"
+            title="Refresh blogs"
+            aria-label="Refresh blogs"
+          >
+            <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+            title="Close panel"
+            aria-label="Close panel"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Blog List */}
