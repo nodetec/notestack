@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -37,10 +37,14 @@ import { CommentsSection } from '@/components/comments';
 function HomeContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [activePanel, setActivePanel] = useState<string | null>(null);
+
+  // Support ?panel=explore query param from landing page
+  const initialPanel = searchParams.get('panel');
+  const [activePanel, setActivePanel] = useState<string | null>(initialPanel);
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const { data: session, status: sessionStatus } = useSession();

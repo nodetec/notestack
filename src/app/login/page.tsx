@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
@@ -34,10 +34,12 @@ const formSchema = z.object({
   }),
 });
 
-export default function LoginPage() {
+function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [extensionError, setExtensionError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
   const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,7 +63,7 @@ export default function LoginPage() {
           secretKey: '',
           redirect: false,
         });
-        router.push('/');
+        router.push(callbackUrl);
       } catch (err) {
         setExtensionError('Failed to get public key from extension');
         console.error(err);
@@ -85,7 +87,7 @@ export default function LoginPage() {
       secretKey,
       redirect: false,
     });
-    router.push('/');
+    router.push(callbackUrl);
   }
 
   return (
@@ -165,5 +167,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

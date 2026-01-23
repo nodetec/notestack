@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { bech32 } from '@scure/base';
 import { lookupProfile } from '@/lib/nostr/profiles';
+import { generateAvatar } from '@/lib/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import type { UserWithKeys } from '@/types/auth';
 interface LoginButtonProps {
   onLogin?: (pubkey: string) => void;
   onLogout?: () => void;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
 function hexToNpub(hex: string): string {
@@ -26,17 +28,15 @@ function hexToNpub(hex: string): string {
   return bech32.encode('npub', words, 1000);
 }
 
-function formatNpub(npub: string): string {
-  return `npub...${npub.slice(-4)}`;
-}
-
-export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
+export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginButtonProps) {
   const { data: session, status } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
   const router = useRouter();
+  const pathname = usePathname();
 
   const [profile, setProfile] = useState<NostrProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // Notify parent when pubkey changes
   useEffect(() => {
@@ -49,23 +49,32 @@ export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
   useEffect(() => {
     if (!pubkey) {
       setProfile(null);
+      setIsLoadingProfile(false);
       return;
     }
 
+    setIsLoadingProfile(true);
     const npub = hexToNpub(pubkey);
     lookupProfile(npub).then((result) => {
       setProfile(result);
+      setIsLoadingProfile(false);
     });
   }, [pubkey]);
 
   const handleLogin = useCallback(() => {
-    router.push('/login');
-  }, [router]);
+    const callbackUrl = encodeURIComponent(pathname || '/');
+    router.push(`/login?callbackUrl=${callbackUrl}`);
+  }, [router, pathname]);
 
   const handleLogout = useCallback(async () => {
     await signOut({ redirect: false });
     onLogout?.();
   }, [onLogout]);
+
+  // Generate fallback avatar from pubkey (must be before early returns)
+  const fallbackAvatar = useMemo(() => {
+    return pubkey ? generateAvatar(pubkey) : null;
+  }, [pubkey]);
 
   // Show skeleton while loading session
   if (status === 'loading') {
@@ -73,23 +82,21 @@ export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
   }
 
   if (pubkey) {
-    const npub = hexToNpub(pubkey);
+    const avatarSrc = profile?.picture || fallbackAvatar;
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          {profile?.picture ? (
+          {isLoadingProfile ? (
+            <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 animate-pulse" />
+          ) : (
             <button className="w-7 h-7 rounded-full overflow-hidden hover:ring-2 hover:ring-zinc-300 dark:hover:ring-zinc-600 transition-shadow">
               <img
-                src={profile.picture}
-                alt={profile.name || 'Profile'}
+                src={avatarSrc!}
+                alt={profile?.name || 'Profile'}
                 className="w-full h-full object-cover"
               />
             </button>
-          ) : (
-            <Button variant="ghost" size="sm" className="font-mono">
-              {formatNpub(npub)}
-            </Button>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -118,7 +125,7 @@ export default function LoginButton({ onLogin, onLogout }: LoginButtonProps) {
   }
 
   return (
-    <Button size="sm" onClick={handleLogin}>
+    <Button size={size} onClick={handleLogin}>
       Login
     </Button>
   );

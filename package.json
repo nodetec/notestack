@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.3.1",
+    "@dicebear/core": "^9.3.1",
     "@hookform/resolvers": "^5.2.2",
     "@lexical/clipboard": "^0.39.0",
     "@lexical/code": "^0.39.0",
