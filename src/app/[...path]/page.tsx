@@ -519,13 +519,17 @@ function HomeContent() {
         <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 gap-2">
           <div className="flex items-center gap-2 flex-shrink-0">
             <SidebarTrigger className="lg:hidden" />
-            {!selectedBlog && <SaveStatusIndicator className="hidden lg:flex" />}
+            {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
           </div>
           {selectedBlog ? (
             <div className="flex-1 min-w-0 flex justify-center">
               <h1 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 truncate max-w-md">
                 {selectedBlog.title || 'Untitled'}
               </h1>
+            </div>
+          ) : isLoadingBlog ? (
+            <div className="flex-1 min-w-0 flex justify-center">
+              <div className="h-5 w-48 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
             </div>
           ) : (
             <div ref={toolbarRef} className="flex items-center justify-center flex-1 min-w-0" />
@@ -536,6 +540,26 @@ function HomeContent() {
             )}
             {isLoggedIn && selectedBlog && (
               <StackButton blog={selectedBlog} />
+            )}
+            {isLoggedIn && isLoadingBlog && (
+              <>
+                <Button size="sm" variant="ghost" disabled className="opacity-50">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 10h7l-9 13v-9H4l9-13z" />
+                  </svg>
+                </Button>
+                <Button size="sm" variant="ghost" disabled className="opacity-50">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                </Button>
+                <Button size="sm" variant="secondary" disabled className="opacity-50">
+                  Edit
+                </Button>
+              </>
             )}
             {isLoggedIn && selectedBlog && !currentDraftId && (
               <Button
@@ -578,8 +602,21 @@ function HomeContent() {
         </header>
         <div className="relative flex-1 overflow-y-auto overscroll-auto cursor-text" data-editor-scroll-container>
           {isLoadingBlog ? (
-            <div className="flex items-center justify-center h-full text-zinc-500">
-              Loading...
+            <div className="min-h-full w-full flex flex-col">
+              <div className="w-full py-8 editor-root">
+                {/* Title skeleton */}
+                <div className="h-10 w-3/4 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-8" />
+                {/* Content skeletons */}
+                <div className="space-y-4">
+                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-5/6 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-4/5 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                  <div className="h-4 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                </div>
+              </div>
             </div>
           ) : (
           <div className="min-h-full w-full flex flex-col">
