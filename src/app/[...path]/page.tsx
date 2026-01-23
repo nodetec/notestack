@@ -38,6 +38,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { BoldIcon, ItalicIcon, PencilRulerIcon, PenToolIcon, ToolCaseIcon, UnderlineIcon } from 'lucide-react';
 
 
 function HomeContent() {
@@ -59,17 +60,22 @@ function HomeContent() {
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const editorRef = useRef<NostrEditorHandle>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const [toolbarElement, setToolbarElement] = useState<HTMLDivElement | null>(null);
+  const [showFloatingToolbar, setShowFloatingToolbar] = useState(false);
+  const floatingToolbarRef = useRef<HTMLDivElement>(null);
+  const [floatingToolbarElement, setFloatingToolbarElement] = useState<HTMLDivElement | null>(null);
   const hasUserTyped = useRef(false);
   const checkBlogForEditsRef = useRef<() => void>(() => {});
   const draftSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedBlogRef = useRef<Blog | null>(null); // Track current blog for useEffect without triggering re-runs
 
-  // Connect toolbar ref to state once after mount
+  // Connect floating toolbar ref to state when visible
   useEffect(() => {
-    setToolbarElement(toolbarRef.current);
-  }, []);
+    if (showFloatingToolbar) {
+      setFloatingToolbarElement(floatingToolbarRef.current);
+    } else {
+      setFloatingToolbarElement(null);
+    }
+  }, [showFloatingToolbar]);
   const queryClient = useQueryClient();
 
   // Parse path params to get draft or blog ID
@@ -538,12 +544,25 @@ function HomeContent() {
       )}
 
       <SidebarInset
-        className="bg-background transition-[margin] duration-200 ease-linear"
-        style={{ marginLeft: activePanel && !isMobile ? '288px' : undefined }}
+        className={`bg-background transition-[margin] duration-200 ease-linear ${activePanel ? 'sm:ml-72' : ''}`}
       >
         <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-border bg-background gap-2">
           <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             <SidebarTrigger className="lg:hidden" />
+            {isLoggedIn && currentDraftId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant={showFloatingToolbar ? 'secondary' : 'ghost'}
+                    onClick={() => setShowFloatingToolbar(!showFloatingToolbar)}
+                  >
+                    <PencilRulerIcon className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{showFloatingToolbar ? 'Hide Toolbar' : 'Show Toolbar'}</TooltipContent>
+              </Tooltip>
+            )}
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
             {selectedBlog && (
               <div className="hidden lg:flex items-center gap-2 min-w-0">
@@ -584,7 +603,7 @@ function HomeContent() {
               <div className="h-5 w-48 bg-muted rounded animate-pulse" />
             </div>
           ) : (
-            <div ref={toolbarRef} className="hidden lg:flex items-center justify-center flex-1 min-w-0" />
+            <div className="flex-1 min-w-0" />
           )}
           <div className="flex items-center gap-1 lg:gap-2 justify-end flex-shrink-0">
             {isLoggedIn && selectedBlog && (
@@ -680,7 +699,7 @@ function HomeContent() {
               onChange={handleEditorChange}
               onProfileLookup={lookupProfile}
               onNoteLookup={lookupNote}
-              toolbarContainer={selectedBlog ? null : toolbarElement}
+              toolbarContainer={selectedBlog ? null : floatingToolbarElement}
               readOnly={!!selectedBlog}
               highlightSource={selectedBlog ? {
                 kind: 30023,
@@ -706,6 +725,19 @@ function HomeContent() {
           </div>
           )}
         </div>
+
+        {/* Floating Toolbar */}
+        {!selectedBlog && !isLoadingBlog && (
+          <div
+            className={`absolute bottom-4 left-0 right-0 z-40 transition-all duration-200 ease-out ${
+              showFloatingToolbar ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+            }`}
+          >
+            <div className="editor-root flex justify-center">
+              <div ref={floatingToolbarRef} />
+            </div>
+          </div>
+        )}
       </SidebarInset>
 
       <PublishDialog

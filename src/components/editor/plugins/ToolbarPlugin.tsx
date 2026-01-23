@@ -273,7 +273,7 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   }
 
   const toolbar = (
-    <div className="flex items-center gap-0.5" onMouseDown={(e) => e.preventDefault()}>
+    <div className="bg-background border border-border rounded-lg shadow-lg px-3 py-2 flex items-center gap-0.5" onMouseDown={(e) => e.preventDefault()}>
       <HeadingSelect blockType={blockType} onSelect={handleBlockTypeChange} disabled={isMarkdownMode} />
 
       <Separator orientation="vertical" className="mx-1 h-6" />
