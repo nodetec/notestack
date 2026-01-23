@@ -631,7 +631,7 @@ function HomeContent() {
               </Tooltip>
             )}
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
-            {selectedBlog && (
+            {selectedBlog && selectedBlog.pubkey !== pubkey && (
               <div className="hidden lg:flex items-center gap-2 min-w-0">
                 {isLoadingAuthor && !hasEmbeddedAuthor ? (
                   <>
