@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, UserPlusIcon, UserMinusIcon, Loader2Icon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { nip19 } from 'nostr-tools';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,7 @@ import {
 import { fetchContactListEvent } from '@/lib/nostr/fetch';
 import { publishContactList } from '@/lib/nostr/publish';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { generateAvatar } from '@/lib/avatar';
 import type { UserWithKeys } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -122,21 +124,24 @@ export default function AuthorDropdown({
     }
   };
 
-  const displayName = authorName || 'Unknown';
+  // Generate shortened npub for display when no name is available
+  const shortenedNpub = useMemo(() => {
+    const npub = nip19.npubEncode(authorPubkey);
+    return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
+  }, [authorPubkey]);
+
+  const displayName = authorName || shortenedNpub;
+  const avatarUrl = authorPicture || generateAvatar(authorPubkey);
 
   // If not logged in or viewing own profile, just show static author info
   if (!userPubkey || isOwnProfile) {
     return (
       <div className="flex items-center gap-2 min-w-0">
-        {authorPicture ? (
-          <img
-            src={authorPicture}
-            alt={displayName}
-            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-          />
-        ) : (
-          <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
-        )}
+        <img
+          src={avatarUrl}
+          alt={displayName}
+          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+        />
         <span className="text-sm text-muted-foreground truncate">
           {displayName}
         </span>
@@ -151,15 +156,11 @@ export default function AuthorDropdown({
           className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
           title={displayName}
         >
-          {authorPicture ? (
-            <img
-              src={authorPicture}
-              alt={displayName}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-            />
-          ) : (
-            <div className="w-6 h-6 rounded-full bg-muted flex-shrink-0" />
-          )}
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+          />
           <span className="text-sm text-muted-foreground truncate">
             {displayName}
           </span>

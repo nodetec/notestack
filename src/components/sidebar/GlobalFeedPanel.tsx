@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon, RefreshCwIcon } from 'lucide-react';
+import { nip19 } from 'nostr-tools';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { extractFirstImage } from '@/lib/utils/markdown';
+import { generateAvatar } from '@/lib/avatar';
 import type { Blog } from '@/lib/nostr/types';
 
 interface GlobalFeedPanelProps {
@@ -35,7 +37,8 @@ function formatDate(timestamp: number): string {
 }
 
 function truncateNpub(pubkey: string): string {
-  return `${pubkey.slice(0, 8)}...${pubkey.slice(-4)}`;
+  const npub = nip19.npubEncode(pubkey);
+  return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
 export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPanelProps) {
@@ -185,6 +188,8 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
             const profile = profiles?.get(blog.pubkey);
+            const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
+            const displayName = profile?.name || truncateNpub(blog.pubkey);
             return (
               <li key={blog.id} className="relative group">
                 <button
@@ -193,17 +198,13 @@ export default function GlobalFeedPanel({ onSelectBlog, onClose }: GlobalFeedPan
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      {profile?.picture ? (
-                        <img
-                          src={profile.picture}
-                          alt=""
-                          className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-muted flex-shrink-0" />
-                      )}
+                      <img
+                        src={avatarUrl}
+                        alt=""
+                        className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                      />
                       <span className="text-xs text-muted-foreground truncate">
-                        {profile?.name || truncateNpub(blog.pubkey)}
+                        {displayName}
                       </span>
                       <span className="text-xs text-muted-foreground/70">
                         &middot;

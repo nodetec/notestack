@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { XIcon, MoreVerticalIcon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
+import { nip19 } from 'nostr-tools';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -36,7 +37,8 @@ function formatDate(timestamp: number): string {
 }
 
 function truncateNpub(pubkey: string): string {
-  return `${pubkey.slice(0, 8)}...${pubkey.slice(-4)}`;
+  const npub = nip19.npubEncode(pubkey);
+  return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
 export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelProps) {
