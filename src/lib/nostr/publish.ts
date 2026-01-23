@@ -209,6 +209,8 @@ export async function publishHighlight({
   };
 }
 
+const NOTEBIN_RELAY = 'wss://relay.notebin.io';
+
 export async function publishCodeSnippet({
   content,
   language,
@@ -221,6 +223,11 @@ export async function publishCodeSnippet({
   secretKey,
 }: CodeSnippetOptions): Promise<PublishResult[]> {
   const createdAt = Math.floor(Date.now() / 1000);
+
+  // Always include notebin relay for kind 1337 events
+  const allRelays = relays.includes(NOTEBIN_RELAY)
+    ? relays
+    : [...relays, NOTEBIN_RELAY];
 
   const eventTags: string[][] = [];
 
@@ -253,7 +260,7 @@ export async function publishCodeSnippet({
 
   const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
 
-  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
+  return Promise.all(allRelays.map((relay) => publishToRelay(signedEvent, relay)));
 }
 
 // NIP-09: Delete a highlight
