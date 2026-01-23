@@ -21,7 +21,6 @@ import {
 import { $isHeadingNode, $createHeadingNode, type HeadingTagType } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $isCodeNode, $createCodeNode } from '@lexical/code';
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
   BoldIcon,
@@ -34,9 +33,7 @@ import {
   ImageIcon,
   TableIcon,
   YoutubeIcon,
-  FileTextIcon,
 } from 'lucide-react';
-import { ALL_TRANSFORMERS } from '../NostrEditor';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -193,80 +190,6 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   const openTableDialog = useCallback(() => {
     setShowTableDialog(true);
   }, []);
-
-  const toggleMarkdownMode = useCallback(() => {
-    try {
-      // First, check if we're currently in markdown mode by reading the state
-      let currentlyInMarkdownMode = false;
-      let markdownContent = '';
-
-      editor.getEditorState().read(() => {
-        const root = $getRoot();
-        const firstChild = root.getFirstChild();
-        currentlyInMarkdownMode = $isCodeNode(firstChild) &&
-          firstChild.getLanguage() === 'markdown' &&
-          root.getChildrenSize() === 1;
-
-        if (currentlyInMarkdownMode && firstChild) {
-          markdownContent = firstChild.getTextContent();
-        } else {
-          // Convert current content to markdown
-          // Use try-catch in case of transformer errors
-          try {
-            markdownContent = $convertToMarkdownString(
-              ALL_TRANSFORMERS,
-              undefined,
-              false
-            );
-          } catch (err) {
-            console.error('Error converting to markdown:', err);
-            markdownContent = '';
-          }
-        }
-      });
-
-      // Warn about very large content (e.g., base64 images)
-      if (markdownContent.length > 500000) {
-        console.warn('Markdown content is very large, this may cause performance issues');
-      }
-
-      editor.update(() => {
-        const root = $getRoot();
-
-        if (currentlyInMarkdownMode) {
-          // Convert from markdown back to rich text
-          try {
-            $convertFromMarkdownString(
-              markdownContent,
-              ALL_TRANSFORMERS,
-              undefined,
-              false
-            );
-          } catch (err) {
-            console.error('Error converting from markdown:', err);
-            // Keep the code block if conversion fails
-            return;
-          }
-          setIsMarkdownMode(false);
-          // Scroll to top after converting back to rich text
-          requestAnimationFrame(() => {
-            window.scrollTo({ top: 0, behavior: 'instant' });
-          });
-        } else {
-          // Display markdown in a code block with syntax highlighting
-          const codeNode = $createCodeNode('markdown');
-          codeNode.append($createTextNode(markdownContent));
-          root.clear().append(codeNode);
-          if (markdownContent.length === 0) {
-            codeNode.select();
-          }
-          setIsMarkdownMode(true);
-        }
-      });
-    } catch (err) {
-      console.error('Error toggling markdown mode:', err);
-    }
-  }, [editor]);
 
   if (!portalContainer) {
     return null;
@@ -432,23 +355,6 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>Embed YouTube</TooltipContent>
-      </Tooltip>
-
-      <Separator orientation="vertical" className="mx-1 h-6 hidden md:block" />
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={toggleMarkdownMode}
-            aria-pressed={isMarkdownMode}
-            className={`hidden md:flex ${isMarkdownMode ? 'bg-accent' : ''}`}
-          >
-            <FileTextIcon className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{isMarkdownMode ? 'Rich Text' : 'Markdown'}</TooltipContent>
       </Tooltip>
     </div>
   );
