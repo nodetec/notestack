@@ -440,7 +440,22 @@ export default function GutterActionsPlugin() {
 
       const nextCodePositions: CodePosition[] = [];
 
+      // Check if we're in markdown mode (single markdown code block)
+      let isInMarkdownMode = false;
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const firstChild = root.getFirstChild();
+        isInMarkdownMode = $isCodeNode(firstChild) &&
+          firstChild.getLanguage() === 'markdown' &&
+          root.getChildrenSize() === 1;
+      });
+
       codeKeysRef.current.forEach((key) => {
+        // Skip copy button for markdown mode code block
+        if (isInMarkdownMode) {
+          return;
+        }
+
         const element = editor.getElementByKey(key);
         if (
           !element ||

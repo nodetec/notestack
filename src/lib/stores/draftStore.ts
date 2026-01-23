@@ -20,6 +20,7 @@ export interface Draft {
   content: string;
   lastSaved: number;
   linkedBlog?: LinkedBlog;
+  isMarkdownMode?: boolean;
 }
 
 interface DraftState {
@@ -28,6 +29,7 @@ interface DraftState {
 
   getDraft: (id: string) => Draft | undefined;
   setDraftContent: (id: string, content: string) => void;
+  setDraftMarkdownMode: (id: string, isMarkdownMode: boolean) => void;
   setSaveStatus: (status: SaveStatus) => void;
   markSaved: (id: string) => void;
   deleteDraft: (id: string) => void;
@@ -60,6 +62,19 @@ export const useDraftStore = create<DraftState>()(
         },
         // Don't change saveStatus here - let the caller control it
       })),
+
+      setDraftMarkdownMode: (id, isMarkdownMode) => set((state) => {
+        if (!state.drafts[id]) return state;
+        return {
+          drafts: {
+            ...state.drafts,
+            [id]: {
+              ...state.drafts[id],
+              isMarkdownMode,
+            },
+          },
+        };
+      }),
 
       setSaveStatus: (status) => set({ saveStatus: status }),
 

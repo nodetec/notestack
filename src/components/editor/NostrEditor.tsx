@@ -9,12 +9,14 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import {
   $convertToMarkdownString,
+  $convertFromMarkdownString,
   ELEMENT_TRANSFORMERS,
   MULTILINE_ELEMENT_TRANSFORMERS,
   TEXT_FORMAT_TRANSFORMERS,
 } from '@lexical/markdown';
-import { defineExtension } from 'lexical';
+import { defineExtension, $getRoot, $createTextNode } from 'lexical';
 import type { EditorState } from 'lexical';
+import { $isCodeNode, $createCodeNode } from '@lexical/code';
 
 import { EditorContext, type ProfileLookupFn, type NoteLookupFn } from './context/EditorContext';
 
@@ -90,6 +92,8 @@ interface NostrEditorProps {
 
 export interface NostrEditorHandle {
   getMarkdown: () => string;
+  toggleMarkdownMode: () => void;
+  isMarkdownMode: () => boolean;
 }
 
 // All transformers for markdown conversion
@@ -146,6 +150,63 @@ function EditorInner({
         markdown = $convertToMarkdownString(ALL_TRANSFORMERS, undefined, false);
       });
       return markdown;
+    },
+    isMarkdownMode: () => {
+      let inMarkdownMode = false;
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const firstChild = root.getFirstChild();
+        inMarkdownMode = $isCodeNode(firstChild) &&
+          firstChild.getLanguage() === 'markdown' &&
+          root.getChildrenSize() === 1;
+      });
+      return inMarkdownMode;
+    },
+    toggleMarkdownMode: () => {
+      let currentlyInMarkdownMode = false;
+      let markdownContent = '';
+
+      editor.getEditorState().read(() => {
+        const root = $getRoot();
+        const firstChild = root.getFirstChild();
+        currentlyInMarkdownMode = $isCodeNode(firstChild) &&
+          firstChild.getLanguage() === 'markdown' &&
+          root.getChildrenSize() === 1;
+
+        if (currentlyInMarkdownMode && firstChild) {
+          markdownContent = firstChild.getTextContent();
+        } else {
+          try {
+            markdownContent = $convertToMarkdownString(ALL_TRANSFORMERS, undefined, false);
+          } catch (err) {
+            console.error('Error converting to markdown:', err);
+            markdownContent = '';
+          }
+        }
+      });
+
+      editor.update(() => {
+        const root = $getRoot();
+
+        if (currentlyInMarkdownMode) {
+          try {
+            $convertFromMarkdownString(markdownContent, ALL_TRANSFORMERS, undefined, false);
+          } catch (err) {
+            console.error('Error converting from markdown:', err);
+            return;
+          }
+          requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          });
+        } else {
+          const codeNode = $createCodeNode('markdown');
+          codeNode.append($createTextNode(markdownContent));
+          root.clear().append(codeNode);
+          if (markdownContent.length === 0) {
+            codeNode.select();
+          }
+        }
+      });
     },
   }));
 

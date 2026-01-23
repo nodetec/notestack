@@ -38,7 +38,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { PencilRulerIcon } from 'lucide-react';
+import { PencilRulerIcon, CodeXmlIcon } from 'lucide-react';
 
 interface FloatingToolbarProps {
   show: boolean;
@@ -95,6 +95,7 @@ function HomeContent() {
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const editorRef = useRef<NostrEditorHandle>(null);
   const [showFloatingToolbar, setShowFloatingToolbar] = useState(false);
+  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const floatingToolbarRef = useRef<HTMLDivElement>(null);
   const [floatingToolbarElement, setFloatingToolbarElement] = useState<HTMLDivElement | null>(null);
   const hasUserTyped = useRef(false);
@@ -104,7 +105,7 @@ function HomeContent() {
 
   // Connect floating toolbar ref to state when visible
   useEffect(() => {
-    if (showFloatingToolbar && !selectedBlog && !isLoadingBlog) {
+    if (showFloatingToolbar && !selectedBlog && !isLoadingBlog && !isMarkdownMode) {
       // Small delay to ensure ref is attached after mount
       const timer = setTimeout(() => {
         setFloatingToolbarElement(floatingToolbarRef.current);
@@ -113,7 +114,7 @@ function HomeContent() {
     } else {
       setFloatingToolbarElement(null);
     }
-  }, [showFloatingToolbar, selectedBlog, isLoadingBlog]);
+  }, [showFloatingToolbar, selectedBlog, isLoadingBlog, isMarkdownMode]);
   const queryClient = useQueryClient();
 
   // Parse path params to get draft or blog ID
@@ -133,6 +134,7 @@ function HomeContent() {
   const createDraftFromBlog = useDraftStore((state) => state.createDraftFromBlog);
   const getDraft = useDraftStore((state) => state.getDraft);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
+  const setDraftMarkdownMode = useDraftStore((state) => state.setDraftMarkdownMode);
 
   // Determine current draft ID
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -420,10 +422,18 @@ function HomeContent() {
   }
   const editorContent = initialContentRef.current.content;
 
-  // Reset hasUserTyped when switching to a different article
+  // Reset state when switching to a different article
   useEffect(() => {
     hasUserTyped.current = false;
-  }, [editorKey]);
+
+    // Load markdown mode from draft store first for immediate UI
+    if (currentDraftId) {
+      const draftData = getDraft(currentDraftId);
+      setIsMarkdownMode(draftData?.isMarkdownMode ?? false);
+    } else {
+      setIsMarkdownMode(false);
+    }
+  }, [editorKey, currentDraftId, getDraft]);
 
   // Track when user actually types and create draft on first edit
   const handleEditorKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -592,13 +602,23 @@ function HomeContent() {
                 <TooltipTrigger asChild>
                   <Button
                     size="sm"
-                    variant={showFloatingToolbar ? 'secondary' : 'ghost'}
-                    onClick={() => setShowFloatingToolbar(!showFloatingToolbar)}
+                    variant={isMarkdownMode ? 'secondary' : 'ghost'}
+                    onClick={() => {
+                      editorRef.current?.toggleMarkdownMode();
+                      const newMode = !isMarkdownMode;
+                      setIsMarkdownMode(newMode);
+                      setDraftMarkdownMode(currentDraftId, newMode);
+                      // Save content after toggling to persist the change
+                      setTimeout(() => {
+                        const markdown = editorRef.current?.getMarkdown() ?? '';
+                        handleContentChange(markdown);
+                      }, 50);
+                    }}
                   >
-                    <PencilRulerIcon className="w-4 h-4" />
+                    <CodeXmlIcon className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{showFloatingToolbar ? 'Hide Toolbar' : 'Show Toolbar'}</TooltipContent>
+                <TooltipContent>{isMarkdownMode ? 'Rich Text Mode' : 'Markdown Mode'}</TooltipContent>
               </Tooltip>
             )}
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
@@ -698,6 +718,21 @@ function HomeContent() {
               </Button>
             )}
             {isLoggedIn && currentDraftId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant={showFloatingToolbar && !isMarkdownMode ? 'secondary' : 'ghost'}
+                    onClick={() => !isMarkdownMode && setShowFloatingToolbar(!showFloatingToolbar)}
+                    disabled={isMarkdownMode}
+                  >
+                    <PencilRulerIcon className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{isMarkdownMode ? 'Toolbar unavailable in markdown mode' : showFloatingToolbar ? 'Hide Toolbar' : 'Show Toolbar'}</TooltipContent>
+              </Tooltip>
+            )}
+            {isLoggedIn && currentDraftId && (
               <Button
                 size="sm"
                 variant={isEditing ? 'success' : 'default'}
@@ -767,7 +802,7 @@ function HomeContent() {
         {/* Floating Toolbar */}
         {!selectedBlog && !isLoadingBlog && (
           <FloatingToolbar
-            show={showFloatingToolbar}
+            show={showFloatingToolbar && !isMarkdownMode}
             activePanel={activePanel}
             toolbarRef={floatingToolbarRef}
           />
