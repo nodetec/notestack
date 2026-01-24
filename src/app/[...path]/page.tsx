@@ -816,7 +816,7 @@ function HomeContent() {
               <NostrEditor
                 ref={editorRef}
                 key={editorKey}
-                placeholder="What's on your mind?"
+                placeholder=""
                 initialMarkdown={editorContent}
                 onChange={handleEditorChange}
                 onProfileLookup={lookupProfile}
