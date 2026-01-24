@@ -229,12 +229,21 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <button
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectAuthor?.(blog.pubkey);
                         }}
-                        className="flex items-center gap-2 hover:underline"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onSelectAuthor?.(blog.pubkey);
+                          }
+                        }}
+                        className="flex items-center gap-2 hover:underline cursor-pointer"
                       >
                         <img
                           src={avatarUrl}
@@ -244,7 +253,7 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                         <span className="text-xs text-muted-foreground truncate">
                           {displayName}
                         </span>
-                      </button>
+                      </span>
                       <span className="text-xs text-muted-foreground/70">
                         &middot;
                       </span>

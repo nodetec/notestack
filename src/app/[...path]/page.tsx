@@ -26,7 +26,8 @@ import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
 import { useDraftAutoSave } from '@/lib/hooks/useDraftAutoSave';
-import { lookupProfile, fetchProfiles } from '@/lib/nostr/profiles';
+import { lookupProfile } from '@/lib/nostr/profiles';
+import { useProfile } from '@/lib/hooks/useProfiles';
 import { lookupNote } from '@/lib/nostr/notes';
 import { fetchBlogByAddress, fetchHighlights } from '@/lib/nostr/fetch';
 import { blogToNaddr, decodeNaddr } from '@/lib/nostr/naddr';
@@ -180,18 +181,12 @@ function HomeContent() {
   });
 
   // Fetch author profile when viewing a blog (only if not already embedded)
+  // Uses shared cache populated by GlobalFeedPanel/FollowingFeedPanel batch fetches
   const hasEmbeddedAuthor = !!(selectedBlog?.authorName || selectedBlog?.authorPicture);
-  const { data: fetchedAuthorProfile, isLoading: isLoadingAuthor } = useQuery({
-    queryKey: ['profile', selectedBlog?.pubkey, activeRelay],
-    queryFn: async () => {
-      // Try active relay and purplepag.es for profiles
-      const relaysToTry = [activeRelay, 'wss://purplepag.es'];
-      const profiles = await fetchProfiles([selectedBlog!.pubkey], relaysToTry);
-      return profiles.get(selectedBlog!.pubkey) || null;
-    },
-    enabled: !!selectedBlog && !hasEmbeddedAuthor,
-    staleTime: 60000, // Cache profile for 1 minute
-  });
+  const { data: fetchedAuthorProfile, isLoading: isLoadingAuthor } = useProfile(
+    selectedBlog && !hasEmbeddedAuthor ? selectedBlog.pubkey : null,
+    [activeRelay, 'wss://purplepag.es']
+  );
 
   // Use embedded author info if available, otherwise use fetched profile
   const authorProfile = hasEmbeddedAuthor

@@ -9,7 +9,7 @@ import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
-import { useProfiles } from '@/lib/hooks/useProfiles';
+import { useProfile } from '@/lib/hooks/useProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
 import PanelRail from './PanelRail';
 import {
@@ -106,12 +106,11 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
 
-  // Fetch profile for the author
+  // Fetch profile for the author (uses shared cache from batch fetches)
   const profileRelays = activeRelay
     ? [activeRelay, 'wss://purplepag.es']
     : [];
-  const { data: profiles } = useProfiles(effectivePubkey ? [effectivePubkey] : [], profileRelays);
-  const authorProfile = effectivePubkey ? profiles?.get(effectivePubkey) : null;
+  const { data: authorProfile } = useProfile(effectivePubkey, profileRelays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
