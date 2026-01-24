@@ -26,6 +26,7 @@ import type { Blog } from '@/lib/nostr/types';
 
 interface FollowingFeedPanelProps {
   onSelectBlog?: (blog: Blog) => void;
+  onSelectAuthor?: (pubkey: string) => void;
   onClose: () => void;
 }
 
@@ -42,7 +43,7 @@ function truncateNpub(pubkey: string): string {
   return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
-export default function FollowingFeedPanel({ onSelectBlog, onClose }: FollowingFeedPanelProps) {
+export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClose }: FollowingFeedPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
@@ -228,14 +229,22 @@ export default function FollowingFeedPanel({ onSelectBlog, onClose }: FollowingF
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <img
-                        src={avatarUrl}
-                        alt=""
-                        className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                      />
-                      <span className="text-xs text-muted-foreground truncate">
-                        {displayName}
-                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectAuthor?.(blog.pubkey);
+                        }}
+                        className="flex items-center gap-2 hover:underline"
+                      >
+                        <img
+                          src={avatarUrl}
+                          alt=""
+                          className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                        />
+                        <span className="text-xs text-muted-foreground truncate">
+                          {displayName}
+                        </span>
+                      </button>
                       <span className="text-xs text-muted-foreground/70">
                         &middot;
                       </span>

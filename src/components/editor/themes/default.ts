@@ -30,8 +30,28 @@ const codeHighlightClasses = {
   string: 'text-[#4D7C0F] dark:text-[#CE9178]',           // olive green - strings
   symbol: 'text-[#0369A1] dark:text-[#569CD6]',           // deep blue - symbols
   tag: 'text-[#B45309] dark:text-[#569CD6]',              // amber - tags
-  url: 'text-[#C2410C] dark:text-[#CE9178]',              // burnt orange - urls
+  url: 'text-[#0369A1] dark:text-[#3794FF]',              // blue - urls
   variable: 'text-[#0369A1] dark:text-[#9CDCFE]',         // deep blue - variables
+  // Markdown-specific tokens
+  title: 'text-[#B45309] dark:text-[#569CD6] font-bold',  // # headings
+  bold: 'font-bold text-[#4A403A] dark:text-[#D4D4D4]',   // **bold**
+  italic: 'italic text-[#4A403A] dark:text-[#D4D4D4]',    // *italic*
+  strike: 'line-through',                                  // ~~strike~~
+  'code-snippet': 'text-[#C2410C] dark:text-[#CE9178]',   // `inline code`
+  'code-block': 'text-[#C2410C] dark:text-[#CE9178]',     // ```code block```
+  'code-language': 'text-[#0D9488] dark:text-[#4EC9B0]',  // ```language
+  blockquote: 'text-[#6B7280] dark:text-[#6A9955]',       // > quote
+  hr: 'text-[#6B7280] dark:text-[#6A9955]',               // ---
+  list: 'text-[#B45309] dark:text-[#569CD6]',             // - or 1.
+  'url-reference': 'text-[#0369A1] dark:text-[#3794FF]',  // [id]: url
+  table: 'text-[#4A403A] dark:text-[#D4D4D4]',            // | table |
+  'table-header': 'text-[#B45309] dark:text-[#569CD6] font-bold',
+  'table-header-row': 'text-[#B45309] dark:text-[#569CD6]',
+  'table-data': 'text-[#4A403A] dark:text-[#D4D4D4]',
+  'table-data-rows': 'text-[#4A403A] dark:text-[#D4D4D4]',
+  'table-line': 'text-[#6B7280] dark:text-[#6A9955]',
+  'front-matter': 'text-[#0D9488] dark:text-[#4EC9B0]',   // YAML front matter
+  'front-matter-block': 'text-[#0D9488] dark:text-[#4EC9B0]',
 };
 
 const theme: EditorThemeClasses = {

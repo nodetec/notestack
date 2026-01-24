@@ -12,6 +12,7 @@ import DraftsPanel from '@/components/sidebar/DraftsPanel';
 import SettingsPanel from '@/components/sidebar/SettingsPanel';
 import GlobalFeedPanel from '@/components/sidebar/GlobalFeedPanel';
 import FollowingFeedPanel from '@/components/sidebar/FollowingFeedPanel';
+import AuthorFeedPanel from '@/components/sidebar/AuthorFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import StacksPanel from '@/components/sidebar/StacksPanel';
 import ProfilePanel from '@/components/sidebar/ProfilePanel';
@@ -97,6 +98,7 @@ function HomeContent() {
   const [activePanel, setActivePanel] = useState<string | null>(initialPanel);
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [selectedAuthorPubkey, setSelectedAuthorPubkey] = useState<string | null>(null);
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -339,6 +341,11 @@ function HomeContent() {
 
   const handleClosePanel = useCallback(() => {
     setActivePanel(null);
+  }, []);
+
+  const handleSelectAuthor = useCallback((pubkey: string) => {
+    setSelectedAuthorPubkey(pubkey);
+    setActivePanel('author');
   }, []);
 
   const handleNewArticle = useCallback(() => {
@@ -584,10 +591,18 @@ function HomeContent() {
 
       {/* Collapsible panels - kept mounted to preserve scroll position */}
       <div className={activePanel === 'explore' ? '' : 'hidden'}>
-        <GlobalFeedPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+        <GlobalFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} />
       </div>
       <div className={activePanel === 'following' ? '' : 'hidden'}>
-        <FollowingFeedPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+        <FollowingFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} />
+      </div>
+      <div className={activePanel === 'author' ? '' : 'hidden'}>
+        <AuthorFeedPanel
+          pubkey={selectedAuthorPubkey}
+          onSelectBlog={handleSelectBlog}
+          onClose={handleClosePanel}
+          onClearAuthor={() => setSelectedAuthorPubkey(null)}
+        />
       </div>
       <div className={activePanel === 'blogs' ? '' : 'hidden'}>
         <BlogListPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon, UsersIcon } from 'lucide-react';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon, UsersIcon, UserRoundSearchIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -164,6 +164,16 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                 >
                   <UsersIcon />
                   <span>Following</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Author"
+                  isActive={activePanel === 'author'}
+                  onClick={() => handleClick('author')}
+                >
+                  <UserRoundSearchIcon />
+                  <span>Author</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
