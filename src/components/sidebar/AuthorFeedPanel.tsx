@@ -296,11 +296,6 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
                   className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-muted-foreground/70 flex-shrink-0">
-                        {formatDate(blog.publishedAt || blog.createdAt)}
-                      </span>
-                    </div>
                     <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
                     </h3>
@@ -314,6 +309,9 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
                         className="max-h-32 rounded object-contain mt-2"
                       />
                     )}
+                    <span className="text-xs text-muted-foreground/70 mt-2 block">
+                      {formatDate(blog.publishedAt || blog.createdAt)}
+                    </span>
                   </div>
                 </button>
                 <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">

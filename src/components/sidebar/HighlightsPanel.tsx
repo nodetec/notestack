@@ -180,11 +180,6 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
                 className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs text-muted-foreground/70">
-                      {formatDate(highlight.createdAt)}
-                    </span>
-                  </div>
                   <p className="text-sm text-foreground line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">
                     "{highlight.content}"
                   </p>
@@ -193,6 +188,9 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
                       ...{highlight.context.slice(0, 100)}...
                     </p>
                   )}
+                  <span className="text-xs text-muted-foreground/70 mt-2 block">
+                    {formatDate(highlight.createdAt)}
+                  </span>
                 </div>
               </button>
               <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">

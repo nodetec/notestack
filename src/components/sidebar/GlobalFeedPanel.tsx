@@ -235,12 +235,6 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                           </>
                         )}
                       </span>
-                      <span className="text-xs text-muted-foreground/70">
-                        &middot;
-                      </span>
-                      <span className="text-xs text-muted-foreground/70 flex-shrink-0">
-                        {formatDate(blog.publishedAt || blog.createdAt)}
-                      </span>
                     </div>
                     <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
@@ -255,6 +249,9 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                         className="max-h-32 rounded object-contain mt-2"
                       />
                     )}
+                    <span className="text-xs text-muted-foreground/70 mt-2 block">
+                      {formatDate(blog.publishedAt || blog.createdAt)}
+                    </span>
                   </div>
                 </button>
                 <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
