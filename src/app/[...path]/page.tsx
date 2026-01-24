@@ -605,10 +605,10 @@ function HomeContent() {
 
       {/* Collapsible panels - kept mounted to preserve scroll position */}
       <div className={activePanel === 'explore' ? '' : 'hidden'}>
-        <GlobalFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} />
+        <GlobalFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
       </div>
       <div className={activePanel === 'following' ? '' : 'hidden'}>
-        <FollowingFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} />
+        <FollowingFeedPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
       </div>
       <div className={activePanel === 'author' ? '' : 'hidden'}>
         <AuthorFeedPanel
@@ -616,19 +616,20 @@ function HomeContent() {
           onSelectBlog={handleSelectBlog}
           onClose={handleClosePanel}
           onClearAuthor={() => setSelectedAuthorPubkey(null)}
+          selectedBlogId={selectedBlog?.id}
         />
       </div>
       <div className={activePanel === 'blogs' ? '' : 'hidden'}>
-        <BlogListPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+        <BlogListPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
       </div>
       <div className={activePanel === 'drafts' ? '' : 'hidden'}>
-        <DraftsPanel onSelectDraft={handleSelectDraft} onClose={handleClosePanel} />
+        <DraftsPanel onSelectDraft={handleSelectDraft} onClose={handleClosePanel} selectedDraftId={currentDraftId ?? undefined} />
       </div>
       <div className={activePanel === 'highlights' ? '' : 'hidden'}>
-        <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} />
+        <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} selectedSourcePubkey={selectedBlog?.pubkey} selectedSourceIdentifier={selectedBlog?.dTag} />
       </div>
       <div className={activePanel === 'stacks' ? '' : 'hidden'}>
-        <StacksPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} />
+        <StacksPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
       </div>
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />

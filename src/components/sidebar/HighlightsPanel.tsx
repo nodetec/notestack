@@ -16,6 +16,8 @@ import type { Highlight } from '@/lib/nostr/types';
 interface HighlightsPanelProps {
   onSelectHighlight?: (highlight: Highlight) => void;
   onClose: () => void;
+  selectedSourcePubkey?: string;
+  selectedSourceIdentifier?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -26,7 +28,7 @@ function formatDate(timestamp: number): string {
   });
 }
 
-export default function HighlightsPanel({ onSelectHighlight, onClose }: HighlightsPanelProps) {
+export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSourcePubkey, selectedSourceIdentifier }: HighlightsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingHighlightId, setDeletingHighlightId] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -169,11 +171,13 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
         )}
 
         <ul className="divide-y divide-border">
-          {highlights.map((highlight) => (
-            <li key={highlight.id} className="relative group">
+          {highlights.map((highlight) => {
+            const isSelected = highlight.source?.pubkey === selectedSourcePubkey && highlight.source?.identifier === selectedSourceIdentifier;
+            return (
+            <li key={highlight.id} className="relative group p-2">
               <button
                 onClick={() => onSelectHighlight?.(highlight)}
-                className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
+                className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -203,7 +207,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose }: Highligh
                 </button>
               </div>
             </li>
-          ))}
+          )})}
         </ul>
 
         {/* Infinite scroll sentinel */}

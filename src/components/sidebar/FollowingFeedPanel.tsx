@@ -28,6 +28,7 @@ interface FollowingFeedPanelProps {
   onSelectBlog?: (blog: Blog) => void;
   onSelectAuthor?: (pubkey: string) => void;
   onClose: () => void;
+  selectedBlogId?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -43,7 +44,7 @@ function truncateNpub(pubkey: string): string {
   return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
-export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClose }: FollowingFeedPanelProps) {
+export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClose, selectedBlogId }: FollowingFeedPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
@@ -221,11 +222,12 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
             const isProfileLoading = !profile && (isLoadingProfiles || isFetchingProfiles);
             const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
             const displayName = profile?.name || truncateNpub(blog.pubkey);
+            const isSelected = blog.id === selectedBlogId;
             return (
-              <li key={blog.id} className="relative group">
+              <li key={blog.id} className="relative group p-2">
                 <button
                   onClick={() => onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture })}
-                  className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
+                  className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -273,11 +275,9 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                     <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
                     </h3>
-                    {blog.summary && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {blog.summary}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                      {blog.summary}
+                    </p>
                     {thumbnail && (
                       <img
                         src={thumbnail}

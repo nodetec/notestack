@@ -10,6 +10,7 @@ import { extractFirstImage } from '@/lib/utils/markdown';
 interface DraftsPanelProps {
   onSelectDraft?: (draftId: string) => void;
   onClose: () => void;
+  selectedDraftId?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -39,7 +40,7 @@ function extractPreview(content: string): { title: string; preview: string } {
   return { title, preview: previewLines || 'No content' };
 }
 
-export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps) {
+export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }: DraftsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const drafts = useDraftStore((state) => state.drafts);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
@@ -107,11 +108,12 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
               const { title, preview } = extractPreview(draft.content);
               const isLinked = !!draft.linkedBlog;
               const thumbnail = extractFirstImage(draft.content);
+              const isSelected = draft.id === selectedDraftId;
               return (
-                <li key={draft.id} className="relative group">
+                <li key={draft.id} className="relative group p-2">
                   <button
                     onClick={() => onSelectDraft?.(draft.id)}
-                    className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
+                    className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -125,11 +127,9 @@ export default function DraftsPanel({ onSelectDraft, onClose }: DraftsPanelProps
                           </span>
                         )}
                       </div>
-                      {preview && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {preview}
-                        </p>
-                      )}
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                        {preview}
+                      </p>
                       {thumbnail && (
                         <img
                           src={thumbnail}

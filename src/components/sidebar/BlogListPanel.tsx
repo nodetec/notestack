@@ -26,6 +26,7 @@ import type { Blog } from '@/lib/nostr/types';
 interface BlogListPanelProps {
   onSelectBlog?: (blog: Blog) => void;
   onClose: () => void;
+  selectedBlogId?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -41,7 +42,7 @@ function truncateNpub(pubkey: string): string {
   return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
-export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelProps) {
+export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }: BlogListPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
@@ -197,11 +198,12 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
           {blogs.map((blog) => {
             const hasDraftEdit = !!findDraftByLinkedBlog(blog.pubkey, blog.dTag);
             const thumbnail = blog.image || extractFirstImage(blog.content);
+            const isSelected = blog.id === selectedBlogId;
             return (
-            <li key={blog.id} className="relative group">
+            <li key={blog.id} className="relative group p-2">
               <button
                 onClick={() => onSelectBlog?.(blog)}
-                className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
+                className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -215,11 +217,9 @@ export default function BlogListPanel({ onSelectBlog, onClose }: BlogListPanelPr
                       </span>
                     )}
                   </div>
-                  {blog.summary && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {blog.summary}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                    {blog.summary}
+                  </p>
                   {thumbnail && (
                     <img
                       src={thumbnail}

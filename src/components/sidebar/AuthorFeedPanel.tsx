@@ -27,6 +27,7 @@ interface AuthorFeedPanelProps {
   onSelectBlog?: (blog: Blog) => void;
   onClose: () => void;
   onClearAuthor: () => void;
+  selectedBlogId?: string;
 }
 
 function formatDate(timestamp: number): string {
@@ -65,7 +66,7 @@ function decodeNpubOrNprofile(input: string): string | null {
   }
 }
 
-export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClearAuthor }: AuthorFeedPanelProps) {
+export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClearAuthor, selectedBlogId }: AuthorFeedPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState('');
@@ -287,11 +288,12 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
         <ul className="divide-y divide-border">
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
+            const isSelected = blog.id === selectedBlogId;
             return (
-              <li key={blog.id} className="relative group">
+              <li key={blog.id} className="relative group p-2">
                 <button
                   onClick={() => onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture })}
-                  className="w-full text-left p-3 pr-10 hover:bg-sidebar-accent transition-colors"
+                  className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -302,11 +304,9 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
                     <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
                     </h3>
-                    {blog.summary && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {blog.summary}
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                      {blog.summary}
+                    </p>
                     {thumbnail && (
                       <img
                         src={thumbnail}

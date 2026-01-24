@@ -16,6 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 interface StacksPanelProps {
   onSelectBlog?: (blog: Blog) => void;
   onClose: () => void;
+  selectedBlogId?: string;
 }
 
 
@@ -25,9 +26,10 @@ interface StackItemDisplayProps {
   onSelectBlog: (blog: Blog) => void;
   onDeleteItem: (stack: Stack, item: StackItem) => void;
   isDeleting: boolean;
+  selectedBlogId?: string;
 }
 
-function StackItemDisplay({ stack, itemIndex, onSelectBlog, onDeleteItem, isDeleting }: StackItemDisplayProps) {
+function StackItemDisplay({ stack, itemIndex, onSelectBlog, onDeleteItem, isDeleting, selectedBlogId }: StackItemDisplayProps) {
   const [blog, setBlog] = useState<Blog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
@@ -83,20 +85,19 @@ function StackItemDisplay({ stack, itemIndex, onSelectBlog, onDeleteItem, isDele
     );
   }
 
+  const isSelected = blog.id === selectedBlogId;
   return (
-    <div className="group relative">
+    <div className="group relative p-2">
       <button
         onClick={() => onSelectBlog(blog)}
-        className="w-full text-left px-4 py-2 pr-10 hover:bg-sidebar-accent transition-colors"
+        className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
       >
         <p className="text-sm text-foreground line-clamp-2">
           {blog.title || 'Untitled'}
         </p>
-        {blog.summary && (
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-            {blog.summary}
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 min-h-[1rem]">
+          {blog.summary}
+        </p>
       </button>
       <button
         onClick={(e) => {
@@ -125,9 +126,10 @@ interface StackDisplayProps {
   onDeleteItem: (stack: Stack, item: StackItem) => void;
   isDeletingStack: boolean;
   deletingItemKey: string | null;
+  selectedBlogId?: string;
 }
 
-function StackDisplay({ stack, onSelectBlog, onDeleteStack, onDeleteItem, isDeletingStack, deletingItemKey }: StackDisplayProps) {
+function StackDisplay({ stack, onSelectBlog, onDeleteStack, onDeleteItem, isDeletingStack, deletingItemKey, selectedBlogId }: StackDisplayProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -178,6 +180,7 @@ function StackDisplay({ stack, onSelectBlog, onDeleteStack, onDeleteItem, isDele
                   onSelectBlog={onSelectBlog}
                   onDeleteItem={onDeleteItem}
                   isDeleting={deletingItemKey === itemKey}
+                  selectedBlogId={selectedBlogId}
                 />
               );
             })
@@ -188,7 +191,7 @@ function StackDisplay({ stack, onSelectBlog, onDeleteStack, onDeleteItem, isDele
   );
 }
 
-export default function StacksPanel({ onSelectBlog, onClose }: StacksPanelProps) {
+export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: StacksPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingStackId, setDeletingStackId] = useState<string | null>(null);
   const [deletingItemKey, setDeletingItemKey] = useState<string | null>(null);
@@ -381,6 +384,7 @@ export default function StacksPanel({ onSelectBlog, onClose }: StacksPanelProps)
               onDeleteItem={handleDeleteItem}
               isDeletingStack={deletingStackId === stack.dTag}
               deletingItemKey={deletingItemKey}
+              selectedBlogId={selectedBlogId}
             />
           ))}
         </div>
