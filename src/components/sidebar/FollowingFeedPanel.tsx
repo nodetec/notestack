@@ -100,7 +100,7 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
   const profileRelays = activeRelay
     ? [activeRelay, 'wss://purplepag.es']
     : [];
-  const { data: profiles, isLoading: isLoadingProfiles, getProfile } = useProfiles(authorPubkeys, profileRelays);
+  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(authorPubkeys, profileRelays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
@@ -220,8 +220,8 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
             const thumbnail = blog.image || extractFirstImage(blog.content);
             // getProfile checks both batch result and individual cache (from AuthorFeedPanel)
             const profile = getProfile(blog.pubkey);
-            // Show skeleton while profiles are loading, fallback to dicebear/npub only when loaded but not found
-            const isProfileLoading = isLoadingProfiles || !profiles;
+            // Show skeleton while this specific profile is loading, fallback to dicebear/npub only when loaded but not found
+            const isProfileLoading = !profile && (isLoadingProfiles || isFetchingProfiles);
             const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
             const displayName = profile?.name || truncateNpub(blog.pubkey);
             return (
