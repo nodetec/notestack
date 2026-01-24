@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { fetchProfiles, type Profile } from '@/lib/nostr/profiles';
 
 /**
  * Hook to fetch profiles for a list of pubkeys
  * Uses React Query for caching and populates individual profile cache entries
+ * Returns a getProfile function that checks both batch and individual cache
  */
 export function useProfiles(pubkeys: string[], relay?: string | string[]) {
   const queryClient = useQueryClient();
@@ -33,17 +34,29 @@ export function useProfiles(pubkeys: string[], relay?: string | string[]) {
     }
   }, [query.data, queryClient, relayKey]);
 
-  return query;
+  // Helper to get a profile, checking both batch result and individual cache
+  const getProfile = useCallback((pubkey: string): Profile | undefined => {
+    // First check batch result
+    const fromBatch = query.data?.get(pubkey);
+    if (fromBatch) return fromBatch;
+
+    // Fall back to individual cache (may have been fetched by useProfile)
+    return queryClient.getQueryData<Profile>(['profile', pubkey, relayKey]) ?? undefined;
+  }, [query.data, queryClient, relayKey]);
+
+  return { ...query, getProfile };
 }
 
 /**
  * Hook to fetch a single profile by pubkey
  * Checks individual cache first (populated by useProfiles batch fetches)
+ * Also updates batch query caches so feed panels re-render with the new profile
  */
 export function useProfile(pubkey: string | null, relays: string[]) {
+  const queryClient = useQueryClient();
   const relayKey = relays.join('|');
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['profile', pubkey, relayKey],
     queryFn: async () => {
       const profiles = await fetchProfiles([pubkey!], relays);
@@ -52,4 +65,25 @@ export function useProfile(pubkey: string | null, relays: string[]) {
     enabled: !!pubkey && relayKey.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // When a profile is fetched, update any batch queries that include this pubkey
+  useEffect(() => {
+    if (query.data && pubkey) {
+      // Find and update all batch queries that might include this pubkey
+      const queries = queryClient.getQueriesData<Map<string, Profile>>({
+        queryKey: ['profiles', relayKey],
+      });
+
+      for (const [queryKey, data] of queries) {
+        if (data && !data.has(pubkey)) {
+          // Update the batch Map with the new profile
+          const updatedMap = new Map(data);
+          updatedMap.set(pubkey, query.data);
+          queryClient.setQueryData(queryKey, updatedMap);
+        }
+      }
+    }
+  }, [query.data, pubkey, queryClient, relayKey]);
+
+  return query;
 }

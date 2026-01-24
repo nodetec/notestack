@@ -79,7 +79,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose 
   const profileRelays = activeRelay
     ? [activeRelay, 'wss://purplepag.es']
     : [];
-  const { data: profiles } = useProfiles(pubkeys, profileRelays);
+  const { data: profiles, isLoading: isLoadingProfiles, getProfile } = useProfiles(pubkeys, profileRelays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
@@ -188,7 +188,10 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose 
         <ul className="divide-y divide-border">
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
-            const profile = profiles?.get(blog.pubkey);
+            // getProfile checks both batch result and individual cache (from AuthorFeedPanel)
+            const profile = getProfile(blog.pubkey);
+            // Show skeleton while profiles are loading, fallback to dicebear/npub only when loaded but not found
+            const isProfileLoading = isLoadingProfiles || !profiles;
             const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
             const displayName = profile?.name || truncateNpub(blog.pubkey);
             return (
@@ -215,14 +218,23 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose 
                         }}
                         className="flex items-center gap-2 hover:underline cursor-pointer"
                       >
-                        <img
-                          src={avatarUrl}
-                          alt=""
-                          className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                        />
-                        <span className="text-xs text-muted-foreground truncate">
-                          {displayName}
-                        </span>
+                        {isProfileLoading ? (
+                          <>
+                            <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                            <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                          </>
+                        ) : (
+                          <>
+                            <img
+                              src={avatarUrl}
+                              alt=""
+                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                            />
+                            <span className="text-xs text-muted-foreground truncate">
+                              {displayName}
+                            </span>
+                          </>
+                        )}
                       </span>
                       <span className="text-xs text-muted-foreground/70">
                         &middot;
