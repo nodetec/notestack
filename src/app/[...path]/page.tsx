@@ -147,6 +147,7 @@ function HomeContent() {
   const createDraftFromBlog = useDraftStore((state) => state.createDraftFromBlog);
   const getDraft = useDraftStore((state) => state.getDraft);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
+  const findDraftByLinkedBlog = useDraftStore((state) => state.findDraftByLinkedBlog);
 
   // Determine current draft ID
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -418,10 +419,14 @@ function HomeContent() {
   const isEditing = !!draft?.linkedBlog;
 
   // Determine editor content and key
-  // Use consistent key format based on blog identity (pubkey:dTag) to prevent remount when transitioning from blog to draft
+  // Prefix with view mode to differentiate blog view from draft view of same article
   const blogIdentityKey = selectedBlog ? `${selectedBlog.pubkey}:${selectedBlog.dTag}` : null;
   const linkedBlogKey = draft?.linkedBlog ? `${draft.linkedBlog.pubkey}:${draft.linkedBlog.dTag}` : null;
-  const editorKey = blogIdentityKey || linkedBlogKey || currentDraftId || 'new';
+  const editorKey = blogIdentityKey
+    ? `blog:${blogIdentityKey}`
+    : linkedBlogKey
+      ? `draft:${linkedBlogKey}`
+      : currentDraftId || 'new';
 
   // Store initial content in a ref to prevent re-renders from changing it
   // Only update when the editor key changes (switching to a different blog/draft) or mode changes
@@ -461,6 +466,13 @@ function HomeContent() {
     if (selectedBlog && editorRef.current) {
       // Small delay to let the keystroke be processed first
       setTimeout(() => {
+        // Check if a draft already exists for this blog
+        const existingDraft = findDraftByLinkedBlog(selectedBlog.pubkey, selectedBlog.dTag);
+        if (existingDraft) {
+          router.replace(`/draft/${existingDraft.id}`);
+          return;
+        }
+
         const markdown = editorRef.current?.getMarkdown() ?? '';
         const draftId = createDraftFromBlog(markdown, {
           pubkey: selectedBlog.pubkey,
@@ -473,7 +485,7 @@ function HomeContent() {
         router.replace(`/draft/${draftId}`);
       }, 0);
     }
-  }, [selectedBlog, createDraftFromBlog, router]);
+  }, [selectedBlog, createDraftFromBlog, findDraftByLinkedBlog, router]);
 
   // Extract first H1 heading from markdown content
   const getFirstH1 = (content: string): string | null => {
@@ -544,6 +556,13 @@ function HomeContent() {
       }
       console.groupEnd();
 
+      // Check if a draft already exists for this blog
+      const existingDraft = findDraftByLinkedBlog(selectedBlog.pubkey, selectedBlog.dTag);
+      if (existingDraft) {
+        router.replace(`/draft/${existingDraft.id}`);
+        return;
+      }
+
       const draftId = createDraftFromBlog(markdown, {
         pubkey: selectedBlog.pubkey,
         dTag: selectedBlog.dTag,
@@ -554,7 +573,7 @@ function HomeContent() {
       });
       router.replace(`/draft/${draftId}`);
     }
-  }, [selectedBlog, createDraftFromBlog, router]);
+  }, [selectedBlog, createDraftFromBlog, findDraftByLinkedBlog, router]);
 
   // Keep ref updated so navigation handlers can call it
   useEffect(() => {
@@ -705,15 +724,19 @@ function HomeContent() {
                 size="sm"
                 variant="secondary"
                 onClick={() => {
-                  const markdown = editorRef.current?.getMarkdown() ?? selectedBlog.content;
-                  const draftId = createDraftFromBlog(markdown, {
-                    pubkey: selectedBlog.pubkey,
-                    dTag: selectedBlog.dTag,
-                    title: selectedBlog.title,
-                    summary: selectedBlog.summary,
-                    image: selectedBlog.image,
-                    tags: selectedBlog.tags,
-                  });
+                  // Check if a draft already exists for this blog
+                  const existingDraft = findDraftByLinkedBlog(selectedBlog.pubkey, selectedBlog.dTag);
+                  const draftId = existingDraft?.id ?? createDraftFromBlog(
+                    editorRef.current?.getMarkdown() ?? selectedBlog.content,
+                    {
+                      pubkey: selectedBlog.pubkey,
+                      dTag: selectedBlog.dTag,
+                      title: selectedBlog.title,
+                      summary: selectedBlog.summary,
+                      image: selectedBlog.image,
+                      tags: selectedBlog.tags,
+                    }
+                  );
                   // Update state directly and URL without triggering navigation
                   setSelectedBlog(null);
                   setCurrentDraftId(draftId);
