@@ -641,7 +641,7 @@ function HomeContent() {
         className={`bg-background transition-[margin] duration-200 ease-linear ${activePanel ? 'sm:ml-72' : ''}`}
       >
         <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-border bg-background gap-2">
-          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 overflow-hidden">
             <SidebarTrigger className="lg:hidden" />
             {isLoggedIn && currentDraftId && (
               <Tooltip>
@@ -669,7 +669,7 @@ function HomeContent() {
             )}
             {!selectedBlog && !isLoadingBlog && <SaveStatusIndicator className="hidden lg:flex" />}
             {selectedBlog && selectedBlog.pubkey !== pubkey && (
-              <div className="hidden lg:flex items-center gap-2 min-w-0">
+              <div className="hidden md:flex items-center gap-2 min-w-0 overflow-hidden max-w-48 md:max-w-60 lg:max-w-64">
                 {isLoadingAuthor && !hasEmbeddedAuthor ? (
                   <>
                     <div className="w-6 h-6 rounded-full bg-muted animate-pulse flex-shrink-0" />
