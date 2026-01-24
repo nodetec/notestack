@@ -216,7 +216,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose 
                             onSelectAuthor?.(blog.pubkey);
                           }
                         }}
-                        className="flex items-center gap-2 hover:underline cursor-pointer"
+                        className="flex items-center gap-2 hover:underline cursor-pointer min-w-0 overflow-hidden"
                       >
                         {isProfileLoading ? (
                           <>
