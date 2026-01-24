@@ -97,10 +97,7 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
 
   // Fetch profiles for all blog authors
   const authorPubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
-  const profileRelays = activeRelay
-    ? [activeRelay, 'wss://purplepag.es']
-    : [];
-  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(authorPubkeys, profileRelays);
+  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(authorPubkeys, 'wss://purplepag.es');
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
