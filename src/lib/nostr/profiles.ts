@@ -1,4 +1,4 @@
-import { create, windowScheduler } from '@yornaath/batshit';
+import { create, windowScheduler, type Batcher } from '@yornaath/batshit';
 import { nip19, SimplePool } from 'nostr-tools';
 import type { NostrProfile } from '@/components/editor';
 import type { NostrEvent } from './types';
@@ -112,7 +112,8 @@ function normalizeRelays(relay?: string | string[]): string[] {
   return filtered.length > 0 ? filtered : DEFAULT_PROFILE_RELAYS;
 }
 
-const profileBatchers = new Map<string, ReturnType<typeof create>>();
+type ProfileBatcher = Batcher<Record<string, NostrProfile | null>, string, NostrProfile | null>;
+const profileBatchers = new Map<string, ProfileBatcher>();
 
 function getProfileBatcher(relay: string | string[]) {
   const relays = normalizeRelays(relay);
@@ -120,7 +121,7 @@ function getProfileBatcher(relay: string | string[]) {
   const existing = profileBatchers.get(relayKey);
   if (existing) return existing;
 
-  const batcher = create({
+  const batcher: ProfileBatcher = create({
     fetcher: async (npubs: string[]): Promise<Record<string, NostrProfile | null>> => {
       console.log('[profileBatcher] Fetching profiles for:', npubs);
 
