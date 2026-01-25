@@ -63,23 +63,24 @@ function ArticleCard({ blog, profile, relays }: { blog: Blog; profile?: { name?:
       className="text-left p-6 bg-card border border-border rounded-lg hover:border-primary/50 transition-colors group h-full w-full flex flex-col min-w-0 overflow-hidden"
     >
       <div className="flex items-center gap-2 mb-3 min-w-0">
+        {/*eslint-disable-next-line @next/next/no-img-element*/}
         <img
           src={avatarUrl}
           alt=""
-          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+          className="w-6 h-6 rounded-full object-cover shrink-0"
         />
         <span className="text-sm text-muted-foreground truncate min-w-0">
           {displayName}
         </span>
-        <span className="text-sm text-muted-foreground/70 flex-shrink-0">&middot;</span>
-        <span className="text-sm text-muted-foreground/70 flex-shrink-0 whitespace-nowrap">
+        <span className="text-sm text-muted-foreground/70 shrink-0">&middot;</span>
+        <span className="text-sm text-muted-foreground/70 shrink-0 whitespace-nowrap">
           {formatDate(blog.publishedAt || blog.createdAt)}
         </span>
       </div>
       <h3 className="text-lg font-semibold text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors line-clamp-2 break-words">
         {blog.title || 'Untitled'}
       </h3>
-      <p className="text-muted-foreground mt-2 line-clamp-4 text-sm flex-1 break-words">
+      <p className="text-muted-foreground mt-2 line-clamp-4 text-sm flex-1 wrap-break-word">
         {blog.summary || ''}
       </p>
     </button>
@@ -153,7 +154,7 @@ export default function LandingPage() {
               </button>
             </nav>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-md hover:bg-muted text-muted-foreground transition-colors"

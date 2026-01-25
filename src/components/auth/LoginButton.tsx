@@ -93,6 +93,7 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
             <div className="w-7 h-7 rounded-full bg-muted animate-pulse" />
           ) : (
             <button className="w-7 h-7 rounded-full overflow-hidden hover:ring-2 hover:ring-border transition-shadow">
+              {/*eslint-disable-next-line @next/next/no-img-element*/}
               <img
                 src={avatarSrc!}
                 alt={profile?.name || 'Profile'}

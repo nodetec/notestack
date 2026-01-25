@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { NostrEditor, type NostrEditorHandle, type HighlightSource, type Highlight } from '@/components/editor';
+import { NostrEditor, type NostrEditorHandle, type Highlight } from '@/components/editor';
 import MarkdownEditor, { type MarkdownEditorHandle } from '@/components/editor/MarkdownEditor';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/sidebar/AppSidebar';
@@ -448,46 +448,6 @@ function HomeContent() {
     hasUserTyped.current = false;
   }, [editorKey]);
 
-  // Track when user actually types and create draft on first edit
-  const handleEditorKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (hasUserTyped.current) return; // Already handled
-
-    // Ignore non-content-modifying keys
-    const ignoredKeys = [
-      'Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'NumLock', 'ScrollLock',
-      'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-      'Home', 'End', 'PageUp', 'PageDown',
-      'Escape', 'Tab', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
-    ];
-    if (ignoredKeys.includes(e.key)) return;
-
-    hasUserTyped.current = true;
-
-    // If viewing a blog, create draft on first content-modifying keystroke
-    if (selectedBlog && editorRef.current) {
-      // Small delay to let the keystroke be processed first
-      setTimeout(() => {
-        // Check if a draft already exists for this blog
-        const existingDraft = findDraftByLinkedBlog(selectedBlog.pubkey, selectedBlog.dTag);
-        if (existingDraft) {
-          router.replace(`/draft/${existingDraft.id}`);
-          return;
-        }
-
-        const markdown = editorRef.current?.getMarkdown() ?? '';
-        const draftId = createDraftFromBlog(markdown, {
-          pubkey: selectedBlog.pubkey,
-          dTag: selectedBlog.dTag,
-          title: selectedBlog.title,
-          summary: selectedBlog.summary,
-          image: selectedBlog.image,
-          tags: selectedBlog.tags,
-        });
-        router.replace(`/draft/${draftId}`);
-      }, 0);
-    }
-  }, [selectedBlog, createDraftFromBlog, findDraftByLinkedBlog, router]);
-
   // Extract first H1 heading from markdown content
   const getFirstH1 = (content: string): string | null => {
     const match = content.match(/^#\s+(.+)$/m);
@@ -524,62 +484,6 @@ function HomeContent() {
       .replace(/\n+/g, '\n')          // Collapse newlines again after stripping
       .trim();
   };
-
-  // Check if blog has been edited and create draft if so
-  const checkBlogForEdits = useCallback(() => {
-    if (!selectedBlog || !hasUserTyped.current) return;
-    if (!editorRef.current) return;
-
-    const markdown = editorRef.current?.getMarkdown() ?? '';
-    const normalizedOriginal = normalizeForComparison(selectedBlog.content);
-    const normalizedEditor = normalizeForComparison(markdown);
-
-    if (normalizedEditor !== normalizedOriginal) {
-      // DEBUG: Keep these logs to diagnose unexpected draft creation - DO NOT REMOVE
-      console.group('Draft created from blog view');
-      console.log('Blog title:', selectedBlog.title);
-      console.log('Original length:', selectedBlog.content.length, '| Normalized:', normalizedOriginal.length);
-      console.log('Editor length:', markdown.length, '| Normalized:', normalizedEditor.length);
-      console.log('--- Normalized original ---');
-      console.log(JSON.stringify(normalizedOriginal));
-      console.log('--- Normalized editor ---');
-      console.log(JSON.stringify(normalizedEditor));
-      // Find first difference
-      for (let i = 0; i < Math.max(normalizedOriginal.length, normalizedEditor.length); i++) {
-        if (normalizedOriginal[i] !== normalizedEditor[i]) {
-          console.log(`First difference at index ${i}:`);
-          console.log(`  Original char: ${JSON.stringify(normalizedOriginal[i])} (code: ${normalizedOriginal.charCodeAt(i)})`);
-          console.log(`  Editor char: ${JSON.stringify(normalizedEditor[i])} (code: ${normalizedEditor.charCodeAt(i)})`);
-          console.log(`  Context original: ${JSON.stringify(normalizedOriginal.slice(Math.max(0, i - 20), i + 20))}`);
-          console.log(`  Context editor: ${JSON.stringify(normalizedEditor.slice(Math.max(0, i - 20), i + 20))}`);
-          break;
-        }
-      }
-      console.groupEnd();
-
-      // Check if a draft already exists for this blog
-      const existingDraft = findDraftByLinkedBlog(selectedBlog.pubkey, selectedBlog.dTag);
-      if (existingDraft) {
-        router.replace(`/draft/${existingDraft.id}`);
-        return;
-      }
-
-      const draftId = createDraftFromBlog(markdown, {
-        pubkey: selectedBlog.pubkey,
-        dTag: selectedBlog.dTag,
-        title: selectedBlog.title,
-        summary: selectedBlog.summary,
-        image: selectedBlog.image,
-        tags: selectedBlog.tags,
-      });
-      router.replace(`/draft/${draftId}`);
-    }
-  }, [selectedBlog, createDraftFromBlog, findDraftByLinkedBlog, router]);
-
-  // Keep ref updated so navigation handlers can call it
-  useEffect(() => {
-    checkBlogForEditsRef.current = checkBlogForEdits;
-  }, [checkBlogForEdits]);
 
   // Handle editor changes - only for draft autosave
   const handleEditorChange = useCallback(() => {
@@ -642,7 +546,7 @@ function HomeContent() {
       <SidebarInset
         className={`bg-background transition-[margin] duration-200 ease-linear ${activePanel ? 'sm:ml-72' : ''}`}
       >
-        <header className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-border bg-background gap-2">
+        <header className="sticky top-0 z-40 shrink-0 flex items-center justify-between px-2 lg:px-3 py-2 border-b border-border bg-background gap-2">
           <div className="flex items-center gap-2 min-w-0 overflow-hidden">
             <SidebarTrigger className="lg:hidden" />
             {isLoggedIn && currentDraftId && (
@@ -674,7 +578,7 @@ function HomeContent() {
               <div className="hidden md:flex items-center gap-2 min-w-0 overflow-hidden max-w-48 md:max-w-60 lg:max-w-64">
                 {isLoadingAuthor && !hasEmbeddedAuthor ? (
                   <>
-                    <div className="w-6 h-6 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                    <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
                     <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                   </>
                 ) : (
@@ -688,13 +592,13 @@ function HomeContent() {
             )}
             {isLoadingBlog && (
               <div className="hidden lg:flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
                 <div className="h-4 w-20 bg-muted rounded animate-pulse" />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0" />
-          <div className="flex items-center gap-1 lg:gap-2 justify-end flex-shrink-0">
+          <div className="flex items-center gap-1 lg:gap-2 justify-end shrink-0">
             {isLoggedIn && selectedBlog && (
               <ZapButton blog={selectedBlog} />
             )}
@@ -801,7 +705,7 @@ function HomeContent() {
           <div className="min-h-full w-full flex flex-col">
             {shouldShowTitle && (
               <div className="editor-root pt-8">
-                <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-source-serif-4)]">
+                <h1 className="text-3xl font-bold text-foreground font-(family-name:--font-source-serif-4)">
                   {selectedBlog?.title}
                 </h1>
               </div>

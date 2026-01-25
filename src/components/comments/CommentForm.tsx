@@ -54,7 +54,7 @@ export default function CommentForm({
         placeholder={placeholder}
         disabled={isSubmitting}
         autoFocus={autoFocus}
-        className="min-h-[80px] resize-none"
+        className="min-h-20 resize-none"
       />
       <div className="flex justify-end gap-2">
         {onCancel && (

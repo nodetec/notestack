@@ -92,7 +92,7 @@ function LoginContent() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="mx-auto grid w-[350px] gap-6">
+      <div className="mx-auto grid w-87.5 gap-6">
         <div className="flex w-full flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Sign in to NED

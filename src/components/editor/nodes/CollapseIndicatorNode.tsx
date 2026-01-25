@@ -6,8 +6,6 @@ import { EllipsisIcon } from 'lucide-react';
 import {
   $applyNodeReplacement,
   $createRangeSelection,
-  $getSelection,
-  $isRangeSelection,
   $setSelection,
   createCommand,
   DecoratorNode,

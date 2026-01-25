@@ -137,10 +137,11 @@ export default function AuthorDropdown({
   if (!userPubkey || isOwnProfile) {
     return (
       <div className="flex items-center gap-2 min-w-0">
+        {/*eslint-disable-next-line @next/next/no-img-element*/}
         <img
           src={avatarUrl}
           alt={displayName}
-          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+          className="w-6 h-6 rounded-full object-cover shrink-0"
         />
         <span className="text-sm text-muted-foreground truncate">
           {displayName}
@@ -156,15 +157,16 @@ export default function AuthorDropdown({
           className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
           title={displayName}
         >
+          {/*eslint-disable-next-line @next/next/no-img-element*/}
           <img
             src={avatarUrl}
             alt={displayName}
-            className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+            className="w-6 h-6 rounded-full object-cover shrink-0"
           />
           <span className="text-sm text-muted-foreground truncate">
             {displayName}
           </span>
-          <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+          <ChevronDownIcon className="w-3 h-3 text-muted-foreground shrink-0" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">

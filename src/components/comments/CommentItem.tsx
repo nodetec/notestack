@@ -79,6 +79,7 @@ export default function CommentItem({
         {/* Author info */}
         <div className="flex items-center gap-2 mb-1">
           {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatar}
               alt={displayName}
@@ -98,7 +99,7 @@ export default function CommentItem({
         </div>
 
         {/* Comment content */}
-        <p className="text-sm text-foreground/80 whitespace-pre-wrap break-words">
+        <p className="text-sm text-foreground/80 whitespace-pre-wrap wrap-break-word">
           {comment.content}
         </p>
 
