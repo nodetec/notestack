@@ -80,6 +80,7 @@ function LinkComponent({
   const popupRef = useRef<HTMLDivElement>(null);
 
   const resolvedDisplayText = displayText || getDisplayTextFromUrl(url);
+  const isAnchorLink = url.startsWith('#');
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -153,14 +154,25 @@ function LinkComponent({
     <span ref={containerRef} className="relative inline-flex items-center gap-1">
       <a
         href={url}
-        target="_blank"
-        rel="noopener noreferrer"
+        target={isAnchorLink ? undefined : '_blank'}
+        rel={isAnchorLink ? undefined : 'noopener noreferrer'}
         className="text-primary hover:underline"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isAnchorLink) {
+            e.preventDefault();
+            const targetId = url.slice(1);
+            if (!targetId) return;
+            const target = document.getElementById(targetId);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }}
       >
         {resolvedDisplayText}
       </a>
-      {isEditable && (
+      {isEditable && !isAnchorLink && (
         <button
           onClick={handleEditClick}
           className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-foreground rounded"

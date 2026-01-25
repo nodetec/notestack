@@ -138,6 +138,15 @@
   padding-left: max(4.5rem, calc((100% - 44rem) / 2));
 }
 
+.editor-root h1,
+.editor-root h2,
+.editor-root h3,
+.editor-root h4,
+.editor-root h5,
+.editor-root h6 {
+  scroll-margin-top: 5rem;
+}
+
 /* Prism markdown highlighting (site-coordinated theme) */
 :root {
   --code-comment: oklch(0.54 0.02 70);

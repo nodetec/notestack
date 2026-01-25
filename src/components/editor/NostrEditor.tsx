@@ -63,6 +63,7 @@ import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
 import HighlightPlugin from './plugins/HighlightPlugin';
 import GutterActionsPlugin from './plugins/GutterActionsPlugin';
 import CodeSnippetPublishPlugin from './plugins/CodeSnippetPublishPlugin';
+import HeadingAnchorPlugin from './plugins/HeadingAnchorPlugin';
 
 // Source information for NIP-84 highlights
 export interface HighlightSource {
@@ -225,6 +226,7 @@ function EditorInner({
       </LexicalErrorBoundary>
       <GutterActionsPlugin />
       <CodeSnippetPublishPlugin />
+      <HeadingAnchorPlugin />
       {onChange && (
         <OnChangePlugin
           onChange={(editorState) => onChange(editorState)}
