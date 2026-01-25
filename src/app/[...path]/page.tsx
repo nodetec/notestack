@@ -643,7 +643,7 @@ function HomeContent() {
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />
       )}
-      {activePanel === 'profile' && pubkey && (
+      {activePanel === 'profile' && (
         <ProfilePanel onClose={handleClosePanel} pubkey={pubkey} />
       )}
 
