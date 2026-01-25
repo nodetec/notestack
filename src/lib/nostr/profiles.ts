@@ -4,10 +4,10 @@ import type { NostrProfile } from '@/components/editor';
 import type { NostrEvent } from './types';
 
 const DEFAULT_PROFILE_RELAYS = [
-  'wss://relay.damus.io',
-  'wss://nos.lol',
-  'wss://relay.primal.net',
   'wss://purplepag.es',
+  // 'wss://relay.damus.io',
+  // 'wss://nos.lol',
+  // 'wss://relay.primal.net',
 ];
 
 export interface Profile {
