@@ -82,6 +82,7 @@ export interface Stack {
   image?: string;
   createdAt: number;
   items: StackItem[];
+  rawEvent?: NostrEvent; // Full event for broadcast/debug
 }
 
 export function eventToStack(event: NostrEvent): Stack {
@@ -115,6 +116,7 @@ export function eventToStack(event: NostrEvent): Stack {
     image: getTag('image'),
     createdAt: event.created_at,
     items,
+    rawEvent: event,
   };
 }
 

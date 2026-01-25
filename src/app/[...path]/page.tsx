@@ -638,7 +638,12 @@ function HomeContent() {
         <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} selectedHighlightId={selectedHighlightId} />
       </div>
       <div className={activePanel === 'stacks' ? '' : 'hidden'}>
-        <StacksPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
+        <StacksPanel
+          onSelectBlog={handleSelectBlog}
+          onSelectAuthor={handleSelectAuthor}
+          onClose={handleClosePanel}
+          selectedBlogId={selectedBlog?.id}
+        />
       </div>
       {activePanel === 'relays' && (
         <SettingsPanel onClose={handleClosePanel} />

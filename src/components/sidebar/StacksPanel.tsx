@@ -1,18 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, Trash2Icon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon } from 'lucide-react';
+import { XIcon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStackStore } from '@/lib/stores/stackStore';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { fetchUserStacks, deleteStack, publishStack } from '@/lib/nostr/stacks';
-import { fetchBlogByAddress } from '@/lib/nostr/fetch';
+import { fetchBlogsByAddresses } from '@/lib/nostr/fetch';
 import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import type { Blog, Stack, StackItem } from '@/lib/nostr/types';
 import { useSidebar } from '@/components/ui/sidebar';
 import PanelRail from './PanelRail';
+import { broadcastEvent } from '@/lib/nostr/publish';
+import EventJsonDialog from '@/components/ui/EventJsonDialog';
+import { toast } from 'sonner';
 import { useProfiles } from '@/lib/hooks/useProfiles';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { generateAvatar } from '@/lib/avatar';
@@ -39,6 +42,7 @@ function truncateNpub(pubkey: string): string {
 
 interface StacksPanelProps {
   onSelectBlog?: (blog: Blog) => void;
+  onSelectAuthor?: (pubkey: string) => void;
   onClose: () => void;
   selectedBlogId?: string;
 }
@@ -49,6 +53,7 @@ interface StackItemDisplayProps {
   item: StackItem;
   blog: Blog | null;
   onSelectBlog: (blog: Blog) => void;
+  onSelectAuthor?: (pubkey: string) => void;
   onDeleteItem: (stack: Stack, item: StackItem) => void;
   isDeleting: boolean;
   selectedBlogId?: string;
@@ -62,6 +67,7 @@ function StackItemDisplay({
   item,
   blog,
   onSelectBlog,
+  onSelectAuthor,
   onDeleteItem,
   isDeleting,
   selectedBlogId,
@@ -115,7 +121,24 @@ function StackItemDisplay({
       >
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="flex items-center gap-2 min-w-0 overflow-hidden">
+            <span
+              role={onSelectAuthor ? 'button' : undefined}
+              tabIndex={onSelectAuthor ? 0 : undefined}
+              onClick={(e) => {
+                if (!onSelectAuthor) return;
+                e.stopPropagation();
+                onSelectAuthor(item.pubkey);
+              }}
+              onKeyDown={(e) => {
+                if (!onSelectAuthor) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSelectAuthor(item.pubkey);
+                }
+              }}
+              className={`flex items-center gap-2 min-w-0 overflow-hidden ${onSelectAuthor ? 'hover:underline cursor-default' : ''}`}
+            >
               {isProfileLoading ? (
                 <>
                   <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
@@ -191,10 +214,21 @@ interface StackDisplayProps {
   stack: Stack;
   onSelectStack: (stack: Stack) => void;
   onDeleteStack: (stack: Stack) => void;
+  onViewStackJson: (stack: Stack) => void;
+  onBroadcastStack: (stack: Stack) => void;
   isDeletingStack: boolean;
+  isBroadcasting: boolean;
 }
 
-function StackDisplay({ stack, onSelectStack, onDeleteStack, isDeletingStack }: StackDisplayProps) {
+function StackDisplay({
+  stack,
+  onSelectStack,
+  onDeleteStack,
+  onViewStackJson,
+  onBroadcastStack,
+  isDeletingStack,
+  isBroadcasting,
+}: StackDisplayProps) {
   return (
     <div className="group relative">
       <button
@@ -210,31 +244,60 @@ function StackDisplay({ stack, onSelectStack, onDeleteStack, isDeletingStack }: 
           </p>
         </div>
       </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDeleteStack(stack);
-        }}
-        disabled={isDeletingStack}
-        className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 disabled:opacity-50 transition-opacity"
-        title="Delete stack"
-        aria-label="Delete stack"
-      >
-        {isDeletingStack ? (
-          <Loader2Icon className="w-4 h-4 animate-spin" />
-        ) : (
-          <Trash2Icon className="w-4 h-4" />
-        )}
-      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-sidebar-accent text-muted-foreground transition-opacity"
+            aria-label="Stack options"
+          >
+            <MoreHorizontalIcon className="w-4 h-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewStackJson(stack);
+            }}
+            disabled={!stack.rawEvent}
+          >
+            View raw JSON
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onBroadcastStack(stack);
+            }}
+            disabled={!stack.rawEvent || isBroadcasting}
+          >
+            {isBroadcasting ? 'Broadcasting...' : 'Broadcast'}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteStack(stack);
+            }}
+            className="text-red-600 focus:text-red-600"
+            disabled={isDeletingStack}
+          >
+            {isDeletingStack ? 'Deleting...' : 'Delete stack'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
 
-export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: StacksPanelProps) {
+export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, selectedBlogId }: StacksPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingStackId, setDeletingStackId] = useState<string | null>(null);
   const [deletingItemKey, setDeletingItemKey] = useState<string | null>(null);
   const [selectedStackId, setSelectedStackId] = useState<string | null>(null);
+  const [broadcastingStackId, setBroadcastingStackId] = useState<string | null>(null);
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
@@ -317,6 +380,41 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
     }
   };
 
+  const handleBroadcastStack = async (stack: Stack) => {
+    if (broadcastingStackId || !stack.rawEvent) return;
+    setBroadcastingStackId(stack.dTag);
+    try {
+      const results = await broadcastEvent(stack.rawEvent, relays);
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        const relayList = successfulRelays.map((r) => r.relay).join('\n');
+        toast.success('Stack broadcast!', {
+          description: `Sent to ${successCount} relay${successCount !== 1 ? 's' : ''}:\n${relayList}`,
+          duration: 5000,
+        });
+      } else {
+        toast.error('Broadcast failed', {
+          description: 'Failed to broadcast to any relay',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to broadcast stack:', err);
+      toast.error('Broadcast failed', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+    } finally {
+      setBroadcastingStackId(null);
+    }
+  };
+
+  const handleViewStackJson = (stack: Stack) => {
+    if (!stack.rawEvent) return;
+    setJsonEvent(stack.rawEvent);
+    setIsJsonOpen(true);
+  };
+
   const handleDeleteItem = async (stack: Stack, item: StackItem) => {
     const itemKey = `${stack.dTag}:${item.pubkey}:${item.identifier}`;
     if (deletingItemKey) return;
@@ -325,6 +423,16 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
 
     // Optimistic update
     removeItemFromStack(stack.dTag, item);
+    queryClient.setQueryData(
+      ['stack-blogs', stack.dTag, activeRelay],
+      (prev: { item: StackItem; blog: Blog | null }[] | undefined) => {
+        if (!prev) return prev;
+        return prev.filter(
+          (entry) =>
+            !(entry.item.pubkey === item.pubkey && entry.item.identifier === item.identifier)
+        );
+      }
+    );
 
     try {
       // Get updated items from store
@@ -347,6 +455,9 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
       console.error('Failed to remove item from stack:', err);
       // Revert optimistic update
       addItemToStack(stack.dTag, item);
+      queryClient.invalidateQueries({
+        queryKey: ['stack-blogs', stack.dTag, activeRelay],
+      });
     } finally {
       setDeletingItemKey(null);
     }
@@ -367,15 +478,10 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
     queryKey: ['stack-blogs', selectedStack?.dTag, activeRelay],
     queryFn: async () => {
       if (!selectedStack) return [];
-      const results = await Promise.all(
-        selectedStack.items.map((item) =>
-          fetchBlogByAddress({
-            pubkey: item.pubkey,
-            identifier: item.identifier,
-            relay: item.relay || activeRelay,
-          })
-        )
-      );
+      const results = await fetchBlogsByAddresses({
+        items: selectedStack.items,
+        relay: activeRelay,
+      });
       return results.map((blog, index) => ({ item: selectedStack.items[index], blog }));
     },
     enabled: !!selectedStack && !!activeRelay,
@@ -471,7 +577,10 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
                 stack={stack}
                 onSelectStack={(stackToOpen) => setSelectedStackId(stackToOpen.dTag)}
                 onDeleteStack={handleDeleteStack}
+                onViewStackJson={handleViewStackJson}
+                onBroadcastStack={handleBroadcastStack}
                 isDeletingStack={deletingStackId === stack.dTag}
+                isBroadcasting={broadcastingStackId === stack.dTag}
               />
             ))}
           </div>
@@ -501,6 +610,7 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
                         item={item}
                         blog={blog}
                         onSelectBlog={handleSelectBlog}
+                        onSelectAuthor={onSelectAuthor}
                         onDeleteItem={handleDeleteItem}
                         isDeleting={deletingItemKey === itemKey}
                         selectedBlogId={selectedBlogId}
@@ -516,6 +626,11 @@ export default function StacksPanel({ onSelectBlog, onClose, selectedBlogId }: S
           </div>
         )}
       </div>
+      <EventJsonDialog
+        open={isJsonOpen}
+        onOpenChange={setIsJsonOpen}
+        event={jsonEvent}
+      />
     </div>
   );
 }

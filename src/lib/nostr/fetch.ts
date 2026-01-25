@@ -1,4 +1,4 @@
-import { NostrEvent, Blog, eventToBlog, Highlight } from './types';
+import { NostrEvent, Blog, eventToBlog, Highlight, StackItem } from './types';
 
 interface FetchBlogsOptions {
   limit?: number;
@@ -174,6 +174,84 @@ export async function fetchBlogs({
           // Only set nextCursor if we got a full page (might be more), and subtract 1 to avoid duplicates
           const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
           resolve({ blogs, nextCursor });
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = (error) => {
+      clearTimeout(timeoutId);
+      reject(error);
+    };
+  });
+}
+
+// Fetch blogs for a list of addressable references (pubkey + d tag)
+export async function fetchBlogsByAddresses({
+  items,
+  relay = 'wss://relay.damus.io',
+}: {
+  items: StackItem[];
+  relay?: string;
+}): Promise<(Blog | null)[]> {
+  if (items.length === 0) return [];
+
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(relay);
+    const eventsByKey = new Map<string, NostrEvent>();
+    const subId = `blogs-addr-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+
+    const authors = Array.from(new Set(items.map((item) => item.pubkey)));
+    const dTags = Array.from(new Set(items.map((item) => item.identifier)));
+
+    ws.onopen = () => {
+      const filter: Record<string, unknown> = {
+        kinds: [30023],
+        authors,
+        '#d': dTags,
+        limit: Math.max(items.length, 1),
+      };
+
+      ws.send(JSON.stringify(['REQ', subId, filter]));
+
+      timeoutId = setTimeout(() => {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        const ordered = items.map((item) => {
+          const key = `${item.pubkey}:${item.identifier}`;
+          const event = eventsByKey.get(key);
+          return event ? eventToBlog(event) : null;
+        });
+        resolve(ordered);
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 30023) {
+            const dTag = event.tags.find((t) => t[0] === 'd')?.[1] || '';
+            const key = `${event.pubkey}:${dTag}`;
+            const existing = eventsByKey.get(key);
+            if (!existing || event.created_at > existing.created_at) {
+              eventsByKey.set(key, event);
+            }
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          const ordered = items.map((item) => {
+            const key = `${item.pubkey}:${item.identifier}`;
+            const event = eventsByKey.get(key);
+            return event ? eventToBlog(event) : null;
+          });
+          resolve(ordered);
         }
       } catch {
         // Ignore parse errors
