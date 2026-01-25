@@ -22,3 +22,5 @@ interface Nostr {
 }
 
 declare const nostr: Nostr | undefined;
+
+declare module 'prismjs';
