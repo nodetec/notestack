@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NostrEditor, type NostrEditorHandle, type Highlight } from '@/components/editor';
@@ -536,6 +536,12 @@ function HomeContent() {
   const shouldShowTitle = selectedBlog?.title &&
     getFirstH1(selectedBlog.content)?.toLowerCase() !== selectedBlog.title.toLowerCase();
 
+  const editorMarkdown = useMemo(() => {
+    if (!selectedBlog) return editorContent;
+    if (!shouldShowTitle) return editorContent;
+    return `# ${selectedBlog.title}\n\n${editorContent}`;
+  }, [editorContent, selectedBlog, shouldShowTitle]);
+
   // Normalize content for comparison - aggressively strip formatting differences
   const normalizeForComparison = (content: string) => {
     return content
@@ -790,13 +796,6 @@ function HomeContent() {
             </div>
           ) : (
           <div className="min-h-full w-full flex flex-col">
-            {shouldShowTitle && (
-              <div className="editor-root pt-8">
-                <h1 className="text-3xl font-bold text-foreground font-(family-name:--font-source-serif-4)">
-                  {selectedBlog?.title}
-                </h1>
-              </div>
-            )}
             {isMarkdownMode && !selectedBlog ? (
               <MarkdownEditor
                 ref={markdownEditorRef}
@@ -810,7 +809,7 @@ function HomeContent() {
                 ref={editorRef}
                 key={editorKey}
                 placeholder=""
-                initialMarkdown={editorContent}
+                initialMarkdown={editorMarkdown}
                 onChange={handleEditorChange}
                 onProfileLookup={handleProfileLookup}
                 onNoteLookup={lookupNote}
