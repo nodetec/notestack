@@ -77,7 +77,7 @@ const theme: EditorThemeClasses = {
     listitemChecked: 'line-through text-muted-foreground',
     listitemUnchecked: '',
   },
-  link: 'inline',
+  link: 'inline text-primary no-underline hover:underline cursor-pointer',
   text: {
     bold: 'font-bold',
     italic: 'italic',

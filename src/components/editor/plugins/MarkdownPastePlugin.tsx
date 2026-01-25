@@ -19,9 +19,9 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { CodeNode, CodeHighlightNode } from '@lexical/code';
 import { HorizontalRuleNode } from '@lexical/extension';
 import { TableNode, TableRowNode, TableCellNode } from '@lexical/table';
+import { LinkNode } from '@lexical/link';
 import { ALL_TRANSFORMERS } from '../NostrEditor';
 import { ImageNode } from '../nodes/ImageNode';
-import { LinkNode } from '../nodes/LinkNode';
 import { YouTubeNode } from '../nodes/YouTubeNode';
 
 // Patterns that strongly indicate markdown content

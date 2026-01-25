@@ -7,6 +7,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
+import { ClickableLinkPlugin } from '@lexical/react/LexicalClickableLinkPlugin';
 import {
   $convertToMarkdownString,
   $convertFromMarkdownString,
@@ -43,7 +44,7 @@ import LinkPastePlugin from './plugins/LinkPastePlugin';
 import NostrPastePlugin from './plugins/NostrPastePlugin';
 import MarkdownPastePlugin from './plugins/MarkdownPastePlugin';
 import { ImageNode } from './nodes/ImageNode';
-import { LinkNode } from './nodes/LinkNode';
+import { LinkNode } from '@lexical/link';
 import { NpubNode } from './nodes/NpubNode';
 import { NprofileNode } from './nodes/NprofileNode';
 import { NeventNode } from './nodes/NeventNode';
@@ -64,6 +65,9 @@ import HighlightPlugin from './plugins/HighlightPlugin';
 import GutterActionsPlugin from './plugins/GutterActionsPlugin';
 import CodeSnippetPublishPlugin from './plugins/CodeSnippetPublishPlugin';
 import HeadingAnchorPlugin from './plugins/HeadingAnchorPlugin';
+import LinkClickPlugin from './plugins/LinkClickPlugin';
+import LinkPencilPlugin from './plugins/LinkPencilPlugin';
+import { LinkPencilNode } from './nodes/LinkPencilNode';
 
 // Source information for NIP-84 highlights
 export interface HighlightSource {
@@ -227,6 +231,9 @@ function EditorInner({
       <GutterActionsPlugin />
       <CodeSnippetPublishPlugin />
       <HeadingAnchorPlugin />
+      <LinkClickPlugin />
+      <LinkPencilPlugin />
+      <ClickableLinkPlugin />
       {onChange && (
         <OnChangePlugin
           onChange={(editorState) => onChange(editorState)}
@@ -281,6 +288,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
         nodes: [
           ImageNode,
           LinkNode,
+          LinkPencilNode,
           NpubNode,
           NprofileNode,
           NeventNode,

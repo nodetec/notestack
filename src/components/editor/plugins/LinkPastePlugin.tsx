@@ -7,10 +7,11 @@ import {
   $isRangeSelection,
   $isTextNode,
   $getNodeByKey,
+  $createTextNode,
   PASTE_COMMAND,
   COMMAND_PRIORITY_HIGH,
 } from 'lexical';
-import { $createLinkNode, $isLinkNode } from '../nodes/LinkNode';
+import { $createLinkNode, $isLinkNode } from '@lexical/link';
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -24,6 +25,13 @@ function isYouTubeUrl(url: string): boolean {
     url.includes('youtu.be') ||
     url.includes('youtube-nocookie.com')
   );
+}
+
+function getLinkAttributes(url: string) {
+  if (url.startsWith('#')) {
+    return undefined;
+  }
+  return { target: '_blank', rel: 'noopener noreferrer' };
 }
 
 // Check if cursor is inside markdown link/image syntax like [text]( or ![alt](
@@ -80,7 +88,8 @@ export default function LinkPastePlugin() {
         event.preventDefault();
 
         // Create link with URL as initial display text
-        const linkNode = $createLinkNode({ url: text, displayText: text });
+        const linkNode = $createLinkNode(text, getLinkAttributes(text));
+        linkNode.append($createTextNode(text));
         selection.insertNodes([linkNode]);
 
         // If it's a YouTube URL, fetch the title and update the link
@@ -91,8 +100,44 @@ export default function LinkPastePlugin() {
               editor.update(() => {
                 const node = $getNodeByKey(nodeKey);
                 if (node && $isLinkNode(node)) {
-                  const newNode = $createLinkNode({ url: text, displayText: title });
-                  node.replace(newNode);
+                  const selection = $getSelection();
+                  const shouldRestoreSelection =
+                    $isRangeSelection(selection) &&
+                    (selection.anchor.getNode() === node ||
+                      selection.focus.getNode() === node ||
+                      node.isParentOf(selection.anchor.getNode()) ||
+                      node.isParentOf(selection.focus.getNode()));
+
+                  if (shouldRestoreSelection) {
+                    node.selectEnd();
+                  }
+
+                  const attributes = getLinkAttributes(text);
+                  node.setURL(text);
+                  if (attributes?.target === null) {
+                    node.setTarget(null);
+                    node.setRel(null);
+                  } else {
+                    node.setTarget(attributes?.target ?? null);
+                    node.setRel(attributes?.rel ?? null);
+                  }
+                  const children = node.getChildren();
+                  let primaryTextNode = children.find((child) => $isTextNode(child));
+                  if (!primaryTextNode) {
+                    primaryTextNode = $createTextNode(title);
+                    node.append(primaryTextNode);
+                  } else {
+                    primaryTextNode.setTextContent(title);
+                  }
+                  children.forEach((child) => {
+                    if (child !== primaryTextNode) {
+                      child.remove();
+                    }
+                  });
+
+                  if (shouldRestoreSelection) {
+                    node.selectEnd();
+                  }
                 }
               });
             }

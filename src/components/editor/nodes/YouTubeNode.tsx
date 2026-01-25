@@ -9,6 +9,7 @@ import { mergeRegister } from '@lexical/utils';
 import {
   $applyNodeReplacement,
   $createParagraphNode,
+  $createTextNode,
   $getNodeByKey,
   $getSelection,
   $isNodeSelection,
@@ -28,6 +29,7 @@ import {
   type SerializedLexicalNode,
   type Spread,
 } from 'lexical';
+import { $createLinkNode } from '@lexical/link';
 import { XIcon, MoreVerticalIcon, LinkIcon } from 'lucide-react';
 import {
   DropdownMenu,
@@ -35,7 +37,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { $createLinkNode } from '../nodes/LinkNode';
 
 type YouTubeComponentProps = Readonly<{
   nodeKey: NodeKey;
@@ -78,7 +79,8 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if (node) {
-          const linkNode = $createLinkNode({ url, displayText: title || 'YouTube' });
+          const linkNode = $createLinkNode(url, { target: '_blank', rel: 'noopener noreferrer' });
+          linkNode.append($createTextNode(title || 'YouTube'));
           node.replace(linkNode);
         }
       });
