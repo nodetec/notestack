@@ -161,6 +161,8 @@ function ImageComponent({
     );
   }
 
+  const isCoverImage = altText === 'Cover image';
+
   return (
     <img
       ref={imageRef}
@@ -171,7 +173,7 @@ function ImageComponent({
         height: 'auto',
         width: width ? `${width}px` : undefined,
       }}
-      className={`rounded-lg cursor-default ${
+      className={`rounded-lg cursor-default ${isCoverImage ? 'max-h-[420px] w-full object-cover' : ''} ${
         isFocused ? 'outline outline-2 outline-primary outline-offset-2' : ''
       }`}
       draggable="false"
