@@ -18,7 +18,7 @@ interface PublishDialogProps {
   isOpen: boolean;
   onClose: () => void;
   getContent: () => string;
-  onPublishSuccess?: () => void;
+  onPublishSuccess?: (info?: { pubkey: string; dTag: string }) => void;
   linkedBlog?: LinkedBlog;
 }
 
@@ -131,7 +131,11 @@ export default function PublishDialog({ isOpen, onClose, getContent, onPublishSu
       const successCount = results.filter((r) => r.success).length;
       if (successCount > 0) {
         setPublishComplete(true);
-        onPublishSuccess?.();
+        if (isEditing && linkedBlog) {
+          onPublishSuccess?.({ pubkey: linkedBlog.pubkey, dTag: linkedBlog.dTag });
+        } else {
+          onPublishSuccess?.();
+        }
       } else {
         setError('Failed to publish to any relay');
       }
