@@ -532,15 +532,35 @@ function HomeContent() {
     return match ? match[1].trim() : null;
   };
 
+  const hasImageInContent = (content: string, imageUrl?: string): boolean => {
+    if (!imageUrl) return false;
+    const escaped = imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const imageRegex = new RegExp(escaped, 'i');
+    return imageRegex.test(content);
+  };
+
   // Check if we should show the title above the editor
   const shouldShowTitle = selectedBlog?.title &&
     getFirstH1(selectedBlog.content)?.toLowerCase() !== selectedBlog.title.toLowerCase();
+  const shouldInsertImage = selectedBlog?.image &&
+    !hasImageInContent(selectedBlog.content, selectedBlog.image);
 
   const editorMarkdown = useMemo(() => {
     if (!selectedBlog) return editorContent;
-    if (!shouldShowTitle) return editorContent;
-    return `# ${selectedBlog.title}\n\n${editorContent}`;
-  }, [editorContent, selectedBlog, shouldShowTitle]);
+    let nextContent = editorContent;
+    if (shouldShowTitle) {
+      nextContent = `# ${selectedBlog.title}\n\n${nextContent}`;
+    }
+    if (shouldInsertImage) {
+      const imageBlock = `![${selectedBlog.title || 'Cover image'}](${selectedBlog.image})\n\n`;
+      if (shouldShowTitle) {
+        nextContent = nextContent.replace(/^# .+\n\n/, (match) => `${match}${imageBlock}`);
+      } else {
+        nextContent = `${imageBlock}${nextContent}`;
+      }
+    }
+    return nextContent;
+  }, [editorContent, selectedBlog, shouldShowTitle, shouldInsertImage]);
 
   // Normalize content for comparison - aggressively strip formatting differences
   const normalizeForComparison = (content: string) => {
