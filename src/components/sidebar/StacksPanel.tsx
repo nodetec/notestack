@@ -354,11 +354,24 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
         relay: activeRelay,
       });
       setStacks(fetchedStacks);
+      return fetchedStacks;
     } catch (err) {
       console.error('Failed to fetch stacks:', err);
+      return null;
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefreshStack = async () => {
+    const refreshedStacks = await handleRefresh();
+    if (!refreshedStacks || !selectedStackId) return;
+    const stillExists = refreshedStacks.some((stack) => stack.dTag === selectedStackId);
+    if (!stillExists) {
+      setSelectedStackId(null);
+      return;
+    }
+    await stackItemsQuery.refetch();
   };
 
   const handleDeleteStack = async (stack: Stack) => {
@@ -421,19 +434,6 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
 
     setDeletingItemKey(itemKey);
 
-    // Optimistic update
-    removeItemFromStack(stack.dTag, item);
-    queryClient.setQueryData(
-      ['stack-blogs', stack.dTag, activeRelay],
-      (prev: { item: StackItem; blog: Blog | null }[] | undefined) => {
-        if (!prev) return prev;
-        return prev.filter(
-          (entry) =>
-            !(entry.item.pubkey === item.pubkey && entry.item.identifier === item.identifier)
-        );
-      }
-    );
-
     try {
       // Get updated items from store
       const currentStack = useStackStore.getState().stacks[stack.dTag];
@@ -447,17 +447,32 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
         name: stack.name,
         description: stack.description,
         image: stack.image,
-        items: currentStack.items,
+        items: currentStack.items.filter(
+          (currentItem) =>
+            !(
+              currentItem.pubkey === item.pubkey &&
+              currentItem.identifier === item.identifier
+            )
+        ),
         relays,
         secretKey,
       });
+      removeItemFromStack(stack.dTag, item);
+      queryClient.setQueryData(
+        ['stack-blogs', stack.dTag, activeRelay],
+        (prev: { item: StackItem; blog: Blog | null }[] | undefined) => {
+          if (!prev) return prev;
+          return prev.filter(
+            (entry) =>
+              !(
+                entry.item.pubkey === item.pubkey &&
+                entry.item.identifier === item.identifier
+              )
+          );
+        }
+      );
     } catch (err) {
       console.error('Failed to remove item from stack:', err);
-      // Revert optimistic update
-      addItemToStack(stack.dTag, item);
-      queryClient.invalidateQueries({
-        queryKey: ['stack-blogs', stack.dTag, activeRelay],
-      });
     } finally {
       setDeletingItemKey(null);
     }
@@ -517,7 +532,7 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
         <div className="flex items-center gap-1">
           {selectedStack && isLoggedIn && (
             <button
-              onClick={() => stackItemsQuery.refetch()}
+              onClick={handleRefreshStack}
               disabled={stackItemsQuery.isFetching || stackItemsQuery.isLoading}
               className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
               title="Refresh stack"
