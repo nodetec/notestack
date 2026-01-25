@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { extractFirstImage } from '@/lib/utils/markdown';
+import { downloadMarkdownFile } from '@/lib/utils/download';
 import { generateAvatar } from '@/lib/avatar';
 import type { Blog } from '@/lib/nostr/types';
 
@@ -279,6 +280,14 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadMarkdownFile(blog.title, blog.content || '');
+                            }}
+                          >
+                            Download markdown
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => handleBroadcast(blog, e)}
                             disabled={broadcastingBlogId === blog.id || !blog.rawEvent}

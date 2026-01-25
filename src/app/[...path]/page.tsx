@@ -330,11 +330,15 @@ function HomeContent() {
   }, [isMarkdownMode]);
 
   const [justPublished, setJustPublished] = useState(false);
+  const [publishNavigateNaddr, setPublishNavigateNaddr] = useState<string | null>(null);
 
-  const handlePublishSuccess = useCallback(() => {
+  const handlePublishSuccess = useCallback((info?: { pubkey: string; dTag: string }) => {
     queryClient.invalidateQueries({ queryKey: ['blogs'] });
     setJustPublished(true);
-  }, [queryClient]);
+    if (info) {
+      setPublishNavigateNaddr(blogToNaddr({ pubkey: info.pubkey, dTag: info.dTag }, relays));
+    }
+  }, [queryClient, relays]);
 
   const handlePublishDialogClose = useCallback(() => {
     setShowPublishDialog(false);
@@ -342,6 +346,16 @@ function HomeContent() {
     // Clean up after successful publish when dialog closes
     if (justPublished) {
       setJustPublished(false);
+      if (publishNavigateNaddr) {
+        setPublishNavigateNaddr(null);
+        if (currentDraftId && draft?.linkedBlog) {
+          deleteDraft(currentDraftId);
+        }
+        setSelectedBlog(null);
+        setCurrentDraftId(null);
+        router.replace(`/${publishNavigateNaddr}`);
+        return;
+      }
       if (currentDraftId) {
         deleteDraft(currentDraftId);
       }
@@ -350,7 +364,15 @@ function HomeContent() {
       if (!newId) return;
       router.replace(`/draft/${newId}`);
     }
-  }, [justPublished, currentDraftId, deleteDraft, createDraftIfAllowed, router]);
+  }, [
+    justPublished,
+    publishNavigateNaddr,
+    currentDraftId,
+    deleteDraft,
+    createDraftIfAllowed,
+    router,
+    draft?.linkedBlog,
+  ]);
 
   const handlePublishDraft = useCallback(async () => {
     if (sessionStatus !== 'authenticated' || !pubkey || !currentDraftId) {

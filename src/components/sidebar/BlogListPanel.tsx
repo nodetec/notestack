@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
+import { downloadMarkdownFile } from '@/lib/utils/download';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import type { Blog } from '@/lib/nostr/types';
 
@@ -250,11 +251,19 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                           <MoreHorizontalIcon className="w-4 h-4" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => handleBroadcast(blog, e)}
-                          disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                        >
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadMarkdownFile(blog.title, blog.content || '');
+                            }}
+                          >
+                            Download markdown
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => handleBroadcast(blog, e)}
+                            disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                          >
                           {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
                         </DropdownMenuItem>
                         <DropdownMenuItem
