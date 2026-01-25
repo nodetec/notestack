@@ -8,6 +8,7 @@ import { fetchUserStacks, publishStack } from '@/lib/nostr/stacks';
 import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import type { Blog, StackItem } from '@/lib/nostr/types';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,6 +107,12 @@ export default function StackButton({ blog }: StackButtonProps) {
         relays,
         secretKey,
       });
+      toast.success(checked ? 'Added to stack' : 'Removed from stack', {
+        description: stack.name,
+      });
+      if (checked) {
+        setIsOpen(false);
+      }
     } catch (err) {
       console.error('Failed to update stack:', err);
       // Revert optimistic update
@@ -155,7 +162,11 @@ export default function StackButton({ blog }: StackButtonProps) {
         items: [item],
       });
 
+      toast.success('Stack created', {
+        description: newStackName.trim(),
+      });
       setNewStackName('');
+      setIsOpen(false);
     } catch (err) {
       console.error('Failed to create stack:', err);
     } finally {
