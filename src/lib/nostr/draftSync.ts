@@ -170,12 +170,14 @@ export async function syncDrafts({
   pubkey,
   relays,
   onDraftReceived,
+  onDraftDeleted,
   secretKey,
 }: {
   drafts: Draft[];
   pubkey: string;
   relays: string[];
   onDraftReceived: (draft: Draft) => void;
+  onDraftDeleted?: (draftId: string) => void;
   secretKey?: string;
 }): Promise<SyncResult> {
   if (!relays.length) {
@@ -198,7 +200,7 @@ export async function syncDrafts({
       relayLatest.set(relay, since);
 
       const events = await pool.querySync([relay], {
-        kinds: [DRAFT_KIND],
+        kinds: [DRAFT_KIND, 5],
         authors: [pubkey],
         since,
       });
@@ -209,6 +211,22 @@ export async function syncDrafts({
         if (event.created_at > latest) {
           relayLatest.set(relay, event.created_at);
         }
+
+        if (event.kind === 5) {
+          const kindTags = event.tags.filter((tag) => tag[0] === 'k').map((tag) => tag[1]);
+          if (!kindTags.includes(String(DRAFT_KIND))) {
+            continue;
+          }
+          const deletedIds = event.tags.filter((tag) => tag[0] === 'e').map((tag) => tag[1]);
+          if (deletedIds.length === 0) continue;
+          for (const [draftId, draft] of localDrafts.entries()) {
+            if (draft.remoteEventId && deletedIds.includes(draft.remoteEventId)) {
+              onDraftDeleted?.(draftId);
+            }
+          }
+          continue;
+        }
+
         let content = event.content;
         if (isEncrypted(event)) {
           try {

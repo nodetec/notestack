@@ -110,6 +110,7 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
         relays: activeRelay ? [activeRelay] : relays,
         secretKey,
         onDraftReceived: upsertDraftFromSync,
+        onDraftDeleted: deleteDraft,
       });
       toast.success('Drafts synced', {
         description: `Received ${result.received}, updated ${result.updated}.`,
