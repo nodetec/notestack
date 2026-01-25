@@ -214,7 +214,7 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                     onSelectBlog?.(blog);
                   }
                 }}
-                className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
                   <div className="flex items-center gap-2">

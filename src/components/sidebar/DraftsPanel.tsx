@@ -183,7 +183,7 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
                 <li key={draft.id} className="relative group p-2">
                   <button
                     onClick={() => onSelectDraft?.(draft.id)}
-                    className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                    className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                   >
                     <div>
                       <div className="flex items-center gap-2">

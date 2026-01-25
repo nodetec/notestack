@@ -310,7 +310,7 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
                       onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture });
                     }
                   }}
-                  className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                  className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
                     <h3 className="text-sm font-medium text-foreground truncate">

@@ -232,7 +232,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
                     onSelectHighlight?.(highlight);
                   }
                 }}
-                className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
                   <p className="text-sm text-foreground line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">

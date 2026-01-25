@@ -214,7 +214,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                       onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture });
                     }
                   }}
-                  className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                  className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -232,7 +232,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                             onSelectAuthor?.(blog.pubkey);
                           }
                         }}
-                        className="flex items-center gap-2 hover:underline cursor-pointer min-w-0 overflow-hidden"
+                        className="flex items-center gap-2 hover:underline cursor-default min-w-0 overflow-hidden"
                       >
                         {isProfileLoading ? (
                           <>

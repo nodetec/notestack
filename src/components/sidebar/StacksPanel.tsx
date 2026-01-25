@@ -90,7 +90,7 @@ function StackItemDisplay({ stack, itemIndex, onSelectBlog, onDeleteItem, isDele
     <div className="group relative p-2">
       <button
         onClick={() => onSelectBlog(blog)}
-        className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
+        className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
       >
         <p className="text-sm text-foreground line-clamp-2">
           {blog.title || 'Untitled'}
