@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreVerticalIcon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
-import { nip19 } from 'nostr-tools';
+import { XIcon, MoreHorizontalIcon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -20,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import type { Blog } from '@/lib/nostr/types';
 
@@ -37,15 +37,12 @@ function formatDate(timestamp: number): string {
   });
 }
 
-function truncateNpub(pubkey: string): string {
-  const npub = nip19.npubEncode(pubkey);
-  return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
-}
-
 export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }: BlogListPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -134,6 +131,12 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
     } finally {
       setBroadcastingBlogId(null);
     }
+  };
+
+  const handleViewJson = (event: unknown | undefined) => {
+    if (!event) return;
+    setJsonEvent(event);
+    setIsJsonOpen(true);
   };
 
   return (
@@ -227,41 +230,46 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                       className="max-h-32 rounded object-contain mt-2"
                     />
                   )}
-                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground/70">
-                    <span>{truncateNpub(blog.pubkey)}</span>
-                    <span>&middot;</span>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
                     <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+                          aria-label="More options"
+                        >
+                          <MoreHorizontalIcon className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => handleBroadcast(blog, e)}
+                          disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                        >
+                          {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewJson(blog.rawEvent);
+                          }}
+                          disabled={!blog.rawEvent}
+                        >
+                          View raw JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => handleDelete(blog, e)}
+                          disabled={deletingBlogId === blog.id}
+                          className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                        >
+                          {deletingBlogId === blog.id ? 'Deleting...' : 'Delete'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </button>
-              <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-                      aria-label="More options"
-                    >
-                      <MoreVerticalIcon className="w-4 h-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={(e) => handleBroadcast(blog, e)}
-                      disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                    >
-                      {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={(e) => handleDelete(blog, e)}
-                      disabled={deletingBlogId === blog.id}
-                      className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
-                    >
-                      {deletingBlogId === blog.id ? 'Deleting...' : 'Delete'}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </li>
           );
           })}
@@ -274,6 +282,11 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
           </div>
         )}
       </div>
+      <EventJsonDialog
+        open={isJsonOpen}
+        onOpenChange={setIsJsonOpen}
+        event={jsonEvent}
+      />
     </div>
   );
 }

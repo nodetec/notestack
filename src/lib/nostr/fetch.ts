@@ -31,6 +31,7 @@ function eventToHighlight(event: NostrEvent): Highlight | null {
     createdAt: event.created_at,
     content: event.content,
     context,
+    rawEvent: event,
     source: { kind, pubkey, identifier },
     authorPubkey,
   };

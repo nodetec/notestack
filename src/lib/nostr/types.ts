@@ -16,6 +16,7 @@ export interface Highlight {
   createdAt: number;
   content: string; // The highlighted text
   context?: string; // Surrounding text for context
+  rawEvent?: NostrEvent; // Full event for debug/broadcast
   // Reference to the source (article)
   source: {
     kind: number;

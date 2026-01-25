@@ -3,14 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, Trash2Icon, ExternalLinkIcon, RefreshCwIcon } from 'lucide-react';
+import { XIcon, RefreshCwIcon, MoreHorizontalIcon } from 'lucide-react';
 import { fetchUserHighlights } from '@/lib/nostr/fetch';
-import { deleteHighlight } from '@/lib/nostr/publish';
+import { deleteHighlight, broadcastEvent } from '@/lib/nostr/publish';
+import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import type { UserWithKeys } from '@/types/auth';
 import { useSidebar } from '@/components/ui/sidebar';
 import PanelRail from './PanelRail';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import type { Highlight } from '@/lib/nostr/types';
 
 interface HighlightsPanelProps {
@@ -31,6 +39,9 @@ function formatDate(timestamp: number): string {
 export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSourcePubkey, selectedSourceIdentifier }: HighlightsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingHighlightId, setDeletingHighlightId] = useState<string | null>(null);
+  const [broadcastingHighlightId, setBroadcastingHighlightId] = useState<string | null>(null);
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -112,6 +123,43 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
     }
   };
 
+  const handleBroadcast = async (highlight: Highlight, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (broadcastingHighlightId || !highlight.rawEvent) return;
+
+    setBroadcastingHighlightId(highlight.id);
+    try {
+      const results = await broadcastEvent(highlight.rawEvent, relays);
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        const relayList = successfulRelays.map((r) => r.relay).join('\n');
+        toast.success('Highlight broadcast!', {
+          description: `Sent to ${successCount} relay${successCount !== 1 ? 's' : ''}:\n${relayList}`,
+          duration: 5000,
+        });
+      } else {
+        toast.error('Broadcast failed', {
+          description: 'Failed to broadcast to any relay',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to broadcast highlight:', err);
+      toast.error('Broadcast failed', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+    } finally {
+      setBroadcastingHighlightId(null);
+    }
+  };
+
+  const handleViewJson = (event: unknown | undefined) => {
+    if (!event) return;
+    setJsonEvent(event);
+    setIsJsonOpen(true);
+  };
+
   return (
     <div
       className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
@@ -188,22 +236,46 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
                       ...{highlight.context.slice(0, 100)}...
                     </p>
                   )}
-                  <span className="text-xs text-muted-foreground/70 mt-2 block">
-                    {formatDate(highlight.createdAt)}
-                  </span>
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+                    <span>{formatDate(highlight.createdAt)}</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+                          aria-label="More options"
+                        >
+                          <MoreHorizontalIcon className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => handleBroadcast(highlight, e)}
+                          disabled={broadcastingHighlightId === highlight.id || !highlight.rawEvent}
+                        >
+                          {broadcastingHighlightId === highlight.id ? 'Broadcasting...' : 'Broadcast'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewJson(highlight.rawEvent);
+                          }}
+                          disabled={!highlight.rawEvent}
+                        >
+                          View raw JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => handleDelete(highlight, e)}
+                          disabled={deletingHighlightId === highlight.id}
+                          className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                        >
+                          {deletingHighlightId === highlight.id ? 'Deleting...' : 'Delete'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </button>
-              <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button
-                  onClick={(e) => handleDelete(highlight, e)}
-                  disabled={deletingHighlightId === highlight.id}
-                  className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50"
-                  title="Delete highlight"
-                  aria-label="Delete highlight"
-                >
-                  <Trash2Icon className="w-4 h-4" />
-                </button>
-              </div>
             </li>
           )})}
         </ul>
@@ -215,6 +287,11 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
           </div>
         )}
       </div>
+      <EventJsonDialog
+        open={isJsonOpen}
+        onOpenChange={setIsJsonOpen}
+        event={jsonEvent}
+      />
     </div>
   );
 }

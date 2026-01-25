@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreVerticalIcon, RefreshCwIcon } from 'lucide-react';
+import { XIcon, MoreHorizontalIcon, RefreshCwIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { fetchContacts, fetchFollowingBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { generateAvatar } from '@/lib/avatar';
 import type { Blog } from '@/lib/nostr/types';
@@ -47,6 +48,8 @@ function truncateNpub(pubkey: string): string {
 export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClose, selectedBlogId }: FollowingFeedPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const relays = useSettingsStore((state) => state.relays);
   const { state: sidebarState, isMobile } = useSidebar();
@@ -147,6 +150,12 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
     } finally {
       setBroadcastingBlogId(null);
     }
+  };
+
+  const handleViewJson = (event: unknown | undefined) => {
+    if (!event) return;
+    setJsonEvent(event);
+    setIsJsonOpen(true);
   };
 
   return (
@@ -279,32 +288,39 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                         className="max-h-32 rounded object-contain mt-2"
                       />
                     )}
-                    <span className="text-xs text-muted-foreground/70 mt-2 block">
-                      {formatDate(blog.publishedAt || blog.createdAt)}
-                    </span>
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+                      <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+                            aria-label="More options"
+                          >
+                            <MoreHorizontalIcon className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => handleBroadcast(blog, e)}
+                            disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                          >
+                            {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewJson(blog.rawEvent);
+                            }}
+                            disabled={!blog.rawEvent}
+                          >
+                            View raw JSON
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </button>
-                <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-                        aria-label="More options"
-                      >
-                        <MoreVerticalIcon className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => handleBroadcast(blog, e)}
-                        disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                      >
-                        {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               </li>
             );
           })}
@@ -317,6 +333,11 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
           </div>
         )}
       </div>
+      <EventJsonDialog
+        open={isJsonOpen}
+        onOpenChange={setIsJsonOpen}
+        event={jsonEvent}
+      />
     </div>
   );
 }
