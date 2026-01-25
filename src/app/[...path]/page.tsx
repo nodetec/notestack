@@ -42,6 +42,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { PencilRulerIcon } from 'lucide-react';
+import { publishDrafts } from '@/lib/nostr/draftSync';
+import { toast } from 'sonner';
 
 function MarkdownIcon({ className }: { className?: string }) {
   return (
@@ -149,6 +151,13 @@ function HomeContent() {
   const getDraft = useDraftStore((state) => state.getDraft);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
   const findDraftByLinkedBlog = useDraftStore((state) => state.findDraftByLinkedBlog);
+  const createDraftIfAllowed = useCallback(() => {
+    if (sessionStatus !== 'authenticated' || !pubkey) {
+      router.push('/login');
+      return null;
+    }
+    return createDraft();
+  }, [sessionStatus, pubkey, router, createDraft]);
 
   // Determine current draft ID
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
@@ -263,13 +272,15 @@ function HomeContent() {
             setSelectedBlog(blog);
           } else {
             // Blog not found on any relay, redirect to new draft
-            const newId = createDraft();
+            const newId = createDraftIfAllowed();
+            if (!newId) return;
             router.replace(`/draft/${newId}`);
           }
         });
       } else {
         // Invalid naddr, redirect to new draft
-        const newId = createDraft();
+        const newId = createDraftIfAllowed();
+        if (!newId) return;
         router.replace(`/draft/${newId}`);
       }
     } else if (urlDraftId) {
@@ -280,15 +291,17 @@ function HomeContent() {
         setCurrentDraftId(urlDraftId);
       } else {
         // Draft doesn't exist, create new and redirect
-        const newId = createDraft();
+        const newId = createDraftIfAllowed();
+        if (!newId) return;
         router.replace(`/draft/${newId}`);
       }
     } else {
       // No draft or blog in URL - create new draft
-      const newId = createDraft();
+      const newId = createDraftIfAllowed();
+      if (!newId) return;
       router.replace(`/draft/${newId}`);
     }
-  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraft, router, relays, activeRelay]);
+  }, [isHydrated, urlDraftId, urlBlogId, getDraft, createDraftIfAllowed, router, relays, activeRelay]);
 
   const handleSelectBlog = useCallback((blog: Blog) => {
     // Check for unsaved edits before navigating
@@ -331,10 +344,43 @@ function HomeContent() {
         deleteDraft(currentDraftId);
       }
       setSelectedBlog(null);
-      const newId = createDraft();
+      const newId = createDraftIfAllowed();
+      if (!newId) return;
       router.replace(`/draft/${newId}`);
     }
-  }, [justPublished, currentDraftId, deleteDraft, createDraft, router]);
+  }, [justPublished, currentDraftId, deleteDraft, createDraftIfAllowed, router]);
+
+  const handlePublishDraft = useCallback(async () => {
+    if (sessionStatus !== 'authenticated' || !pubkey || !currentDraftId) {
+      router.push('/login');
+      return;
+    }
+    const draftToPublish = useDraftStore.getState().drafts[currentDraftId];
+    if (!draftToPublish) return;
+
+    try {
+      const result = await publishDrafts({
+        drafts: [draftToPublish],
+        pubkey,
+        relays,
+        secretKey: user?.secretKey,
+        onDraftPublished: (draftId, eventId) => {
+          const draft = useDraftStore.getState().drafts[draftId];
+          if (!draft) return;
+          useDraftStore.getState().upsertDraftFromSync({ ...draft, remoteEventId: eventId });
+        },
+      });
+      if (result.published > 0) {
+        toast.success('Draft published');
+      } else {
+        toast.error('Draft publish failed');
+      }
+    } catch (error) {
+      toast.error('Draft publish failed', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }, [currentDraftId, pubkey, relays, router, sessionStatus, user?.secretKey]);
 
   const handleClosePanel = useCallback(() => {
     setActivePanel(null);
@@ -347,13 +393,18 @@ function HomeContent() {
 
   const handleNewArticle = useCallback(() => {
     checkBlogForEditsRef.current();
-    const newId = createDraft();
+    const newId = createDraftIfAllowed();
+    if (!newId) return;
     // Update state directly and URL without triggering navigation
     setSelectedBlog(null);
     setCurrentDraftId(newId);
     window.history.pushState(null, '', `/draft/${newId}`);
-    if (isMobile) setActivePanel(null);
-  }, [createDraft, isMobile]);
+    if (isMobile) {
+      setActivePanel(null);
+    } else {
+      setActivePanel('drafts');
+    }
+  }, [createDraftIfAllowed, isMobile]);
 
   const handleSelectDraft = useCallback((draftId: string) => {
     checkBlogForEditsRef.current();
@@ -670,6 +721,15 @@ function HomeContent() {
                 </TooltipTrigger>
                 <TooltipContent>{isMarkdownMode ? 'Toolbar unavailable in markdown mode' : showFloatingToolbar ? 'Hide Toolbar' : 'Show Toolbar'}</TooltipContent>
               </Tooltip>
+            )}
+            {isLoggedIn && currentDraftId && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handlePublishDraft}
+              >
+                Publish Draft
+              </Button>
             )}
             {isLoggedIn && currentDraftId && (
               <Button

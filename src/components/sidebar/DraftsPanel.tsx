@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { XIcon, FileEditIcon, Trash2Icon, PenLineIcon } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { XIcon, FileEditIcon, Trash2Icon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
 import { useDraftStore, type Draft } from '@/lib/stores/draftStore';
 import { useSidebar } from '@/components/ui/sidebar';
 import PanelRail from './PanelRail';
 import { extractFirstImage } from '@/lib/utils/markdown';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { syncDrafts } from '@/lib/nostr/draftSync';
+import { toast } from 'sonner';
+import { useSettingsStore } from '@/lib/stores/settingsStore';
+import { deleteDraft as deleteDraftEvent } from '@/lib/nostr/publish';
 
 interface DraftsPanelProps {
   onSelectDraft?: (draftId: string) => void;
@@ -42,14 +47,19 @@ function extractPreview(content: string): { title: string; preview: string } {
 
 export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }: DraftsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const drafts = useDraftStore((state) => state.drafts);
+  const upsertDraftFromSync = useDraftStore((state) => state.upsertDraftFromSync);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
   const { state: sidebarState, isMobile } = useSidebar();
+  const { publicKey, secretKey, isAuthenticated } = useAuth();
+  const relays = useSettingsStore((state) => state.relays);
+  const activeRelay = useSettingsStore((state) => state.activeRelay);
 
   // Convert drafts object to sorted array (most recent first)
   // Keep linked drafts (edits to published blogs) even if empty
   const draftsList: Draft[] = Object.values(drafts)
-    .filter((draft) => draft.content.trim().length > 0 || draft.linkedBlog)
+    .filter((draft) => draft.content.trim().length > 0 || draft.linkedBlog || draft.id === selectedDraftId)
     .sort((a, b) => b.lastSaved - a.lastSaved);
 
   const hasDrafts = isHydrated && draftsList.length > 0;
@@ -58,12 +68,60 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
     setIsHydrated(true);
   }, []);
 
-  const handleDelete = (draftId: string, e: React.MouseEvent) => {
+  const handleDelete = async (draftId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Delete this draft?')) {
+      const draft = drafts[draftId];
+      if (draft?.remoteEventId && isAuthenticated) {
+        try {
+          const results = await deleteDraftEvent({
+            eventId: draft.remoteEventId,
+            relays,
+            secretKey,
+          });
+          const successCount = results.filter((result) => result.success).length;
+          if (successCount === 0) {
+            toast.error('Failed to delete draft from relay');
+          }
+        } catch (error) {
+          toast.error('Failed to delete draft from relay', {
+            description: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      } else if (draft?.remoteEventId && !isAuthenticated) {
+        toast.error('Sign in to delete from relay');
+      }
       deleteDraft(draftId);
     }
   };
+
+  const handleSync = useCallback(async () => {
+    if (!isAuthenticated || !publicKey) {
+      toast.error('Sign in to sync drafts');
+      return;
+    }
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    try {
+      const result = await syncDrafts({
+        drafts: Object.values(drafts),
+        pubkey: publicKey,
+        relays: activeRelay ? [activeRelay] : relays,
+        secretKey,
+        onDraftReceived: upsertDraftFromSync,
+      });
+      toast.success('Drafts synced', {
+        description: `Received ${result.received}, updated ${result.updated}.`,
+      });
+    } catch (error) {
+      toast.error('Failed to sync drafts', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [drafts, isAuthenticated, isSyncing, publicKey, relays, upsertDraftFromSync]);
 
   return (
     <div
@@ -76,14 +134,25 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
         <h2 className="text-sm font-semibold text-foreground/80">
           Drafts
         </h2>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleSync}
+            disabled={isSyncing}
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
+            title="Sync drafts"
+            aria-label="Sync drafts"
+          >
+            <RefreshCwIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+            title="Close panel"
+            aria-label="Close panel"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Drafts List */}

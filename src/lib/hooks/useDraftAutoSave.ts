@@ -31,6 +31,7 @@ export function useDraftAutoSave(draftId: string | null) {
       const fullDraft = useDraftStore.getState().drafts[draftId];
       if (fullDraft) {
         initialContentRef.current = fullDraft.content;
+        lastContentRef.current = fullDraft.content;
         hasInitializedRef.current = true;
       }
     }
@@ -38,6 +39,7 @@ export function useDraftAutoSave(draftId: string | null) {
     if (!draftId) {
       hasInitializedRef.current = false;
       initialContentRef.current = '';
+      lastContentRef.current = '';
     }
   }, [draftId]);
 
@@ -49,6 +51,15 @@ export function useDraftAutoSave(draftId: string | null) {
 
     // Skip if content hasn't changed
     if (newContent === lastContentRef.current) return;
+    if (newContent === initialContentRef.current) {
+      lastContentRef.current = newContent;
+      return;
+    }
+    const storedContent = useDraftStore.getState().drafts[draftId]?.content ?? '';
+    if (newContent === storedContent) {
+      lastContentRef.current = newContent;
+      return;
+    }
     lastContentRef.current = newContent;
 
     // Clear previous timeout

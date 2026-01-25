@@ -20,6 +20,7 @@ export interface Draft {
   content: string;
   lastSaved: number;
   linkedBlog?: LinkedBlog;
+  remoteEventId?: string;
 }
 
 interface DraftState {
@@ -33,6 +34,7 @@ interface DraftState {
   deleteDraft: (id: string) => void;
   createDraft: () => string;
   createDraftFromBlog: (content: string, linkedBlog: LinkedBlog) => string;
+  upsertDraftFromSync: (draft: Draft) => void;
   findDraftByLinkedBlog: (pubkey: string, dTag: string) => Draft | undefined;
 }
 
@@ -49,15 +51,24 @@ export const useDraftStore = create<DraftState>()(
       getDraft: (id) => get().drafts[id],
 
       setDraftContent: (id, content) => set((state) => ({
-        drafts: {
-          ...state.drafts,
-          [id]: {
-            ...state.drafts[id],
-            id,
-            content,
-            lastSaved: state.drafts[id]?.lastSaved ?? Date.now(),
-          },
-        },
+        drafts: (() => {
+          const existing = state.drafts[id];
+          if (!existing && content.trim().length === 0) {
+            return state.drafts;
+          }
+          if (existing && existing.content === content) {
+            return state.drafts;
+          }
+          return {
+            ...state.drafts,
+            [id]: {
+              ...existing,
+              id,
+              content,
+              lastSaved: existing?.lastSaved ?? Date.now(),
+            },
+          };
+        })(),
         // Don't change saveStatus here - let the caller control it
       })),
 
@@ -110,6 +121,23 @@ export const useDraftStore = create<DraftState>()(
         }));
         return id;
       },
+
+      upsertDraftFromSync: (draft) => set((state) => {
+        const existing = state.drafts[draft.id];
+        const shouldUpdateRemoteId = !!draft.remoteEventId && !existing?.remoteEventId;
+        if (existing && existing.lastSaved >= draft.lastSaved && !shouldUpdateRemoteId) {
+          return state;
+        }
+        return {
+          drafts: {
+            ...state.drafts,
+            [draft.id]: {
+              ...existing,
+              ...draft,
+            },
+          },
+        };
+      }),
 
       findDraftByLinkedBlog: (pubkey: string, dTag: string) => {
         const drafts = get().drafts;

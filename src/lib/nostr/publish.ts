@@ -121,6 +121,36 @@ export async function deleteArticle({
   return results;
 }
 
+export async function deleteDraft({
+  eventId,
+  relays,
+  secretKey,
+}: {
+  eventId: string;
+  relays: string[];
+  secretKey?: string;
+}): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+
+  const unsignedEvent = {
+    kind: 5,
+    created_at: createdAt,
+    tags: [
+      ['e', eventId],
+      ['k', '30024'],
+    ],
+    content: 'Draft deleted',
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  const results = await Promise.all(
+    relays.map((relay) => publishToRelay(signedEvent, relay))
+  );
+
+  return results;
+}
+
 export async function broadcastEvent(
   event: NostrEvent,
   relays: string[]

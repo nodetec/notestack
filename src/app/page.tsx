@@ -114,6 +114,10 @@ export default function LandingPage() {
   const { data: profiles } = useProfiles(pubkeys, relays);
 
   const handleStartWriting = () => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
     const draftId = createDraft();
     // Open drafts panel on desktop (768px+ matches md: breakpoint)
     const isDesktop = window.innerWidth >= 768;
@@ -126,6 +130,10 @@ export default function LandingPage() {
       const naddr = blogToNaddr(blogs[0], relays);
       router.push(`/${naddr}?panel=explore`);
     } else {
+      if (!isLoggedIn) {
+        router.push('/login');
+        return;
+      }
       const draftId = createDraft();
       router.push(`/draft/${draftId}?panel=explore`);
     }
