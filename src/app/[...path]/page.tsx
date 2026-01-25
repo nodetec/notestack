@@ -102,6 +102,7 @@ function HomeContent() {
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [selectedAuthorPubkey, setSelectedAuthorPubkey] = useState<string | null>(null);
+  const [selectedHighlightId, setSelectedHighlightId] = useState<string | null>(null);
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -306,6 +307,7 @@ function HomeContent() {
   const handleSelectBlog = useCallback((blog: Blog) => {
     // Check for unsaved edits before navigating
     checkBlogForEditsRef.current();
+    setSelectedHighlightId(null);
 
     // Set the blog directly since we already have the data
     setSelectedBlog(blog);
@@ -393,6 +395,7 @@ function HomeContent() {
 
   const handleNewArticle = useCallback(() => {
     checkBlogForEditsRef.current();
+    setSelectedHighlightId(null);
     const newId = createDraftIfAllowed();
     if (!newId) return;
     // Update state directly and URL without triggering navigation
@@ -408,6 +411,7 @@ function HomeContent() {
 
   const handleSelectDraft = useCallback((draftId: string) => {
     checkBlogForEditsRef.current();
+    setSelectedHighlightId(null);
     // Update state directly and URL without triggering navigation
     setSelectedBlog(null);
     setCurrentDraftId(draftId);
@@ -416,6 +420,7 @@ function HomeContent() {
   }, [isMobile]);
 
   const handleSelectHighlight = useCallback(async (highlight: Highlight) => {
+    setSelectedHighlightId(highlight.id);
     // Load the source article directly instead of navigating
     if (highlight.source) {
       checkBlogForEditsRef.current();
@@ -582,7 +587,7 @@ function HomeContent() {
         <DraftsPanel onSelectDraft={handleSelectDraft} onClose={handleClosePanel} selectedDraftId={currentDraftId ?? undefined} />
       </div>
       <div className={activePanel === 'highlights' ? '' : 'hidden'}>
-        <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} selectedSourcePubkey={selectedBlog?.pubkey} selectedSourceIdentifier={selectedBlog?.dTag} />
+        <HighlightsPanel onSelectHighlight={handleSelectHighlight} onClose={handleClosePanel} selectedHighlightId={selectedHighlightId} />
       </div>
       <div className={activePanel === 'stacks' ? '' : 'hidden'}>
         <StacksPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />

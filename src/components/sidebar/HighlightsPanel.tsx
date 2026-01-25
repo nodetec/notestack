@@ -24,8 +24,7 @@ import type { Highlight } from '@/lib/nostr/types';
 interface HighlightsPanelProps {
   onSelectHighlight?: (highlight: Highlight) => void;
   onClose: () => void;
-  selectedSourcePubkey?: string;
-  selectedSourceIdentifier?: string;
+  selectedHighlightId?: string | null;
 }
 
 function formatDate(timestamp: number): string {
@@ -36,7 +35,7 @@ function formatDate(timestamp: number): string {
   });
 }
 
-export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSourcePubkey, selectedSourceIdentifier }: HighlightsPanelProps) {
+export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHighlightId }: HighlightsPanelProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingHighlightId, setDeletingHighlightId] = useState<string | null>(null);
   const [broadcastingHighlightId, setBroadcastingHighlightId] = useState<string | null>(null);
@@ -220,7 +219,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedSo
 
         <ul className="divide-y divide-border">
           {highlights.map((highlight) => {
-            const isSelected = highlight.source?.pubkey === selectedSourcePubkey && highlight.source?.identifier === selectedSourceIdentifier;
+            const isSelected = highlight.id === selectedHighlightId;
             return (
             <li key={highlight.id} className="relative group p-2">
               <button
