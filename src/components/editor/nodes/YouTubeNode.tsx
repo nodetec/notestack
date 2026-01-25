@@ -181,7 +181,7 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
         {/* X button to delete - top right, always visible in edit mode */}
         {isEditable && (
           <button
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-50 shadow-md"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-20 shadow-md"
             onClick={(e) => {
               e.stopPropagation();
               deleteNode();
@@ -198,7 +198,7 @@ function YouTubeComponent({ nodeKey, videoID }: YouTubeComponentProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-50 shadow-md"
+                className="absolute right-2 bottom-2 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground text-background hover:bg-foreground transition-colors z-20 shadow-md"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="More options"
                 type="button"
