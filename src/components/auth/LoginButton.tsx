@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { bech32 } from '@scure/base';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { generateAvatar } from '@/lib/avatar';
+import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
   const { data: session, status } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
+  const relays = useSettingsStore((state) => state.relays);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,11 +57,11 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
 
     setIsLoadingProfile(true);
     const npub = hexToNpub(pubkey);
-    lookupProfile(npub).then((result) => {
+    lookupProfile(npub, relays).then((result) => {
       setProfile(result);
       setIsLoadingProfile(false);
     });
-  }, [pubkey]);
+  }, [pubkey, relays]);
 
   const handleLogin = useCallback(() => {
     const callbackUrl = encodeURIComponent(pathname || '/');

@@ -108,7 +108,7 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
 
   // Fetch profile for the author (uses shared cache from batch fetches)
-  const { data: authorProfile } = useProfile(effectivePubkey, ['wss://purplepag.es']);
+  const { data: authorProfile } = useProfile(effectivePubkey, relays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({

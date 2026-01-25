@@ -105,6 +105,7 @@ function HomeContent() {
   const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
+  const handleProfileLookup = useCallback((npub: string) => lookupProfile(npub, relays), [relays]);
   const editorRef = useRef<NostrEditorHandle>(null);
   const markdownEditorRef = useRef<MarkdownEditorHandle>(null);
   const [showFloatingToolbar, setShowFloatingToolbar] = useState(false);
@@ -186,7 +187,7 @@ function HomeContent() {
   const hasEmbeddedAuthor = !!(selectedBlog?.authorName || selectedBlog?.authorPicture);
   const { data: fetchedAuthorProfile, isLoading: isLoadingAuthor } = useProfile(
     selectedBlog && !hasEmbeddedAuthor ? selectedBlog.pubkey : null,
-    [activeRelay, 'wss://purplepag.es']
+    [activeRelay, ...relays]
   );
 
   // Use embedded author info if available, otherwise use fetched profile
@@ -820,7 +821,7 @@ function HomeContent() {
                 placeholder=""
                 initialMarkdown={editorContent}
                 onChange={handleEditorChange}
-                onProfileLookup={lookupProfile}
+                onProfileLookup={handleProfileLookup}
                 onNoteLookup={lookupNote}
                 toolbarContainer={selectedBlog ? null : floatingToolbarElement}
                 readOnly={!!selectedBlog}

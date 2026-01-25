@@ -110,7 +110,7 @@ export default function LandingPage() {
 
   const blogs = feedData?.blogs ?? [];
   const pubkeys = blogs.map((blog) => blog.pubkey);
-  const { data: profiles } = useProfiles(pubkeys, 'wss://purplepag.es');
+  const { data: profiles } = useProfiles(pubkeys, relays);
 
   const handleStartWriting = () => {
     const draftId = createDraft();
