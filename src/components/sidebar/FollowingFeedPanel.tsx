@@ -302,7 +302,7 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                         <DropdownMenuTrigger asChild>
                           <button
                             onClick={(e) => e.stopPropagation()}
-                            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+                            className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
                             aria-label="More options"
                           >
                             <MoreHorizontalIcon className="w-4 h-4" />
