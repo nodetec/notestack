@@ -89,7 +89,7 @@ const theme: EditorThemeClasses = {
   code: 'bg-muted dark:bg-[#1E1E1E] rounded-lg p-4 font-mono text-sm block mb-6 overflow-x-auto',
   codeHighlight: codeHighlightClasses,
   image: 'inline-block my-2',
-  hr: 'my-6 border-t border-border',
+  hr: 'mt-3 mb-6 border-t border-border',
   table: 'border-collapse border border-border mb-6 w-full',
   tableCell: 'border border-border px-3 py-2 text-left align-top',
   tableCellHeader: 'border border-border px-3 py-2 text-left font-bold bg-muted',
