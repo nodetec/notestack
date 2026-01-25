@@ -234,8 +234,16 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
             const isSelected = blog.id === selectedBlogId;
             return (
               <li key={blog.id} className="relative group p-2">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture });
+                    }
+                  }}
                   className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
@@ -320,7 +328,7 @@ export default function FollowingFeedPanel({ onSelectBlog, onSelectAuthor, onClo
                       </DropdownMenu>
                     </div>
                   </div>
-                </button>
+                </div>
               </li>
             );
           })}

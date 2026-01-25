@@ -222,8 +222,16 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
             const isSelected = highlight.id === selectedHighlightId;
             return (
             <li key={highlight.id} className="relative group p-2">
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelectHighlight?.(highlight)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectHighlight?.(highlight);
+                  }
+                }}
                 className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
@@ -274,7 +282,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
                     </DropdownMenu>
                   </div>
                 </div>
-              </button>
+              </div>
             </li>
           )})}
         </ul>

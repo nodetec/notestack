@@ -300,8 +300,16 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
             const isSelected = blog.id === selectedBlogId;
             return (
               <li key={blog.id} className="relative group p-2">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture });
+                    }
+                  }}
                   className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
@@ -350,7 +358,7 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
                       </DropdownMenu>
                     </div>
                   </div>
-                </button>
+                </div>
               </li>
             );
           })}

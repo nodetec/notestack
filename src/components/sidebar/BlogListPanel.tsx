@@ -204,8 +204,16 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
             const isSelected = blog.id === selectedBlogId;
             return (
             <li key={blog.id} className="relative group p-2">
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelectBlog?.(blog)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectBlog?.(blog);
+                  }
+                }}
                 className={`w-full text-left p-2 rounded-md transition-colors ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
@@ -269,7 +277,7 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                     </DropdownMenu>
                   </div>
                 </div>
-              </button>
+              </div>
             </li>
           );
           })}
