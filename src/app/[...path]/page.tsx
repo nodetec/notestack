@@ -554,7 +554,7 @@ function HomeContent() {
     if (shouldInsertImage) {
       const imageBlock = `![${selectedBlog.title || 'Cover image'}](${selectedBlog.image})\n\n`;
       if (shouldShowTitle) {
-        nextContent = nextContent.replace(/^# .+\n\n/, (match) => `${match}${imageBlock}`);
+        nextContent = nextContent.replace(/^# .+\n\n/, (match) => `${imageBlock}${match}`);
       } else {
         nextContent = `${imageBlock}${nextContent}`;
       }
