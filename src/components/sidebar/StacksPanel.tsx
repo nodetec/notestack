@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon } from 'lucide-react';
+import { XIcon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon, DownloadIcon, Trash2Icon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStackStore } from '@/lib/stores/stackStore';
@@ -190,6 +190,7 @@ function StackItemDisplay({
                     downloadMarkdownFile(blog.title, blog.content || '');
                   }}
                 >
+                  <DownloadIcon className="w-4 h-4" />
                   Download markdown
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -199,6 +200,7 @@ function StackItemDisplay({
                   }}
                   disabled={isDeleting}
                 >
+                  <Trash2Icon className="w-4 h-4" />
                   {isDeleting ? 'Removing...' : 'Remove from stack'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -310,6 +312,7 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
     removeStack,
     removeItemFromStack,
     addItemToStack,
+    updateStack,
     isLoading,
     setLoading,
   } = useStackStore();
@@ -442,7 +445,7 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
         return;
       }
 
-      await publishStack({
+      const result = await publishStack({
         dTag: stack.dTag,
         name: stack.name,
         description: stack.description,
@@ -457,6 +460,7 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
         relays,
         secretKey,
       });
+      updateStack(stack.dTag, { createdAt: result.event.createdAt });
       removeItemFromStack(stack.dTag, item);
       queryClient.setQueryData(
         ['stack-blogs', stack.dTag, activeRelay],
@@ -482,7 +486,7 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
     onSelectBlog?.(blog);
   };
 
-  const stacksList = Object.values(stacks);
+  const stacksList = Object.values(stacks).sort((a, b) => b.createdAt - a.createdAt);
   const isLoggedIn = isHydrated && !!pubkey;
   const selectedStack = selectedStackId ? stacks[selectedStackId] : null;
   const stackPubkeys = selectedStack
@@ -493,11 +497,12 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
     queryKey: ['stack-blogs', selectedStack?.dTag, activeRelay],
     queryFn: async () => {
       if (!selectedStack) return [];
+      const orderedItems = [...selectedStack.items].reverse();
       const results = await fetchBlogsByAddresses({
-        items: selectedStack.items,
+        items: orderedItems,
         relay: activeRelay,
       });
-      return results.map((blog, index) => ({ item: selectedStack.items[index], blog }));
+      return results.map((blog, index) => ({ item: orderedItems[index], blog }));
     },
     enabled: !!selectedStack && !!activeRelay,
   });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreHorizontalIcon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
+import { XIcon, MoreHorizontalIcon, PenLineIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, Trash2Icon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -17,11 +17,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { downloadMarkdownFile } from '@/lib/utils/download';
 import { extractFirstImage } from '@/lib/utils/markdown';
+import StackMenuSub from '@/components/stacks/StackMenuSub';
 import type { Blog } from '@/lib/nostr/types';
 
 interface BlogListPanelProps {
@@ -251,19 +253,23 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                           <MoreHorizontalIcon className="w-4 h-4" />
                         </button>
                       </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadMarkdownFile(blog.title, blog.content || '');
-                            }}
-                          >
-                            Download markdown
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => handleBroadcast(blog, e)}
-                            disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                          >
+                      <DropdownMenuContent align="end">
+                        <StackMenuSub blog={blog} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadMarkdownFile(blog.title, blog.content || '');
+                          }}
+                        >
+                          <DownloadIcon className="w-4 h-4" />
+                          Download markdown
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => handleBroadcast(blog, e)}
+                          disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                        >
+                          <SendIcon className="w-4 h-4" />
                           {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -273,6 +279,7 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                           }}
                           disabled={!blog.rawEvent}
                         >
+                          <CodeIcon className="w-4 h-4" />
                           View raw JSON
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -280,6 +287,7 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
                           disabled={deletingBlogId === blog.id}
                           className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
                         >
+                          <Trash2Icon className="w-4 h-4" />
                           {deletingBlogId === blog.id ? 'Deleting...' : 'Delete'}
                         </DropdownMenuItem>
                       </DropdownMenuContent>

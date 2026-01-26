@@ -41,6 +41,7 @@ export default function StackButton({ blog }: StackButtonProps) {
     addItemToStack,
     removeItemFromStack,
     addStack,
+    updateStack,
     isLoading,
     setLoading,
   } = useStackStore();
@@ -70,7 +71,7 @@ export default function StackButton({ blog }: StackButtonProps) {
     loadStacks();
   }, [isOpen, pubkey, activeRelay, setStacks, setLoading]);
 
-  const stacksList = Object.values(stacks);
+  const stacksList = Object.values(stacks).sort((a, b) => b.createdAt - a.createdAt);
   const isInAnyStack = isArticleInAnyStack(blog.pubkey, blog.dTag);
 
   const handleToggleStack = async (dTag: string, checked: boolean) => {
@@ -98,7 +99,7 @@ export default function StackButton({ blog }: StackButtonProps) {
       const currentStack = useStackStore.getState().stacks[dTag];
       if (!currentStack) return;
 
-      await publishStack({
+      const result = await publishStack({
         dTag: stack.dTag,
         name: stack.name,
         description: stack.description,
@@ -107,6 +108,7 @@ export default function StackButton({ blog }: StackButtonProps) {
         relays,
         secretKey,
       });
+      updateStack(dTag, { createdAt: result.event.createdAt });
       toast.success(checked ? 'Added to stack' : 'Removed from stack', {
         description: stack.name,
       });

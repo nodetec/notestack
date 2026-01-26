@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreHorizontalIcon, RefreshCwIcon } from 'lucide-react';
+import { XIcon, MoreHorizontalIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
@@ -17,12 +17,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { downloadMarkdownFile } from '@/lib/utils/download';
 import { generateAvatar } from '@/lib/avatar';
+import StackMenuSub from '@/components/stacks/StackMenuSub';
 import type { Blog } from '@/lib/nostr/types';
 
 interface GlobalFeedPanelProps {
@@ -280,18 +282,22 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <StackMenuSub blog={blog} />
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               downloadMarkdownFile(blog.title, blog.content || '');
                             }}
                           >
+                            <DownloadIcon className="w-4 h-4" />
                             Download markdown
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => handleBroadcast(blog, e)}
                             disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
                           >
+                            <SendIcon className="w-4 h-4" />
                             {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -301,6 +307,7 @@ export default function GlobalFeedPanel({ onSelectBlog, onSelectAuthor, onClose,
                             }}
                             disabled={!blog.rawEvent}
                           >
+                            <CodeIcon className="w-4 h-4" />
                             View raw JSON
                           </DropdownMenuItem>
                         </DropdownMenuContent>
