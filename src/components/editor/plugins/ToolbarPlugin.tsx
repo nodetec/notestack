@@ -33,6 +33,7 @@ import {
   ImageIcon,
   TableIcon,
   YoutubeIcon,
+  Volume2Icon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -42,6 +43,8 @@ import HeadingSelect from '../toolbar/HeadingSelect';
 import ImageDialog from '../toolbar/ImageDialog';
 import InsertTableDialog from '../toolbar/InsertTableDialog';
 import YouTubeDialog from '../toolbar/YouTubeDialog';
+import AudioDialog from '../toolbar/AudioDialog';
+import { $createAudioNode } from '../nodes/AudioNode';
 import type { BlockType } from '../toolbar/constants';
 
 interface ToolbarPluginProps {
@@ -61,6 +64,7 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
+  const [showAudioDialog, setShowAudioDialog] = useState(false);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -181,6 +185,18 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
         const imageNode = $createImageNode({ src: url, altText });
         const paragraphAfter = $createParagraphNode();
         $insertNodes([imageNode, paragraphAfter]);
+        paragraphAfter.selectStart();
+      });
+    },
+    [editor]
+  );
+
+  const insertAudio = useCallback(
+    (url: string) => {
+      editor.update(() => {
+        const audioNode = $createAudioNode({ url });
+        const paragraphAfter = $createParagraphNode();
+        $insertNodes([audioNode, paragraphAfter]);
         paragraphAfter.selectStart();
       });
     },
@@ -356,6 +372,21 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
         </TooltipTrigger>
         <TooltipContent>Embed YouTube</TooltipContent>
       </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setShowAudioDialog(true)}
+            disabled={isMarkdownMode}
+            className="hidden md:flex"
+          >
+            <Volume2Icon className="size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Insert Audio</TooltipContent>
+      </Tooltip>
     </div>
   );
 
@@ -375,6 +406,11 @@ export default function ToolbarPlugin({ portalContainer }: ToolbarPluginProps) {
       <YouTubeDialog
         isOpen={showYouTubeDialog}
         onClose={() => setShowYouTubeDialog(false)}
+      />
+      <AudioDialog
+        isOpen={showAudioDialog}
+        onClose={() => setShowAudioDialog(false)}
+        onInsert={insertAudio}
       />
     </>
   );

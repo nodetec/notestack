@@ -34,6 +34,8 @@ export interface Blog {
   title: string;
   summary?: string;
   image?: string;
+  audioUrl?: string;
+  audioMime?: string;
   publishedAt?: number;
   dTag: string;
   content: string;
@@ -48,6 +50,25 @@ export function eventToBlog(event: NostrEvent): Blog {
   const getTag = (name: string) => event.tags.find((t) => t[0] === name)?.[1];
   // Extract all 't' tags (hashtags)
   const tags = event.tags.filter((t) => t[0] === 't').map((t) => t[1]);
+  const imetaTags = event.tags.filter((t) => t[0] === 'imeta');
+  let audioUrl: string | undefined;
+  let audioMime: string | undefined;
+
+  for (const imeta of imetaTags) {
+    const mime = imeta.find((part) => part.startsWith('m '))?.slice(2);
+    const url = imeta.find((part) => part.startsWith('url '))?.slice(4);
+    if (mime && mime.startsWith('audio/') && url) {
+      audioMime = mime;
+      audioUrl = url;
+      break;
+    }
+  }
+  if (!audioUrl) {
+    const match = event.content.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/i);
+    if (match) {
+      audioUrl = match[0];
+    }
+  }
 
   return {
     id: event.id,
@@ -56,6 +77,8 @@ export function eventToBlog(event: NostrEvent): Blog {
     title: getTag('title') || 'Untitled',
     summary: getTag('summary'),
     image: getTag('image'),
+    audioUrl,
+    audioMime,
     publishedAt: getTag('published_at') ? parseInt(getTag('published_at')!) : undefined,
     dTag: getTag('d') || '',
     content: event.content,

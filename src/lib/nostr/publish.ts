@@ -70,6 +70,25 @@ export async function publishArticle({
     eventTags.push(['t', tag.toLowerCase()]);
   }
 
+  const audioMatches = content.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/gi) ?? [];
+  const audioUrls = Array.from(new Set(audioMatches));
+  const guessAudioMime = (url: string) => {
+    const lower = url.toLowerCase();
+    if (lower.includes('.mp3')) return 'audio/mpeg';
+    if (lower.includes('.wav')) return 'audio/wav';
+    if (lower.includes('.m4a')) return 'audio/mp4';
+    if (lower.includes('.ogg')) return 'audio/ogg';
+    if (lower.includes('.flac')) return 'audio/flac';
+    if (lower.includes('.aac')) return 'audio/aac';
+    return undefined;
+  };
+
+  for (const url of audioUrls) {
+    const mime = guessAudioMime(url);
+    if (!mime) continue;
+    eventTags.push(['imeta', `m ${mime}`, `url ${url}`]);
+  }
+
   const unsignedEvent = {
     kind: 30023,
     created_at: createdAt,

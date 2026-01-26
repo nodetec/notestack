@@ -840,6 +840,8 @@ function HomeContent() {
                 onNoteLookup={lookupNote}
                 toolbarContainer={selectedBlog ? null : floatingToolbarElement}
                 readOnly={!!selectedBlog}
+                audioUrl={selectedBlog?.audioUrl}
+                audioMime={selectedBlog?.audioMime}
                 highlightSource={selectedBlog ? {
                   kind: 30023,
                   pubkey: selectedBlog.pubkey,

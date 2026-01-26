@@ -44,6 +44,7 @@ import LinkPastePlugin from './plugins/LinkPastePlugin';
 import NostrPastePlugin from './plugins/NostrPastePlugin';
 import MarkdownPastePlugin from './plugins/MarkdownPastePlugin';
 import { ImageNode } from './nodes/ImageNode';
+import { AudioNode } from './nodes/AudioNode';
 import { LinkNode } from '@lexical/link';
 import { NpubNode } from './nodes/NpubNode';
 import { NprofileNode } from './nodes/NprofileNode';
@@ -57,6 +58,7 @@ import { NOSTR_TRANSFORMERS } from './transformers/NostrTransformers';
 import { TABLE, setTableTransformers } from './transformers/TableTransformer';
 import { HORIZONTAL_RULE } from './transformers/HorizontalRuleTransformer';
 import { YOUTUBE_TRANSFORMER } from './transformers/YouTubeTransformer';
+import { AUDIO_TRANSFORMER } from './transformers/AudioTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import TableClickOutsidePlugin from './plugins/TableClickOutsidePlugin';
@@ -67,6 +69,7 @@ import CodeSnippetPublishPlugin from './plugins/CodeSnippetPublishPlugin';
 import HeadingAnchorPlugin from './plugins/HeadingAnchorPlugin';
 import LinkClickPlugin from './plugins/LinkClickPlugin';
 import LinkPencilPlugin from './plugins/LinkPencilPlugin';
+import AudioEmbedPlugin from './plugins/AudioEmbedPlugin';
 import { LinkPencilNode } from './nodes/LinkPencilNode';
 
 // Source information for NIP-84 highlights
@@ -89,6 +92,8 @@ interface NostrEditorProps {
   onNoteLookup?: NoteLookupFn;
   toolbarContainer?: HTMLElement | null;
   readOnly?: boolean;
+  audioUrl?: string;
+  audioMime?: string;
   highlightSource?: HighlightSource; // For NIP-84 highlights when viewing articles
   highlights?: import('@/lib/nostr/types').Highlight[]; // Existing highlights to display
   onHighlightDeleted?: (highlightId: string) => void; // Callback when highlight is deleted
@@ -107,6 +112,7 @@ export const ALL_TRANSFORMERS = [
   TABLE,
   HORIZONTAL_RULE,
   IMAGE,
+  AUDIO_TRANSFORMER,
   LINK,
   ...NOSTR_TRANSFORMERS,
   ...ELEMENT_TRANSFORMERS,
@@ -125,6 +131,8 @@ function EditorInner({
   toolbarContainer,
   initialMarkdown,
   readOnly,
+  audioUrl,
+  audioMime,
   highlightSource,
   highlights,
   onHighlightDeleted,
@@ -136,6 +144,8 @@ function EditorInner({
   toolbarContainer?: HTMLElement | null;
   initialMarkdown?: string;
   readOnly?: boolean;
+  audioUrl?: string;
+  audioMime?: string;
   highlightSource?: HighlightSource;
   highlights?: import('@/lib/nostr/types').Highlight[];
   onHighlightDeleted?: (highlightId: string) => void;
@@ -257,6 +267,7 @@ function EditorInner({
       <TableCellResizerPlugin />
       <TableClickOutsidePlugin />
       <CodeHighlightPlugin />
+      <AudioEmbedPlugin url={audioUrl} mime={audioMime} enabled={readOnly} />
       <HighlightPlugin source={highlightSource} highlights={highlights} onHighlightDeleted={onHighlightDeleted} onHighlightCreated={onHighlightCreated} />
     </>
   );
@@ -272,6 +283,8 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
     onNoteLookup,
     toolbarContainer,
     readOnly = false,
+    audioUrl,
+    audioMime,
     highlightSource,
     highlights,
     onHighlightDeleted,
@@ -294,6 +307,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
           NeventNode,
           NaddrNode,
           YouTubeNode,
+          AudioNode,
           CollapseIndicatorNode,
         ],
         onError: (error: Error) => console.error('Lexical error:', error),
@@ -328,6 +342,8 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
               toolbarContainer={toolbarContainer}
               initialMarkdown={initialMarkdown}
               readOnly={readOnly}
+              audioUrl={audioUrl}
+              audioMime={audioMime}
               highlightSource={highlightSource}
               highlights={highlights}
               onHighlightDeleted={onHighlightDeleted}
