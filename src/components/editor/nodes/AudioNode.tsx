@@ -66,9 +66,13 @@ export class AudioNode extends DecoratorNode<ReactNode> {
     const audio = document.createElement('audio');
     audio.controls = true;
     audio.preload = 'metadata';
-    audio.src = this.__url;
     if (this.__mime) {
-      audio.type = this.__mime;
+      const source = document.createElement('source');
+      source.src = this.__url;
+      source.type = this.__mime;
+      audio.appendChild(source);
+    } else {
+      audio.src = this.__url;
     }
     return { element: audio };
   }
