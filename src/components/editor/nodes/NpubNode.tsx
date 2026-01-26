@@ -128,7 +128,7 @@ function NpubComponent({
         <img
           src={profile.picture}
           alt=""
-          className="w-4 h-4 rounded-full object-cover"
+          className="w-4 h-4 rounded-full object-cover ml-1"
         />
       )}
       <span
