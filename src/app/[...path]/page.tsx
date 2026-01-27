@@ -609,7 +609,7 @@ function HomeContent() {
   }, [selectedBlog, currentDraftId, handleContentChange, isMarkdownMode]);
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar activePanel={activePanel} onPanelChange={setActivePanel} onNewArticle={handleNewArticle} />
 
       {/* Collapsible panels - kept mounted to preserve scroll position */}
