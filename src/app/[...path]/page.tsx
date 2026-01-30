@@ -16,6 +16,7 @@ import AuthorFeedPanel from '@/components/sidebar/AuthorFeedPanel';
 import HighlightsPanel from '@/components/sidebar/HighlightsPanel';
 import StacksPanel from '@/components/sidebar/StacksPanel';
 import ProfilePanel from '@/components/sidebar/ProfilePanel';
+import SearchPanel from '@/components/sidebar/SearchPanel';
 import StackButton from '@/components/stacks/StackButton';
 import ZapButton from '@/components/zap/ZapButton';
 import LoginButton from '@/components/auth/LoginButton';
@@ -627,6 +628,9 @@ function HomeContent() {
           onClearAuthor={() => setSelectedAuthorPubkey(null)}
           selectedBlogId={selectedBlog?.id}
         />
+      </div>
+      <div className={activePanel === 'search' ? '' : 'hidden'}>
+        <SearchPanel onSelectBlog={handleSelectBlog} onSelectAuthor={handleSelectAuthor} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
       </div>
       <div className={activePanel === 'blogs' ? '' : 'hidden'}>
         <BlogListPanel onSelectBlog={handleSelectBlog} onClose={handleClosePanel} selectedBlogId={selectedBlog?.id} />
