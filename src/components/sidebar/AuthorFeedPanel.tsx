@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreHorizontalIcon, RefreshCwIcon, SearchIcon, DownloadIcon, SendIcon, CodeIcon } from 'lucide-react';
+import { XIcon, MoreHorizontalIcon, RefreshCwIcon, SearchIcon, DownloadIcon, SendIcon, CodeIcon, CopyIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
@@ -180,6 +180,18 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
     }
   };
 
+  const handleCopyNpub = async () => {
+    if (!effectivePubkey) return;
+    try {
+      const npub = nip19.npubEncode(effectivePubkey);
+      await navigator.clipboard.writeText(npub);
+      toast.success('Copied npub');
+    } catch (err) {
+      console.error('Failed to copy npub:', err);
+      toast.error('Failed to copy npub');
+    }
+  };
+
   const handleClear = () => {
     setLocalPubkey(null);
     setSearchInput('');
@@ -257,9 +269,19 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
               <p className="text-sm font-medium text-foreground truncate">
                 {authorProfile?.name || truncateNpub(effectivePubkey)}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {truncateNpub(effectivePubkey)}
-              </p>
+              <div className="flex items-center gap-1 min-w-0">
+                <p className="text-xs text-muted-foreground truncate">
+                  {truncateNpub(effectivePubkey)}
+                </p>
+                <button
+                  onClick={handleCopyNpub}
+                  className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
+                  title="Copy npub"
+                  aria-label="Copy npub"
+                >
+                  <CopyIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
             <button
               onClick={handleClear}
