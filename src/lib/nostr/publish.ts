@@ -1,4 +1,5 @@
 import type { NostrEvent } from './types';
+import { stripCodeBlocks } from '@/lib/utils/markdown';
 import { signEvent, getSignerPublicKey } from './signing';
 
 function generateId(): string {
@@ -70,7 +71,8 @@ export async function publishArticle({
     eventTags.push(['t', tag.toLowerCase()]);
   }
 
-  const audioMatches = content.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/gi) ?? [];
+  const contentWithoutCode = stripCodeBlocks(content);
+  const audioMatches = contentWithoutCode.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/gi) ?? [];
   const audioUrls = Array.from(new Set(audioMatches));
   const guessAudioMime = (url: string) => {
     const lower = url.toLowerCase();

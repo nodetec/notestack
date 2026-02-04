@@ -17,3 +17,11 @@ export function extractFirstImage(content: string): string | null {
 
   return null;
 }
+
+/**
+ * Removes fenced code blocks (``` or ~~~) from markdown content.
+ */
+export function stripCodeBlocks(content: string): string {
+  if (!content) return content;
+  return content.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, '');
+}

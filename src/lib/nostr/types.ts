@@ -1,3 +1,5 @@
+import { stripCodeBlocks } from '@/lib/utils/markdown';
+
 // NIP-01 Event structure
 export interface NostrEvent {
   id: string;
@@ -64,7 +66,8 @@ export function eventToBlog(event: NostrEvent): Blog {
     }
   }
   if (!audioUrl) {
-    const match = event.content.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/i);
+    const contentWithoutCode = stripCodeBlocks(event.content);
+    const match = contentWithoutCode.match(/https?:\/\/\S+\.(mp3|wav|m4a|ogg|flac|aac)(\?\S*)?/i);
     if (match) {
       audioUrl = match[0];
     }
