@@ -43,14 +43,22 @@ export default function ExplorePage() {
     setActivePanel('author');
   }, []);
 
+  const withPanelParam = useCallback((path: string) => {
+    if (activePanel && activePanel !== 'explore') {
+      const separator = path.includes('?') ? '&' : '?';
+      return `${path}${separator}panel=${encodeURIComponent(activePanel)}`;
+    }
+    return path;
+  }, [activePanel]);
+
   const handleSelectBlog = useCallback((blog: Blog) => {
     const naddr = blogToNaddr(blog, relays);
-    router.push(`/${naddr}`, { scroll: false });
-  }, [relays, router]);
+    router.push(withPanelParam(`/${naddr}`), { scroll: false });
+  }, [relays, router, withPanelParam]);
 
   const handleSelectDraft = useCallback((draftId: string) => {
-    router.push(`/draft/${draftId}`, { scroll: false });
-  }, [router]);
+    router.push(withPanelParam(`/draft/${draftId}`), { scroll: false });
+  }, [router, withPanelParam]);
 
   const handleSelectHighlight = useCallback((highlight: Highlight) => {
     setSelectedHighlightId(highlight.id);
@@ -59,9 +67,9 @@ export default function ExplorePage() {
         { pubkey: highlight.source.pubkey, dTag: highlight.source.identifier },
         relays
       );
-      router.push(`/${naddr}`, { scroll: false });
+      router.push(withPanelParam(`/${naddr}`), { scroll: false });
     }
-  }, [relays, router]);
+  }, [relays, router, withPanelParam]);
 
   return (
     <SidebarProvider defaultOpen={false}>

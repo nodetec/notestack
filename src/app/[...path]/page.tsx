@@ -45,7 +45,6 @@ import { lookupNote } from "@/lib/nostr/notes";
 import { fetchBlogByAddress, fetchHighlights } from "@/lib/nostr/fetch";
 import { blogToNaddr, decodeNaddr } from "@/lib/nostr/naddr";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
-import { useIsMobile } from "@/hooks/use-mobile";
 import type { Blog } from "@/lib/nostr/types";
 import { CommentsSection } from "@/components/comments";
 import AuthorDropdown from "@/components/author/AuthorDropdown";
@@ -116,7 +115,6 @@ function HomeContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const isMobile = useIsMobile();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -385,6 +383,17 @@ function HomeContent() {
     activeRelay,
   ]);
 
+  const withPanelParam = useCallback(
+    (path: string) => {
+      if (activePanel) {
+        const separator = path.includes("?") ? "&" : "?";
+        return `${path}${separator}panel=${encodeURIComponent(activePanel)}`;
+      }
+      return path;
+    },
+    [activePanel],
+  );
+
   const handleSelectBlog = useCallback(
     (blog: Blog) => {
       // Check for unsaved edits before navigating
@@ -400,10 +409,9 @@ function HomeContent() {
       // Update URL for bookmarking without triggering navigation
       // (router.push would cause re-render and potentially re-fetch)
       const naddr = blogToNaddr(blog, relays);
-      router.push(`/${naddr}`, { scroll: false });
-      if (isMobile) setActivePanel(null);
+      router.push(withPanelParam(`/${naddr}`), { scroll: false });
     },
-    [relays, isMobile, router],
+    [relays, router, withPanelParam],
   );
 
   const getEditorContent = useCallback(() => {
@@ -515,10 +523,9 @@ function HomeContent() {
       // Update state directly and URL without triggering navigation
       setSelectedBlog(null);
       setCurrentDraftId(draftId);
-      router.push(`/draft/${draftId}`, { scroll: false });
-      if (isMobile) setActivePanel(null);
+      router.push(withPanelParam(`/draft/${draftId}`), { scroll: false });
     },
-    [isMobile, router],
+    [router, withPanelParam],
   );
 
   const handleSelectHighlight = useCallback(
@@ -550,7 +557,7 @@ function HomeContent() {
           selectedBlogRef.current = cachedBlog;
           setCurrentDraftId(null);
           const naddr = blogToNaddr(cachedBlog, relays);
-          router.push(`/${naddr}`, { scroll: false });
+          router.push(withPanelParam(`/${naddr}`), { scroll: false });
         } else {
           // Fetch the blog if not in cache
           setIsLoadingBlog(true);
@@ -569,14 +576,13 @@ function HomeContent() {
             setSelectedBlog(blog);
             selectedBlogRef.current = blog;
             const naddr = blogToNaddr(blog, relays);
-            router.push(`/${naddr}`, { scroll: false });
+            router.push(withPanelParam(`/${naddr}`), { scroll: false });
           }
         }
 
-        if (isMobile) setActivePanel(null);
       }
     },
-    [relays, isMobile, activeRelay, queryClient, router],
+    [relays, activeRelay, queryClient, router, withPanelParam],
   );
 
   const isLoggedIn = sessionStatus === "authenticated" && !!pubkey;
