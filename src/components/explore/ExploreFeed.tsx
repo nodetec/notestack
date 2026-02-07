@@ -8,6 +8,7 @@ import { useInView } from "react-intersection-observer";
 import {
   MoreHorizontalIcon,
   PenLineIcon,
+  RefreshCwIcon,
   DownloadIcon,
   SendIcon,
   CodeIcon,
@@ -111,6 +112,8 @@ export default function ExploreFeed() {
     isFetchingNextPage: isFetchingNextLatestPage,
     isLoading: isLoadingLatest,
     isError: isLatestError,
+    refetch: refetchLatest,
+    isRefetching: isRefetchingLatest,
   } = useInfiniteQuery({
     queryKey: ["global-feed", activeRelay, activeTag || ""],
     queryFn: ({ pageParam }) =>
@@ -128,6 +131,8 @@ export default function ExploreFeed() {
   const {
     data: contacts,
     isLoading: isLoadingContacts,
+    refetch: refetchContacts,
+    isRefetching: isRefetchingContacts,
   } = useQuery({
     queryKey: ["contacts", pubkey, activeRelay],
     queryFn: () => fetchContacts({ pubkey: pubkey!, relay: activeRelay }),
@@ -142,6 +147,8 @@ export default function ExploreFeed() {
     isFetchingNextPage: isFetchingNextFollowingPage,
     isLoading: isLoadingFollowing,
     isError: isFollowingError,
+    refetch: refetchFollowing,
+    isRefetching: isRefetchingFollowing,
   } = useInfiniteQuery({
     queryKey: ["following-feed", activeRelay, (contacts ?? []).join(",")],
     queryFn: ({ pageParam }) =>
@@ -204,6 +211,18 @@ export default function ExploreFeed() {
   const isFetchingNextPage = isFollowingView
     ? isFetchingNextFollowingPage
     : isFetchingNextLatestPage;
+  const isRefetching = isFollowingView
+    ? isRefetchingContacts || isRefetchingFollowing
+    : isRefetchingLatest;
+
+  const handleRefresh = () => {
+    if (isFollowingView) {
+      refetchContacts();
+      refetchFollowing();
+      return;
+    }
+    refetchLatest();
+  };
 
   const handleBroadcast = async (blog: Blog, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -287,15 +306,26 @@ export default function ExploreFeed() {
                   Following
                 </button>
               </div>
-              {!isFollowingView && activeTag && (
+              <div className="mb-2 flex items-center gap-2">
+                {!isFollowingView && activeTag && (
+                  <button
+                    onClick={() => setActiveTag(null)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
+                  >
+                    #{activeTag}
+                    <XIcon className="w-3 h-3" />
+                  </button>
+                )}
                 <button
-                  onClick={() => setActiveTag(null)}
-                  className="mb-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
+                  onClick={handleRefresh}
+                  disabled={isRefetching}
+                  className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+                  title="Refresh feed"
+                  aria-label="Refresh feed"
                 >
-                  #{activeTag}
-                  <XIcon className="w-3 h-3" />
+                  <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
                 </button>
-              )}
+              </div>
             </div>
           </div>
 
