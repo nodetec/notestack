@@ -56,6 +56,9 @@ export default function ContentHeader({
             leftClassName,
           )}
         >
+          {showSidebarTrigger && (
+            <SidebarTrigger className={cn('lg:hidden', triggerClassName)} />
+          )}
           {showBrand && (
             <Link
               href={brandHref}
@@ -66,9 +69,6 @@ export default function ContentHeader({
             >
               {brandText}
             </Link>
-          )}
-          {showSidebarTrigger && (
-            <SidebarTrigger className={cn('lg:hidden', triggerClassName)} />
           )}
           {left}
         </div>

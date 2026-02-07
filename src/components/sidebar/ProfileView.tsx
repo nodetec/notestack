@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { XIcon, Loader2Icon, UserIcon } from 'lucide-react';
+import { Loader2Icon, UserIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,14 +27,14 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-interface ProfilePanelProps {
-  onClose: () => void;
+interface ProfileViewProps {
   pubkey?: string;
 }
 
-export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
+export default function ProfileView({
+  pubkey,
+}: ProfileViewProps) {
   const router = useRouter();
-  const { state: sidebarState, isMobile } = useSidebar();
   const relays = useSettingsStore((state) => state.relays);
   const { secretKey } = useAuth();
   const queryClient = useQueryClient();
@@ -142,24 +140,12 @@ export default function ProfilePanel({ onClose, pubkey }: ProfilePanelProps) {
   };
 
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
+      <div className="flex items-center justify-between border-b border-border/70 pt-2 pb-2">
+        <h2 className="text-sm font-medium text-foreground">
           Profile
         </h2>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Content */}

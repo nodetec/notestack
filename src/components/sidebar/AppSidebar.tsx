@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
@@ -38,14 +38,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { UserWithKeys } from '@/types/auth';
 
-interface AppSidebarProps {
-  activePanel: string | null;
-  onPanelChange: (panel: string | null) => void;
-}
-
-export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+export default function AppSidebar() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
@@ -62,18 +61,11 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
   const [isAddingTag, setIsAddingTag] = useState(false);
   const { tags, activeTag, addTag, removeTag, setActiveTag } = useTagStore();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const handleClick = (panel: string) => {
-    onPanelChange(activePanel === panel ? null : panel);
-    setOpenMobile(false);
-  };
-
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
+
+  const isDarkTheme = (resolvedTheme ?? theme) === 'dark';
 
   const handleTagClick = (tag: string) => {
     if (activeTag === tag) {
@@ -106,6 +98,11 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
 
   // Extract hostname from relay URL for display
   const relayHost = activeRelay ? new URL(activeRelay).hostname : null;
+  const isHomeRoute = pathname === '/' || pathname === '/explore';
+  const isDraftsRoute = pathname === '/drafts';
+  const isHighlightsRoute = pathname === '/highlights';
+  const isStacksRoute = pathname === '/stacks';
+  const isRelaysRoute = pathname === '/relays';
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -154,17 +151,12 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Home"
-                  isActive={activePanel === 'explore'}
+                  isActive={isHomeRoute}
                   asChild
                 >
                   <Link
                     href="/"
-                    onClick={() => {
-                      if (pathname === '/' || pathname === '/explore') {
-                        onPanelChange('explore');
-                      }
-                      setOpenMobile(false);
-                    }}
+                    onClick={() => setOpenMobile(false)}
                     className="flex items-center gap-2"
                   >
                     <HouseIcon />
@@ -175,41 +167,65 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Drafts"
-                  isActive={activePanel === 'drafts'}
-                  onClick={() => handleClick('drafts')}
+                  isActive={isDraftsRoute}
+                  asChild
                 >
-                  <FileEditIcon />
-                  <span>Drafts</span>
+                  <Link
+                    href="/drafts"
+                    onClick={() => setOpenMobile(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <FileEditIcon />
+                    <span>Drafts</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Highlights"
-                  isActive={activePanel === 'highlights'}
-                  onClick={() => handleClick('highlights')}
+                  isActive={isHighlightsRoute}
+                  asChild
                 >
-                  <HighlighterIcon />
-                  <span>Highlights</span>
+                  <Link
+                    href="/highlights"
+                    onClick={() => setOpenMobile(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <HighlighterIcon />
+                    <span>Highlights</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Stacks"
-                  isActive={activePanel === 'stacks'}
-                  onClick={() => handleClick('stacks')}
+                  isActive={isStacksRoute}
+                  asChild
                 >
-                  <LayersIcon />
-                  <span>Stacks</span>
+                  <Link
+                    href="/stacks"
+                    onClick={() => setOpenMobile(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <LayersIcon />
+                    <span>Stacks</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Relays"
-                  isActive={activePanel === 'relays'}
-                  onClick={() => handleClick('relays')}
+                  isActive={isRelaysRoute}
+                  asChild
                 >
-                  <ServerIcon />
-                  <span>Relays</span>
+                  <Link
+                    href="/relays"
+                    onClick={() => setOpenMobile(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <ServerIcon />
+                    <span>Relays</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -221,7 +237,6 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
                   <Link
                     href={profileHref}
                     onClick={() => {
-                      onPanelChange(null);
                       setOpenMobile(false);
                     }}
                     className="flex items-center gap-2"
@@ -320,11 +335,11 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={mounted ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : 'Toggle theme'}
+              tooltip={mounted ? (isDarkTheme ? 'Light mode' : 'Dark mode') : 'Toggle theme'}
               onClick={toggleTheme}
             >
-              {mounted ? (theme === 'dark' ? <SunIcon /> : <MoonIcon />) : <MoonIcon />}
-              <span>{mounted ? (theme === 'dark' ? 'Light mode' : 'Dark mode') : 'Toggle theme'}</span>
+              {mounted ? (isDarkTheme ? <SunIcon /> : <MoonIcon />) : <MoonIcon />}
+              <span>{mounted ? (isDarkTheme ? 'Light mode' : 'Dark mode') : 'Toggle theme'}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

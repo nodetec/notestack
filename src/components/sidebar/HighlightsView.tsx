@@ -3,15 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, RefreshCwIcon, MoreHorizontalIcon } from 'lucide-react';
+import { RefreshCwIcon, MoreHorizontalIcon } from 'lucide-react';
 import { fetchUserHighlights } from '@/lib/nostr/fetch';
 import { deleteHighlight, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import type { UserWithKeys } from '@/types/auth';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +19,8 @@ import {
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import type { Highlight } from '@/lib/nostr/types';
 
-interface HighlightsPanelProps {
+interface HighlightsViewProps {
   onSelectHighlight?: (highlight: Highlight) => void;
-  onClose: () => void;
   selectedHighlightId?: string | null;
 }
 
@@ -35,7 +32,10 @@ function formatDate(timestamp: number): string {
   });
 }
 
-export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHighlightId }: HighlightsPanelProps) {
+export default function HighlightsView({
+  onSelectHighlight,
+  selectedHighlightId,
+}: HighlightsViewProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingHighlightId, setDeletingHighlightId] = useState<string | null>(null);
   const [broadcastingHighlightId, setBroadcastingHighlightId] = useState<string | null>(null);
@@ -48,7 +48,6 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();
-  const { state: sidebarState, isMobile } = useSidebar();
 
   useEffect(() => {
     setIsHydrated(true);
@@ -160,34 +159,24 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
   };
 
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
-          My Highlights
-        </h2>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
-            title="Refresh highlights"
-            aria-label="Refresh highlights"
-          >
-            <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-            title="Close panel"
-            aria-label="Close panel"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
+      <div className="mb-5 border-b border-border/70 pt-2">
+        <div className="flex items-center justify-between pb-2">
+          <h2 className="text-sm font-medium text-foreground">
+            My Highlights
+          </h2>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+              title="Refresh highlights"
+              aria-label="Refresh highlights"
+            >
+              <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -221,7 +210,7 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
           {highlights.map((highlight) => {
             const isSelected = highlight.id === selectedHighlightId;
             return (
-            <li key={highlight.id} className="relative group p-2">
+            <li key={highlight.id} className="relative group py-2">
               <div
                 role="button"
                 tabIndex={0}
@@ -232,11 +221,11 @@ export default function HighlightsPanel({ onSelectHighlight, onClose, selectedHi
                     onSelectHighlight?.(highlight);
                   }
                 }}
-                className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                className={`w-full text-left py-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
                 <div>
                   <p className="text-sm text-foreground line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">
-                    "{highlight.content}"
+                    &quot;{highlight.content}&quot;
                   </p>
                   {highlight.context && (
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2 italic">

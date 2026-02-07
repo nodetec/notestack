@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreHorizontalIcon, RefreshCwIcon, SearchIcon, DownloadIcon, SendIcon, CodeIcon, CopyIcon } from 'lucide-react';
+import { MoreHorizontalIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
-import { fetchBlogs } from '@/lib/nostr/fetch';
+import { fetchContacts, fetchFollowingBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
-import { useProfile } from '@/lib/hooks/useProfiles';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
+import { useProfiles } from '@/lib/hooks/useProfiles';
+import { useSession } from 'next-auth/react';
+import type { UserWithKeys } from '@/types/auth';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +26,9 @@ import { generateAvatar } from '@/lib/avatar';
 import StackMenuSub from '@/components/stacks/StackMenuSub';
 import type { Blog } from '@/lib/nostr/types';
 
-interface AuthorFeedPanelProps {
-  pubkey: string | null;
+interface FollowingFeedViewProps {
   onSelectBlog?: (blog: Blog) => void;
-  onClose: () => void;
-  onClearAuthor: () => void;
+  onSelectAuthor?: (pubkey: string) => void;
   selectedBlogId?: string;
 }
 
@@ -47,74 +45,66 @@ function truncateNpub(pubkey: string): string {
   return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
-function decodeNpubOrNprofile(input: string): string | null {
-  try {
-    const trimmed = input.trim();
-    // Remove nostr: prefix if present
-    const cleaned = trimmed.startsWith('nostr:') ? trimmed.slice(6) : trimmed;
-
-    if (cleaned.startsWith('npub1')) {
-      const decoded = nip19.decode(cleaned);
-      if (decoded.type === 'npub') {
-        return decoded.data;
-      }
-    } else if (cleaned.startsWith('nprofile1')) {
-      const decoded = nip19.decode(cleaned);
-      if (decoded.type === 'nprofile') {
-        return decoded.data.pubkey;
-      }
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClearAuthor, selectedBlogId }: AuthorFeedPanelProps) {
+export default function FollowingFeedView({
+  onSelectBlog,
+  onSelectAuthor,
+  selectedBlogId,
+}: FollowingFeedViewProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [localPubkey, setLocalPubkey] = useState<string | null>(pubkey);
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const relays = useSettingsStore((state) => state.relays);
-  const { state: sidebarState, isMobile } = useSidebar();
+  const { data: session, status: sessionStatus } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const pubkey = user?.publicKey;
+  const isLoggedIn = sessionStatus === 'authenticated' && !!pubkey;
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  // Sync local pubkey with prop
-  useEffect(() => {
-    setLocalPubkey(pubkey);
-    setSearchError(null);
-  }, [pubkey]);
+  // Fetch user's contacts (follow list)
+  const {
+    data: contacts,
+    isLoading: isLoadingContacts,
+    refetch: refetchContacts,
+    isRefetching: isRefetchingContacts,
+  } = useQuery({
+    queryKey: ['contacts', pubkey, activeRelay],
+    queryFn: () => fetchContacts({ pubkey: pubkey!, relay: activeRelay }),
+    enabled: isHydrated && !!activeRelay && !!pubkey,
+  });
 
-  const effectivePubkey = localPubkey;
-
+  // Fetch blogs from followed users
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
+    isLoading: isLoadingBlogs,
     isError,
-    refetch,
-    isRefetching,
+    refetch: refetchBlogs,
+    isRefetching: isRefetchingBlogs,
   } = useInfiniteQuery({
-    queryKey: ['author-feed', activeRelay, effectivePubkey],
-    queryFn: ({ pageParam }) => fetchBlogs({ limit: 20, until: pageParam, relay: activeRelay, pubkey: effectivePubkey! }),
+    queryKey: ['following-feed', activeRelay, contacts],
+    queryFn: ({ pageParam }) => fetchFollowingBlogs({
+      authors: contacts || [],
+      limit: 20,
+      until: pageParam,
+      relay: activeRelay,
+    }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    enabled: isHydrated && !!activeRelay && !!effectivePubkey,
+    enabled: isHydrated && !!activeRelay && !!contacts && contacts.length > 0,
   });
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
 
-  // Fetch profile for the author (uses shared cache from batch fetches)
-  const { data: authorProfile } = useProfile(effectivePubkey, relays);
+  // Fetch profiles for all blog authors
+  const authorPubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
+  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(authorPubkeys, relays);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
@@ -125,6 +115,14 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
       }
     },
   });
+
+  const handleRefresh = () => {
+    refetchContacts();
+    refetchBlogs();
+  };
+
+  const isLoading = isLoadingContacts || isLoadingBlogs;
+  const isRefetching = isRefetchingContacts || isRefetchingBlogs;
 
   const handleBroadcast = async (blog: Blog, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -163,181 +161,119 @@ export default function AuthorFeedPanel({ pubkey, onSelectBlog, onClose, onClear
     setIsJsonOpen(true);
   };
 
-  const handleSearch = () => {
-    const decoded = decodeNpubOrNprofile(searchInput);
-    if (decoded) {
-      setLocalPubkey(decoded);
-      setSearchError(null);
-      setSearchInput('');
-    } else {
-      setSearchError('Invalid npub or nprofile');
-    }
-  };
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  const handleCopyNpub = async () => {
-    if (!effectivePubkey) return;
-    try {
-      const npub = nip19.npubEncode(effectivePubkey);
-      await navigator.clipboard.writeText(npub);
-      toast.success('Copied npub');
-    } catch (err) {
-      console.error('Failed to copy npub:', err);
-      toast.error('Failed to copy npub');
-    }
-  };
-
-  const handleClear = () => {
-    setLocalPubkey(null);
-    setSearchInput('');
-    setSearchError(null);
-    onClearAuthor();
-  };
-
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
-          Author
+      <div className="flex items-center justify-between border-b border-border/70 pt-2 pb-2">
+        <h2 className="text-sm font-medium text-foreground">
+          Following
         </h2>
         <div className="flex items-center gap-1">
-          {effectivePubkey && (
-            <button
-              onClick={() => refetch()}
-              disabled={isRefetching}
-              className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
-              title="Refresh feed"
-              aria-label="Refresh feed"
-            >
-              <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            </button>
-          )}
           <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-            title="Close panel"
-            aria-label="Close panel"
+            onClick={handleRefresh}
+            disabled={isRefetching}
+            className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+            title="Refresh feed"
+            aria-label="Refresh feed"
           >
-            <XIcon className="w-4 h-4" />
+            <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Search input when no author selected */}
-      {!effectivePubkey && (
-        <div className="p-3 border-b border-sidebar-border">
-          <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value);
-                setSearchError(null);
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Enter npub..."
-              className="w-full pl-9 pr-3 py-2 text-sm bg-sidebar-accent/50 rounded-md border border-sidebar-border focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
-            />
-          </div>
-          {searchError && (
-            <p className="text-xs text-red-500 mt-1">{searchError}</p>
-          )}
-        </div>
-      )}
-
-      {/* Author header when author is selected */}
-      {effectivePubkey && (
-        <div className="p-3 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <img
-              src={authorProfile?.picture || generateAvatar(effectivePubkey)}
-              alt=""
-              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {authorProfile?.name || truncateNpub(effectivePubkey)}
-              </p>
-              <div className="flex items-center gap-1 min-w-0">
-                <p className="text-xs text-muted-foreground truncate">
-                  {truncateNpub(effectivePubkey)}
-                </p>
-                <button
-                  onClick={handleCopyNpub}
-                  className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-                  title="Copy npub"
-                  aria-label="Copy npub"
-                >
-                  <CopyIcon className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-            <button
-              onClick={handleClear}
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent rounded"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto overscroll-none">
-        {!effectivePubkey && (
+        {!isLoggedIn && (
           <div className="p-4 text-center text-muted-foreground text-sm">
-            Enter an npub to view their articles
+            Log in to see posts from people you follow
           </div>
         )}
 
-        {effectivePubkey && isLoading && (
+        {isLoggedIn && isLoading && (
           <div className="p-4 text-center text-muted-foreground text-sm">
-            Loading articles...
+            Loading...
           </div>
         )}
 
-        {effectivePubkey && isError && (
+        {isLoggedIn && isError && (
           <div className="p-4 text-center text-red-500 text-sm">
-            Failed to load articles
+            Failed to load blogs
           </div>
         )}
 
-        {effectivePubkey && !isLoading && blogs.length === 0 && (
+        {isLoggedIn && !isLoading && contacts && contacts.length === 0 && (
           <div className="p-4 text-center text-muted-foreground text-sm">
-            No articles found
+            Follow users to see their posts here
+          </div>
+        )}
+
+        {isLoggedIn && !isLoading && contacts && contacts.length > 0 && blogs.length === 0 && (
+          <div className="p-4 text-center text-muted-foreground text-sm">
+            No blogs from followed users yet
           </div>
         )}
 
         <ul className="divide-y divide-border">
           {blogs.map((blog) => {
             const thumbnail = blog.image || extractFirstImage(blog.content);
+            // getProfile checks both batch result and individual cache (from AuthorFeedView)
+            const profile = getProfile(blog.pubkey);
+            // Show skeleton while this specific profile is loading, fallback to dicebear/npub only when loaded but not found
+            const isProfileLoading = !profile && (isLoadingProfiles || isFetchingProfiles);
+            const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
+            const displayName = profile?.name || truncateNpub(blog.pubkey);
             const isSelected = blog.id === selectedBlogId;
             return (
               <li key={blog.id} className="relative group p-2">
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture })}
+                  onClick={() => onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture })}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      onSelectBlog?.({ ...blog, authorName: authorProfile?.name, authorPicture: authorProfile?.picture });
+                      onSelectBlog?.({ ...blog, authorName: profile?.name, authorPicture: profile?.picture });
                     }
                   }}
                   className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
                   <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectAuthor?.(blog.pubkey);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onSelectAuthor?.(blog.pubkey);
+                          }
+                        }}
+                        className="flex items-center gap-2 hover:underline cursor-default min-w-0 overflow-hidden"
+                      >
+                        {isProfileLoading ? (
+                          <>
+                            <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                            <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                          </>
+                        ) : (
+                          <>
+                            <img
+                              src={avatarUrl}
+                              alt=""
+                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                            />
+                            <span className="text-xs text-muted-foreground truncate">
+                              {displayName}
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    </div>
                     <h3 className="text-sm font-medium text-foreground truncate">
                       {blog.title || 'Untitled'}
                     </h3>

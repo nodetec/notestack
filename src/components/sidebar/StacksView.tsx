@@ -11,8 +11,6 @@ import { fetchBlogsByAddresses } from '@/lib/nostr/fetch';
 import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import type { Blog, Stack, StackItem } from '@/lib/nostr/types';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { toast } from 'sonner';
@@ -40,10 +38,9 @@ function truncateNpub(pubkey: string): string {
   return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
 }
 
-interface StacksPanelProps {
+interface StacksViewProps {
   onSelectBlog?: (blog: Blog) => void;
   onSelectAuthor?: (pubkey: string) => void;
-  onClose: () => void;
   selectedBlogId?: string;
 }
 
@@ -78,7 +75,7 @@ function StackItemDisplay({
   if (!blog) {
     return (
       <div className="group relative p-2 text-sm text-muted-foreground italic">
-        <div className="w-full text-left p-2 rounded-md bg-sidebar-accent/40">
+        <div className="w-full text-left py-2 rounded-md bg-sidebar-accent/40">
           Article not found
         </div>
         <button
@@ -106,7 +103,7 @@ function StackItemDisplay({
   const displayName = profile?.name || truncateNpub(item.pubkey);
 
   return (
-    <div className="group relative p-2">
+    <div className="group relative py-2">
       <div
         role="button"
         tabIndex={0}
@@ -117,7 +114,7 @@ function StackItemDisplay({
             onSelectBlog(blog);
           }
         }}
-        className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
+        className={`w-full text-left py-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
       >
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -235,7 +232,7 @@ function StackDisplay({
     <div className="group relative">
       <button
         onClick={() => onSelectStack(stack)}
-        className="flex w-full items-center justify-between px-3 py-2 hover:bg-sidebar-accent transition-colors text-left"
+        className="flex w-full items-center justify-between py-2 hover:bg-sidebar-accent transition-colors text-left"
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground truncate">
@@ -291,7 +288,11 @@ function StackDisplay({
   );
 }
 
-export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, selectedBlogId }: StacksPanelProps) {
+export default function StacksView({
+  onSelectBlog,
+  onSelectAuthor,
+  selectedBlogId,
+}: StacksViewProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingStackId, setDeletingStackId] = useState<string | null>(null);
   const [deletingItemKey, setDeletingItemKey] = useState<string | null>(null);
@@ -319,7 +320,6 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
 
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
-  const { state: sidebarState, isMobile } = useSidebar();
 
   useEffect(() => {
     setIsHydrated(true);
@@ -508,63 +508,53 @@ export default function StacksPanel({ onSelectBlog, onSelectAuthor, onClose, sel
   });
 
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        {selectedStack ? (
-          <div className="flex items-center gap-2 min-w-0">
-            <button
-              onClick={() => setSelectedStackId(null)}
-              className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-              title="Back to stacks"
-              aria-label="Back to stacks"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-            </button>
-            <h2 className="text-sm font-semibold text-foreground/80 flex-1 min-w-0 truncate">
-              {selectedStack.name}
+      <div className="mb-5 border-b border-border/70 pt-2">
+        <div className="flex items-center justify-between pb-2">
+          {selectedStack ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={() => setSelectedStackId(null)}
+                className="p-1 rounded hover:bg-muted text-muted-foreground"
+                title="Back to stacks"
+                aria-label="Back to stacks"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+              </button>
+              <h2 className="text-sm font-medium text-foreground flex-1 min-w-0 truncate">
+                {selectedStack.name}
+              </h2>
+            </div>
+          ) : (
+            <h2 className="text-sm font-medium text-foreground">
+              My Stacks
             </h2>
+          )}
+          <div className="flex items-center gap-1">
+            {selectedStack && isLoggedIn && (
+              <button
+                onClick={handleRefreshStack}
+                disabled={stackItemsQuery.isFetching || stackItemsQuery.isLoading}
+                className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+                title="Refresh stack"
+                aria-label="Refresh stack"
+              >
+                <RefreshCwIcon className={`w-4 h-4 ${stackItemsQuery.isFetching ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+            {!selectedStack && isLoggedIn && (
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+                title="Refresh stacks"
+                aria-label="Refresh stacks"
+              >
+                <RefreshCwIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </button>
+            )}
           </div>
-        ) : (
-          <h2 className="text-sm font-semibold text-foreground/80">
-            My Stacks
-          </h2>
-        )}
-        <div className="flex items-center gap-1">
-          {selectedStack && isLoggedIn && (
-            <button
-              onClick={handleRefreshStack}
-              disabled={stackItemsQuery.isFetching || stackItemsQuery.isLoading}
-              className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
-              title="Refresh stack"
-              aria-label="Refresh stack"
-            >
-              <RefreshCwIcon className={`w-4 h-4 ${stackItemsQuery.isFetching ? 'animate-spin' : ''}`} />
-            </button>
-          )}
-          {!selectedStack && isLoggedIn && (
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
-              title="Refresh stacks"
-              aria-label="Refresh stacks"
-            >
-              <RefreshCwIcon className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-            title="Close panel"
-            aria-label="Close panel"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
         </div>
       </div>
 

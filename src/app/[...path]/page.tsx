@@ -9,7 +9,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   NostrEditor,
@@ -22,14 +22,6 @@ import MarkdownEditor, {
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import ContentHeader from "@/components/layout/ContentHeader";
 import AppSidebar from "@/components/sidebar/AppSidebar";
-import BlogListPanel from "@/components/sidebar/BlogListPanel";
-import DraftsPanel from "@/components/sidebar/DraftsPanel";
-import SettingsPanel from "@/components/sidebar/SettingsPanel";
-import FollowingFeedPanel from "@/components/sidebar/FollowingFeedPanel";
-import AuthorFeedPanel from "@/components/sidebar/AuthorFeedPanel";
-import HighlightsPanel from "@/components/sidebar/HighlightsPanel";
-import StacksPanel from "@/components/sidebar/StacksPanel";
-import ProfilePanel from "@/components/sidebar/ProfilePanel";
 import StackButton from "@/components/stacks/StackButton";
 import ZapButton from "@/components/zap/ZapButton";
 import LoginButton from "@/components/auth/LoginButton";
@@ -73,27 +65,20 @@ function MarkdownIcon({ className }: { className?: string }) {
 
 interface FloatingToolbarProps {
   show: boolean;
-  isPanelOpen: boolean;
   toolbarRef: React.RefObject<HTMLDivElement | null>;
 }
 
 function FloatingToolbar({
   show,
-  isPanelOpen,
   toolbarRef,
 }: FloatingToolbarProps) {
   const { state: sidebarState, isMobile } = useSidebar();
   const sidebarWidth = sidebarState === "collapsed" ? "3rem" : "16rem";
-  const panelWidth = "18rem";
 
-  // Calculate left margin based on sidebar state and panel
+  // Calculate left margin based on sidebar state
   let marginLeft = "0";
   if (!isMobile) {
-    if (isPanelOpen) {
-      marginLeft = `calc(${sidebarWidth} + ${panelWidth})`;
-    } else {
-      marginLeft = sidebarWidth;
-    }
+    marginLeft = sidebarWidth;
   }
 
   return (
@@ -115,23 +100,10 @@ function FloatingToolbar({
 function HomeContent() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-
-  // Support ?panel=... query param from landing page
-  const panelParam = searchParams.get("panel");
-  const initialPanel = panelParam === "explore" ? null : panelParam;
-  const [activePanel, setActivePanel] = useState<string | null>(initialPanel);
-  const isPanelOpen = !!activePanel;
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
-  const [selectedAuthorPubkey, setSelectedAuthorPubkey] = useState<
-    string | null
-  >(null);
-  const [selectedHighlightId, setSelectedHighlightId] = useState<string | null>(
-    null,
-  );
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -149,7 +121,6 @@ function HomeContent() {
   const [floatingToolbarElement, setFloatingToolbarElement] =
     useState<HTMLDivElement | null>(null);
   const hasUserTyped = useRef(false);
-  const checkBlogForEditsRef = useRef<() => void>(() => {});
   const draftSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedBlogRef = useRef<Blog | null>(null); // Track current blog for useEffect without triggering re-runs
 
@@ -206,18 +177,6 @@ function HomeContent() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
-  useEffect(() => {
-    if (!isHydrated) return;
-    if (panelParam === "explore") {
-      router.replace("/");
-    }
-  }, [isHydrated, panelParam, router]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-    if (!panelParam || panelParam === "explore") return;
-    setActivePanel(panelParam);
-  }, [isHydrated, panelParam]);
 
   // Keep selectedBlogRef in sync
   useEffect(() => {
@@ -251,7 +210,7 @@ function HomeContent() {
   });
 
   // Fetch author profile when viewing a blog (only if not already embedded)
-  // Uses shared cache populated by ExploreFeed/FollowingFeedPanel batch fetches
+  // Uses shared cache populated by ExploreFeed/FollowingFeedView batch fetches
   const hasEmbeddedAuthor = !!(
     selectedBlog?.authorName || selectedBlog?.authorPicture
   );
@@ -274,7 +233,7 @@ function HomeContent() {
           old ? old.filter((h) => h.id !== highlightId) : [],
         );
       }
-      // Invalidate user highlights so the panel refreshes
+      // Invalidate user highlights so the highlights view refreshes
       queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
     },
     [queryClient, highlightsQueryKey],
@@ -289,7 +248,7 @@ function HomeContent() {
           old ? [...old, highlight] : [highlight],
         );
       }
-      // Invalidate user highlights so the panel refreshes
+      // Invalidate user highlights so the highlights view refreshes
       queryClient.invalidateQueries({ queryKey: ["user-highlights"] });
     },
     [queryClient, highlightsQueryKey],
@@ -386,37 +345,6 @@ function HomeContent() {
     activeRelay,
   ]);
 
-  const withPanelParam = useCallback(
-    (path: string) => {
-      if (activePanel && activePanel !== "explore") {
-        const separator = path.includes("?") ? "&" : "?";
-        return `${path}${separator}panel=${encodeURIComponent(activePanel)}`;
-      }
-      return path;
-    },
-    [activePanel],
-  );
-
-  const handleSelectBlog = useCallback(
-    (blog: Blog) => {
-      // Check for unsaved edits before navigating
-      checkBlogForEditsRef.current();
-      setSelectedHighlightId(null);
-
-      // Set the blog directly since we already have the data
-      setSelectedBlog(blog);
-      selectedBlogRef.current = blog; // Also set ref synchronously for useEffect
-      setCurrentDraftId(null);
-      setIsLoadingBlog(false);
-
-      // Update URL for bookmarking without triggering navigation
-      // (router.push would cause re-render and potentially re-fetch)
-      const naddr = blogToNaddr(blog, relays);
-      router.push(withPanelParam(`/${naddr}`), { scroll: false });
-    },
-    [relays, router, withPanelParam],
-  );
-
   const getEditorContent = useCallback(() => {
     if (isMarkdownMode) {
       return markdownEditorRef.current?.getMarkdown() ?? "";
@@ -509,84 +437,6 @@ function HomeContent() {
       });
     }
   }, [currentDraftId, pubkey, relays, router, sessionStatus, user?.secretKey]);
-
-  const handleClosePanel = useCallback(() => {
-    setActivePanel(null);
-  }, []);
-
-  const handleSelectAuthor = useCallback((pubkey: string) => {
-    setSelectedAuthorPubkey(pubkey);
-    setActivePanel("author");
-  }, []);
-
-  const handleSelectDraft = useCallback(
-    (draftId: string) => {
-      checkBlogForEditsRef.current();
-      setSelectedHighlightId(null);
-      // Update state directly and URL without triggering navigation
-      setSelectedBlog(null);
-      setCurrentDraftId(draftId);
-      router.push(withPanelParam(`/draft/${draftId}`), { scroll: false });
-    },
-    [router, withPanelParam],
-  );
-
-  const handleSelectHighlight = useCallback(
-    async (highlight: Highlight) => {
-      setSelectedHighlightId(highlight.id);
-      // Load the source article directly instead of navigating
-      if (highlight.source) {
-        checkBlogForEditsRef.current();
-
-        // Try to find the blog in the query cache first
-        const cachedQueries = queryClient.getQueriesData<{ blogs: Blog[] }>({
-          queryKey: ["blogs"],
-        });
-        let cachedBlog: Blog | undefined;
-        for (const [, data] of cachedQueries) {
-          if (data?.blogs) {
-            cachedBlog = data.blogs.find(
-              (b) =>
-                b.pubkey === highlight.source!.pubkey &&
-                b.dTag === highlight.source!.identifier,
-            );
-            if (cachedBlog) break;
-          }
-        }
-
-        if (cachedBlog) {
-          // Use cached blog directly - no loading needed
-          setSelectedBlog(cachedBlog);
-          selectedBlogRef.current = cachedBlog;
-          setCurrentDraftId(null);
-          const naddr = blogToNaddr(cachedBlog, relays);
-          router.push(withPanelParam(`/${naddr}`), { scroll: false });
-        } else {
-          // Fetch the blog if not in cache
-          setIsLoadingBlog(true);
-          setSelectedBlog(null);
-          setCurrentDraftId(null);
-
-          const blog = await fetchBlogByAddress({
-            pubkey: highlight.source.pubkey,
-            identifier: highlight.source.identifier,
-            relay: activeRelay,
-          });
-
-          setIsLoadingBlog(false);
-
-          if (blog) {
-            setSelectedBlog(blog);
-            selectedBlogRef.current = blog;
-            const naddr = blogToNaddr(blog, relays);
-            router.push(withPanelParam(`/${naddr}`), { scroll: false });
-          }
-        }
-
-      }
-    },
-    [relays, activeRelay, queryClient, router, withPanelParam],
-  );
 
   const isLoggedIn = sessionStatus === "authenticated" && !!pubkey;
 
@@ -694,66 +544,9 @@ function HomeContent() {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <AppSidebar
-        activePanel={activePanel}
-        onPanelChange={setActivePanel}
-      />
+      <AppSidebar />
 
-      {/* Collapsible panels - kept mounted to preserve scroll position */}
-      <div className={activePanel === "following" ? "" : "hidden"}>
-        <FollowingFeedPanel
-          onSelectBlog={handleSelectBlog}
-          onSelectAuthor={handleSelectAuthor}
-          onClose={handleClosePanel}
-          selectedBlogId={selectedBlog?.id}
-        />
-      </div>
-      <div className={activePanel === "author" ? "" : "hidden"}>
-        <AuthorFeedPanel
-          pubkey={selectedAuthorPubkey}
-          onSelectBlog={handleSelectBlog}
-          onClose={handleClosePanel}
-          onClearAuthor={() => setSelectedAuthorPubkey(null)}
-          selectedBlogId={selectedBlog?.id}
-        />
-      </div>
-      <div className={activePanel === "blogs" ? "" : "hidden"}>
-        <BlogListPanel
-          onSelectBlog={handleSelectBlog}
-          onClose={handleClosePanel}
-          selectedBlogId={selectedBlog?.id}
-        />
-      </div>
-      <div className={activePanel === "drafts" ? "" : "hidden"}>
-        <DraftsPanel
-          onSelectDraft={handleSelectDraft}
-          onClose={handleClosePanel}
-          selectedDraftId={currentDraftId ?? undefined}
-        />
-      </div>
-      <div className={activePanel === "highlights" ? "" : "hidden"}>
-        <HighlightsPanel
-          onSelectHighlight={handleSelectHighlight}
-          onClose={handleClosePanel}
-          selectedHighlightId={selectedHighlightId}
-        />
-      </div>
-      <div className={activePanel === "stacks" ? "" : "hidden"}>
-        <StacksPanel
-          onSelectBlog={handleSelectBlog}
-          onSelectAuthor={handleSelectAuthor}
-          onClose={handleClosePanel}
-          selectedBlogId={selectedBlog?.id}
-        />
-      </div>
-      {activePanel === "relays" && <SettingsPanel onClose={handleClosePanel} />}
-      {activePanel === "profile" && (
-        <ProfilePanel onClose={handleClosePanel} pubkey={pubkey} />
-      )}
-
-      <SidebarInset
-        className={`bg-background transition-[margin] duration-200 ease-linear ${isPanelOpen ? "sm:ml-72" : ""}`}
-      >
+      <SidebarInset className="bg-background">
         <>
           <ContentHeader
             sticky={!selectedBlog}
@@ -908,10 +701,6 @@ function HomeContent() {
                         setSelectedBlog(null);
                         setCurrentDraftId(draftId);
                         router.replace(`/draft/${draftId}`, { scroll: false });
-                        // Switch to drafts panel if a panel is open
-                        if (activePanel) {
-                          setActivePanel("drafts");
-                        }
                       }}
                     >
                       Edit
@@ -1046,7 +835,6 @@ function HomeContent() {
           {!selectedBlog && !isLoadingBlog && (
             <FloatingToolbar
               show={showFloatingToolbar && !isMarkdownMode}
-              isPanelOpen={isPanelOpen}
               toolbarRef={floatingToolbarRef}
             />
           )}

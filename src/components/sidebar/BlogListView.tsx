@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { XIcon, MoreHorizontalIcon, PenLineIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, Trash2Icon } from 'lucide-react';
+import { MoreHorizontalIcon, PenLineIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, Trash2Icon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -11,8 +11,6 @@ import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +24,8 @@ import { extractFirstImage } from '@/lib/utils/markdown';
 import StackMenuSub from '@/components/stacks/StackMenuSub';
 import type { Blog } from '@/lib/nostr/types';
 
-interface BlogListPanelProps {
+interface BlogListViewProps {
   onSelectBlog?: (blog: Blog) => void;
-  onClose: () => void;
   selectedBlogId?: string;
 }
 
@@ -40,7 +37,10 @@ function formatDate(timestamp: number): string {
   });
 }
 
-export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }: BlogListPanelProps) {
+export default function BlogListView({
+  onSelectBlog,
+  selectedBlogId,
+}: BlogListViewProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(null);
@@ -54,7 +54,6 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const queryClient = useQueryClient();
   const findDraftByLinkedBlog = useDraftStore((state) => state.findDraftByLinkedBlog);
-  const { state: sidebarState, isMobile } = useSidebar();
 
   useEffect(() => {
     setIsHydrated(true);
@@ -143,33 +142,21 @@ export default function BlogListPanel({ onSelectBlog, onClose, selectedBlogId }:
   };
 
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
+      <div className="flex items-center justify-between border-b border-border/70 pt-2 pb-2">
+        <h2 className="text-sm font-medium text-foreground">
           My Blogs
         </h2>
         <div className="flex items-center gap-1">
           <button
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
+            className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
             title="Refresh blogs"
             aria-label="Refresh blogs"
           >
             <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-            title="Close panel"
-            aria-label="Close panel"
-          >
-            <XIcon className="w-4 h-4" />
           </button>
         </div>
       </div>

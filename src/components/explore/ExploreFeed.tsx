@@ -352,7 +352,7 @@ export default function ExploreFeed() {
           <ul className="divide-y divide-border/60">
             {blogs.map((blog) => {
               const thumbnail = blog.image || extractFirstImage(blog.content);
-              // getProfile checks both batch result and individual cache (from AuthorFeedPanel)
+              // getProfile checks both batch result and individual cache (from AuthorFeedView)
               const profile = getProfile(blog.pubkey);
               // Show skeleton while this specific profile is loading, fallback to dicebear/npub only when loaded but not found
               const isProfileLoading =

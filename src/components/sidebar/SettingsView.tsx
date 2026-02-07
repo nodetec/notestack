@@ -1,25 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { XIcon, CheckIcon } from 'lucide-react';
+import { useState } from 'react';
+import { CheckIcon, XIcon } from 'lucide-react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import { Button } from '@/components/ui/button';
 
-interface SettingsPanelProps {
-  onClose: () => void;
-}
-
-export default function SettingsPanel({ onClose }: SettingsPanelProps) {
+export default function SettingsView() {
   const { relays, activeRelay, addRelay, removeRelay, setActiveRelay } = useSettingsStore();
   const [newRelay, setNewRelay] = useState('');
-  const [isHydrated, setIsHydrated] = useState(false);
-  const { state: sidebarState, isMobile } = useSidebar();
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   const handleAddRelay = () => {
     const trimmed = newRelay.trim();
@@ -35,33 +23,19 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
     }
   };
 
-  if (!isHydrated) {
-    return null;
-  }
-
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
-          Relays
-        </h2>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-          title="Close panel"
-          aria-label="Close panel"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+      <div className="mb-5 border-b border-border/70 pt-2">
+        <div className="flex items-center justify-between pb-2">
+          <h2 className="text-sm font-medium text-foreground">
+            Relays
+          </h2>
+        </div>
       </div>
 
       {/* Relays Content */}
-      <div className="flex-1 overflow-y-auto overscroll-none p-3">
+      <div className="flex-1 overflow-y-auto overscroll-none py-3">
         <div className="space-y-4">
           <div>
             <ul className="space-y-1">
@@ -70,7 +44,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                 return (
                   <li
                     key={relay}
-                    className={`flex items-center justify-between gap-2 p-2 rounded text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between gap-2 py-2 rounded text-xs cursor-pointer transition-colors ${
                       isActive
                         ? 'bg-primary/10 dark:bg-primary/20 border border-primary/30 dark:border-primary/40'
                         : 'bg-muted hover:bg-sidebar-accent'

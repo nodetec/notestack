@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { XIcon, FileEditIcon, Trash2Icon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
+import { FileEditIcon, Trash2Icon, PenLineIcon, RefreshCwIcon } from 'lucide-react';
 import { useDraftStore, type Draft } from '@/lib/stores/draftStore';
-import { useSidebar } from '@/components/ui/sidebar';
-import PanelRail from './PanelRail';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { syncDrafts } from '@/lib/nostr/draftSync';
@@ -12,9 +10,8 @@ import { toast } from 'sonner';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { deleteDraft as deleteDraftEvent } from '@/lib/nostr/publish';
 
-interface DraftsPanelProps {
+interface DraftsViewProps {
   onSelectDraft?: (draftId: string) => void;
-  onClose: () => void;
   selectedDraftId?: string;
 }
 
@@ -45,13 +42,15 @@ function extractPreview(content: string): { title: string; preview: string } {
   return { title, preview: previewLines || 'No content' };
 }
 
-export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }: DraftsPanelProps) {
+export default function DraftsView({
+  onSelectDraft,
+  selectedDraftId,
+}: DraftsViewProps) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const drafts = useDraftStore((state) => state.drafts);
   const upsertDraftFromSync = useDraftStore((state) => state.upsertDraftFromSync);
   const deleteDraft = useDraftStore((state) => state.deleteDraft);
-  const { state: sidebarState, isMobile } = useSidebar();
   const { publicKey, secretKey, isAuthenticated } = useAuth();
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
@@ -125,34 +124,24 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
   }, [drafts, isAuthenticated, isSyncing, publicKey, relays, upsertDraftFromSync]);
 
   return (
-    <div
-      className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
-      style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
-    >
-      <PanelRail onClose={onClose} />
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold text-foreground/80">
-          Drafts
-        </h2>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground disabled:opacity-50"
-            title="Sync drafts"
-            aria-label="Sync drafts"
-          >
-            <RefreshCwIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-sidebar-accent text-muted-foreground"
-            title="Close panel"
-            aria-label="Close panel"
-          >
-            <XIcon className="w-4 h-4" />
-          </button>
+      <div className="mb-5 border-b border-border/70 pt-2">
+        <div className="flex items-center justify-between pb-2">
+          <h2 className="text-sm font-medium text-foreground">
+            Drafts
+          </h2>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-50"
+              title="Sync drafts"
+              aria-label="Sync drafts"
+            >
+              <RefreshCwIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -180,10 +169,10 @@ export default function DraftsPanel({ onSelectDraft, onClose, selectedDraftId }:
               const thumbnail = extractFirstImage(draft.content);
               const isSelected = draft.id === selectedDraftId;
               return (
-                <li key={draft.id} className="relative group p-2">
+                <li key={draft.id} className="relative group py-2">
                   <button
                     onClick={() => onSelectDraft?.(draft.id)}
-                    className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                    className={`w-full text-left py-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                   >
                     <div>
                       <div className="flex items-center gap-2">
