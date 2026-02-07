@@ -245,7 +245,7 @@ export default function ExploreFeed() {
   return (
     <div className="flex flex-col min-h-0 flex-1">
       <ContentHeader
-        className="z-10 bg-background/80 backdrop-blur"
+        className="z-30 bg-background/80 backdrop-blur"
         innerClassName="px-3 sm:px-6 py-2 min-h-12"
         left={
           <>
