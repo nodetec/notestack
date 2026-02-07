@@ -16,6 +16,7 @@ interface ContentHeaderProps {
   brandClassName?: string;
   triggerClassName?: string;
   showSidebarTrigger?: boolean;
+  sticky?: boolean;
 }
 
 export default function ContentHeader({
@@ -30,17 +31,19 @@ export default function ContentHeader({
   brandClassName,
   triggerClassName,
   showSidebarTrigger = true,
+  sticky = true,
 }: ContentHeaderProps) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 shrink-0 border-b border-border bg-background',
+        'z-40 shrink-0 border-b border-border bg-background',
+        sticky && 'sticky top-0',
         className,
       )}
     >
       <div
         className={cn(
-          'flex items-center justify-between gap-2 px-2 lg:px-3 py-2',
+          'flex items-center justify-between gap-2 px-2 lg:px-3 py-2 min-h-12',
           innerClassName,
         )}
       >

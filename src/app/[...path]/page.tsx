@@ -254,7 +254,7 @@ function HomeContent() {
   const hasEmbeddedAuthor = !!(
     selectedBlog?.authorName || selectedBlog?.authorPicture
   );
-  const { data: fetchedAuthorProfile, isLoading: isLoadingAuthor } = useProfile(
+  const { data: fetchedAuthorProfile } = useProfile(
     selectedBlog && !hasEmbeddedAuthor ? selectedBlog.pubkey : null,
     [activeRelay, ...relays],
   );
@@ -747,6 +747,7 @@ function HomeContent() {
       >
         <>
           <ContentHeader
+            sticky={!selectedBlog}
             left={
               <>
                 {isLoggedIn && currentDraftId && (
@@ -778,118 +779,10 @@ function HomeContent() {
                 {!selectedBlog && !isLoadingBlog && (
                   <SaveStatusIndicator className="hidden lg:flex" />
                 )}
-                {selectedBlog && selectedBlog.pubkey !== pubkey && (
-                  <div className="hidden md:flex items-center gap-2 min-w-0 overflow-hidden max-w-48 md:max-w-60 lg:max-w-64">
-                    {isLoadingAuthor && !hasEmbeddedAuthor ? (
-                      <>
-                        <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
-                        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                      </>
-                    ) : (
-                      <AuthorDropdown
-                        authorPubkey={selectedBlog.pubkey}
-                        authorName={authorProfile?.name}
-                        authorPicture={authorProfile?.picture}
-                      />
-                    )}
-                  </div>
-                )}
-                {isLoadingBlog && (
-                  <div className="hidden lg:flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
-                    <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                  </div>
-                )}
               </>
             }
             right={
               <>
-                {isLoggedIn && selectedBlog && <ZapButton blog={selectedBlog} />}
-                {isLoggedIn && selectedBlog && (
-                  <StackButton blog={selectedBlog} />
-                )}
-                {isLoggedIn && isLoadingBlog && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled
-                      className="opacity-50"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M13 10h7l-9 13v-9H4l9-13z" />
-                      </svg>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled
-                      className="opacity-50"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                        <rect x="14" y="14" width="7" height="7" />
-                      </svg>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled
-                      className="opacity-50"
-                    >
-                      Edit
-                    </Button>
-                  </>
-                )}
-                {isLoggedIn && selectedBlog && !currentDraftId && (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      // Check if a draft already exists for this blog
-                      const existingDraft = findDraftByLinkedBlog(
-                        selectedBlog.pubkey,
-                        selectedBlog.dTag,
-                      );
-                      const draftId =
-                        existingDraft?.id ??
-                        createDraftFromBlog(
-                          editorRef.current?.getMarkdown() ??
-                            selectedBlog.content,
-                          {
-                            pubkey: selectedBlog.pubkey,
-                            dTag: selectedBlog.dTag,
-                            title: selectedBlog.title,
-                            summary: selectedBlog.summary,
-                            image: selectedBlog.image,
-                            tags: selectedBlog.tags,
-                          },
-                        );
-                      // Update state directly and URL without triggering navigation
-                      setSelectedBlog(null);
-                      setCurrentDraftId(draftId);
-                      router.replace(`/draft/${draftId}`, { scroll: false });
-                      // Switch to drafts panel if a panel is open
-                      if (activePanel) {
-                        setActivePanel("drafts");
-                      }
-                    }}
-                  >
-                    Edit
-                  </Button>
-                )}
                 {isLoggedIn && currentDraftId && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -940,6 +833,116 @@ function HomeContent() {
               </>
             }
           />
+          {(selectedBlog || isLoadingBlog) && (
+            <div className="sticky mt-12 top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+              <div className="editor-root min-h-12 py-2 flex items-center justify-between gap-3">
+                <div className="min-w-0 overflow-hidden">
+                  {isLoadingBlog ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                    </div>
+                  ) : (
+                    selectedBlog && (
+                      <AuthorDropdown
+                        authorPubkey={selectedBlog.pubkey}
+                        authorName={authorProfile?.name}
+                        authorPicture={authorProfile?.picture}
+                      />
+                    )
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {isLoggedIn && selectedBlog && <ZapButton blog={selectedBlog} />}
+                  {isLoggedIn && selectedBlog && (
+                    <StackButton blog={selectedBlog} />
+                  )}
+                  {isLoggedIn && selectedBlog && !currentDraftId && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        // Check if a draft already exists for this blog
+                        const existingDraft = findDraftByLinkedBlog(
+                          selectedBlog.pubkey,
+                          selectedBlog.dTag,
+                        );
+                        const draftId =
+                          existingDraft?.id ??
+                          createDraftFromBlog(
+                            editorRef.current?.getMarkdown() ??
+                              selectedBlog.content,
+                            {
+                              pubkey: selectedBlog.pubkey,
+                              dTag: selectedBlog.dTag,
+                              title: selectedBlog.title,
+                              summary: selectedBlog.summary,
+                              image: selectedBlog.image,
+                              tags: selectedBlog.tags,
+                            },
+                          );
+                        // Update state directly and URL without triggering navigation
+                        setSelectedBlog(null);
+                        setCurrentDraftId(draftId);
+                        router.replace(`/draft/${draftId}`, { scroll: false });
+                        // Switch to drafts panel if a panel is open
+                        if (activePanel) {
+                          setActivePanel("drafts");
+                        }
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  {isLoggedIn && isLoadingBlog && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled
+                        className="opacity-50"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M13 10h7l-9 13v-9H4l9-13z" />
+                        </svg>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled
+                        className="opacity-50"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect x="3" y="3" width="7" height="7" />
+                          <rect x="14" y="3" width="7" height="7" />
+                          <rect x="3" y="14" width="7" height="7" />
+                          <rect x="14" y="14" width="7" height="7" />
+                        </svg>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled
+                        className="opacity-50"
+                      >
+                        Edit
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           <div
             className="relative flex-1 overflow-y-auto overscroll-auto cursor-text"
             data-editor-scroll-container
