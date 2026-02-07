@@ -4,6 +4,7 @@ import {
   Suspense,
   useState,
   useEffect,
+  useLayoutEffect,
   useRef,
   useCallback,
   useMemo,
@@ -142,7 +143,7 @@ function HomeContent() {
   );
   const editorRef = useRef<NostrEditorHandle>(null);
   const markdownEditorRef = useRef<MarkdownEditorHandle>(null);
-  const [showFloatingToolbar, setShowFloatingToolbar] = useState(false);
+  const [showFloatingToolbar, setShowFloatingToolbar] = useState(true);
   const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const floatingToolbarRef = useRef<HTMLDivElement>(null);
   const [floatingToolbarElement, setFloatingToolbarElement] =
@@ -152,19 +153,15 @@ function HomeContent() {
   const draftSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedBlogRef = useRef<Blog | null>(null); // Track current blog for useEffect without triggering re-runs
 
-  // Connect floating toolbar ref to state when visible
-  useEffect(() => {
+  // Connect floating toolbar ref to state when visible (before paint to avoid flash)
+  useLayoutEffect(() => {
     if (
       showFloatingToolbar &&
       !selectedBlog &&
       !isLoadingBlog &&
       !isMarkdownMode
     ) {
-      // Small delay to ensure ref is attached after mount
-      const timer = setTimeout(() => {
-        setFloatingToolbarElement(floatingToolbarRef.current);
-      }, 0);
-      return () => clearTimeout(timer);
+      setFloatingToolbarElement(floatingToolbarRef.current);
     } else {
       setFloatingToolbarElement(null);
     }
@@ -215,6 +212,12 @@ function HomeContent() {
       router.replace("/");
     }
   }, [isHydrated, panelParam, router]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (!panelParam || panelParam === "explore") return;
+    setActivePanel(panelParam);
+  }, [isHydrated, panelParam]);
 
   // Keep selectedBlogRef in sync
   useEffect(() => {
@@ -385,7 +388,7 @@ function HomeContent() {
 
   const withPanelParam = useCallback(
     (path: string) => {
-      if (activePanel) {
+      if (activePanel && activePanel !== "explore") {
         const separator = path.includes("?") ? "&" : "?";
         return `${path}${separator}panel=${encodeURIComponent(activePanel)}`;
       }
