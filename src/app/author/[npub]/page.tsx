@@ -1,10 +1,10 @@
 'use client';
 
-import { Suspense, useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/sidebar/AppSidebar';
-import ExploreFeed from '@/components/explore/ExploreFeed';
+import AuthorArticlesFeed from '@/components/author/AuthorArticlesFeed';
 import FollowingFeedPanel from '@/components/sidebar/FollowingFeedPanel';
 import AuthorFeedPanel from '@/components/sidebar/AuthorFeedPanel';
 import BlogListPanel from '@/components/sidebar/BlogListPanel';
@@ -19,7 +19,8 @@ import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { blogToNaddr } from '@/lib/nostr/naddr';
 import type { Blog, Highlight } from '@/lib/nostr/types';
 
-export default function ExplorePage() {
+export default function AuthorPage() {
+  const params = useParams<{ npub: string }>();
   const router = useRouter();
   const [activePanel, setActivePanel] = useState<string | null>('explore');
   const [selectedAuthorPubkey, setSelectedAuthorPubkey] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export default function ExplorePage() {
   const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const isPanelOpen = !!activePanel && activePanel !== 'explore';
+  const npubParam = Array.isArray(params.npub) ? params.npub[0] : params.npub;
 
   const handlePanelChange = useCallback((panel: string | null) => {
     setActivePanel(panel ?? 'explore');
@@ -103,9 +105,7 @@ export default function ExplorePage() {
       )}
 
       <SidebarInset className={`bg-background transition-[margin] duration-200 ease-linear ${isPanelOpen ? 'sm:ml-72' : ''}`}>
-        <Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading...</div>}>
-          <ExploreFeed />
-        </Suspense>
+        <AuthorArticlesFeed npub={npubParam ?? ''} />
       </SidebarInset>
     </SidebarProvider>
   );

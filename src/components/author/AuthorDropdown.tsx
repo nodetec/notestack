@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, UserPlusIcon, UserMinusIcon, Loader2Icon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -129,6 +130,8 @@ export default function AuthorDropdown({
     const npub = nip19.npubEncode(authorPubkey);
     return `${npub.slice(0, 8)}...${npub.slice(-4)}`;
   }, [authorPubkey]);
+  const authorNpub = useMemo(() => nip19.npubEncode(authorPubkey), [authorPubkey]);
+  const authorHref = `/author/${authorNpub}`;
 
   const displayName = authorName || shortenedNpub;
   const avatarUrl = authorPicture || generateAvatar(authorPubkey);
@@ -136,7 +139,7 @@ export default function AuthorDropdown({
   // If not logged in or viewing own profile, just show static author info
   if (!userPubkey || isOwnProfile) {
     return (
-      <div className="flex items-center gap-2 min-w-0">
+      <Link href={authorHref} className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors" title={authorNpub}>
         {/*eslint-disable-next-line @next/next/no-img-element*/}
         <img
           src={avatarUrl}
@@ -146,54 +149,64 @@ export default function AuthorDropdown({
         <span className="text-sm text-muted-foreground truncate">
           {displayName}
         </span>
-      </div>
+      </Link>
     );
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
-          title={displayName}
-        >
-          {/*eslint-disable-next-line @next/next/no-img-element*/}
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            className="w-6 h-6 rounded-full object-cover shrink-0"
-          />
-          <span className="text-sm text-muted-foreground truncate">
-            {displayName}
-          </span>
-          <ChevronDownIcon className="w-3 h-3 text-muted-foreground shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
-        {isFollowing ? (
-          <DropdownMenuItem
-            onClick={handleUnfollow}
-            disabled={isUpdating}
-            className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+    <div className="flex items-center gap-1 min-w-0">
+      <Link
+        href={authorHref}
+        className="flex items-center gap-2 min-w-0 hover:bg-muted rounded-md px-1.5 py-1 -mx-1.5 -my-1 transition-colors"
+        title={authorNpub}
+      >
+        {/*eslint-disable-next-line @next/next/no-img-element*/}
+        <img
+          src={avatarUrl}
+          alt={displayName}
+          className="w-6 h-6 rounded-full object-cover shrink-0"
+        />
+        <span className="text-sm text-muted-foreground truncate">
+          {displayName}
+        </span>
+      </Link>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="p-1 rounded hover:bg-muted text-muted-foreground"
+            aria-label="Author actions"
+            title="Author actions"
           >
-            {isUpdating ? (
-              <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <UserMinusIcon className="w-4 h-4 mr-2" />
-            )}
-            Unfollow
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onClick={handleFollow} disabled={isUpdating}>
-            {isUpdating ? (
-              <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <UserPlusIcon className="w-4 h-4 mr-2" />
-            )}
-            Follow
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <ChevronDownIcon className="w-3 h-3 shrink-0" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          {isFollowing ? (
+            <DropdownMenuItem
+              onClick={handleUnfollow}
+              disabled={isUpdating}
+              className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+            >
+              {isUpdating ? (
+                <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <UserMinusIcon className="w-4 h-4 mr-2" />
+              )}
+              Unfollow
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={handleFollow} disabled={isUpdating}>
+              {isUpdating ? (
+                <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <UserPlusIcon className="w-4 h-4 mr-2" />
+              )}
+              Follow
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

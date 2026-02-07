@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon, UserRoundSearchIcon } from 'lucide-react';
+import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { nip19 } from 'nostr-tools';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -34,6 +36,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { UserWithKeys } from '@/types/auth';
 
 interface AppSidebarProps {
   activePanel: string | null;
@@ -46,7 +49,12 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user as UserWithKeys | undefined;
+  const userPubkey = user?.publicKey;
   const { relays, activeRelay, setActiveRelay } = useSettingsStore();
+  const profileHref = userPubkey ? `/author/${nip19.npubEncode(userPubkey)}` : '/login';
+  const isOwnProfileRoute = !!userPubkey && pathname === profileHref;
 
   // Tags section state
   const [isTagsOpen, setIsTagsOpen] = useState(true);
@@ -164,26 +172,6 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  tooltip="Author"
-                  isActive={activePanel === 'author'}
-                  onClick={() => handleClick('author')}
-                >
-                  <UserRoundSearchIcon />
-                  <span>Author</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="My Blogs"
-                  isActive={activePanel === 'blogs'}
-                  onClick={() => handleClick('blogs')}
-                >
-                  <FileTextIcon />
-                  <span>My Blogs</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
                   tooltip="Drafts"
                   isActive={activePanel === 'drafts'}
                   onClick={() => handleClick('drafts')}
@@ -225,11 +213,20 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Profile"
-                  isActive={activePanel === 'profile'}
-                  onClick={() => handleClick('profile')}
+                  isActive={isOwnProfileRoute}
+                  asChild
                 >
-                  <UserIcon />
-                  <span>Profile</span>
+                  <Link
+                    href={profileHref}
+                    onClick={() => {
+                      onPanelChange(null);
+                      setOpenMobile(false);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <UserIcon />
+                    <span>Profile</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

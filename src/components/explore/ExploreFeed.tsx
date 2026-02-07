@@ -39,10 +39,6 @@ import StackMenuSub from "@/components/stacks/StackMenuSub";
 import type { Blog } from "@/lib/nostr/types";
 import type { UserWithKeys } from "@/types/auth";
 
-interface ExploreFeedProps {
-  onSelectAuthor?: (pubkey: string) => void;
-}
-
 function formatDate(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleDateString("en-US", {
     month: "short",
@@ -61,7 +57,7 @@ function estimateReadTime(text: string): number {
   return Math.max(1, Math.round(words / 200));
 }
 
-export default function ExploreFeed({ onSelectAuthor }: ExploreFeedProps) {
+export default function ExploreFeed() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(
     null,
@@ -280,13 +276,13 @@ export default function ExploreFeed({ onSelectAuthor }: ExploreFeedProps) {
 
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mx-auto w-full max-w-2xl">
-          <div className="mb-5 border-b border-border/70 py-2">
+          <div className="mb-5 border-b border-border/70 pt-2">
             <div className="flex items-center gap-5 text-sm">
               <button
                 onClick={() => setFeedModeInUrl("latest")}
-                className={`-mb-px border-b-2 pb-2 transition-colors ${
+                className={`relative -mb-px border-b-2 pb-2 transition-colors ${
                   !isFollowingView
-                    ? "border-foreground text-foreground font-medium"
+                    ? "z-10 border-foreground text-foreground font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -294,9 +290,9 @@ export default function ExploreFeed({ onSelectAuthor }: ExploreFeedProps) {
               </button>
               <button
                 onClick={() => setFeedModeInUrl("following")}
-                className={`-mb-px border-b-2 pb-2 transition-colors ${
+                className={`relative -mb-px border-b-2 pb-2 transition-colors ${
                   isFollowingView
-                    ? "border-foreground text-foreground font-medium"
+                    ? "z-10 border-foreground text-foreground font-medium"
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -369,132 +365,113 @@ export default function ExploreFeed({ onSelectAuthor }: ExploreFeedProps) {
               );
               return (
                 <li key={blog.id} className="py-5">
-                  <Link href={`/${naddr}`} className="group block text-left">
-                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          role="button"
-                          tabIndex={0}
+                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Link
+                        href={`/author/${nip19.npubEncode(blog.pubkey)}`}
+                        className="flex items-center gap-2 hover:underline min-w-0 overflow-hidden"
+                      >
+                        {isProfileLoading ? (
+                          <>
+                            <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                            <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                          </>
+                        ) : (
+                          <>
+                            {/*eslint-disable-next-line @next/next/no-img-element*/}
+                            <img
+                              src={avatarUrl}
+                              alt=""
+                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                            />
+                            <span className="truncate">{displayName}</span>
+                          </>
+                        )}
+                      </Link>
+                      <span className="text-muted-foreground/70">&middot;</span>
+                      <span className="text-muted-foreground/70">
+                        {formatDate(blog.publishedAt || blog.createdAt)}
+                      </span>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
                           onClick={(e) => {
-                            if (!onSelectAuthor) return;
                             e.preventDefault();
                             e.stopPropagation();
-                            onSelectAuthor?.(blog.pubkey);
                           }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              if (!onSelectAuthor) return;
-                              e.preventDefault();
-                              e.stopPropagation();
-                              onSelectAuthor?.(blog.pubkey);
-                            }
-                          }}
-                          className="flex items-center gap-2 hover:underline cursor-pointer min-w-0 overflow-hidden"
+                          className="p-1 rounded hover:bg-muted hover:ring-1 hover:ring-border text-muted-foreground shrink-0"
+                          aria-label="More options"
                         >
-                          {isProfileLoading ? (
-                            <>
-                              <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
-                              <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-                            </>
-                          ) : (
-                            <>
-                              {/*eslint-disable-next-line @next/next/no-img-element*/}
-                              <img
-                                src={avatarUrl}
-                                alt=""
-                                className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                              />
-                              <span className="truncate">{displayName}</span>
-                            </>
-                          )}
-                        </span>
-                        <span className="text-muted-foreground/70">
-                          &middot;
-                        </span>
-                        <span className="text-muted-foreground/70">
-                          {formatDate(blog.publishedAt || blog.createdAt)}
-                        </span>
+                          <MoreHorizontalIcon className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <StackMenuSub blog={blog} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            downloadMarkdownFile(blog.title, blog.content || "");
+                          }}
+                        >
+                          <DownloadIcon className="w-4 h-4" />
+                          Download markdown
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleBroadcast(blog, e);
+                          }}
+                          disabled={
+                            broadcastingBlogId === blog.id || !blog.rawEvent
+                          }
+                        >
+                          <SendIcon className="w-4 h-4" />
+                          {broadcastingBlogId === blog.id
+                            ? "Broadcasting..."
+                            : "Broadcast"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleViewJson(blog.rawEvent);
+                          }}
+                          disabled={!blog.rawEvent}
+                        >
+                          <CodeIcon className="w-4 h-4" />
+                          View raw JSON
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <Link
+                    href={`/${naddr}`}
+                    className="group mt-2 flex items-start gap-4 text-left"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-foreground">
+                        {blog.title || "Untitled"}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                        {blog.summary}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground/70">
+                        <span>{readMinutes} min read</span>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            className="p-1 rounded hover:bg-muted hover:ring-1 hover:ring-border text-muted-foreground shrink-0"
-                            aria-label="More options"
-                          >
-                            <MoreHorizontalIcon className="w-4 h-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <StackMenuSub blog={blog} />
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              downloadMarkdownFile(
-                                blog.title,
-                                blog.content || "",
-                              );
-                            }}
-                          >
-                            <DownloadIcon className="w-4 h-4" />
-                            Download markdown
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleBroadcast(blog, e);
-                            }}
-                            disabled={
-                              broadcastingBlogId === blog.id || !blog.rawEvent
-                            }
-                          >
-                            <SendIcon className="w-4 h-4" />
-                            {broadcastingBlogId === blog.id
-                              ? "Broadcasting..."
-                              : "Broadcast"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleViewJson(blog.rawEvent);
-                            }}
-                            disabled={!blog.rawEvent}
-                          >
-                            <CodeIcon className="w-4 h-4" />
-                            View raw JSON
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
-                    <div className="mt-2 flex items-start gap-4">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-foreground">
-                          {blog.title || "Untitled"}
-                        </h3>
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                          {blog.summary}
-                        </p>
-                        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground/70">
-                          <span>{readMinutes} min read</span>
-                        </div>
+                    {thumbnail && (
+                      <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden bg-muted">
+                        {/*eslint-disable-next-line @next/next/no-img-element*/}
+                        <img
+                          src={thumbnail}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                      {thumbnail && (
-                        <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden bg-muted">
-                          {/*eslint-disable-next-line @next/next/no-img-element*/}
-                          <img
-                            src={thumbnail}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </Link>
                 </li>
               );
