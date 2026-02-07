@@ -38,13 +38,13 @@ export default function SettingsView() {
       <div className="flex-1 overflow-y-auto overscroll-none py-3">
         <div className="space-y-4">
           <div>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {relays.map((relay) => {
                 const isActive = relay === activeRelay;
                 return (
                   <li
                     key={relay}
-                    className={`flex items-center justify-between gap-2 py-2 rounded text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded text-xs cursor-pointer transition-colors ${
                       isActive
                         ? 'bg-primary/10 dark:bg-primary/20 border border-primary/30 dark:border-primary/40'
                         : 'bg-muted hover:bg-sidebar-accent'

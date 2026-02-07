@@ -221,7 +221,8 @@ export default function HighlightsView({
                     onSelectHighlight?.(highlight);
                   }
                 }}
-                className={`w-full text-left py-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
+                aria-current={isSelected ? 'true' : undefined}
+                className="w-full text-left py-2 rounded-md transition-colors cursor-default"
               >
                 <div>
                   <p className="text-sm text-foreground line-clamp-3 bg-yellow-100/50 dark:bg-yellow-500/20 px-1 rounded">
