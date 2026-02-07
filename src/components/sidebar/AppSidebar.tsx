@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -52,7 +52,6 @@ export default function AppSidebar() {
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const userPubkey = user?.publicKey;
@@ -116,8 +115,11 @@ export default function AppSidebar() {
       setActiveTag(nextActiveTag);
     }
     const targetPath = isHomeRoute ? pathname : '/';
+    const feedParam = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('feed')
+      : null;
     const nextParams = new URLSearchParams();
-    if (isFollowingFeed) {
+    if ((targetPath === '/' || targetPath === '/explore') && feedParam === 'following') {
       nextParams.set('feed', 'following');
     }
     if (nextActiveTag) {
@@ -153,7 +155,6 @@ export default function AppSidebar() {
   // Extract hostname from relay URL for display
   const relayHost = activeRelay ? new URL(activeRelay).hostname : null;
   const isHomeRoute = pathname === '/' || pathname === '/explore';
-  const isFollowingFeed = isHomeRoute && searchParams.get('feed') === 'following';
   const isDraftsRoute = pathname === '/drafts';
   const isHighlightsRoute = pathname === '/highlights';
   const isStacksRoute = pathname === '/stacks';
