@@ -167,6 +167,7 @@ function HomeContent() {
   const pathSegments = params.path as string[] | undefined;
   let urlDraftId: string | null = null;
   let urlBlogId: string | null = null;
+  const isDraftRoute = pathSegments?.[0] === "draft";
 
   if (pathSegments && pathSegments.length > 0) {
     if (pathSegments[0] === "draft" && pathSegments[1]) {
@@ -696,13 +697,15 @@ function HomeContent() {
                     {isEditing ? "Publish Edit" : "Publish"}
                   </Button>
                 )}
-                <Link
-                  href="/draft/new"
-                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <PenLineIcon className="w-4 h-4" />
-                  <span>Write</span>
-                </Link>
+                {!isDraftRoute && (
+                  <Link
+                    href="/draft/new"
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  >
+                    <PenLineIcon className="w-4 h-4" />
+                    <span>Write</span>
+                  </Link>
+                )}
                 <LoginButton />
               </>
             }
@@ -882,12 +885,14 @@ function HomeContent() {
                     initialContent={editorContent}
                     onChange={handleEditorChange}
                     placeholder="Write in markdown..."
+                    autoFocus={!!currentDraftId}
                   />
                 ) : (
                   <NostrEditor
                     ref={editorRef}
                     key={editorKey}
                     placeholder=""
+                    autoFocus={!selectedBlog && !!currentDraftId}
                     initialMarkdown={editorMarkdown}
                     onChange={handleEditorChange}
                     onProfileLookup={handleProfileLookup}

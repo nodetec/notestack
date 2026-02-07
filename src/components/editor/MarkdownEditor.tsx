@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useImperativeHandle, useRef, useCallback, useEffect, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useCallback, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-markdown';
 
@@ -13,13 +13,16 @@ interface MarkdownEditorProps {
   initialContent: string;
   onChange?: (content: string) => void;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
-  function MarkdownEditor({ initialContent, onChange, placeholder }, ref) {
+  function MarkdownEditor({ initialContent, onChange, placeholder, autoFocus = false }, ref) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const preRef = useRef<HTMLPreElement>(null);
-    const [highlighted, setHighlighted] = useState('');
+    const [highlighted, setHighlighted] = useState(() =>
+      Prism.highlight(initialContent || '', Prism.languages.markdown, 'markdown')
+    );
 
     useImperativeHandle(ref, () => ({
       getMarkdown: () => textareaRef.current?.value ?? '',
@@ -39,10 +42,6 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
         setHighlighted(Prism.highlight(value, Prism.languages.markdown, 'markdown'));
       }
     }, [onChange]);
-
-    useEffect(() => {
-      setHighlighted(Prism.highlight(initialContent || '', Prism.languages.markdown, 'markdown'));
-    }, [initialContent]);
 
     const handleScroll = useCallback(() => {
       if (!textareaRef.current || !preRef.current) return;
@@ -64,6 +63,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
           onChange={handleChange}
           onScroll={handleScroll}
           placeholder={placeholder}
+          autoFocus={autoFocus}
           className="editor-root absolute inset-0 w-full h-full resize-none bg-transparent text-transparent caret-foreground outline-none font-mono text-sm leading-relaxed py-8 pb-[30%]"
           spellCheck={false}
         />
