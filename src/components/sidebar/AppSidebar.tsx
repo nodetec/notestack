@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, GlobeIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon, UsersIcon, UserRoundSearchIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { FileTextIcon, FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon, UserRoundSearchIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -20,7 +22,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
-import { useSession } from 'next-auth/react';
 import {
   Tooltip,
   TooltipContent,
@@ -37,16 +38,15 @@ import {
 interface AppSidebarProps {
   activePanel: string | null;
   onPanelChange: (panel: string | null) => void;
-  onNewArticle?: () => void;
 }
 
-export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }: AppSidebarProps) {
+export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
+  const router = useRouter();
+  const pathname = usePathname();
   const { relays, activeRelay, setActiveRelay } = useSettingsStore();
-  const { status: sessionStatus } = useSession();
-  const isLoggedIn = sessionStatus === 'authenticated';
 
   // Tags section state
   const [isTagsOpen, setIsTagsOpen] = useState(true);
@@ -63,11 +63,6 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
     setOpenMobile(false);
   };
 
-  const handleNewArticle = () => {
-    onNewArticle?.();
-    setOpenMobile(false);
-  };
-
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -77,10 +72,10 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
       // If clicking the same tag, clear the filter
       setActiveTag(null);
     } else {
-      // Set the filter and open Explore panel
+      // Set the filter and open Home view
       setActiveTag(tag);
-      onPanelChange('explore');
     }
+    router.push('/');
     setOpenMobile(false);
   };
 
@@ -148,22 +143,23 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  tooltip="Explore"
+                  tooltip="Home"
                   isActive={activePanel === 'explore'}
-                  onClick={() => handleClick('explore')}
+                  asChild
                 >
-                  <GlobeIcon />
-                  <span>Explore</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Following"
-                  isActive={activePanel === 'following'}
-                  onClick={() => handleClick('following')}
-                >
-                  <UsersIcon />
-                  <span>Following</span>
+                  <Link
+                    href="/"
+                    onClick={() => {
+                      if (pathname === '/' || pathname === '/explore') {
+                        onPanelChange('explore');
+                      }
+                      setOpenMobile(false);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <HouseIcon />
+                    <span>Home</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -234,16 +230,6 @@ export default function AppSidebar({ activePanel, onPanelChange, onNewArticle }:
                 >
                   <UserIcon />
                   <span>Profile</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="New Article"
-                  onClick={handleNewArticle}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-                >
-                  <PlusIcon />
-                  <span>New Article</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { bech32 } from '@scure/base';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { generateAvatar } from '@/lib/avatar';
@@ -37,9 +38,6 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
   const router = useRouter();
   const pathname = usePathname();
 
-  const [profile, setProfile] = useState<NostrProfile | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-
   // Notify parent when pubkey changes
   useEffect(() => {
     if (status === 'authenticated' && pubkey) {
@@ -47,21 +45,15 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
     }
   }, [status, pubkey, onLogin]);
 
-  // Fetch profile when pubkey is available
-  useEffect(() => {
-    if (!pubkey) {
-      setProfile(null);
-      setIsLoadingProfile(false);
-      return;
-    }
-
-    setIsLoadingProfile(true);
-    const npub = hexToNpub(pubkey);
-    lookupProfile(npub, relays).then((result) => {
-      setProfile(result);
-      setIsLoadingProfile(false);
-    });
-  }, [pubkey, relays]);
+  const relayKey = useMemo(() => relays.join('|'), [relays]);
+  const npub = useMemo(() => (pubkey ? hexToNpub(pubkey) : null), [pubkey]);
+  const { data: profile, isPending: isProfilePending } = useQuery<NostrProfile | null>({
+    queryKey: ['user-profile', pubkey, relayKey],
+    queryFn: async () => lookupProfile(npub!, relays),
+    enabled: !!npub,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
   const handleLogin = useCallback(() => {
     const callbackUrl = encodeURIComponent(pathname || '/');
@@ -85,11 +77,12 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
 
   if (pubkey) {
     const avatarSrc = profile?.picture || fallbackAvatar;
+    const shouldShowProfileSkeleton = isProfilePending && !profile;
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          {isLoadingProfile ? (
+          {shouldShowProfileSkeleton ? (
             <div className="w-7 h-7 rounded-full bg-muted animate-pulse" />
           ) : (
             <button className="w-7 h-7 rounded-full overflow-hidden hover:ring-2 hover:ring-border transition-shadow">
