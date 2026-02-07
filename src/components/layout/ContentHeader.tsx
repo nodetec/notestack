@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
@@ -36,11 +36,36 @@ export default function ContentHeader({
   sticky = true,
   brandHref = '/',
 }: ContentHeaderProps) {
+  const headerRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const wrapper = header.closest('[data-slot="sidebar-wrapper"]') as HTMLElement | null;
+    if (!wrapper) return;
+
+    const updateHeaderHeight = () => {
+      wrapper.style.setProperty('--app-header-height', `${header.offsetHeight}px`);
+    };
+
+    updateHeaderHeight();
+    const observer = new ResizeObserver(updateHeaderHeight);
+    observer.observe(header);
+    window.addEventListener('resize', updateHeaderHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
+  }, []);
+
   return (
     <header
+      ref={headerRef}
       className={cn(
         'z-40 shrink-0 border-b border-border bg-background',
-        sticky && 'sticky top-0',
+        sticky && 'lg:sticky lg:top-0',
         className,
       )}
     >
@@ -57,13 +82,13 @@ export default function ContentHeader({
           )}
         >
           {showSidebarTrigger && (
-            <SidebarTrigger className={cn('lg:hidden', triggerClassName)} />
+            <SidebarTrigger className={triggerClassName} />
           )}
           {showBrand && (
             <Link
               href={brandHref}
               className={cn(
-                'shrink-0 text-base font-semibold tracking-[0.02em] text-foreground/85 font-[family-name:var(--font-merriweather)]',
+                'shrink-0 text-xl font-semibold tracking-[0.02em] text-foreground/85 font-[family-name:var(--font-merriweather)]',
                 brandClassName,
               )}
             >

@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
+import { FileEditIcon, ServerIcon, PlusIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, UserIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { nip19 } from 'nostr-tools';
-import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
@@ -21,8 +20,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
-  SidebarHeader,
   SidebarFooter,
   SidebarSeparator,
   useSidebar,
@@ -43,12 +40,6 @@ import {
 import type { UserWithKeys } from '@/types/auth';
 
 export default function AppSidebar() {
-  const { theme, resolvedTheme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
@@ -96,12 +87,6 @@ export default function AppSidebar() {
       });
     }
   };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const isDarkTheme = (resolvedTheme ?? theme) === 'dark';
 
   const handleTagClick = (tag: string) => {
     const normalized = tag.toLowerCase().trim().replace(/^#/, '');
@@ -161,45 +146,7 @@ export default function AppSidebar() {
   const isRelaysRoute = pathname === '/relays';
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border p-0.5">
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-2 px-3 py-3 hover:bg-sidebar-accent rounded-md transition-colors text-left">
-                  <ServerIcon className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm font-semibold text-foreground/80 truncate flex-1">
-                    {relayHost || 'No relay'}
-                  </span>
-                  {(sidebarState !== 'collapsed' || isMobile) && (
-                    <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                  )}
-                </button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent
-              side="right"
-              align="center"
-              hidden={sidebarState !== 'collapsed' || isMobile}
-            >
-              {activeRelay || 'No relay selected'}
-            </TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuRadioGroup value={activeRelay} onValueChange={setActiveRelay}>
-              {relays.map((relay) => {
-                const host = new URL(relay).hostname;
-                return (
-                  <DropdownMenuRadioItem key={relay} value={relay}>
-                    {host}
-                  </DropdownMenuRadioItem>
-                );
-              })}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarHeader>
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -378,31 +325,48 @@ export default function AppSidebar() {
           </>
         )}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Donate"
-              asChild
-            >
-              <a href="https://getalby.com/p/chrisatmachine" target="_blank" rel="noopener noreferrer">
-                <HeartIcon />
-                <span>Donate</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip={mounted ? (isDarkTheme ? 'Light mode' : 'Dark mode') : 'Toggle theme'}
-              onClick={toggleTheme}
-            >
-              {mounted ? (isDarkTheme ? <SunIcon /> : <MoonIcon />) : <MoonIcon />}
-              <span>{mounted ? (isDarkTheme ? 'Light mode' : 'Dark mode') : 'Toggle theme'}</span>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex w-full items-center gap-2 px-3 py-2.5 hover:bg-sidebar-accent rounded-md transition-colors text-left">
+                      <ServerIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-sm font-semibold text-foreground/80 truncate flex-1">
+                        {relayHost || 'No relay'}
+                      </span>
+                      {(sidebarState !== 'collapsed' || isMobile) && (
+                        <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      )}
+                    </button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  align="center"
+                  hidden={sidebarState !== 'collapsed' || isMobile}
+                >
+                  {activeRelay || 'No relay selected'}
+                </TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuRadioGroup value={activeRelay} onValueChange={setActiveRelay}>
+                  {relays.map((relay) => {
+                    const host = new URL(relay).hostname;
+                    return (
+                      <DropdownMenuRadioItem key={relay} value={relay}>
+                        {host}
+                      </DropdownMenuRadioItem>
+                    );
+                  })}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

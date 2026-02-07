@@ -6,7 +6,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import {
   MoreHorizontalIcon,
-  PenLineIcon,
   DownloadIcon,
   SendIcon,
   CodeIcon,
@@ -22,8 +21,6 @@ import { generateAvatar } from "@/lib/avatar";
 import { extractFirstImage } from "@/lib/utils/markdown";
 import { downloadMarkdownFile } from "@/lib/utils/download";
 import { blogToNaddr } from "@/lib/nostr/naddr";
-import ContentHeader from "@/components/layout/ContentHeader";
-import LoginButton from "@/components/auth/LoginButton";
 import EventJsonDialog from "@/components/ui/EventJsonDialog";
 import {
   DropdownMenu,
@@ -177,23 +174,6 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
 
   return (
     <div className="flex flex-col min-h-0 flex-1">
-      <ContentHeader
-        className="z-10 bg-background/80 backdrop-blur"
-        innerClassName="px-3 sm:px-6 py-2 min-h-12"
-        right={
-          <>
-            <Link
-              href="/draft/new"
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <PenLineIcon className="w-4 h-4" />
-              <span>Write</span>
-            </Link>
-            <LoginButton />
-          </>
-        }
-      />
-
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mx-auto w-full max-w-2xl">
           {!pubkey && (

@@ -25,6 +25,7 @@ import AppSidebar from "@/components/sidebar/AppSidebar";
 import StackMenuSub from "@/components/stacks/StackMenuSub";
 import ZapButton from "@/components/zap/ZapButton";
 import LoginButton from "@/components/auth/LoginButton";
+import ThemeToggleButton from "@/components/theme/ThemeToggleButton";
 import PublishDialog from "@/components/publish/PublishDialog";
 import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import { Button } from "@/components/ui/button";
@@ -92,13 +93,8 @@ function FloatingToolbar({
   toolbarRef,
 }: FloatingToolbarProps) {
   const { state: sidebarState, isMobile } = useSidebar();
-  const sidebarWidth = sidebarState === "collapsed" ? "3rem" : "16rem";
-
-  // Calculate left margin based on sidebar state
-  let marginLeft = "0";
-  if (!isMobile) {
-    marginLeft = sidebarWidth;
-  }
+  const marginLeft =
+    !isMobile && sidebarState === "expanded" ? "16rem" : "0";
 
   return (
     <div
@@ -610,109 +606,111 @@ function HomeContent() {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
+      <div className="flex min-h-svh w-full flex-col bg-background">
+        <ContentHeader
+          sticky
+          showBrand={!isDraftRoute}
+          left={
+            <>
+              {isLoggedIn && currentDraftId && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={isMarkdownMode ? "secondary" : "ghost"}
+                      onClick={() => {
+                        // Get content from current editor before switching
+                        const currentContent = isMarkdownMode
+                          ? (markdownEditorRef.current?.getMarkdown() ?? "")
+                          : (editorRef.current?.getMarkdown() ?? "");
 
-      <SidebarInset className="bg-background">
-        <>
-          <ContentHeader
-            sticky={!selectedBlog}
-            showBrand={!isDraftRoute}
-            left={
-              <>
-                {isLoggedIn && currentDraftId && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant={isMarkdownMode ? "secondary" : "ghost"}
-                        onClick={() => {
-                          // Get content from current editor before switching
-                          const currentContent = isMarkdownMode
-                            ? (markdownEditorRef.current?.getMarkdown() ?? "")
-                            : (editorRef.current?.getMarkdown() ?? "");
+                        setIsMarkdownMode(!isMarkdownMode);
 
-                          setIsMarkdownMode(!isMarkdownMode);
-
-                          // Save content to persist it for the other editor to load
-                          handleContentChange(currentContent);
-                        }}
-                      >
-                        <MarkdownIcon className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isMarkdownMode ? "Rich Text Mode" : "Markdown Mode"}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                {!selectedBlog && !isLoadingBlog && (
-                  <SaveStatusIndicator className="hidden lg:flex" />
-                )}
-              </>
-            }
-            right={
-              <>
-                {isLoggedIn && currentDraftId && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant={
-                          showFloatingToolbar && !isMarkdownMode
-                            ? "secondary"
-                            : "ghost"
-                        }
-                        onClick={() =>
-                          !isMarkdownMode &&
-                          setShowFloatingToolbar(!showFloatingToolbar)
-                        }
-                        disabled={isMarkdownMode}
-                      >
-                        <PencilRulerIcon className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isMarkdownMode
-                        ? "Toolbar unavailable in markdown mode"
-                        : showFloatingToolbar
-                          ? "Hide Toolbar"
-                          : "Show Toolbar"}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                {isLoggedIn && currentDraftId && (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={handlePublishDraft}
-                  >
-                    Publish Draft
-                  </Button>
-                )}
-                {isLoggedIn && currentDraftId && (
-                  <Button
-                    size="sm"
-                    variant={isEditing ? "success" : "default"}
-                    onClick={() => setShowPublishDialog(true)}
-                  >
-                    {isEditing ? "Publish Edit" : "Publish"}
-                  </Button>
-                )}
-                {!isDraftRoute && (
-                  <Link
-                    href="/draft/new"
-                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  >
-                    <PenLineIcon className="w-4 h-4" />
-                    <span>Write</span>
-                  </Link>
-                )}
-                <LoginButton />
-              </>
-            }
-          />
+                        // Save content to persist it for the other editor to load
+                        handleContentChange(currentContent);
+                      }}
+                    >
+                      <MarkdownIcon className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isMarkdownMode ? "Rich Text Mode" : "Markdown Mode"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {!selectedBlog && !isLoadingBlog && (
+                <SaveStatusIndicator className="hidden lg:flex" />
+              )}
+            </>
+          }
+          right={
+            <>
+              {isLoggedIn && currentDraftId && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={
+                        showFloatingToolbar && !isMarkdownMode
+                          ? "secondary"
+                          : "ghost"
+                      }
+                      onClick={() =>
+                        !isMarkdownMode &&
+                        setShowFloatingToolbar(!showFloatingToolbar)
+                      }
+                      disabled={isMarkdownMode}
+                    >
+                      <PencilRulerIcon className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isMarkdownMode
+                      ? "Toolbar unavailable in markdown mode"
+                      : showFloatingToolbar
+                        ? "Hide Toolbar"
+                        : "Show Toolbar"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {isLoggedIn && currentDraftId && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handlePublishDraft}
+                >
+                  Publish Draft
+                </Button>
+              )}
+              {isLoggedIn && currentDraftId && (
+                <Button
+                  size="sm"
+                  variant={isEditing ? "success" : "default"}
+                  onClick={() => setShowPublishDialog(true)}
+                >
+                  {isEditing ? "Publish Edit" : "Publish"}
+                </Button>
+              )}
+              {!isDraftRoute && (
+                <Link
+                  href="/draft/new"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <PenLineIcon className="w-4 h-4" />
+                  <span>Write</span>
+                </Link>
+              )}
+              <ThemeToggleButton />
+              <LoginButton />
+            </>
+          }
+        />
+        <div className="flex min-h-0 flex-1 w-full">
+          <AppSidebar />
+          <SidebarInset className="bg-background">
+            <>
           {(selectedBlog || isLoadingBlog) && (
-            <div className="sticky mt-12 top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pt-8">
               <div className="editor-root min-h-12 py-2 flex items-center justify-between gap-3">
                 <div className="min-w-0 overflow-hidden flex items-center gap-2">
                   <Button
@@ -943,6 +941,8 @@ function HomeContent() {
           )}
         </>
       </SidebarInset>
+        </div>
+      </div>
 
       <PublishDialog
         isOpen={showPublishDialog}

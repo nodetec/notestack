@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { bech32 } from '@scure/base';
+import { HeartIcon } from 'lucide-react';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { generateAvatar } from '@/lib/avatar';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
@@ -13,6 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { NostrProfile } from '@/components/editor';
@@ -96,6 +98,17 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <a
+              href="https://getalby.com/p/chrisatmachine"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <HeartIcon className="mr-2" />
+              Donate
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
             <svg
               width="16"

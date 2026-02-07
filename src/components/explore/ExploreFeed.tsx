@@ -7,7 +7,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import {
   MoreHorizontalIcon,
-  PenLineIcon,
   RefreshCwIcon,
   DownloadIcon,
   SendIcon,
@@ -22,8 +21,6 @@ import { toast } from "sonner";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import { useTagStore } from "@/lib/stores/tagStore";
 import { useProfiles } from "@/lib/hooks/useProfiles";
-import ContentHeader from "@/components/layout/ContentHeader";
-import LoginButton from "@/components/auth/LoginButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -287,23 +284,6 @@ export default function ExploreFeed() {
 
   return (
     <div className="flex flex-col min-h-0 flex-1">
-      <ContentHeader
-        className="z-30 bg-background/80 backdrop-blur"
-        innerClassName="px-3 sm:px-6 py-2 min-h-12"
-        right={
-          <>
-            <Link
-              href="/draft/new"
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <PenLineIcon className="w-4 h-4" />
-              <span>Write</span>
-            </Link>
-            <LoginButton />
-          </>
-        }
-      />
-
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mx-auto w-full max-w-2xl">
           <div className="mb-5 border-b border-border/70 pt-2">
@@ -313,7 +293,7 @@ export default function ExploreFeed() {
                   onClick={() => setFeedModeInUrl("latest")}
                   className={`relative -mb-px border-b-2 pb-2 transition-colors ${
                     !isFollowingView
-                      ? "z-10 border-foreground text-foreground font-medium"
+                      ? "border-foreground text-foreground font-medium"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -323,7 +303,7 @@ export default function ExploreFeed() {
                   onClick={() => setFeedModeInUrl("following")}
                   className={`relative -mb-px border-b-2 pb-2 transition-colors ${
                     isFollowingView
-                      ? "z-10 border-foreground text-foreground font-medium"
+                      ? "border-foreground text-foreground font-medium"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
