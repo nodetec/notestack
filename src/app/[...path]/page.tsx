@@ -22,7 +22,7 @@ import MarkdownEditor, {
 import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import ContentHeader from "@/components/layout/ContentHeader";
 import AppSidebar from "@/components/sidebar/AppSidebar";
-import StackButton from "@/components/stacks/StackButton";
+import StackMenuSub from "@/components/stacks/StackMenuSub";
 import ZapButton from "@/components/zap/ZapButton";
 import LoginButton from "@/components/auth/LoginButton";
 import PublishDialog from "@/components/publish/PublishDialog";
@@ -37,17 +37,35 @@ import { useProfile } from "@/lib/hooks/useProfiles";
 import { lookupNote } from "@/lib/nostr/notes";
 import { fetchBlogByAddress, fetchHighlights } from "@/lib/nostr/fetch";
 import { blogToNaddr, decodeNaddr } from "@/lib/nostr/naddr";
+import { broadcastEvent } from "@/lib/nostr/publish";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import type { Blog } from "@/lib/nostr/types";
 import { CommentsSection } from "@/components/comments";
 import AuthorDropdown from "@/components/author/AuthorDropdown";
+import EventJsonDialog from "@/components/ui/EventJsonDialog";
+import { downloadMarkdownFile } from "@/lib/utils/download";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Link from "next/link";
-import { ArrowLeftIcon, PenLineIcon, PencilRulerIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  CodeIcon,
+  DownloadIcon,
+  MoreHorizontalIcon,
+  PenLineIcon,
+  PencilRulerIcon,
+  SendIcon,
+} from "lucide-react";
 import { publishDrafts } from "@/lib/nostr/draftSync";
 import { toast } from "sonner";
 
@@ -105,6 +123,11 @@ function HomeContent() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
+  const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(
+    null,
+  );
+  const [isJsonOpen, setIsJsonOpen] = useState(false);
+  const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -548,6 +571,42 @@ function HomeContent() {
     }
   }, [selectedBlog, currentDraftId, handleContentChange, isMarkdownMode]);
 
+  const handleBroadcast = async (blog: Blog) => {
+    if (broadcastingBlogId || !blog.rawEvent) return;
+
+    setBroadcastingBlogId(blog.id);
+    try {
+      const results = await broadcastEvent(blog.rawEvent, relays);
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        const relayList = successfulRelays.map((r) => r.relay).join("\n");
+        toast.success("Article broadcast!", {
+          description: `Sent to ${successCount} relay${successCount !== 1 ? "s" : ""}:\n${relayList}`,
+          duration: 5000,
+        });
+      } else {
+        toast.error("Broadcast failed", {
+          description: "Failed to broadcast to any relay",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to broadcast article:", err);
+      toast.error("Broadcast failed", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setBroadcastingBlogId(null);
+    }
+  };
+
+  const handleViewJson = (event: unknown | undefined) => {
+    if (!event) return;
+    setJsonEvent(event);
+    setIsJsonOpen(true);
+  };
+
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -683,8 +742,52 @@ function HomeContent() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {isLoggedIn && selectedBlog && <ZapButton blog={selectedBlog} />}
-                  {isLoggedIn && selectedBlog && (
-                    <StackButton blog={selectedBlog} />
+                  {selectedBlog && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          aria-label="More options"
+                        >
+                          <MoreHorizontalIcon className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <StackMenuSub blog={selectedBlog} />
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() =>
+                            downloadMarkdownFile(
+                              selectedBlog.title,
+                              selectedBlog.content || "",
+                            )
+                          }
+                        >
+                          <DownloadIcon className="w-4 h-4" />
+                          Download markdown
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleBroadcast(selectedBlog)}
+                          disabled={
+                            broadcastingBlogId === selectedBlog.id ||
+                            !selectedBlog.rawEvent
+                          }
+                        >
+                          <SendIcon className="w-4 h-4" />
+                          {broadcastingBlogId === selectedBlog.id
+                            ? "Broadcasting..."
+                            : "Broadcast"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleViewJson(selectedBlog.rawEvent)}
+                          disabled={!selectedBlog.rawEvent}
+                        >
+                          <CodeIcon className="w-4 h-4" />
+                          View raw JSON
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                   {canEditSelectedBlog && !currentDraftId && (
                     <Button
@@ -741,18 +844,7 @@ function HomeContent() {
                         disabled
                         className="opacity-50"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <rect x="3" y="3" width="7" height="7" />
-                          <rect x="14" y="3" width="7" height="7" />
-                          <rect x="3" y="14" width="7" height="7" />
-                          <rect x="14" y="14" width="7" height="7" />
-                        </svg>
+                        <MoreHorizontalIcon className="w-4 h-4" />
                       </Button>
                     </>
                   )}
@@ -864,6 +956,11 @@ function HomeContent() {
             : undefined)
         }
         onPublishSuccess={handlePublishSuccess}
+      />
+      <EventJsonDialog
+        open={isJsonOpen}
+        onOpenChange={setIsJsonOpen}
+        event={jsonEvent}
       />
     </SidebarProvider>
   );
