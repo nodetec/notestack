@@ -439,6 +439,11 @@ function HomeContent() {
   }, [currentDraftId, pubkey, relays, router, sessionStatus, user?.secretKey]);
 
   const isLoggedIn = sessionStatus === "authenticated" && !!pubkey;
+  const canEditSelectedBlog =
+    isLoggedIn &&
+    !!selectedBlog &&
+    !!pubkey &&
+    selectedBlog.pubkey === pubkey;
 
   // Determine if we're editing an existing blog (only when we have a draft with actual edits)
   const isEditing = !!draft?.linkedBlog;
@@ -673,7 +678,7 @@ function HomeContent() {
                   {isLoggedIn && selectedBlog && (
                     <StackButton blog={selectedBlog} />
                   )}
-                  {isLoggedIn && selectedBlog && !currentDraftId && (
+                  {canEditSelectedBlog && !currentDraftId && (
                     <Button
                       size="sm"
                       variant="secondary"
@@ -740,14 +745,6 @@ function HomeContent() {
                           <rect x="3" y="14" width="7" height="7" />
                           <rect x="14" y="14" width="7" height="7" />
                         </svg>
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled
-                        className="opacity-50"
-                      >
-                        Edit
                       </Button>
                     </>
                   )}
