@@ -70,8 +70,11 @@ export default function ExploreFeed() {
   const searchParams = useSearchParams();
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const relays = useSettingsStore((state) => state.relays);
-  const activeTag = useTagStore((state) => state.activeTag);
   const setActiveTag = useTagStore((state) => state.setActiveTag);
+  const tagParam = searchParams.get("tag");
+  const activeTag = tagParam
+    ? tagParam.toLowerCase().trim().replace(/^#/, "") || null
+    : null;
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -82,6 +85,32 @@ export default function ExploreFeed() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    setActiveTag(activeTag);
+  }, [activeTag, isHydrated, setActiveTag]);
+
+  const setTagInUrl = useCallback(
+    (nextTag: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (nextTag) {
+        params.set("tag", nextTag);
+      } else {
+        params.delete("tag");
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  const clearTag = useCallback(() => {
+    setActiveTag(null);
+    setTagInUrl(null);
+  }, [setActiveTag, setTagInUrl]);
 
   const setFeedModeInUrl = useCallback(
     (nextMode: "latest" | "following") => {
@@ -98,12 +127,6 @@ export default function ExploreFeed() {
     },
     [pathname, router, searchParams],
   );
-
-  useEffect(() => {
-    if (activeTag && isFollowingView) {
-      setFeedModeInUrl("latest");
-    }
-  }, [activeTag, isFollowingView, setFeedModeInUrl]);
 
   const {
     data: latestData,
@@ -150,13 +173,14 @@ export default function ExploreFeed() {
     refetch: refetchFollowing,
     isRefetching: isRefetchingFollowing,
   } = useInfiniteQuery({
-    queryKey: ["following-feed", activeRelay, (contacts ?? []).join(",")],
+    queryKey: ["following-feed", activeRelay, (contacts ?? []).join(","), activeTag || ""],
     queryFn: ({ pageParam }) =>
       fetchFollowingBlogs({
         authors: contacts || [],
         limit: 20,
         until: pageParam,
         relay: activeRelay,
+        tag: activeTag || undefined,
       }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -307,9 +331,9 @@ export default function ExploreFeed() {
                 </button>
               </div>
               <div className="mb-2 flex items-center gap-2">
-                {!isFollowingView && activeTag && (
+                {activeTag && (
                   <button
-                    onClick={() => setActiveTag(null)}
+                    onClick={clearTag}
                     className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
                   >
                     #{activeTag}

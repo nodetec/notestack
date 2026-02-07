@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -52,6 +52,7 @@ export default function AppSidebar() {
   const { setOpenMobile, state: sidebarState, isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const userPubkey = user?.publicKey;
@@ -104,14 +105,26 @@ export default function AppSidebar() {
   const isDarkTheme = (resolvedTheme ?? theme) === 'dark';
 
   const handleTagClick = (tag: string) => {
-    if (activeTag === tag) {
+    const normalized = tag.toLowerCase().trim().replace(/^#/, '');
+    const nextActiveTag = activeTag === normalized ? null : normalized;
+
+    if (nextActiveTag === null) {
       // If clicking the same tag, clear the filter
       setActiveTag(null);
     } else {
       // Set the filter and open Home view
-      setActiveTag(tag);
+      setActiveTag(nextActiveTag);
     }
-    router.push('/');
+    const targetPath = isHomeRoute ? pathname : '/';
+    const nextParams = new URLSearchParams();
+    if (isFollowingFeed) {
+      nextParams.set('feed', 'following');
+    }
+    if (nextActiveTag) {
+      nextParams.set('tag', nextActiveTag);
+    }
+    const query = nextParams.toString();
+    router.push(query ? `${targetPath}?${query}` : targetPath);
     setOpenMobile(false);
   };
 
@@ -140,6 +153,7 @@ export default function AppSidebar() {
   // Extract hostname from relay URL for display
   const relayHost = activeRelay ? new URL(activeRelay).hostname : null;
   const isHomeRoute = pathname === '/' || pathname === '/explore';
+  const isFollowingFeed = isHomeRoute && searchParams.get('feed') === 'following';
   const isDraftsRoute = pathname === '/drafts';
   const isHighlightsRoute = pathname === '/highlights';
   const isStacksRoute = pathname === '/stacks';

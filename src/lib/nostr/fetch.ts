@@ -565,11 +565,13 @@ export async function fetchFollowingBlogs({
   limit = 10,
   until,
   relay = 'wss://relay.damus.io',
+  tag,
 }: {
   authors: string[];
   limit?: number;
   until?: number;
   relay?: string;
+  tag?: string;
 }): Promise<{ blogs: Blog[]; nextCursor?: number }> {
   if (authors.length === 0) {
     return { blogs: [] };
@@ -590,6 +592,10 @@ export async function fetchFollowingBlogs({
 
       if (until) {
         filter.until = until;
+      }
+
+      if (tag) {
+        filter['#t'] = [tag.toLowerCase()];
       }
 
       ws.send(JSON.stringify(['REQ', subId, filter]));
