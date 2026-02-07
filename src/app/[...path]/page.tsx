@@ -616,6 +616,7 @@ function HomeContent() {
         <>
           <ContentHeader
             sticky={!selectedBlog}
+            showBrand={!isDraftRoute}
             left={
               <>
                 {isLoggedIn && currentDraftId && (
