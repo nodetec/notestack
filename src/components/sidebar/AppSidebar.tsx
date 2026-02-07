@@ -119,7 +119,9 @@ export default function AppSidebar({ activePanel, onPanelChange }: AppSidebarPro
                   <span className="text-sm font-semibold text-foreground/80 truncate flex-1">
                     {relayHost || 'No relay'}
                   </span>
-                  <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                  {(sidebarState !== 'collapsed' || isMobile) && (
+                    <ChevronDownIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                  )}
                 </button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
