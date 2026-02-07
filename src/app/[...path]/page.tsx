@@ -46,7 +46,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeftIcon, PencilRulerIcon } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeftIcon, PenLineIcon, PencilRulerIcon } from "lucide-react";
 import { publishDrafts } from "@/lib/nostr/draftSync";
 import { toast } from "sonner";
 
@@ -636,6 +637,13 @@ function HomeContent() {
                     {isEditing ? "Publish Edit" : "Publish"}
                   </Button>
                 )}
+                <Link
+                  href="/draft/new"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <PenLineIcon className="w-4 h-4" />
+                  <span>Write</span>
+                </Link>
                 <LoginButton />
               </>
             }
