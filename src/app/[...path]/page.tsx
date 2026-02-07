@@ -620,58 +620,58 @@ function HomeContent() {
           right={
             <>
               {isLoggedIn && currentDraftId && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant={isMarkdownMode ? "secondary" : "ghost"}
-                      onClick={() => {
-                        // Get content from current editor before switching
-                        const currentContent = isMarkdownMode
-                          ? (markdownEditorRef.current?.getMarkdown() ?? "")
-                          : (editorRef.current?.getMarkdown() ?? "");
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant={
+                          showFloatingToolbar && !isMarkdownMode
+                            ? "secondary"
+                            : "ghost"
+                        }
+                        onClick={() =>
+                          !isMarkdownMode &&
+                          setShowFloatingToolbar(!showFloatingToolbar)
+                        }
+                        disabled={isMarkdownMode}
+                      >
+                        <PencilRulerIcon className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isMarkdownMode
+                        ? "Toolbar unavailable in markdown mode"
+                        : showFloatingToolbar
+                          ? "Hide Toolbar"
+                          : "Show Toolbar"}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant={isMarkdownMode ? "secondary" : "ghost"}
+                        onClick={() => {
+                          // Get content from current editor before switching
+                          const currentContent = isMarkdownMode
+                            ? (markdownEditorRef.current?.getMarkdown() ?? "")
+                            : (editorRef.current?.getMarkdown() ?? "");
 
-                        setIsMarkdownMode(!isMarkdownMode);
+                          setIsMarkdownMode(!isMarkdownMode);
 
-                        // Save content to persist it for the other editor to load
-                        handleContentChange(currentContent);
-                      }}
-                    >
-                      <MarkdownIcon className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {isMarkdownMode ? "Rich Text Mode" : "Markdown Mode"}
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {isLoggedIn && currentDraftId && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant={
-                        showFloatingToolbar && !isMarkdownMode
-                          ? "secondary"
-                          : "ghost"
-                      }
-                      onClick={() =>
-                        !isMarkdownMode &&
-                        setShowFloatingToolbar(!showFloatingToolbar)
-                      }
-                      disabled={isMarkdownMode}
-                    >
-                      <PencilRulerIcon className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {isMarkdownMode
-                      ? "Toolbar unavailable in markdown mode"
-                      : showFloatingToolbar
-                        ? "Hide Toolbar"
-                        : "Show Toolbar"}
-                  </TooltipContent>
-                </Tooltip>
+                          // Save content to persist it for the other editor to load
+                          handleContentChange(currentContent);
+                        }}
+                      >
+                        <MarkdownIcon className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isMarkdownMode ? "Rich Text Mode" : "Markdown Mode"}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               )}
               {isLoggedIn && currentDraftId && (
                 <Button
