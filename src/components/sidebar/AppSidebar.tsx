@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { FileEditIcon, ServerIcon, PlusIcon, SunIcon, MoonIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, HeartIcon, UserIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { nip19 } from 'nostr-tools';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTagStore } from '@/lib/stores/tagStore';
+import { fetchInterestTags } from '@/lib/nostr/fetch';
+import { publishInterestTagsList } from '@/lib/nostr/publish';
 import {
   Sidebar,
   SidebarContent,
@@ -59,7 +63,39 @@ export default function AppSidebar() {
   const [isTagsOpen, setIsTagsOpen] = useState(true);
   const [newTagInput, setNewTagInput] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
-  const { tags, activeTag, addTag, removeTag, setActiveTag } = useTagStore();
+  const { tags, activeTag, setTags, addTag, removeTag, setActiveTag } = useTagStore();
+
+  const { data: nostrTags } = useQuery({
+    queryKey: ['interest-tags', userPubkey, activeRelay],
+    queryFn: () => fetchInterestTags({ pubkey: userPubkey!, relay: activeRelay }),
+    enabled: !!userPubkey && !!activeRelay,
+    staleTime: 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!userPubkey || !nostrTags) return;
+    setTags(nostrTags);
+  }, [nostrTags, setTags, userPubkey]);
+
+  const publishTags = async (nextTags: string[]) => {
+    if (!userPubkey) return;
+
+    try {
+      const results = await publishInterestTagsList({
+        tags: nextTags,
+        relays,
+        secretKey: user?.secretKey,
+      });
+      const successCount = results.filter((result) => result.success).length;
+      if (successCount === 0) {
+        toast.error('Failed to save tags to relays');
+      }
+    } catch (error) {
+      toast.error('Failed to save tags to relays', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -80,11 +116,16 @@ export default function AppSidebar() {
   };
 
   const handleAddTag = () => {
-    if (newTagInput.trim()) {
-      addTag(newTagInput);
-      setNewTagInput('');
-      setIsAddingTag(false);
-    }
+    const normalized = newTagInput.toLowerCase().trim().replace(/^#/, '');
+    if (!normalized) return;
+
+    const nextTags = tags.includes(normalized)
+      ? tags
+      : [...tags, normalized].sort();
+    addTag(normalized);
+    setNewTagInput('');
+    setIsAddingTag(false);
+    publishTags(nextTags);
   };
 
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -277,7 +318,9 @@ export default function AppSidebar() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              const nextTags = tags.filter((t) => t !== tag);
                               removeTag(tag);
+                              publishTags(nextTags);
                             }}
                             className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-sidebar-accent text-muted-foreground"
                             aria-label={`Remove ${tag}`}

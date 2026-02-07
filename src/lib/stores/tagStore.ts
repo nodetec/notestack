@@ -7,6 +7,7 @@ interface TagState {
   tags: string[];           // Saved tags (lowercase, no # prefix)
   activeTag: string | null; // Currently selected tag for filtering
 
+  setTags: (tags: string[]) => void;
   addTag: (tag: string) => void;
   removeTag: (tag: string) => void;
   setActiveTag: (tag: string | null) => void;
@@ -17,6 +18,24 @@ export const useTagStore = create<TagState>()(
     (set) => ({
       tags: [],
       activeTag: null,
+
+      setTags: (tags) => {
+        const normalized = Array.from(
+          new Set(
+            tags
+              .map((tag) => tag.toLowerCase().trim().replace(/^#/, ''))
+              .filter(Boolean)
+          )
+        ).sort();
+
+        set((state) => ({
+          tags: normalized,
+          activeTag:
+            state.activeTag && normalized.includes(state.activeTag)
+              ? state.activeTag
+              : null,
+        }));
+      },
 
       addTag: (tag) => {
         const normalized = tag.toLowerCase().trim().replace(/^#/, '');

@@ -1,6 +1,6 @@
 import type { NostrEvent } from './types';
 import { stripCodeBlocks } from '@/lib/utils/markdown';
-import { signEvent, getSignerPublicKey } from './signing';
+import { signEvent } from './signing';
 
 function generateId(): string {
   const array = new Uint8Array(16);
@@ -367,6 +367,39 @@ export async function publishContactList({
     created_at: createdAt,
     tags,
     content,
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
+}
+
+// NIP-51: Publish interests list (kind 10015)
+interface InterestListOptions {
+  tags: string[];
+  relays: string[];
+  secretKey?: string;
+}
+
+export async function publishInterestTagsList({
+  tags,
+  relays,
+  secretKey,
+}: InterestListOptions): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+  const normalizedTags = Array.from(
+    new Set(
+      tags
+        .map((tag) => tag.toLowerCase().trim().replace(/^#/, ''))
+        .filter(Boolean)
+    )
+  ).sort();
+
+  const unsignedEvent = {
+    kind: 10015,
+    created_at: createdAt,
+    tags: normalizedTags.map((tag) => ['t', tag] as string[]),
+    content: '',
   };
 
   const signedEvent = await signEvent({ event: unsignedEvent, secretKey });

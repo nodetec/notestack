@@ -486,6 +486,79 @@ export async function fetchContacts({
   });
 }
 
+// Fetch user's interests/tags list (NIP-51 kind 10015)
+export async function fetchInterestTags({
+  pubkey,
+  relay = 'wss://relay.damus.io',
+}: {
+  pubkey: string;
+  relay?: string;
+}): Promise<string[]> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `interest-tags-${Date.now()}`;
+    let timeoutId: NodeJS.Timeout;
+    let resolved = false;
+    let latestEvent: NostrEvent | null = null;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify(['REQ', subId, {
+        kinds: [10015],
+        authors: [pubkey],
+        limit: 10,
+      }]));
+
+      timeoutId = setTimeout(() => {
+        if (resolved) return;
+        resolved = true;
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        const tags = latestEvent
+          ? latestEvent.tags
+              .filter((tag) => tag[0] === 't' && tag[1])
+              .map((tag) => tag[1].toLowerCase())
+          : [];
+        resolve(Array.from(new Set(tags)).sort());
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind !== 10015) return;
+          if (!latestEvent || event.created_at > latestEvent.created_at) {
+            latestEvent = event;
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          const tags = latestEvent
+            ? latestEvent.tags
+                .filter((tag) => tag[0] === 't' && tag[1])
+                .map((tag) => tag[1].toLowerCase())
+            : [];
+          resolve(Array.from(new Set(tags)).sort());
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timeoutId);
+      resolve([]);
+    };
+  });
+}
+
 // Fetch blogs from multiple authors (for following feed)
 export async function fetchFollowingBlogs({
   authors,

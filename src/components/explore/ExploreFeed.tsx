@@ -247,19 +247,6 @@ export default function ExploreFeed() {
       <ContentHeader
         className="z-30 bg-background/80 backdrop-blur"
         innerClassName="px-3 sm:px-6 py-2 min-h-12"
-        left={
-          <>
-            {!isFollowingView && activeTag && (
-              <button
-                onClick={() => setActiveTag(null)}
-                className="flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
-              >
-                #{activeTag}
-                <XIcon className="w-3 h-3" />
-              </button>
-            )}
-          </>
-        }
         right={
           <>
             <Link
@@ -277,27 +264,38 @@ export default function ExploreFeed() {
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mx-auto w-full max-w-2xl">
           <div className="mb-5 border-b border-border/70 pt-2">
-            <div className="flex items-center gap-5 text-sm">
-              <button
-                onClick={() => setFeedModeInUrl("latest")}
-                className={`relative -mb-px border-b-2 pb-2 transition-colors ${
-                  !isFollowingView
-                    ? "z-10 border-foreground text-foreground font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Latest
-              </button>
-              <button
-                onClick={() => setFeedModeInUrl("following")}
-                className={`relative -mb-px border-b-2 pb-2 transition-colors ${
-                  isFollowingView
-                    ? "z-10 border-foreground text-foreground font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Following
-              </button>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-5 text-sm">
+                <button
+                  onClick={() => setFeedModeInUrl("latest")}
+                  className={`relative -mb-px border-b-2 pb-2 transition-colors ${
+                    !isFollowingView
+                      ? "z-10 border-foreground text-foreground font-medium"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Latest
+                </button>
+                <button
+                  onClick={() => setFeedModeInUrl("following")}
+                  className={`relative -mb-px border-b-2 pb-2 transition-colors ${
+                    isFollowingView
+                      ? "z-10 border-foreground text-foreground font-medium"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Following
+                </button>
+              </div>
+              {!isFollowingView && activeTag && (
+                <button
+                  onClick={() => setActiveTag(null)}
+                  className="mb-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-primary/10 dark:bg-primary/20 text-primary rounded-full hover:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  #{activeTag}
+                  <XIcon className="w-3 h-3" />
+                </button>
+              )}
             </div>
           </div>
 
