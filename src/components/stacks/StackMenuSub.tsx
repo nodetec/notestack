@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Loader2Icon, LayersIcon } from 'lucide-react';
+import { Loader2Icon, LayersIcon, PlusIcon } from 'lucide-react';
 import type { UserWithKeys } from '@/types/auth';
 import type { Blog, StackItem } from '@/lib/nostr/types';
 import { useStackStore } from '@/lib/stores/stackStore';
@@ -23,6 +23,8 @@ interface StackMenuSubProps {
 export default function StackMenuSub({ blog }: StackMenuSubProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [savingStacks, setSavingStacks] = useState<Set<string>>(new Set());
+  const [isCreating, setIsCreating] = useState(false);
+  const [newStackName, setNewStackName] = useState('');
 
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
@@ -36,6 +38,7 @@ export default function StackMenuSub({ blog }: StackMenuSubProps) {
     isArticleInStack,
     addItemToStack,
     removeItemFromStack,
+    addStack,
     updateStack,
     isLoading,
     setLoading,
@@ -121,6 +124,61 @@ export default function StackMenuSub({ blog }: StackMenuSubProps) {
     }
   };
 
+  const handleCreateStack = async () => {
+    if (!newStackName.trim() || !pubkey) return;
+
+    setIsCreating(true);
+
+    const stackName = newStackName.trim();
+    const dTag = `stack-${Date.now()}`;
+    const item: StackItem = {
+      kind: 30023,
+      pubkey: blog.pubkey,
+      identifier: blog.dTag,
+      relay: activeRelay,
+    };
+
+    try {
+      const result = await publishStack({
+        dTag,
+        name: stackName,
+        items: [item],
+        relays,
+        secretKey,
+      });
+
+      addStack({
+        id: result.event.id,
+        pubkey: result.event.pubkey,
+        dTag,
+        name: stackName,
+        createdAt: result.event.createdAt,
+        items: [item],
+      });
+
+      toast.success('Stack created', {
+        description: stackName,
+      });
+      setNewStackName('');
+      setIsOpen(false);
+    } catch (err) {
+      console.error('Failed to create stack:', err);
+      toast.error('Failed to create stack', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleCreateKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleCreateStack();
+    } else if (e.key === 'Escape') {
+      setNewStackName('');
+    }
+  };
+
   return (
     <DropdownMenuSub open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuSubTrigger>
@@ -168,6 +226,37 @@ export default function StackMenuSub({ blog }: StackMenuSubProps) {
                 </DropdownMenuCheckboxItem>
               );
             })}
+          </>
+        )}
+        {isLoggedIn && (
+          <>
+            <div className="mx-2 my-1 h-px bg-border" />
+            <div className="p-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newStackName}
+                  onChange={(e) => setNewStackName(e.target.value)}
+                  onKeyDown={handleCreateKeyDown}
+                  placeholder="New stack name..."
+                  className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground"
+                  disabled={isCreating}
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateStack}
+                  disabled={!newStackName.trim() || isCreating}
+                  className="h-6 px-2 rounded text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50"
+                  aria-label="Create stack"
+                >
+                  {isCreating ? (
+                    <Loader2Icon className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <PlusIcon className="w-3 h-3" />
+                  )}
+                </button>
+              </div>
+            </div>
           </>
         )}
       </DropdownMenuSubContent>
