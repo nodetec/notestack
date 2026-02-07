@@ -609,7 +609,7 @@ function HomeContent() {
       <div className="flex min-h-svh w-full flex-col bg-background">
         <ContentHeader
           sticky
-          showBrand={!isDraftRoute}
+          brandClassName={isDraftRoute ? "hidden sm:inline-flex" : undefined}
           left={
             <>
               {isLoggedIn && currentDraftId && (
