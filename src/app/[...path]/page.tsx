@@ -612,6 +612,13 @@ function HomeContent() {
           brandClassName={isDraftRoute ? "hidden sm:inline-flex" : undefined}
           left={
             <>
+              {!selectedBlog && !isLoadingBlog && (
+                <SaveStatusIndicator className="hidden lg:flex" />
+              )}
+            </>
+          }
+          right={
+            <>
               {isLoggedIn && currentDraftId && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -638,13 +645,6 @@ function HomeContent() {
                   </TooltipContent>
                 </Tooltip>
               )}
-              {!selectedBlog && !isLoadingBlog && (
-                <SaveStatusIndicator className="hidden lg:flex" />
-              )}
-            </>
-          }
-          right={
-            <>
               {isLoggedIn && currentDraftId && (
                 <Tooltip>
                   <TooltipTrigger asChild>
