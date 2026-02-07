@@ -54,7 +54,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PencilRulerIcon } from "lucide-react";
+import { ArrowLeftIcon, PencilRulerIcon } from "lucide-react";
 import { publishDrafts } from "@/lib/nostr/draftSync";
 import { toast } from "sonner";
 
@@ -836,7 +836,21 @@ function HomeContent() {
           {(selectedBlog || isLoadingBlog) && (
             <div className="sticky mt-12 top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
               <div className="editor-root min-h-12 py-2 flex items-center justify-between gap-3">
-                <div className="min-w-0 overflow-hidden">
+                <div className="min-w-0 overflow-hidden flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      if (typeof window !== "undefined" && window.history.length > 1) {
+                        router.back();
+                        return;
+                      }
+                      router.push("/");
+                    }}
+                    aria-label="Back"
+                  >
+                    <ArrowLeftIcon className="w-4 h-4" />
+                  </Button>
                   {isLoadingBlog ? (
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />

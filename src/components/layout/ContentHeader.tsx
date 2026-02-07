@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ interface ContentHeaderProps {
   triggerClassName?: string;
   showSidebarTrigger?: boolean;
   sticky?: boolean;
+  brandHref?: string;
 }
 
 export default function ContentHeader({
@@ -32,6 +34,7 @@ export default function ContentHeader({
   triggerClassName,
   showSidebarTrigger = true,
   sticky = true,
+  brandHref = '/',
 }: ContentHeaderProps) {
   return (
     <header
@@ -54,14 +57,15 @@ export default function ContentHeader({
           )}
         >
           {showBrand && (
-            <span
+            <Link
+              href={brandHref}
               className={cn(
                 'shrink-0 text-base font-semibold tracking-[0.02em] text-foreground/85 font-[family-name:var(--font-merriweather)]',
                 brandClassName,
               )}
             >
               {brandText}
-            </span>
+            </Link>
           )}
           {showSidebarTrigger && (
             <SidebarTrigger className={cn('lg:hidden', triggerClassName)} />
