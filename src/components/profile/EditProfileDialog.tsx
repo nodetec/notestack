@@ -79,12 +79,13 @@ export default function EditProfileDialog({
 
   useEffect(() => {
     if (!open || !pubkey) return;
+    const targetPubkey = pubkey;
 
     let cancelled = false;
     async function loadProfile() {
       setIsLoadingProfile(true);
       try {
-        const profileEvent = await fetchProfileEvent(pubkey, relays[0]);
+        const profileEvent = await fetchProfileEvent(targetPubkey, relays[0]);
         if (cancelled) return;
         if (!profileEvent) {
           setExistingProfile(null);
