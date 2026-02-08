@@ -234,7 +234,7 @@ export default function HighlightsView({
                       ...{highlight.context.slice(0, 100)}...
                     </p>
                   )}
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+                  <div className="mt-2 mr-1 flex items-center justify-between text-xs text-muted-foreground/70">
                     <span>{formatDate(highlight.createdAt)}</span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
