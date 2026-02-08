@@ -484,8 +484,8 @@ function HomeContent() {
       : currentDraftId || "new";
 
   // Store initial content in a ref to prevent re-renders from changing it
-  // Only update when the editor key changes (switching to a different blog/draft) or mode changes
-  const editorContentKey = `${editorKey}-${isMarkdownMode ? "md" : "rich"}`;
+  // Only update when switching to a different blog/draft.
+  const editorContentKey = editorKey;
   const initialContentRef = useRef<{ key: string; content: string }>({
     key: "",
     content: "",
@@ -501,6 +501,40 @@ function HomeContent() {
     };
   }
   const editorContent = initialContentRef.current.content;
+
+  const getContentForModeSwitch = useCallback(() => {
+    const activeEditorRef = isMarkdownMode
+      ? markdownEditorRef.current
+      : editorRef.current;
+
+    // If current editor is mounted, trust its content (including intentional empty content).
+    if (activeEditorRef) {
+      return activeEditorRef.getMarkdown();
+    }
+
+    // During quick route transitions (e.g. click Edit then toggle), editor may not be mounted yet.
+    // Fall back to the draft snapshot instead of writing an empty string.
+    if (currentDraftId) {
+      return useDraftStore.getState().drafts[currentDraftId]?.content ?? "";
+    }
+
+    return initialContentRef.current.content;
+  }, [isMarkdownMode, currentDraftId]);
+
+  const handleToggleMarkdownMode = useCallback(() => {
+    const contentForNextMode = getContentForModeSwitch();
+
+    initialContentRef.current = {
+      key: editorKey,
+      content: contentForNextMode,
+    };
+
+    if (currentDraftId) {
+      useDraftStore.getState().setDraftContent(currentDraftId, contentForNextMode);
+    }
+
+    setIsMarkdownMode((prev) => !prev);
+  }, [getContentForModeSwitch, editorKey, currentDraftId]);
 
   // Reset state when switching to a different article
   useEffect(() => {
@@ -652,17 +686,7 @@ function HomeContent() {
                       <Button
                         size="sm"
                         variant={isMarkdownMode ? "secondary" : "ghost"}
-                        onClick={() => {
-                          // Get content from current editor before switching
-                          const currentContent = isMarkdownMode
-                            ? (markdownEditorRef.current?.getMarkdown() ?? "")
-                            : (editorRef.current?.getMarkdown() ?? "");
-
-                          setIsMarkdownMode(!isMarkdownMode);
-
-                          // Save content to persist it for the other editor to load
-                          handleContentChange(currentContent);
-                        }}
+                        onClick={handleToggleMarkdownMode}
                       >
                         <MarkdownIcon className="w-4 h-4" />
                       </Button>
