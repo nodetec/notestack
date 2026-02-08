@@ -40,7 +40,7 @@ function getTextNodes(container: HTMLElement): Text[] {
   const textNodes: Text[] = [];
   let node: Text | null;
   while ((node = walker.nextNode() as Text | null)) {
-    if (node.textContent && node.textContent.trim()) {
+    if (node.textContent && node.textContent.length > 0) {
       textNodes.push(node);
     }
   }
@@ -52,21 +52,92 @@ interface HighlightRangeInfo {
   range: Range;
 }
 
+interface CSSHighlightsRegistry {
+  set(name: string, highlight: unknown): void;
+  delete(name: string): void;
+}
+
+interface WindowWithHighlightCtor extends Window {
+  Highlight: new (...ranges: Range[]) => unknown;
+}
+
+const isHighlightDebugEnabled = process.env.NODE_ENV !== 'production';
+
+function normalizeWhitespace(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function previewText(value: string, max = 160): string {
+  if (!value) return '';
+  const compact = value.replace(/\s+/g, ' ').trim();
+  return compact.length > max ? `${compact.slice(0, max)}...` : compact;
+}
+
+function logHighlightDebug(label: string, payload: Record<string, unknown>) {
+  if (!isHighlightDebugEnabled) return;
+  console.log(`[HighlightDebug] ${label}`, payload);
+}
+
+function findTopLevelChild(container: HTMLElement, node: Node): Node | null {
+  let current: Node | null = node;
+  while (current?.parentNode) {
+    if (current.parentNode === container) {
+      return current;
+    }
+    current = current.parentNode;
+  }
+  return null;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Build a map of combined text to text nodes for cross-node matching
 function buildTextMap(container: HTMLElement): {
   combinedText: string;
-  charMap: { node: Text; offset: number }[];
+  charMap: ({ node: Text; offset: number } | null)[];
+}
+function buildTextMap(
+  container: HTMLElement,
+  includeBlockSeparators: boolean
+): {
+  combinedText: string;
+  charMap: ({ node: Text; offset: number } | null)[];
+}
+function buildTextMap(
+  container: HTMLElement,
+  includeBlockSeparators = true
+): {
+  combinedText: string;
+  charMap: ({ node: Text; offset: number } | null)[];
 } {
   const textNodes = getTextNodes(container);
   let combinedText = '';
-  const charMap: { node: Text; offset: number }[] = [];
+  const charMap: ({ node: Text; offset: number } | null)[] = [];
+  let previousTopLevel: Node | null = null;
 
   for (const textNode of textNodes) {
+    const currentTopLevel = findTopLevelChild(container, textNode);
+    // Add a virtual line break between top-level blocks so multi-paragraph
+    // highlights can be matched even when DOM text nodes are contiguous.
+    if (
+      includeBlockSeparators &&
+      previousTopLevel &&
+      currentTopLevel &&
+      currentTopLevel !== previousTopLevel
+    ) {
+      combinedText += '\n';
+      charMap.push(null);
+    }
+
     const text = textNode.textContent || '';
     for (let i = 0; i < text.length; i++) {
       charMap.push({ node: textNode, offset: i });
       combinedText += text[i];
     }
+
+    previousTopLevel = currentTopLevel;
   }
 
   return { combinedText, charMap };
@@ -74,23 +145,137 @@ function buildTextMap(container: HTMLElement): {
 
 // Create a range that may span multiple text nodes
 function createCrossNodeRange(
-  charMap: { node: Text; offset: number }[],
+  charMap: ({ node: Text; offset: number } | null)[],
   startIndex: number,
   length: number
 ): Range | null {
   if (startIndex < 0 || startIndex >= charMap.length) return null;
 
-  const endIndex = Math.min(startIndex + length - 1, charMap.length - 1);
-  if (endIndex < startIndex) return null;
+  let endIndex = Math.min(startIndex + length - 1, charMap.length - 1);
+  if (endIndex < startIndex || length <= 0) return null;
 
-  const startInfo = charMap[startIndex];
+  let resolvedStart = startIndex;
+  while (resolvedStart <= endIndex && !charMap[resolvedStart]) {
+    resolvedStart += 1;
+  }
+
+  while (endIndex >= resolvedStart && !charMap[endIndex]) {
+    endIndex -= 1;
+  }
+
+  if (resolvedStart > endIndex) return null;
+
+  const startInfo = charMap[resolvedStart];
   const endInfo = charMap[endIndex];
+  if (!startInfo || !endInfo) return null;
 
   const range = new Range();
   range.setStart(startInfo.node, startInfo.offset);
   range.setEnd(endInfo.node, endInfo.offset + 1);
 
   return range;
+}
+
+function findWhitespaceTolerantMatch(
+  haystack: string,
+  needle: string
+): { index: number; length: number } | null {
+  const tokens = needle
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (tokens.length === 0) return null;
+
+  const pattern = tokens.map(escapeRegExp).join('\\s+');
+  const match = new RegExp(pattern, 'm').exec(haystack);
+  if (!match || typeof match.index !== 'number') return null;
+  return { index: match.index, length: match[0].length };
+}
+
+function isAlphaNumeric(char: string): boolean {
+  return /[\p{L}\p{N}]/u.test(char);
+}
+
+function buildNormalizedAlphaNumericView(value: string): {
+  normalized: string;
+  originalIndices: number[];
+} {
+  let normalized = '';
+  const originalIndices: number[] = [];
+  let previousWasSpace = false;
+
+  for (let i = 0; i < value.length; i += 1) {
+    const normalizedChunk = value[i].normalize('NFKC').toLowerCase();
+    for (const ch of normalizedChunk) {
+      if (/\s/u.test(ch)) {
+        if (!previousWasSpace && normalized.length > 0) {
+          normalized += ' ';
+          originalIndices.push(i);
+          previousWasSpace = true;
+        }
+        continue;
+      }
+      if (isAlphaNumeric(ch)) {
+        normalized += ch;
+        originalIndices.push(i);
+        previousWasSpace = false;
+      }
+    }
+  }
+
+  return { normalized: normalized.trim(), originalIndices };
+}
+
+function buildCompactAlphaNumericView(value: string): {
+  normalized: string;
+  originalIndices: number[];
+} {
+  let normalized = '';
+  const originalIndices: number[] = [];
+
+  for (let i = 0; i < value.length; i += 1) {
+    const normalizedChunk = value[i].normalize('NFKC').toLowerCase();
+    for (const ch of normalizedChunk) {
+      if (isAlphaNumeric(ch)) {
+        normalized += ch;
+        originalIndices.push(i);
+      }
+    }
+  }
+
+  return { normalized, originalIndices };
+}
+
+function findAnchoredAlphaNumericMatch(
+  haystack: ReturnType<typeof buildCompactAlphaNumericView>,
+  needle: string
+): { index: number; length: number } | null {
+  if (needle.length < 40) return null;
+
+  const anchorLength = Math.min(40, Math.max(12, Math.floor(needle.length * 0.18)));
+  const startAnchor = needle.slice(0, anchorLength);
+  const endAnchor = needle.slice(-anchorLength);
+  let startPos = haystack.normalized.indexOf(startAnchor);
+
+  while (startPos !== -1) {
+    const endPos = haystack.normalized.indexOf(endAnchor, startPos + anchorLength);
+    if (endPos !== -1) {
+      const spanLength = endPos + anchorLength - startPos;
+      if (spanLength <= needle.length * 4) {
+        const originalStart = haystack.originalIndices[startPos];
+        const originalEnd = haystack.originalIndices[endPos + anchorLength - 1];
+        if (typeof originalStart === 'number' && typeof originalEnd === 'number') {
+          return {
+            index: originalStart,
+            length: originalEnd - originalStart + 1,
+          };
+        }
+      }
+    }
+    startPos = haystack.normalized.indexOf(startAnchor, startPos + 1);
+  }
+
+  return null;
 }
 
 // Apply highlights using CSS Custom Highlight API (doesn't modify DOM)
@@ -117,35 +302,147 @@ function applyHighlightsWithCSS(
   const rangeInfos: HighlightRangeInfo[] = [];
 
   // Build combined text map for cross-node matching
-  const { combinedText, charMap } = buildTextMap(container);
+  const { combinedText, charMap } = buildTextMap(container, true);
+  const normalizedCombinedText = normalizeWhitespace(combinedText);
+  const normalizedAlphaCombined = buildNormalizedAlphaNumericView(combinedText);
+  const compactAlphaCombined = buildCompactAlphaNumericView(combinedText);
+
+  logHighlightDebug('ApplyStart', {
+    highlightCount: highlights.length,
+    combinedLength: combinedText.length,
+    combinedPreview: previewText(combinedText, 240),
+  });
 
   for (const highlight of uniqueHighlights) {
     const searchText = highlight.content.trim();
     if (!searchText || searchText.length < 3) continue;
 
-    // Find match in combined text (handles cross-node matches)
-    const index = combinedText.indexOf(searchText);
+    // Find match in combined text (handles cross-node matches).
+    // If exact match fails, fallback to whitespace-tolerant matching so
+    // newlines/paragraph separators in selection text still resolve.
+    let index = combinedText.indexOf(searchText);
+    let matchLength = searchText.length;
+    let matchStrategy = 'exact';
+    if (index === -1) {
+      const fallbackMatch = findWhitespaceTolerantMatch(combinedText, searchText);
+      if (fallbackMatch) {
+        index = fallbackMatch.index;
+        matchLength = fallbackMatch.length;
+        matchStrategy = 'whitespace';
+        logHighlightDebug('WhitespaceFallbackMatch', {
+          highlightId: highlight.id,
+          searchLength: searchText.length,
+          matchIndex: index,
+          matchLength,
+          searchPreview: previewText(searchText),
+          matchedPreview: previewText(combinedText.slice(index, index + matchLength)),
+        });
+      }
+    }
+    if (index === -1) {
+      const normalizedAlphaSearch = buildNormalizedAlphaNumericView(searchText).normalized;
+      if (normalizedAlphaSearch.length >= 3) {
+        const alphaIndex = normalizedAlphaCombined.normalized.indexOf(normalizedAlphaSearch);
+        if (alphaIndex !== -1) {
+          const startOriginal = normalizedAlphaCombined.originalIndices[alphaIndex];
+          const endOriginal =
+            normalizedAlphaCombined.originalIndices[
+              alphaIndex + normalizedAlphaSearch.length - 1
+            ];
+          if (typeof startOriginal === 'number' && typeof endOriginal === 'number') {
+            index = startOriginal;
+            matchLength = endOriginal - startOriginal + 1;
+            matchStrategy = 'alnum';
+            logHighlightDebug('AlphaNumericFallbackMatch', {
+              highlightId: highlight.id,
+              searchLength: searchText.length,
+              normalizedSearchLength: normalizedAlphaSearch.length,
+              matchIndex: index,
+              matchLength,
+              searchPreview: previewText(searchText),
+              normalizedSearchPreview: previewText(normalizedAlphaSearch),
+            });
+          }
+        }
+      }
+    }
+    if (index === -1) {
+      const compactAlphaSearch = buildCompactAlphaNumericView(searchText).normalized;
+      const anchoredMatch = findAnchoredAlphaNumericMatch(
+        compactAlphaCombined,
+        compactAlphaSearch
+      );
+      if (anchoredMatch) {
+        index = anchoredMatch.index;
+        matchLength = anchoredMatch.length;
+        matchStrategy = 'anchored-alnum';
+        logHighlightDebug('AnchoredAlphaFallbackMatch', {
+          highlightId: highlight.id,
+          searchLength: searchText.length,
+          normalizedSearchLength: compactAlphaSearch.length,
+          matchIndex: index,
+          matchLength,
+          searchPreview: previewText(searchText),
+          normalizedSearchPreview: previewText(compactAlphaSearch),
+        });
+      }
+    }
 
     if (index !== -1) {
-      const range = createCrossNodeRange(charMap, index, searchText.length);
+      const range = createCrossNodeRange(charMap, index, matchLength);
       if (range) {
         ranges.push(range);
         rangeInfos.push({ highlight, range });
+        logHighlightDebug('MatchApplied', {
+          highlightId: highlight.id,
+          strategy: matchStrategy,
+          matchIndex: index,
+          matchLength,
+        });
       }
+    } else {
+      const normalizedSearch = normalizeWhitespace(searchText);
+      const normalizedAlphaSearch = buildNormalizedAlphaNumericView(searchText).normalized;
+      const compactAlphaSearch = buildCompactAlphaNumericView(searchText).normalized;
+      logHighlightDebug('NoMatch', {
+        highlightId: highlight.id,
+        searchLength: searchText.length,
+        normalizedSearchLength: normalizedSearch.length,
+        normalizedSearchFound: normalizedCombinedText.includes(normalizedSearch),
+        normalizedAlphaSearchLength: normalizedAlphaSearch.length,
+        normalizedAlphaSearchFound:
+          normalizedAlphaSearch.length > 0 &&
+          normalizedAlphaCombined.normalized.includes(normalizedAlphaSearch),
+        compactAlphaSearchLength: compactAlphaSearch.length,
+        compactAlphaSearchFound:
+          compactAlphaSearch.length > 0 &&
+          compactAlphaCombined.normalized.includes(compactAlphaSearch),
+        searchPreview: previewText(searchText),
+        normalizedSearchPreview: previewText(normalizedSearch),
+        normalizedAlphaSearchPreview: previewText(normalizedAlphaSearch),
+        compactAlphaSearchPreview: previewText(compactAlphaSearch),
+      });
     }
   }
 
   if (ranges.length > 0) {
     // Create a Highlight object and register it
-    const cssHighlight = new (window as any).Highlight(...ranges);
-    (CSS as any).highlights.set('nostr-highlights', cssHighlight);
+    const windowWithHighlight = window as WindowWithHighlightCtor;
+    const cssWithHighlights = CSS as typeof CSS & {
+      highlights: CSSHighlightsRegistry;
+    };
+    const cssHighlight = new windowWithHighlight.Highlight(...ranges);
+    cssWithHighlights.highlights.set('nostr-highlights', cssHighlight);
   }
 
   // Return cleanup function and range infos
   return {
     cleanup: () => {
       if ('highlights' in CSS) {
-        (CSS as any).highlights.delete('nostr-highlights');
+        const cssWithHighlights = CSS as typeof CSS & {
+          highlights: CSSHighlightsRegistry;
+        };
+        cssWithHighlights.highlights.delete('nostr-highlights');
       }
     },
     rangeInfos,
@@ -304,7 +601,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
     } finally {
       setIsDeleting(false);
     }
-  }, [clickedHighlight, relays, isDeleting, onHighlightDeleted]);
+  }, [clickedHighlight, relays, isDeleting, onHighlightDeleted, secretKey]);
 
   const updatePopover = useCallback(() => {
     if (!canHighlight) {
@@ -385,6 +682,13 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
 
     setIsPublishing(true);
     try {
+      logHighlightDebug('CreateHighlight', {
+        sourceIdentifier: source.identifier,
+        selectedTextLength: selectedText.length,
+        selectedTextPreview: previewText(selectedText),
+        selectedTextRaw: selectedText,
+      });
+
       const { event } = await publishHighlight({
         content: selectedText,
         context: context || undefined,
@@ -424,7 +728,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
     } finally {
       setIsPublishing(false);
     }
-  }, [source, selectedText, context, relays, isPublishing, onHighlightCreated]);
+  }, [source, selectedText, context, relays, isPublishing, onHighlightCreated, secretKey]);
 
   // Render create highlight popover
   const createPopover = canHighlight && popoverPosition && selectedText ? createPortal(
