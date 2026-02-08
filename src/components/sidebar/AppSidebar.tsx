@@ -167,54 +167,58 @@ export default function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Drafts"
-                  isActive={isDraftsRoute}
-                  asChild
-                >
-                  <Link
-                    href="/drafts"
-                    onClick={() => setOpenMobile(false)}
-                    className="flex items-center gap-2"
-                  >
-                    <FileEditIcon />
-                    <span>Drafts</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Highlights"
-                  isActive={isHighlightsRoute}
-                  asChild
-                >
-                  <Link
-                    href="/highlights"
-                    onClick={() => setOpenMobile(false)}
-                    className="flex items-center gap-2"
-                  >
-                    <HighlighterIcon />
-                    <span>Highlights</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Stacks"
-                  isActive={isStacksRoute}
-                  asChild
-                >
-                  <Link
-                    href="/stacks"
-                    onClick={() => setOpenMobile(false)}
-                    className="flex items-center gap-2"
-                  >
-                    <LayersIcon />
-                    <span>Stacks</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {userPubkey && (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      tooltip="Drafts"
+                      isActive={isDraftsRoute}
+                      asChild
+                    >
+                      <Link
+                        href="/drafts"
+                        onClick={() => setOpenMobile(false)}
+                        className="flex items-center gap-2"
+                      >
+                        <FileEditIcon />
+                        <span>Drafts</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      tooltip="Highlights"
+                      isActive={isHighlightsRoute}
+                      asChild
+                    >
+                      <Link
+                        href="/highlights"
+                        onClick={() => setOpenMobile(false)}
+                        className="flex items-center gap-2"
+                      >
+                        <HighlighterIcon />
+                        <span>Highlights</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      tooltip="Stacks"
+                      isActive={isStacksRoute}
+                      asChild
+                    >
+                      <Link
+                        href="/stacks"
+                        onClick={() => setOpenMobile(false)}
+                        className="flex items-center gap-2"
+                      >
+                        <LayersIcon />
+                        <span>Stacks</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Relays"
@@ -231,30 +235,32 @@ export default function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Profile"
-                  isActive={isOwnProfileRoute}
-                  asChild
-                >
-                  <Link
-                    href={profileHref}
-                    onClick={() => {
-                      setOpenMobile(false);
-                    }}
-                    className="flex items-center gap-2"
+              {userPubkey && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip="Profile"
+                    isActive={isOwnProfileRoute}
+                    asChild
                   >
-                    <UserIcon />
-                    <span>Profile</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                    <Link
+                      href={profileHref}
+                      onClick={() => {
+                        setOpenMobile(false);
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <UserIcon />
+                      <span>Profile</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Tags Section - only show when sidebar is expanded */}
-        {sidebarState !== 'collapsed' && (
+        {/* Tags Section - only show when sidebar is expanded and logged in */}
+        {sidebarState !== 'collapsed' && userPubkey && (
           <>
             <SidebarSeparator />
             <SidebarGroup>
