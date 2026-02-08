@@ -63,6 +63,7 @@ import { AUDIO_TRANSFORMER } from './transformers/AudioTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import TableClickOutsidePlugin from './plugins/TableClickOutsidePlugin';
+import TableBreakoutPlugin from './plugins/TableBreakoutPlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
 import HighlightPlugin from './plugins/HighlightPlugin';
 import GutterActionsPlugin from './plugins/GutterActionsPlugin';
@@ -273,6 +274,7 @@ function EditorInner({
       <TableActionMenuPlugin />
       <TableCellResizerPlugin />
       <TableClickOutsidePlugin />
+      <TableBreakoutPlugin />
       <CodeHighlightPlugin />
       <AudioEmbedPlugin url={audioUrl} mime={audioMime} enabled={readOnly} />
       <HighlightPlugin
