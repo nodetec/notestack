@@ -12,7 +12,6 @@ import {
   $convertToMarkdownString,
   $convertFromMarkdownString,
   ELEMENT_TRANSFORMERS,
-  MULTILINE_ELEMENT_TRANSFORMERS,
   TEXT_FORMAT_TRANSFORMERS,
   type ElementTransformer,
 } from '@lexical/markdown';
@@ -60,6 +59,7 @@ import { TABLE, setTableTransformers } from './transformers/TableTransformer';
 import { HORIZONTAL_RULE } from './transformers/HorizontalRuleTransformer';
 import { YOUTUBE_TRANSFORMER } from './transformers/YouTubeTransformer';
 import { AUDIO_TRANSFORMER } from './transformers/AudioTransformer';
+import { CODE_BLOCK } from './transformers/CodeTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import TableClickOutsidePlugin from './plugins/TableClickOutsidePlugin';
@@ -120,7 +120,7 @@ export const ALL_TRANSFORMERS = [
   LINK,
   ...NOSTR_TRANSFORMERS,
   ...ELEMENT_TRANSFORMERS,
-  ...MULTILINE_ELEMENT_TRANSFORMERS,
+  CODE_BLOCK,
   ...TEXT_FORMAT_TRANSFORMERS,
 ];
 
