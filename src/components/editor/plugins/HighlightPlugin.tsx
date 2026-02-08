@@ -468,7 +468,6 @@ export default function HighlightPlugin({
   const relays = useSettingsStore((state) => state.relays);
   const cleanupRef = useRef<(() => void) | null>(null);
   const rangeInfosRef = useRef<HighlightRangeInfo[]>([]);
-  const lastAutoScrolledHighlightIdRef = useRef<string | null>(null);
   const settledScrollHighlightIdRef = useRef<string | null>(null);
 
   // Only show highlight creation UI when viewing (not editing) and logged in
@@ -546,10 +545,7 @@ export default function HighlightPlugin({
       rangeInfosRef.current = rangeInfos;
 
       let didScrollToTarget = false;
-      if (
-        scrollToHighlightId &&
-        lastAutoScrolledHighlightIdRef.current !== scrollToHighlightId
-      ) {
+      if (scrollToHighlightId) {
         const target = rangeInfos.find((info) => info.highlight.id === scrollToHighlightId);
         if (target) {
           const scrollTarget =
@@ -557,7 +553,7 @@ export default function HighlightPlugin({
               ? target.range.startContainer
               : target.range.startContainer.parentElement;
           const tryScroll = (remainingAttempts: number) => {
-            if (!scrollTarget) return;
+            if (!scrollTarget || cancelled) return;
             scrollTarget.scrollIntoView({
               block: 'center',
               behavior: 'auto',
@@ -566,12 +562,10 @@ export default function HighlightPlugin({
             const rect = target.range.getBoundingClientRect();
             const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
 
-            if (!isVisible && remainingAttempts > 0 && !cancelled) {
+            if (!isVisible && remainingAttempts > 0) {
               frameId = requestAnimationFrame(() => tryScroll(remainingAttempts - 1));
               return;
             }
-
-            lastAutoScrolledHighlightIdRef.current = scrollToHighlightId;
           };
 
           tryScroll(8);
@@ -622,6 +616,7 @@ export default function HighlightPlugin({
         cleanupRef.current = null;
       }
       rangeInfosRef.current = [];
+      settledScrollHighlightIdRef.current = null;
     };
   }, [
     editor,
