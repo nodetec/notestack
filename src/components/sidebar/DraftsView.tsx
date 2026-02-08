@@ -124,7 +124,7 @@ export default function DraftsView({
   }, [drafts, isAuthenticated, isSyncing, publicKey, relays, upsertDraftFromSync]);
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-2xl flex-col bg-background pt-6">
       {/* Header */}
       <div className="mb-5 border-b border-border/70 pt-2">
         <div className="flex items-center justify-between pb-2">
@@ -146,7 +146,7 @@ export default function DraftsView({
       </div>
 
       {/* Drafts List */}
-      <div className="flex-1 overflow-y-auto overscroll-none">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {!isHydrated && (
           <div className="p-4 text-center text-muted-foreground text-sm">
             Loading...
