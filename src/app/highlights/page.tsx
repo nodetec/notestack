@@ -25,7 +25,10 @@ export default function HighlightsPage() {
       { pubkey: highlight.source.pubkey, dTag: highlight.source.identifier },
       relays,
     );
-    router.push(`/${naddr}`, { scroll: false });
+    const nextParams = new URLSearchParams({
+      highlight: highlight.id,
+    });
+    router.push(`/${naddr}?${nextParams.toString()}`, { scroll: false });
   }, [relays, router]);
 
   return (

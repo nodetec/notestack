@@ -14,6 +14,7 @@ import {
   ELEMENT_TRANSFORMERS,
   MULTILINE_ELEMENT_TRANSFORMERS,
   TEXT_FORMAT_TRANSFORMERS,
+  type ElementTransformer,
 } from '@lexical/markdown';
 import { defineExtension, $getRoot, $createTextNode } from 'lexical';
 import type { EditorState } from 'lexical';
@@ -98,6 +99,7 @@ interface NostrEditorProps {
   highlights?: import('@/lib/nostr/types').Highlight[]; // Existing highlights to display
   onHighlightDeleted?: (highlightId: string) => void; // Callback when highlight is deleted
   onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void; // Callback when highlight is created
+  scrollToHighlightId?: string | null; // Optional highlight to auto-scroll into view
 }
 
 export interface NostrEditorHandle {
@@ -121,7 +123,7 @@ export const ALL_TRANSFORMERS = [
 ];
 
 // Set transformers for table cell content parsing
-setTableTransformers(ALL_TRANSFORMERS as any);
+setTableTransformers(ALL_TRANSFORMERS as ElementTransformer[]);
 
 // Inner component to access editor context
 function EditorInner({
@@ -137,6 +139,7 @@ function EditorInner({
   highlights,
   onHighlightDeleted,
   onHighlightCreated,
+  scrollToHighlightId,
 }: {
   editorRef: React.RefObject<NostrEditorHandle | null>;
   placeholder: string;
@@ -150,6 +153,7 @@ function EditorInner({
   highlights?: import('@/lib/nostr/types').Highlight[];
   onHighlightDeleted?: (highlightId: string) => void;
   onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void;
+  scrollToHighlightId?: string | null;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -268,7 +272,13 @@ function EditorInner({
       <TableClickOutsidePlugin />
       <CodeHighlightPlugin />
       <AudioEmbedPlugin url={audioUrl} mime={audioMime} enabled={readOnly} />
-      <HighlightPlugin source={highlightSource} highlights={highlights} onHighlightDeleted={onHighlightDeleted} onHighlightCreated={onHighlightCreated} />
+      <HighlightPlugin
+        source={highlightSource}
+        highlights={highlights}
+        onHighlightDeleted={onHighlightDeleted}
+        onHighlightCreated={onHighlightCreated}
+        scrollToHighlightId={scrollToHighlightId}
+      />
     </>
   );
 }
@@ -289,6 +299,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
     highlights,
     onHighlightDeleted,
     onHighlightCreated,
+    scrollToHighlightId,
   },
   ref
 ) {
@@ -348,6 +359,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
               highlights={highlights}
               onHighlightDeleted={onHighlightDeleted}
               onHighlightCreated={onHighlightCreated}
+              scrollToHighlightId={scrollToHighlightId}
             />
           </div>
         </div>

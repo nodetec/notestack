@@ -9,7 +9,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   NostrEditor,
@@ -115,6 +115,7 @@ function FloatingToolbar({
 function HomeContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoadingBlog, setIsLoadingBlog] = useState(false);
@@ -161,6 +162,7 @@ function HomeContent() {
 
   // Parse path params to get draft or blog ID
   const pathSegments = params.path as string[] | undefined;
+  const scrollToHighlightId = searchParams.get("highlight");
   let urlDraftId: string | null = null;
   let urlBlogId: string | null = null;
   const isDraftRoute = pathSegments?.[0] === "draft";
@@ -939,6 +941,9 @@ function HomeContent() {
                     highlights={highlights}
                     onHighlightDeleted={handleHighlightDeleted}
                     onHighlightCreated={handleHighlightCreated}
+                    scrollToHighlightId={
+                      selectedBlog ? scrollToHighlightId : null
+                    }
                   />
                 )}
                 {selectedBlog && (

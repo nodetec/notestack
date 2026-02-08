@@ -27,6 +27,8 @@ interface HighlightPluginProps {
   onHighlightDeleted?: (highlightId: string) => void;
   // Callback when a highlight is created
   onHighlightCreated?: (highlight: Highlight) => void;
+  // Optional highlight id to scroll to once highlights are applied
+  scrollToHighlightId?: string | null;
 }
 
 // Get all text nodes in a container
@@ -449,7 +451,13 @@ function applyHighlightsWithCSS(
   };
 }
 
-export default function HighlightPlugin({ source, highlights = [], onHighlightDeleted, onHighlightCreated }: HighlightPluginProps) {
+export default function HighlightPlugin({
+  source,
+  highlights = [],
+  onHighlightDeleted,
+  onHighlightCreated,
+  scrollToHighlightId,
+}: HighlightPluginProps) {
   const [editor] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
   const [selectedText, setSelectedText] = useState<string>('');
@@ -466,6 +474,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
   const relays = useSettingsStore((state) => state.relays);
   const cleanupRef = useRef<(() => void) | null>(null);
   const rangeInfosRef = useRef<HighlightRangeInfo[]>([]);
+  const lastAutoScrolledHighlightIdRef = useRef<string | null>(null);
 
   // Only show highlight creation UI when viewing (not editing) and logged in
   const canHighlight = !isEditable && !!pubkey && !!source;
@@ -519,6 +528,35 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
       const { cleanup, rangeInfos } = applyHighlightsWithCSS(rootElement, highlights);
       cleanupRef.current = cleanup;
       rangeInfosRef.current = rangeInfos;
+
+      if (
+        scrollToHighlightId &&
+        lastAutoScrolledHighlightIdRef.current !== scrollToHighlightId
+      ) {
+        const target = rangeInfos.find((info) => info.highlight.id === scrollToHighlightId);
+        if (target) {
+          const scrollTarget =
+            target.range.startContainer instanceof Element
+              ? target.range.startContainer
+              : target.range.startContainer.parentElement;
+
+          scrollTarget?.scrollIntoView({
+            block: 'center',
+            behavior: 'smooth',
+          });
+
+          lastAutoScrolledHighlightIdRef.current = scrollToHighlightId;
+          logHighlightDebug('AutoScrollToHighlight', {
+            highlightId: scrollToHighlightId,
+            matched: true,
+          });
+        } else {
+          logHighlightDebug('AutoScrollToHighlight', {
+            highlightId: scrollToHighlightId,
+            matched: false,
+          });
+        }
+      }
     }, 100);
 
     return () => {
@@ -529,7 +567,7 @@ export default function HighlightPlugin({ source, highlights = [], onHighlightDe
       }
       rangeInfosRef.current = [];
     };
-  }, [editor, isEditable, highlights]);
+  }, [editor, isEditable, highlights, scrollToHighlightId]);
 
   // Handle clicks on highlighted text
   useEffect(() => {
