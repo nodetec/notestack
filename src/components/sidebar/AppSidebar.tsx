@@ -333,7 +333,7 @@ export default function AppSidebar() {
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
                     <button className="flex w-full items-center gap-2 px-3 py-2.5 hover:bg-sidebar-accent rounded-md transition-colors text-left">
-                      <ServerIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                      <ServerIcon className="w-4 h-4 text-foreground/80 flex-shrink-0" />
                       <span className="text-sm font-semibold text-foreground/80 truncate flex-1">
                         {relayHost || 'No relay'}
                       </span>
