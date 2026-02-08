@@ -124,7 +124,8 @@ export default function DraftsView({
   }, [drafts, isAuthenticated, isSyncing, publicKey, relays, upsertDraftFromSync]);
 
   return (
-    <div className="mx-auto flex h-full min-h-0 w-full max-w-2xl flex-col bg-background px-4 pt-6 sm:px-6 lg:px-8">
+    <div className="flex h-full min-h-0 w-full flex-col bg-background px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-2xl flex-col pt-6">
       {/* Header */}
       <div className="mb-5 border-b border-border/70 pt-2">
         <div className="flex items-center justify-between pb-2">
@@ -214,6 +215,7 @@ export default function DraftsView({
           </ul>
         )}
       </div>
+    </div>
     </div>
   );
 }

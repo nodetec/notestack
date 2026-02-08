@@ -24,7 +24,8 @@ export default function SettingsView() {
   };
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
+    <div className="flex min-h-full w-full flex-col bg-background px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-2xl flex-col pt-6">
       {/* Header */}
       <div className="mb-5 border-b border-border/70 pt-2">
         <div className="flex items-center justify-between pb-2">
@@ -101,6 +102,7 @@ export default function SettingsView() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
