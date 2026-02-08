@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { connect as bunkerConnect } from '@/lib/nostr/bunkerManager';
 
 const isValidNsec = (nsec: string) => {
   try {
@@ -28,24 +29,37 @@ const isValidNsec = (nsec: string) => {
   }
 };
 
-const formSchema = z.object({
+const nsecFormSchema = z.object({
   nsec: z.string().refine(isValidNsec, {
     message: 'Invalid nsec.',
   }),
 });
 
+const bunkerFormSchema = z.object({
+  bunkerInput: z.string().min(1, 'Please enter a bunker URL or NIP-05 address.'),
+});
+
 function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [extensionError, setExtensionError] = useState<string | null>(null);
+  const [bunkerError, setBunkerError] = useState<string | null>(null);
+  const [bunkerStatus, setBunkerStatus] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const nsecForm = useForm<z.infer<typeof nsecFormSchema>>({
+    resolver: zodResolver(nsecFormSchema),
     defaultValues: {
       nsec: '',
+    },
+  });
+
+  const bunkerForm = useForm<z.infer<typeof bunkerFormSchema>>({
+    resolver: zodResolver(bunkerFormSchema),
+    defaultValues: {
+      bunkerInput: '',
     },
   });
 
@@ -61,6 +75,7 @@ function LoginContent() {
         await signIn('credentials', {
           publicKey: publicKey,
           secretKey: '',
+          signingMethod: 'nip07',
           redirect: false,
         });
         router.push(callbackUrl);
@@ -74,7 +89,7 @@ function LoginContent() {
     setIsLoading(false);
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onNsecSubmit(values: z.infer<typeof nsecFormSchema>) {
     setIsLoading(true);
     const { nsec } = values;
     const secretKeyUint8 = nip19.decode(nsec).data as Uint8Array;
@@ -85,9 +100,43 @@ function LoginContent() {
     await signIn('credentials', {
       publicKey,
       secretKey,
+      signingMethod: 'local',
       redirect: false,
     });
     router.push(callbackUrl);
+  }
+
+  async function onBunkerSubmit(values: z.infer<typeof bunkerFormSchema>) {
+    setIsLoading(true);
+    setBunkerError(null);
+    setBunkerStatus('Connecting to remote signer...');
+
+    try {
+      const { publicKey, bunkerParams } = await bunkerConnect(values.bunkerInput, {
+        onauth: (url: string) => {
+          setBunkerStatus('Approve the connection in your signer app...');
+          window.open(url, '_blank', 'noopener,noreferrer');
+        },
+      });
+
+      setBunkerStatus(null);
+      await queryClient.invalidateQueries();
+      await signIn('credentials', {
+        publicKey,
+        secretKey: '',
+        signingMethod: 'nip46',
+        bunkerParams: JSON.stringify(bunkerParams),
+        redirect: false,
+      });
+      router.push(callbackUrl);
+    } catch (err) {
+      setBunkerStatus(null);
+      setBunkerError(
+        err instanceof Error ? err.message : 'Failed to connect to remote signer',
+      );
+      console.error(err);
+    }
+    setIsLoading(false);
   }
 
   return (
@@ -134,13 +183,57 @@ function LoginContent() {
           </div>
         </div>
 
-        <Form {...form}>
+        <Form {...bunkerForm}>
           <form
             className="flex flex-col gap-3"
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={bunkerForm.handleSubmit(onBunkerSubmit)}
           >
             <FormField
-              control={form.control}
+              control={bunkerForm.control}
+              name="bunkerInput"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      disabled={isLoading}
+                      placeholder="bunker://... or user@domain"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Connecting...' : 'Sign in with nsecBunker'}
+            </Button>
+            {bunkerStatus && (
+              <p className="text-sm text-muted-foreground text-center">{bunkerStatus}</p>
+            )}
+            {bunkerError && (
+              <p className="text-sm text-red-500 text-center">{bunkerError}</p>
+            )}
+          </form>
+        </Form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or with nsec
+            </span>
+          </div>
+        </div>
+
+        <Form {...nsecForm}>
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={nsecForm.handleSubmit(onNsecSubmit)}
+          >
+            <FormField
+              control={nsecForm.control}
               name="nsec"
               render={({ field }) => (
                 <FormItem>
@@ -156,14 +249,14 @@ function LoginContent() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} variant="outline">
               {isLoading ? 'Signing in...' : 'Sign in with nsec'}
             </Button>
           </form>
         </Form>
 
         <p className="text-xs text-center text-muted-foreground">
-          Your nsec is only stored in your browser session and never sent to any server.
+          Your keys are only stored in your browser session and never sent to any server.
         </p>
       </div>
     </div>

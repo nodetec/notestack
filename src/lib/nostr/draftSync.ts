@@ -3,6 +3,7 @@ import { hexToBytes } from 'nostr-tools/utils';
 import type { NostrEvent } from './types';
 import type { Draft } from '@/lib/stores/draftStore';
 import { signEvent } from './signing';
+import { getSigner } from './bunkerManager';
 
 const DRAFT_KIND = 30024;
 
@@ -72,6 +73,12 @@ async function encryptDraftContent(content: string, pubkey: string, secretKey?: 
     return nip44.encrypt(content, conversationKey);
   }
 
+  // NIP-46 remote signer encryption
+  const bunkerSigner = getSigner();
+  if (bunkerSigner) {
+    return bunkerSigner.nip44Encrypt(pubkey, content);
+  }
+
   if (typeof window !== 'undefined' && window.nostr?.nip44?.encrypt) {
     return window.nostr.nip44.encrypt(pubkey, content);
   }
@@ -83,6 +90,12 @@ async function decryptDraftContent(payload: string, pubkey: string, secretKey?: 
   if (secretKey) {
     const conversationKey = nip44.v2.utils.getConversationKey(hexToBytes(secretKey), pubkey);
     return nip44.decrypt(payload, conversationKey);
+  }
+
+  // NIP-46 remote signer decryption
+  const bunkerSigner = getSigner();
+  if (bunkerSigner) {
+    return bunkerSigner.nip44Decrypt(pubkey, payload);
   }
 
   if (typeof window !== 'undefined' && window.nostr?.nip44?.decrypt) {

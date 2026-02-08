@@ -1,6 +1,7 @@
 import { finalizeEvent, getPublicKey } from 'nostr-tools';
 import { hexToBytes } from 'nostr-tools/utils';
 import type { NostrEvent } from './types';
+import { getSigner } from './bunkerManager';
 
 /**
  * Unsigned event template for signing
@@ -18,29 +19,38 @@ export interface UnsignedEvent {
 export interface SignEventOptions {
   /** The unsigned event to sign */
   event: UnsignedEvent;
-  /** Optional secret key (hex) for local signing. If not provided, uses NIP-07 extension. */
+  /** Optional secret key (hex) for local signing. If not provided, uses NIP-46 or NIP-07. */
   secretKey?: string;
 }
 
 /**
- * Sign an event using either a local secret key or NIP-07 extension.
+ * Sign an event using local secret key, NIP-46 remote signer, or NIP-07 extension.
  *
- * If secretKey is provided, signs locally using nostr-tools.
- * Otherwise, falls back to window.nostr.signEvent (NIP-07).
+ * Priority:
+ * 1. Local signing if secretKey is provided
+ * 2. NIP-46 remote signing if a bunker signer is connected
+ * 3. NIP-07 browser extension fallback
  *
  * @returns The signed event with id, pubkey, and sig
  */
 export async function signEvent({ event, secretKey }: SignEventOptions): Promise<NostrEvent> {
+  // Local signing with secret key
   if (secretKey) {
-    // Sign locally with the secret key
     const secretKeyBytes = hexToBytes(secretKey);
     const signedEvent = finalizeEvent(event, secretKeyBytes);
     return signedEvent as NostrEvent;
   }
 
+  // NIP-46 remote signing (bunker)
+  const bunkerSigner = getSigner();
+  if (bunkerSigner) {
+    const signedEvent = await bunkerSigner.signEvent(event);
+    return signedEvent as NostrEvent;
+  }
+
   // Fall back to NIP-07 extension
   if (!window.nostr) {
-    throw new Error('No Nostr extension found and no secret key provided');
+    throw new Error('No signing method available. Please sign in with an extension, nsec, or remote signer.');
   }
 
   const pubkey = await window.nostr.getPublicKey();
@@ -50,9 +60,9 @@ export async function signEvent({ event, secretKey }: SignEventOptions): Promise
 }
 
 /**
- * Get the public key from either a secret key or NIP-07 extension.
+ * Get the public key from either a secret key, NIP-46 signer, or NIP-07 extension.
  *
- * @param secretKey Optional secret key (hex). If not provided, uses NIP-07 extension.
+ * @param secretKey Optional secret key (hex).
  * @returns The public key (hex)
  */
 export async function getSignerPublicKey(secretKey?: string): Promise<string> {
@@ -61,8 +71,13 @@ export async function getSignerPublicKey(secretKey?: string): Promise<string> {
     return getPublicKey(secretKeyBytes);
   }
 
+  const bunkerSigner = getSigner();
+  if (bunkerSigner) {
+    return bunkerSigner.getPublicKey();
+  }
+
   if (!window.nostr) {
-    throw new Error('No Nostr extension found and no secret key provided');
+    throw new Error('No signing method available. Please sign in with an extension, nsec, or remote signer.');
   }
 
   return window.nostr.getPublicKey();
