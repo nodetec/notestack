@@ -29,6 +29,8 @@ interface HighlightPluginProps {
   onHighlightCreated?: (highlight: Highlight) => void;
   // Optional highlight id to scroll to once highlights are applied
   scrollToHighlightId?: string | null;
+  // Called after highlight auto-scroll has settled (matched or exhausted)
+  onScrollToHighlightSettled?: (matched: boolean) => void;
 }
 
 // Get all text nodes in a container
@@ -291,15 +293,6 @@ function applyHighlightsWithCSS(
     return { cleanup: () => {}, rangeInfos: [] };
   }
 
-  // Deduplicate highlights by content (keep the first one for each content)
-  const seenContent = new Set<string>();
-  const uniqueHighlights = highlights.filter((h) => {
-    const key = h.content.trim();
-    if (seenContent.has(key)) return false;
-    seenContent.add(key);
-    return true;
-  });
-
   const ranges: Range[] = [];
   const rangeInfos: HighlightRangeInfo[] = [];
 
@@ -315,7 +308,7 @@ function applyHighlightsWithCSS(
     combinedPreview: previewText(combinedText, 240),
   });
 
-  for (const highlight of uniqueHighlights) {
+  for (const highlight of highlights) {
     const searchText = highlight.content.trim();
     if (!searchText || searchText.length < 3) continue;
 
@@ -457,6 +450,7 @@ export default function HighlightPlugin({
   onHighlightDeleted,
   onHighlightCreated,
   scrollToHighlightId,
+  onScrollToHighlightSettled,
 }: HighlightPluginProps) {
   const [editor] = useLexicalComposerContext();
   const isEditable = useLexicalEditable();
@@ -475,6 +469,7 @@ export default function HighlightPlugin({
   const cleanupRef = useRef<(() => void) | null>(null);
   const rangeInfosRef = useRef<HighlightRangeInfo[]>([]);
   const lastAutoScrolledHighlightIdRef = useRef<string | null>(null);
+  const settledScrollHighlightIdRef = useRef<string | null>(null);
 
   // Only show highlight creation UI when viewing (not editing) and logged in
   const canHighlight = !isEditable && !!pubkey && !!source;
@@ -514,10 +509,31 @@ export default function HighlightPlugin({
       return;
     }
 
-    // Wait for DOM to be ready
-    const timeoutId = setTimeout(() => {
+    let frameId: number | null = null;
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 24;
+
+    const applyWhenReady = () => {
+      if (cancelled) return;
+
       const rootElement = editor.getRootElement();
-      if (!rootElement) return;
+      if (!rootElement) {
+        if (attempts < maxAttempts) {
+          attempts += 1;
+          frameId = requestAnimationFrame(applyWhenReady);
+        }
+        return;
+      }
+
+      // Lexical content can arrive shortly after mount. Retry on the next frames
+      // until we have text content or we hit the retry cap.
+      const hasRenderableContent = (rootElement.textContent?.length ?? 0) > 0;
+      if (!hasRenderableContent && attempts < maxAttempts) {
+        attempts += 1;
+        frameId = requestAnimationFrame(applyWhenReady);
+        return;
+      }
 
       // Clean up previous highlights
       if (cleanupRef.current) {
@@ -529,6 +545,7 @@ export default function HighlightPlugin({
       cleanupRef.current = cleanup;
       rangeInfosRef.current = rangeInfos;
 
+      let didScrollToTarget = false;
       if (
         scrollToHighlightId &&
         lastAutoScrolledHighlightIdRef.current !== scrollToHighlightId
@@ -539,13 +556,26 @@ export default function HighlightPlugin({
             target.range.startContainer instanceof Element
               ? target.range.startContainer
               : target.range.startContainer.parentElement;
+          const tryScroll = (remainingAttempts: number) => {
+            if (!scrollTarget) return;
+            scrollTarget.scrollIntoView({
+              block: 'center',
+              behavior: 'auto',
+            });
 
-          scrollTarget?.scrollIntoView({
-            block: 'center',
-            behavior: 'smooth',
-          });
+            const rect = target.range.getBoundingClientRect();
+            const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
 
-          lastAutoScrolledHighlightIdRef.current = scrollToHighlightId;
+            if (!isVisible && remainingAttempts > 0 && !cancelled) {
+              frameId = requestAnimationFrame(() => tryScroll(remainingAttempts - 1));
+              return;
+            }
+
+            lastAutoScrolledHighlightIdRef.current = scrollToHighlightId;
+          };
+
+          tryScroll(8);
+          didScrollToTarget = true;
           logHighlightDebug('AutoScrollToHighlight', {
             highlightId: scrollToHighlightId,
             matched: true,
@@ -557,17 +587,49 @@ export default function HighlightPlugin({
           });
         }
       }
-    }, 100);
+
+      // If a target highlight was requested but couldn't be matched yet, retry
+      // for a few frames before giving up.
+      const shouldRetry =
+        scrollToHighlightId &&
+        !didScrollToTarget &&
+        attempts < maxAttempts;
+
+      if (shouldRetry) {
+        attempts += 1;
+        frameId = requestAnimationFrame(applyWhenReady);
+        return;
+      }
+
+      if (
+        scrollToHighlightId &&
+        settledScrollHighlightIdRef.current !== scrollToHighlightId
+      ) {
+        settledScrollHighlightIdRef.current = scrollToHighlightId;
+        onScrollToHighlightSettled?.(didScrollToTarget);
+      }
+    };
+
+    applyWhenReady();
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
       if (cleanupRef.current) {
         cleanupRef.current();
         cleanupRef.current = null;
       }
       rangeInfosRef.current = [];
     };
-  }, [editor, isEditable, highlights, scrollToHighlightId]);
+  }, [
+    editor,
+    isEditable,
+    highlights,
+    scrollToHighlightId,
+    onScrollToHighlightSettled,
+  ]);
 
   // Handle clicks on highlighted text
   useEffect(() => {

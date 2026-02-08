@@ -69,6 +69,7 @@ import {
 } from "lucide-react";
 import { publishDrafts } from "@/lib/nostr/draftSync";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 function MarkdownIcon({ className }: { className?: string }) {
   return (
@@ -125,6 +126,7 @@ function HomeContent() {
   );
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
+  const [isArticleRevealReady, setIsArticleRevealReady] = useState(true);
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
@@ -205,6 +207,30 @@ function HomeContent() {
   useEffect(() => {
     selectedBlogRef.current = selectedBlog;
   }, [selectedBlog]);
+
+  useEffect(() => {
+    const shouldDelayReveal =
+      !!selectedBlog && !isLoadingBlog && !!scrollToHighlightId;
+
+    if (!shouldDelayReveal) {
+      setIsArticleRevealReady(true);
+      return;
+    }
+
+    setIsArticleRevealReady(false);
+
+    // Fallback to avoid indefinite hidden content if target highlight can't be matched.
+    const timeoutId = window.setTimeout(() => {
+      setIsArticleRevealReady(true);
+    }, 1500);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [selectedBlog, isLoadingBlog, scrollToHighlightId]);
+
+  const showArticlePrescrollSkeleton =
+    !!selectedBlog && !!scrollToHighlightId && !isArticleRevealReady;
 
   // Fetch highlights when viewing a blog using React Query
   // Only fetch the logged-in user's highlights
@@ -902,61 +928,87 @@ function HomeContent() {
                 </div>
               </div>
             ) : (
-              <div className="min-h-full w-full flex flex-col">
-                {isMarkdownMode && !selectedBlog ? (
-                  <MarkdownEditor
-                    ref={markdownEditorRef}
-                    key={`${editorKey}-markdown`}
-                    initialContent={editorContent}
-                    onChange={handleEditorChange}
-                    placeholder="Write in markdown..."
-                    autoFocus={!!currentDraftId}
-                  />
-                ) : (
-                  <NostrEditor
-                    ref={editorRef}
-                    key={editorKey}
-                    placeholder=""
-                    autoFocus={!selectedBlog && !!currentDraftId}
-                    initialMarkdown={editorMarkdown}
-                    onChange={handleEditorChange}
-                    onProfileLookup={handleProfileLookup}
-                    onNoteLookup={lookupNote}
-                    toolbarContainer={
-                      selectedBlog ? null : floatingToolbarElement
-                    }
-                    readOnly={!!selectedBlog}
-                    audioUrl={selectedBlog?.audioUrl}
-                    audioMime={selectedBlog?.audioMime}
-                    highlightSource={
-                      selectedBlog
-                        ? {
-                            kind: 30023,
-                            pubkey: selectedBlog.pubkey,
-                            identifier: selectedBlog.dTag,
-                            relay: activeRelay,
-                          }
-                        : undefined
-                    }
-                    highlights={highlights}
-                    onHighlightDeleted={handleHighlightDeleted}
-                    onHighlightCreated={handleHighlightCreated}
-                    scrollToHighlightId={
-                      selectedBlog ? scrollToHighlightId : null
-                    }
-                  />
-                )}
-                {selectedBlog && (
-                  <div className="px-4 sm:px-8 md:px-16 lg:px-24 pb-8 max-w-3xl mx-auto w-full">
-                    <CommentsSection
-                      article={{
-                        pubkey: selectedBlog.pubkey,
-                        identifier: selectedBlog.dTag,
-                        eventId: selectedBlog.id,
-                      }}
-                    />
+              <div className="relative min-h-full w-full">
+                {showArticlePrescrollSkeleton && (
+                  <div className="absolute inset-x-0 top-0 z-10 bg-background">
+                    <div className="w-full py-8 editor-root">
+                      <div className="h-10 w-3/4 bg-muted rounded animate-pulse mb-8" />
+                      <div className="space-y-4">
+                        <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-5/6 bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-4/5 bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-full bg-muted rounded animate-pulse" />
+                        <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+                      </div>
+                    </div>
                   </div>
                 )}
+                <div
+                  className={cn(
+                    "min-h-full w-full flex flex-col",
+                    showArticlePrescrollSkeleton && "opacity-0 pointer-events-none",
+                  )}
+                >
+                  {isMarkdownMode && !selectedBlog ? (
+                    <MarkdownEditor
+                      ref={markdownEditorRef}
+                      key={`${editorKey}-markdown`}
+                      initialContent={editorContent}
+                      onChange={handleEditorChange}
+                      placeholder="Write in markdown..."
+                      autoFocus={!!currentDraftId}
+                    />
+                  ) : (
+                    <NostrEditor
+                      ref={editorRef}
+                      key={editorKey}
+                      placeholder=""
+                      autoFocus={!selectedBlog && !!currentDraftId}
+                      initialMarkdown={editorMarkdown}
+                      onChange={handleEditorChange}
+                      onProfileLookup={handleProfileLookup}
+                      onNoteLookup={lookupNote}
+                      toolbarContainer={
+                        selectedBlog ? null : floatingToolbarElement
+                      }
+                      readOnly={!!selectedBlog}
+                      audioUrl={selectedBlog?.audioUrl}
+                      audioMime={selectedBlog?.audioMime}
+                      highlightSource={
+                        selectedBlog
+                          ? {
+                              kind: 30023,
+                              pubkey: selectedBlog.pubkey,
+                              identifier: selectedBlog.dTag,
+                              relay: activeRelay,
+                            }
+                          : undefined
+                      }
+                      highlights={highlights}
+                      onHighlightDeleted={handleHighlightDeleted}
+                      onHighlightCreated={handleHighlightCreated}
+                      scrollToHighlightId={
+                        selectedBlog ? scrollToHighlightId : null
+                      }
+                      onScrollToHighlightSettled={() =>
+                        setIsArticleRevealReady(true)
+                      }
+                    />
+                  )}
+                  {selectedBlog && (
+                    <div className="px-4 sm:px-8 md:px-16 lg:px-24 pb-8 max-w-3xl mx-auto w-full">
+                      <CommentsSection
+                        article={{
+                          pubkey: selectedBlog.pubkey,
+                          identifier: selectedBlog.dTag,
+                          eventId: selectedBlog.id,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

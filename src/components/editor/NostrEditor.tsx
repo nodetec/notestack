@@ -100,6 +100,7 @@ interface NostrEditorProps {
   onHighlightDeleted?: (highlightId: string) => void; // Callback when highlight is deleted
   onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void; // Callback when highlight is created
   scrollToHighlightId?: string | null; // Optional highlight to auto-scroll into view
+  onScrollToHighlightSettled?: (matched: boolean) => void;
 }
 
 export interface NostrEditorHandle {
@@ -140,6 +141,7 @@ function EditorInner({
   onHighlightDeleted,
   onHighlightCreated,
   scrollToHighlightId,
+  onScrollToHighlightSettled,
 }: {
   editorRef: React.RefObject<NostrEditorHandle | null>;
   placeholder: string;
@@ -154,6 +156,7 @@ function EditorInner({
   onHighlightDeleted?: (highlightId: string) => void;
   onHighlightCreated?: (highlight: import('@/lib/nostr/types').Highlight) => void;
   scrollToHighlightId?: string | null;
+  onScrollToHighlightSettled?: (matched: boolean) => void;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -278,6 +281,7 @@ function EditorInner({
         onHighlightDeleted={onHighlightDeleted}
         onHighlightCreated={onHighlightCreated}
         scrollToHighlightId={scrollToHighlightId}
+        onScrollToHighlightSettled={onScrollToHighlightSettled}
       />
     </>
   );
@@ -300,6 +304,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
     onHighlightDeleted,
     onHighlightCreated,
     scrollToHighlightId,
+    onScrollToHighlightSettled,
   },
   ref
 ) {
@@ -360,6 +365,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
               onHighlightDeleted={onHighlightDeleted}
               onHighlightCreated={onHighlightCreated}
               scrollToHighlightId={scrollToHighlightId}
+              onScrollToHighlightSettled={onScrollToHighlightSettled}
             />
           </div>
         </div>
