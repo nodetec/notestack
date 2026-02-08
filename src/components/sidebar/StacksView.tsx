@@ -508,7 +508,7 @@ export default function StacksView({
   });
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background pt-6">
+    <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background px-4 pt-6 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-5 border-b border-border/70 pt-2">
         <div className="flex items-center justify-between pb-2">
