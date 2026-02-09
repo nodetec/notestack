@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const DEFAULT_RELAYS = [
+  'wss://relay.damus.io',
   'wss://antiprimal.net',
   'wss://nos.lol',
   'wss://relay.primal.net',
