@@ -12,7 +12,6 @@ import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useProfiles } from '@/lib/hooks/useProfiles';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
-import PanelRail from './PanelRail';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -146,7 +145,6 @@ export default function SearchPanel({ onSelectBlog, onSelectAuthor, onClose, sel
       className="fixed inset-y-0 z-50 h-svh border-r border-sidebar-border bg-sidebar flex flex-col overflow-hidden transition-[left,width] duration-200 ease-linear w-full sm:w-72"
       style={{ left: isMobile ? 0 : `var(--sidebar-width${sidebarState === 'collapsed' ? '-icon' : ''})` }}
     >
-      <PanelRail onClose={onClose} />
       <div className="flex flex-col gap-2 px-3 py-3 border-b border-sidebar-border">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground/80">
