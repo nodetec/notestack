@@ -37,6 +37,19 @@ interface CodeSnippetOptions {
   secretKey?: string; // For signing with nsec instead of NIP-07
 }
 
+interface PublishReactionOptions {
+  target: {
+    eventId: string;
+    pubkey: string;
+    kind: number;
+    address?: string;
+    relayHint?: string;
+  };
+  relays: string[];
+  secretKey?: string;
+  content?: string;
+}
+
 export async function publishArticle({
   content,
   title,
@@ -201,6 +214,45 @@ export interface PublishHighlightResult {
     pubkey: string;
     createdAt: number;
   };
+}
+
+export async function publishReaction({
+  target,
+  relays,
+  secretKey,
+  content = '+',
+}: PublishReactionOptions): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+  const eventTags: string[][] = [];
+
+  if (target.relayHint) {
+    eventTags.push(['e', target.eventId, target.relayHint, target.pubkey]);
+    eventTags.push(['p', target.pubkey, target.relayHint]);
+  } else {
+    eventTags.push(['e', target.eventId]);
+    eventTags.push(['p', target.pubkey]);
+  }
+
+  if (target.address) {
+    if (target.relayHint) {
+      eventTags.push(['a', target.address, target.relayHint]);
+    } else {
+      eventTags.push(['a', target.address]);
+    }
+  }
+
+  eventTags.push(['k', String(target.kind)]);
+
+  const unsignedEvent = {
+    kind: 7,
+    created_at: createdAt,
+    tags: eventTags,
+    content,
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
 }
 
 export async function publishHighlight({

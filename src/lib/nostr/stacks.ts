@@ -4,7 +4,7 @@ import { signEvent, getSignerPublicKey } from './signing';
 
 interface FetchStacksOptions {
   pubkey: string;
-  relay?: string;
+  relay: string;
 }
 
 interface PublishStackOptions {
@@ -36,7 +36,7 @@ export interface PublishStackResult {
 // Fetch user's stacks (kind 30003 bookmark sets)
 export async function fetchUserStacks({
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: FetchStacksOptions): Promise<Stack[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);

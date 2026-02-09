@@ -1,19 +1,15 @@
-import { create, windowScheduler } from '@yornaath/batshit';
+import { create, windowScheduler, type Batcher } from '@yornaath/batshit';
 import { nip19 } from 'nostr-tools';
 import type { NostrNote } from '@/components/editor';
+import { fetchProfiles } from './profiles';
 
-const DEFAULT_RELAY = 'wss://relay.damus.io';
+const DEFAULT_RELAY = 'wss://antiprimal.net';
 
 interface NoteEvent {
   id: string;
   pubkey: string;
   content: string;
   created_at: number;
-}
-
-interface ProfileEvent {
-  pubkey: string;
-  content: string;
 }
 
 /**
@@ -90,149 +86,92 @@ async function fetchNoteEvents(
   });
 }
 
-/**
- * Fetches profile events (kind 0) for multiple pubkeys from a relay
- */
-async function fetchProfileEvents(
-  pubkeys: string[],
-  relay: string = DEFAULT_RELAY
-): Promise<ProfileEvent[]> {
-  if (pubkeys.length === 0) return [];
+type NoteBatcher = Batcher<Record<string, NostrNote | null>, string, NostrNote | null>;
+const noteBatchers = new Map<string, NoteBatcher>();
 
-  return new Promise((resolve) => {
-    const ws = new WebSocket(relay);
-    const events: ProfileEvent[] = [];
-    const subId = `profiles-${Date.now()}`;
-    let timeoutId: NodeJS.Timeout;
+function resolveRelay(relay?: string): string {
+  return relay || DEFAULT_RELAY;
+}
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify(['REQ', subId, {
-        kinds: [0],
-        authors: pubkeys,
-      }]));
+function getNoteBatcher(relay?: string): NoteBatcher {
+  const relayUrl = resolveRelay(relay);
+  const existing = noteBatchers.get(relayUrl);
+  if (existing) return existing;
 
-      // Timeout after 5 seconds
-      timeoutId = setTimeout(() => {
-        ws.send(JSON.stringify(['CLOSE', subId]));
-        ws.close();
-        resolve(events);
-      }, 5000);
-    };
+  const batcher: NoteBatcher = create({
+    fetcher: async (nevents: string[]): Promise<Record<string, NostrNote | null>> => {
+      console.log('[noteBatcher] Fetching notes for:', nevents);
 
-    ws.onmessage = (msg) => {
-      try {
-        const data = JSON.parse(msg.data);
+      // Convert nevents to event IDs
+      const neventToIdMap = new Map<string, string>();
+      const eventIds: string[] = [];
 
-        if (data[0] === 'EVENT' && data[1] === subId) {
-          const event = data[2];
-          if (event.kind === 0) {
-            events.push({
-              pubkey: event.pubkey,
-              content: event.content,
-            });
-          }
-        } else if (data[0] === 'EOSE' && data[1] === subId) {
-          clearTimeout(timeoutId);
-          ws.send(JSON.stringify(['CLOSE', subId]));
-          ws.close();
-          resolve(events);
+      for (const nevent of nevents) {
+        const id = neventToEventId(nevent);
+        if (id) {
+          neventToIdMap.set(nevent, id);
+          eventIds.push(id);
         }
-      } catch {
-        // Ignore parse errors
       }
-    };
 
-    ws.onerror = () => {
-      clearTimeout(timeoutId);
-      resolve(events);
-    };
+      console.log('[noteBatcher] Event IDs:', eventIds);
+
+      if (eventIds.length === 0) {
+        return Object.fromEntries(nevents.map(nevent => [nevent, null]));
+      }
+
+      // Fetch all notes from the selected active relay.
+      const noteEvents = await fetchNoteEvents(eventIds, relayUrl);
+      console.log('[noteBatcher] Received note events:', noteEvents);
+
+      // Profile lookups are always resolved via Purplepages.
+      const pubkeys = [...new Set(noteEvents.map(e => e.pubkey))];
+      const profiles = await fetchProfiles(pubkeys);
+
+      // Build result map
+      const results: Record<string, NostrNote | null> = {};
+
+      for (const nevent of nevents) {
+        const eventId = neventToIdMap.get(nevent);
+        if (!eventId) {
+          results[nevent] = null;
+          continue;
+        }
+
+        const noteEvent = noteEvents.find(e => e.id === eventId);
+        if (!noteEvent) {
+          results[nevent] = null;
+          continue;
+        }
+
+        const profile = profiles.get(noteEvent.pubkey);
+        results[nevent] = {
+          content: noteEvent.content,
+          authorName: profile?.name,
+          authorPicture: profile?.picture,
+          createdAt: noteEvent.created_at,
+        };
+      }
+
+      console.log('[noteBatcher] Results:', results);
+      return results;
+    },
+    resolver: (notes, nevent) => notes[nevent] || null,
+    scheduler: windowScheduler(50), // 50ms window for batching
   });
+
+  noteBatchers.set(relayUrl, batcher);
+  return batcher;
 }
 
 /**
- * Batched note fetcher - collects requests within a 50ms window
- * and fetches all notes in a single relay request
+ * Default batcher for compatibility with existing imports.
  */
-export const noteBatcher = create({
-  fetcher: async (nevents: string[]): Promise<Record<string, NostrNote | null>> => {
-    console.log('[noteBatcher] Fetching notes for:', nevents);
-
-    // Convert nevents to event IDs
-    const neventToIdMap = new Map<string, string>();
-    const eventIds: string[] = [];
-
-    for (const nevent of nevents) {
-      const id = neventToEventId(nevent);
-      if (id) {
-        neventToIdMap.set(nevent, id);
-        eventIds.push(id);
-      }
-    }
-
-    console.log('[noteBatcher] Event IDs:', eventIds);
-
-    if (eventIds.length === 0) {
-      return Object.fromEntries(nevents.map(nevent => [nevent, null]));
-    }
-
-    // Fetch all notes in one request
-    const noteEvents = await fetchNoteEvents(eventIds);
-    console.log('[noteBatcher] Received note events:', noteEvents);
-
-    // Collect unique pubkeys to fetch profiles
-    const pubkeys = [...new Set(noteEvents.map(e => e.pubkey))];
-    const profileEvents = await fetchProfileEvents(pubkeys);
-    console.log('[noteBatcher] Received profile events:', profileEvents);
-
-    // Build profile lookup map
-    const profileMap = new Map<string, { name?: string; picture?: string }>();
-    for (const profile of profileEvents) {
-      try {
-        const content = JSON.parse(profile.content);
-        profileMap.set(profile.pubkey, {
-          name: content.name || content.display_name,
-          picture: content.picture,
-        });
-      } catch {
-        // Ignore parse errors
-      }
-    }
-
-    // Build result map
-    const results: Record<string, NostrNote | null> = {};
-
-    for (const nevent of nevents) {
-      const eventId = neventToIdMap.get(nevent);
-      if (!eventId) {
-        results[nevent] = null;
-        continue;
-      }
-
-      const noteEvent = noteEvents.find(e => e.id === eventId);
-      if (!noteEvent) {
-        results[nevent] = null;
-        continue;
-      }
-
-      const profile = profileMap.get(noteEvent.pubkey);
-      results[nevent] = {
-        content: noteEvent.content,
-        authorName: profile?.name,
-        authorPicture: profile?.picture,
-        createdAt: noteEvent.created_at,
-      };
-    }
-
-    console.log('[noteBatcher] Results:', results);
-    return results;
-  },
-  resolver: (notes, nevent) => notes[nevent] || null,
-  scheduler: windowScheduler(50), // 50ms window for batching
-});
+export const noteBatcher = getNoteBatcher(DEFAULT_RELAY);
 
 /**
  * Look up a note by nevent - uses batching under the hood
  */
-export function lookupNote(nevent: string): Promise<NostrNote | null> {
-  return noteBatcher.fetch(nevent);
+export function lookupNote(nevent: string, relay?: string): Promise<NostrNote | null> {
+  return getNoteBatcher(relay).fetch(nevent);
 }

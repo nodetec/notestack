@@ -8,7 +8,6 @@ import { bech32 } from '@scure/base';
 import { HeartIcon } from 'lucide-react';
 import { lookupProfile } from '@/lib/nostr/profiles';
 import { generateAvatar } from '@/lib/avatar';
-import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -36,7 +35,6 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
   const { data: session, status } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
-  const relays = useSettingsStore((state) => state.relays);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -47,11 +45,10 @@ export default function LoginButton({ onLogin, onLogout, size = 'sm' }: LoginBut
     }
   }, [status, pubkey, onLogin]);
 
-  const relayKey = useMemo(() => relays.join('|'), [relays]);
   const npub = useMemo(() => (pubkey ? hexToNpub(pubkey) : null), [pubkey]);
   const { data: profile, isPending: isProfilePending } = useQuery<NostrProfile | null>({
-    queryKey: ['user-profile', pubkey, relayKey],
-    queryFn: async () => lookupProfile(npub!, relays),
+    queryKey: ['user-profile', pubkey],
+    queryFn: async () => lookupProfile(npub!),
     enabled: !!npub,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

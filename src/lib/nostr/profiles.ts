@@ -5,8 +5,9 @@ import type { NostrEvent } from './types';
 
 const DEFAULT_PROFILE_RELAYS = [
   'wss://purplepag.es',
-  // 'wss://relay.damus.io',
-  // 'wss://nos.lol',
+  'wss://relay.damus.io',
+  'wss://antiprimal.net',
+  'wss://nos.lol',
   // 'wss://relay.primal.net',
 ];
 
@@ -106,10 +107,9 @@ function normalizePubkey(pubkey: string): string | null {
 }
 
 function normalizeRelays(relay?: string | string[]): string[] {
-  if (!relay) return DEFAULT_PROFILE_RELAYS;
-  const relays = Array.isArray(relay) ? relay : [relay];
-  const filtered = relays.filter(Boolean);
-  return filtered.length > 0 ? filtered : DEFAULT_PROFILE_RELAYS;
+  void relay;
+  // Profile reads are pinned to Purplepages regardless of caller preferences.
+  return DEFAULT_PROFILE_RELAYS;
 }
 
 type ProfileBatcher = Batcher<Record<string, NostrProfile | null>, string, NostrProfile | null>;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XIcon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon, DownloadIcon, Trash2Icon } from 'lucide-react';
+import { XIcon, Loader2Icon, RefreshCwIcon, ArrowLeftIcon, MoreHorizontalIcon, DownloadIcon, Trash2Icon, HeartIcon, MessageCircleIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStackStore } from '@/lib/stores/stackStore';
@@ -15,9 +15,11 @@ import { broadcastEvent } from '@/lib/nostr/publish';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
 import { toast } from 'sonner';
 import { useProfiles } from '@/lib/hooks/useProfiles';
+import { useInteractionCounts } from '@/lib/hooks/useInteractionCounts';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { generateAvatar } from '@/lib/avatar';
 import { downloadMarkdownFile } from '@/lib/utils/download';
+import InteractionCountValue from '@/components/ui/InteractionCountValue';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,8 +57,9 @@ interface StackItemDisplayProps {
   isDeleting: boolean;
   selectedBlogId?: string;
   getProfile: (pubkey: string) => { name?: string; picture?: string } | undefined;
-  isLoadingProfiles: boolean;
-  isFetchingProfiles: boolean;
+  isProfilePending: (pubkey: string) => boolean;
+  getInteractionCounts: (eventId: string) => { likeCount: number; replyCount: number } | undefined;
+  isInteractionCountLoading: (eventId: string) => boolean;
 }
 
 function StackItemDisplay({
@@ -69,8 +72,9 @@ function StackItemDisplay({
   isDeleting,
   selectedBlogId,
   getProfile,
-  isLoadingProfiles,
-  isFetchingProfiles,
+  isProfilePending,
+  getInteractionCounts,
+  isInteractionCountLoading,
 }: StackItemDisplayProps) {
   if (!blog) {
     return (
@@ -98,9 +102,16 @@ function StackItemDisplay({
   const isSelected = blog.id === selectedBlogId;
   const thumbnail = blog.image || extractFirstImage(blog.content);
   const profile = getProfile(item.pubkey);
-  const isProfileLoading = !profile && (isLoadingProfiles || isFetchingProfiles);
+  const isProfileLoading = isProfilePending(item.pubkey);
   const avatarUrl = profile?.picture || generateAvatar(item.pubkey);
   const displayName = profile?.name || truncateNpub(item.pubkey);
+  const interaction = getInteractionCounts(blog.id);
+  const likeCount = interaction?.likeCount ?? blog.likeCount;
+  const replyCount = interaction?.replyCount ?? blog.replyCount;
+  const isCountLoading =
+    isInteractionCountLoading(blog.id) &&
+    likeCount === undefined &&
+    replyCount === undefined;
 
   return (
     <div className="group relative py-2">
@@ -116,92 +127,108 @@ function StackItemDisplay({
         }}
         className={`w-full text-left py-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
       >
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              role={onSelectAuthor ? 'button' : undefined}
-              tabIndex={onSelectAuthor ? 0 : undefined}
-              onClick={(e) => {
-                if (!onSelectAuthor) return;
-                e.stopPropagation();
-                onSelectAuthor(item.pubkey);
-              }}
-              onKeyDown={(e) => {
-                if (!onSelectAuthor) return;
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                role={onSelectAuthor ? 'button' : undefined}
+                tabIndex={onSelectAuthor ? 0 : undefined}
+                onClick={(e) => {
+                  if (!onSelectAuthor) return;
                   e.stopPropagation();
                   onSelectAuthor(item.pubkey);
-                }
-              }}
-              className={`flex items-center gap-2 min-w-0 overflow-hidden ${onSelectAuthor ? 'hover:underline cursor-default' : ''}`}
-            >
-              {isProfileLoading ? (
-                <>
-                  <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
-                  <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-                </>
-              ) : (
-                <>
-                  <img
-                    src={avatarUrl}
-                    alt=""
-                    className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                  />
-                  <span className="text-xs text-muted-foreground truncate">
-                    {displayName}
-                  </span>
-                </>
-              )}
-            </span>
+                }}
+                onKeyDown={(e) => {
+                  if (!onSelectAuthor) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectAuthor(item.pubkey);
+                  }
+                }}
+                className={`flex items-center gap-2 min-w-0 overflow-hidden ${onSelectAuthor ? 'hover:underline cursor-default' : ''}`}
+              >
+                {isProfileLoading ? (
+                  <>
+                    <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                    <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground truncate">
+                      {displayName}
+                    </span>
+                  </>
+                )}
+              </span>
+            </div>
+            <h3 className="text-sm font-medium text-foreground truncate">
+              {blog.title || 'Untitled'}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+              {blog.summary}
+            </p>
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                <span className="inline-flex items-center gap-1">
+                  <HeartIcon className="h-3 w-3" />
+                  <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MessageCircleIcon className="h-3 w-3" />
+                  <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                </span>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
+                    aria-label="More options"
+                  >
+                    <MoreHorizontalIcon className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadMarkdownFile(blog.title, blog.content || '');
+                    }}
+                  >
+                    <DownloadIcon className="w-4 h-4" />
+                    Download markdown
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteItem(stack, item);
+                    }}
+                    disabled={isDeleting}
+                  >
+                    <Trash2Icon className="w-4 h-4" />
+                    {isDeleting ? 'Removing...' : 'Remove from stack'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <h3 className="text-sm font-medium text-foreground truncate">
-            {blog.title || 'Untitled'}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
-            {blog.summary}
-          </p>
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt=""
-              className="max-h-32 rounded object-contain mt-2"
-            />
-          )}
-          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
-            <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
-                  aria-label="More options"
-                >
-                  <MoreHorizontalIcon className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    downloadMarkdownFile(blog.title, blog.content || '');
-                  }}
-                >
-                  <DownloadIcon className="w-4 h-4" />
-                  Download markdown
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteItem(stack, item);
-                  }}
-                  disabled={isDeleting}
-                >
-                  <Trash2Icon className="w-4 h-4" />
-                  {isDeleting ? 'Removing...' : 'Remove from stack'}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="shrink-0 w-20 aspect-[4/3] rounded overflow-hidden">
+            {thumbnail ? (
+              <img
+                src={thumbnail}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div aria-hidden="true" className="h-full w-full" />
+            )}
           </div>
         </div>
       </div>
@@ -492,7 +519,7 @@ export default function StacksView({
   const stackPubkeys = selectedStack
     ? Array.from(new Set(selectedStack.items.map((item) => item.pubkey)))
     : [];
-  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(stackPubkeys, relays);
+  const { isProfilePending, getProfile } = useProfiles(stackPubkeys);
   const stackItemsQuery = useQuery({
     queryKey: ['stack-blogs', selectedStack?.dTag, activeRelay],
     queryFn: async () => {
@@ -506,6 +533,16 @@ export default function StacksView({
     },
     enabled: !!selectedStack && !!activeRelay,
   });
+  const stackBlogs = stackItemsQuery.data
+    ?.map(({ blog }) => blog)
+    .filter((blog): blog is Blog => blog !== null) ?? [];
+  const countEventIds = stackBlogs
+    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+    .map((blog) => blog.id);
+  const {
+    getCounts: getInteractionCounts,
+    isLoading: isInteractionCountLoading,
+  } = useInteractionCounts(countEventIds);
 
   return (
     <div className="flex min-h-full w-full flex-col bg-background px-4 sm:px-6 lg:px-8">
@@ -626,8 +663,9 @@ export default function StacksView({
                         isDeleting={deletingItemKey === itemKey}
                         selectedBlogId={selectedBlogId}
                         getProfile={getProfile}
-                        isLoadingProfiles={isLoadingProfiles}
-                        isFetchingProfiles={isFetchingProfiles}
+                        isProfilePending={isProfilePending}
+                        getInteractionCounts={getInteractionCounts}
+                        isInteractionCountLoading={isInteractionCountLoading}
                       />
                     );
                   })}

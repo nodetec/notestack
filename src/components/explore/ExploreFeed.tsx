@@ -12,6 +12,8 @@ import {
   SendIcon,
   CodeIcon,
   XIcon,
+  HeartIcon,
+  MessageCircleIcon,
 } from "lucide-react";
 import { nip19 } from "nostr-tools";
 import { useSession } from "next-auth/react";
@@ -21,6 +23,7 @@ import { toast } from "sonner";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import { useTagStore } from "@/lib/stores/tagStore";
 import { useProfiles } from "@/lib/hooks/useProfiles";
+import { useInteractionCounts } from "@/lib/hooks/useInteractionCounts";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import EventJsonDialog from "@/components/ui/EventJsonDialog";
+import InteractionCountValue from "@/components/ui/InteractionCountValue";
 import { extractFirstImage } from "@/lib/utils/markdown";
 import { downloadMarkdownFile } from "@/lib/utils/download";
 import { generateAvatar } from "@/lib/avatar";
@@ -194,14 +198,17 @@ export default function ExploreFeed() {
   const followingBlogs =
     followingData?.pages.flatMap((page) => page.blogs) ?? [];
   const blogs = isFollowingView ? followingBlogs : latestBlogs;
+  const countEventIds = blogs
+    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+    .map((blog) => blog.id);
+  const { getCounts, isLoading: isInteractionCountLoading } = useInteractionCounts(countEventIds);
 
   // Fetch profiles for all blog authors (only when we have blogs)
   const pubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
   const {
-    isLoading: isLoadingProfiles,
-    isFetching: isFetchingProfiles,
+    isProfilePending,
     getProfile,
-  } = useProfiles(pubkeys, relays);
+  } = useProfiles(pubkeys);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
@@ -387,14 +394,20 @@ export default function ExploreFeed() {
               // getProfile checks both batch result and individual cache (from AuthorFeedView)
               const profile = getProfile(blog.pubkey);
               // Show skeleton while this specific profile is loading, fallback to dicebear/npub only when loaded but not found
-              const isProfileLoading =
-                !profile && (isLoadingProfiles || isFetchingProfiles);
+              const isProfileLoading = isProfilePending(blog.pubkey);
               const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
               const displayName = profile?.name || truncateNpub(blog.pubkey);
               const naddr = blogToNaddr(blog, relays);
               const readMinutes = estimateReadTime(
                 blog.content || blog.summary || "",
               );
+              const interaction = getCounts(blog.id);
+              const likeCount = interaction?.likeCount ?? blog.likeCount;
+              const replyCount = interaction?.replyCount ?? blog.replyCount;
+              const isCountLoading =
+                isInteractionCountLoading(blog.id) &&
+                likeCount === undefined &&
+                replyCount === undefined;
               return (
                 <li key={blog.id} className="py-5">
                   <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
@@ -492,18 +505,30 @@ export default function ExploreFeed() {
                       </p>
                       <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground/70">
                         <span>{readMinutes} min read</span>
+                        <span className="inline-flex items-center gap-3 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center gap-1">
+                            <HeartIcon className="h-3 w-3" />
+                            <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MessageCircleIcon className="h-3 w-3" />
+                            <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                          </span>
+                        </span>
                       </div>
                     </div>
-                    {thumbnail && (
-                      <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden bg-muted">
-                        {/*eslint-disable-next-line @next/next/no-img-element*/}
+                    <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden">
+                      {thumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={thumbnail}
                           alt=""
                           className="h-full w-full object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div aria-hidden="true" className="h-full w-full" />
+                      )}
+                    </div>
                   </Link>
                 </li>
               );

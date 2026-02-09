@@ -1,38 +1,76 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { fetchProfiles, type Profile } from '@/lib/nostr/profiles';
+
+// Session-scoped negative cache: pubkeys confirmed to have no profile.
+const missingProfilePubkeys = new Set<string>();
 
 /**
  * Hook to fetch profiles for a list of pubkeys
  * Uses React Query for caching and populates individual profile cache entries
  * Returns a getProfile function that checks both batch and individual cache
  */
-export function useProfiles(pubkeys: string[], relay?: string | string[]) {
+export function useProfiles(pubkeys: string[]) {
   const queryClient = useQueryClient();
   const uniquePubkeys = [...new Set(pubkeys)];
-  const relayKey = Array.isArray(relay) ? relay.join('|') : relay ?? '';
+  const sortedPubkeys = [...uniquePubkeys].sort();
 
   const query = useQuery({
-    queryKey: ['profiles', relayKey, [...uniquePubkeys].sort().join(',')],
+    queryKey: ['profiles', sortedPubkeys.join(',')],
     queryFn: async () => {
-      if (uniquePubkeys.length === 0) return new Map<string, Profile>();
-      return fetchProfiles(uniquePubkeys, relay);
+      if (sortedPubkeys.length === 0) return new Map<string, Profile>();
+
+      const mergedProfiles = new Map<string, Profile>();
+      const missingPubkeys: string[] = [];
+
+      // Reuse already-cached individual profiles and only fetch missing pubkeys.
+      for (const pubkey of sortedPubkeys) {
+        if (missingProfilePubkeys.has(pubkey)) {
+          continue;
+        }
+
+        const cachedProfile = queryClient.getQueryData<Profile | null>(['profile', pubkey]);
+        if (cachedProfile !== undefined) {
+          if (cachedProfile !== null) {
+            mergedProfiles.set(pubkey, cachedProfile);
+          }
+        } else {
+          missingPubkeys.push(pubkey);
+        }
+      }
+
+      if (missingPubkeys.length > 0) {
+        const fetchedProfiles = await fetchProfiles(missingPubkeys);
+        for (const pubkey of missingPubkeys) {
+          const profile = fetchedProfiles.get(pubkey) ?? null;
+          queryClient.setQueryData<Profile | null>(['profile', pubkey], profile);
+
+          if (profile) {
+            missingProfilePubkeys.delete(pubkey);
+            mergedProfiles.set(pubkey, profile);
+          } else {
+            missingProfilePubkeys.add(pubkey);
+          }
+        }
+      }
+
+      return mergedProfiles;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     placeholderData: keepPreviousData, // Keep previous profiles while loading new ones
-    enabled: uniquePubkeys.length > 0 && relayKey.length > 0,
+    enabled: uniquePubkeys.length > 0,
   });
 
   // Populate individual profile cache entries after batch fetch completes
   useEffect(() => {
     if (query.data) {
       for (const [pk, profile] of query.data) {
-        queryClient.setQueryData(['profile', pk, relayKey], profile);
+        queryClient.setQueryData(['profile', pk], profile);
       }
     }
-  }, [query.data, queryClient, relayKey]);
+  }, [query.data, queryClient]);
 
   // Helper to get a profile, checking both batch result and individual cache
   const getProfile = useCallback((pubkey: string): Profile | undefined => {
@@ -41,10 +79,35 @@ export function useProfiles(pubkeys: string[], relay?: string | string[]) {
     if (fromBatch) return fromBatch;
 
     // Fall back to individual cache (may have been fetched by useProfile)
-    return queryClient.getQueryData<Profile>(['profile', pubkey, relayKey]) ?? undefined;
-  }, [query.data, queryClient, relayKey]);
+    const cached = queryClient.getQueryData<Profile | null>(['profile', pubkey]);
+    return cached ?? undefined;
+  }, [query.data, queryClient]);
 
-  return { ...query, getProfile };
+  const pendingPubkeys = useMemo(() => {
+    const pending = new Set<string>();
+    if (!query.isFetching) return pending;
+
+    for (const pubkey of sortedPubkeys) {
+      if (query.data?.has(pubkey)) continue;
+      if (missingProfilePubkeys.has(pubkey)) continue;
+
+      const cached = queryClient.getQueryData<Profile | null>(['profile', pubkey]);
+      if (cached === undefined) {
+        pending.add(pubkey);
+      }
+    }
+
+    return pending;
+  }, [query.isFetching, query.data, queryClient, sortedPubkeys]);
+
+  const isProfilePending = useCallback(
+    (pubkey: string) => pendingPubkeys.has(pubkey),
+    [pendingPubkeys],
+  );
+
+  const isInitialLoading = query.isPending && !query.data;
+
+  return { ...query, isInitialLoading, isProfilePending, getProfile };
 }
 
 /**
@@ -52,17 +115,25 @@ export function useProfiles(pubkeys: string[], relay?: string | string[]) {
  * Checks individual cache first (populated by useProfiles batch fetches)
  * Also updates batch query caches so feed panels re-render with the new profile
  */
-export function useProfile(pubkey: string | null, relays: string[]) {
+export function useProfile(pubkey: string | null) {
   const queryClient = useQueryClient();
-  const relayKey = relays.join('|');
 
   const query = useQuery({
-    queryKey: ['profile', pubkey, relayKey],
+    queryKey: ['profile', pubkey],
     queryFn: async () => {
-      const profiles = await fetchProfiles([pubkey!], relays);
-      return profiles.get(pubkey!) || null;
+      if (!pubkey) return null;
+      if (missingProfilePubkeys.has(pubkey)) return null;
+
+      const profiles = await fetchProfiles([pubkey]);
+      const profile = profiles.get(pubkey) || null;
+      if (profile) {
+        missingProfilePubkeys.delete(pubkey);
+      } else {
+        missingProfilePubkeys.add(pubkey);
+      }
+      return profile;
     },
-    enabled: !!pubkey && relayKey.length > 0,
+    enabled: !!pubkey,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -71,7 +142,7 @@ export function useProfile(pubkey: string | null, relays: string[]) {
     if (query.data && pubkey) {
       // Find and update all batch queries that might include this pubkey
       const queries = queryClient.getQueriesData<Map<string, Profile>>({
-        queryKey: ['profiles', relayKey],
+        queryKey: ['profiles'],
       });
 
       for (const [queryKey, data] of queries) {
@@ -83,7 +154,7 @@ export function useProfile(pubkey: string | null, relays: string[]) {
         }
       }
     }
-  }, [query.data, pubkey, queryClient, relayKey]);
+  }, [query.data, pubkey, queryClient]);
 
   return query;
 }

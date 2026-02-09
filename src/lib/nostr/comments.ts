@@ -6,13 +6,13 @@ import { signEvent } from './signing';
 interface FetchCommentsOptions {
   articlePubkey: string;
   articleIdentifier: string;
-  relay?: string;
+  relay: string;
 }
 
 export async function fetchArticleComments({
   articlePubkey,
   articleIdentifier,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: FetchCommentsOptions): Promise<Comment[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);

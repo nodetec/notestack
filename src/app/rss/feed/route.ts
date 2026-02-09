@@ -2,7 +2,7 @@ import { fetchBlogs } from '@/lib/nostr/fetch';
 import { fetchProfiles } from '@/lib/nostr/profiles';
 import { generateRSS, rssResponse } from '@/lib/rss';
 
-const DEFAULT_RELAY = 'wss://relay.damus.io';
+const DEFAULT_RELAY = 'wss://antiprimal.net';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://notestack.com';
 
 export async function GET() {

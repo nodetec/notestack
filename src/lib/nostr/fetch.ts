@@ -4,8 +4,213 @@ interface FetchBlogsOptions {
   limit?: number;
   until?: number;
   pubkey?: string;
-  relay?: string;
+  relay: string;
   tag?: string;
+}
+
+const ANTIPRIMAL_RELAY = 'wss://antiprimal.net';
+const COUNT_TIMEOUT_MS = 8000;
+
+type CountKind = 1 | 7;
+
+export interface InteractionCounts {
+  likeCount: number;
+  replyCount: number;
+}
+
+export async function fetchUserLikedEvent({
+  eventId,
+  pubkey,
+  relay,
+}: {
+  eventId: string;
+  pubkey: string;
+  relay: string;
+}): Promise<boolean> {
+  if (!eventId || !pubkey) return false;
+
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `liked-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    let timeoutId: NodeJS.Timeout | undefined;
+    let resolved = false;
+    let hasReaction = false;
+    let latestCreatedAt = -1;
+
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      try {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+      } catch {
+        // Ignore close errors
+      }
+      ws.close();
+      resolve(hasReaction);
+    };
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify([
+          'REQ',
+          subId,
+          {
+            kinds: [7],
+            authors: [pubkey],
+            '#e': [eventId],
+            limit: 50,
+          },
+        ]),
+      );
+
+      timeoutId = setTimeout(finish, COUNT_TIMEOUT_MS);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind !== 7) return;
+
+          // Use the user's latest reaction for this target event.
+          if (event.created_at >= latestCreatedAt) {
+            latestCreatedAt = event.created_at;
+            hasReaction = event.content.trim() !== '-';
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          finish();
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = finish;
+    ws.onclose = () => {
+      if (!resolved) finish();
+    };
+  });
+}
+
+export async function fetchInteractionCounts(eventIds: string[]): Promise<Map<string, InteractionCounts>> {
+  const uniqueEventIds = Array.from(new Set(eventIds.filter(Boolean)));
+  const counts = new Map<string, InteractionCounts>();
+
+  uniqueEventIds.forEach((eventId) => {
+    counts.set(eventId, { likeCount: 0, replyCount: 0 });
+  });
+
+  if (uniqueEventIds.length === 0) {
+    return counts;
+  }
+
+  return new Promise((resolve) => {
+    const ws = new WebSocket(ANTIPRIMAL_RELAY);
+    const pending = new Map<string, { eventId: string; kind: CountKind }>();
+    let timeoutId: NodeJS.Timeout | undefined;
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      ws.close();
+      resolve(counts);
+    };
+
+    ws.onopen = () => {
+      uniqueEventIds.forEach((eventId, index) => {
+        const requests: CountKind[] = [7, 1];
+
+        requests.forEach((kind) => {
+          const subId = `count-${kind}-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
+          pending.set(subId, { eventId, kind });
+          ws.send(
+            JSON.stringify([
+              'COUNT',
+              subId,
+              {
+                kinds: [kind],
+                '#e': [eventId],
+              },
+            ]),
+          );
+        });
+      });
+
+      timeoutId = setTimeout(finish, COUNT_TIMEOUT_MS);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+        const type = data[0];
+        const subId = data[1];
+
+        if (typeof subId !== 'string') return;
+        const request = pending.get(subId);
+        if (!request) return;
+
+        if (type === 'COUNT') {
+          const rawCount = data[2]?.count;
+          const count =
+            typeof rawCount === 'number'
+              ? rawCount
+              : Number.parseInt(String(rawCount ?? 0), 10) || 0;
+          const current = counts.get(request.eventId) ?? {
+            likeCount: 0,
+            replyCount: 0,
+          };
+
+          if (request.kind === 7) {
+            counts.set(request.eventId, { ...current, likeCount: count });
+          } else {
+            counts.set(request.eventId, { ...current, replyCount: count });
+          }
+        }
+
+        if (type === 'COUNT' || type === 'CLOSED') {
+          pending.delete(subId);
+        }
+
+        if (pending.size === 0) {
+          finish();
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = finish;
+    ws.onclose = () => {
+      if (!done) finish();
+    };
+  });
+}
+
+async function withInteractionCounts(blogs: Blog[]): Promise<Blog[]> {
+  if (blogs.length === 0) return blogs;
+
+  try {
+    const counts = await fetchInteractionCounts(blogs.map((blog) => blog.id));
+    return blogs.map((blog) => {
+      const interaction = counts.get(blog.id) ?? { likeCount: 0, replyCount: 0 };
+      return {
+        ...blog,
+        likeCount: interaction.likeCount,
+        replyCount: interaction.replyCount,
+      };
+    });
+  } catch {
+    return blogs.map((blog) => ({
+      ...blog,
+      likeCount: 0,
+      replyCount: 0,
+    }));
+  }
 }
 
 function eventToHighlight(event: NostrEvent): Highlight | null {
@@ -40,11 +245,11 @@ function eventToHighlight(event: NostrEvent): Highlight | null {
 export async function fetchBlogByAddress({
   pubkey,
   identifier,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: {
   pubkey: string;
   identifier: string;
-  relay?: string;
+  relay: string;
 }): Promise<Blog | null> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -83,7 +288,10 @@ export async function fetchBlogByAddress({
             clearTimeout(timeoutId);
             ws.send(JSON.stringify(['CLOSE', subId]));
             ws.close();
-            resolve(eventToBlog(event));
+            const baseBlog = eventToBlog(event);
+            void withInteractionCounts([baseBlog]).then(([blog]) => {
+              resolve(blog ?? baseBlog);
+            });
           }
         } else if (data[0] === 'EOSE' && data[1] === subId) {
           if (!resolved) {
@@ -113,9 +321,9 @@ export async function fetchBlogs({
   limit = 10,
   until,
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
   tag,
-}: FetchBlogsOptions = {}): Promise<{ blogs: Blog[]; nextCursor?: number }> {
+}: FetchBlogsOptions): Promise<{ blogs: Blog[]; nextCursor?: number }> {
 
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(relay);
@@ -148,10 +356,10 @@ export async function fetchBlogs({
         // Send CLOSE to unsubscribe before closing connection
         ws.send(JSON.stringify(['CLOSE', subId]));
         ws.close();
-        const blogs = events.map(eventToBlog);
+        const baseBlogs = events.map(eventToBlog);
         // Only set nextCursor if we got a full page (might be more), and subtract 1 to avoid duplicates
-        const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
-        resolve({ blogs, nextCursor });
+        const nextCursor = baseBlogs.length >= limit ? Math.min(...baseBlogs.map((b) => b.createdAt)) - 1 : undefined;
+        resolve({ blogs: baseBlogs, nextCursor });
       }, 10000);
     };
 
@@ -170,10 +378,10 @@ export async function fetchBlogs({
           // Send CLOSE to unsubscribe before closing connection
           ws.send(JSON.stringify(['CLOSE', subId]));
           ws.close();
-          const blogs = events.map(eventToBlog);
+          const baseBlogs = events.map(eventToBlog);
           // Only set nextCursor if we got a full page (might be more), and subtract 1 to avoid duplicates
-          const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
-          resolve({ blogs, nextCursor });
+          const nextCursor = baseBlogs.length >= limit ? Math.min(...baseBlogs.map((b) => b.createdAt)) - 1 : undefined;
+          resolve({ blogs: baseBlogs, nextCursor });
         }
       } catch {
         // Ignore parse errors
@@ -190,10 +398,10 @@ export async function fetchBlogs({
 // Fetch blogs for a list of addressable references (pubkey + d tag)
 export async function fetchBlogsByAddresses({
   items,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: {
   items: StackItem[];
-  relay?: string;
+  relay: string;
 }): Promise<(Blog | null)[]> {
   if (items.length === 0) return [];
 
@@ -268,12 +476,12 @@ export async function fetchBlogsByAddresses({
 // Fetch user's highlights (for the highlights panel)
 export async function fetchUserHighlights({
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
   limit = 50,
   until,
 }: {
   pubkey: string;
-  relay?: string;
+  relay: string;
   limit?: number;
   until?: number;
 }): Promise<{ highlights: Highlight[]; nextCursor?: number }> {
@@ -347,10 +555,10 @@ export async function fetchUserHighlights({
 // Fetch user's full contact list event (kind 3) - returns the full event for modification
 export async function fetchContactListEvent({
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: {
   pubkey: string;
-  relay?: string;
+  relay: string;
 }): Promise<NostrEvent | null> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -415,10 +623,10 @@ export async function fetchContactListEvent({
 // Fetch user's contacts (follow list) from kind 3 event (NIP-02)
 export async function fetchContacts({
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: {
   pubkey: string;
-  relay?: string;
+  relay: string;
 }): Promise<string[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -489,10 +697,10 @@ export async function fetchContacts({
 // Fetch user's interests/tags list (NIP-51 kind 10015)
 export async function fetchInterestTags({
   pubkey,
-  relay = 'wss://relay.damus.io',
+  relay,
 }: {
   pubkey: string;
-  relay?: string;
+  relay: string;
 }): Promise<string[]> {
   return new Promise((resolve) => {
     const ws = new WebSocket(relay);
@@ -564,13 +772,13 @@ export async function fetchFollowingBlogs({
   authors,
   limit = 10,
   until,
-  relay = 'wss://relay.damus.io',
+  relay,
   tag,
 }: {
   authors: string[];
   limit?: number;
   until?: number;
-  relay?: string;
+  relay: string;
   tag?: string;
 }): Promise<{ blogs: Blog[]; nextCursor?: number }> {
   if (authors.length === 0) {
@@ -603,9 +811,9 @@ export async function fetchFollowingBlogs({
       timeoutId = setTimeout(() => {
         ws.send(JSON.stringify(['CLOSE', subId]));
         ws.close();
-        const blogs = events.map(eventToBlog);
-        const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
-        resolve({ blogs, nextCursor });
+        const baseBlogs = events.map(eventToBlog);
+        const nextCursor = baseBlogs.length >= limit ? Math.min(...baseBlogs.map((b) => b.createdAt)) - 1 : undefined;
+        resolve({ blogs: baseBlogs, nextCursor });
       }, 10000);
     };
 
@@ -622,9 +830,9 @@ export async function fetchFollowingBlogs({
           clearTimeout(timeoutId);
           ws.send(JSON.stringify(['CLOSE', subId]));
           ws.close();
-          const blogs = events.map(eventToBlog);
-          const nextCursor = blogs.length >= limit ? Math.min(...blogs.map((b) => b.createdAt)) - 1 : undefined;
-          resolve({ blogs, nextCursor });
+          const baseBlogs = events.map(eventToBlog);
+          const nextCursor = baseBlogs.length >= limit ? Math.min(...baseBlogs.map((b) => b.createdAt)) - 1 : undefined;
+          resolve({ blogs: baseBlogs, nextCursor });
         }
       } catch {
         // Ignore parse errors
@@ -641,12 +849,12 @@ export async function fetchFollowingBlogs({
 export async function fetchHighlights({
   articlePubkey,
   articleIdentifier,
-  relay = 'wss://relay.damus.io',
+  relay,
   authors,
 }: {
   articlePubkey: string;
   articleIdentifier: string;
-  relay?: string;
+  relay: string;
   authors?: string[];
 }): Promise<Highlight[]> {
   return new Promise((resolve) => {

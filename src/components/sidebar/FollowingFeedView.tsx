@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { MoreHorizontalIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon } from 'lucide-react';
+import { MoreHorizontalIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, HeartIcon, MessageCircleIcon } from 'lucide-react';
 import { nip19 } from 'nostr-tools';
 import { fetchContacts, fetchFollowingBlogs } from '@/lib/nostr/fetch';
 import { broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import { useProfiles } from '@/lib/hooks/useProfiles';
+import { useInteractionCounts } from '@/lib/hooks/useInteractionCounts';
 import { useSession } from 'next-auth/react';
 import type { UserWithKeys } from '@/types/auth';
 import {
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
+import InteractionCountValue from '@/components/ui/InteractionCountValue';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import { downloadMarkdownFile } from '@/lib/utils/download';
 import { generateAvatar } from '@/lib/avatar';
@@ -101,10 +103,14 @@ export default function FollowingFeedView({
   });
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
+  const countEventIds = blogs
+    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+    .map((blog) => blog.id);
+  const { getCounts, isLoading: isInteractionCountLoading } = useInteractionCounts(countEventIds);
 
   // Fetch profiles for all blog authors
   const authorPubkeys = blogs.length > 0 ? blogs.map((blog) => blog.pubkey) : [];
-  const { isLoading: isLoadingProfiles, isFetching: isFetchingProfiles, getProfile } = useProfiles(authorPubkeys, relays);
+  const { isProfilePending, getProfile } = useProfiles(authorPubkeys);
 
   // Infinite scroll with intersection observer
   const { ref: loadMoreRef } = useInView({
@@ -219,10 +225,17 @@ export default function FollowingFeedView({
             // getProfile checks both batch result and individual cache (from AuthorFeedView)
             const profile = getProfile(blog.pubkey);
             // Show skeleton while this specific profile is loading, fallback to dicebear/npub only when loaded but not found
-            const isProfileLoading = !profile && (isLoadingProfiles || isFetchingProfiles);
+            const isProfileLoading = isProfilePending(blog.pubkey);
             const avatarUrl = profile?.picture || generateAvatar(blog.pubkey);
             const displayName = profile?.name || truncateNpub(blog.pubkey);
             const isSelected = blog.id === selectedBlogId;
+            const interaction = getCounts(blog.id);
+            const likeCount = interaction?.likeCount ?? blog.likeCount;
+            const replyCount = interaction?.replyCount ?? blog.replyCount;
+            const isCountLoading =
+              isInteractionCountLoading(blog.id) &&
+              likeCount === undefined &&
+              replyCount === undefined;
             return (
               <li key={blog.id} className="relative group p-2">
                 <div
@@ -237,99 +250,115 @@ export default function FollowingFeedView({
                   }}
                   className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
                 >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectAuthor?.(blog.pubkey);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
+                  <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
                             e.stopPropagation();
                             onSelectAuthor?.(blog.pubkey);
-                          }
-                        }}
-                        className="flex items-center gap-2 hover:underline cursor-default min-w-0 overflow-hidden"
-                      >
-                        {isProfileLoading ? (
-                          <>
-                            <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
-                            <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-                          </>
-                        ) : (
-                          <>
-                            <img
-                              src={avatarUrl}
-                              alt=""
-                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                            />
-                            <span className="text-xs text-muted-foreground truncate">
-                              {displayName}
-                            </span>
-                          </>
-                        )}
-                      </span>
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onSelectAuthor?.(blog.pubkey);
+                            }
+                          }}
+                          className="flex items-center gap-2 hover:underline cursor-default min-w-0 overflow-hidden"
+                        >
+                          {isProfileLoading ? (
+                            <>
+                              <div className="w-5 h-5 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                              <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                            </>
+                          ) : (
+                            <>
+                              <img
+                                src={avatarUrl}
+                                alt=""
+                                className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                              />
+                              <span className="text-xs text-muted-foreground truncate">
+                                {displayName}
+                              </span>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-medium text-foreground truncate">
+                        {blog.title || 'Untitled'}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                        {blog.summary}
+                      </p>
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <HeartIcon className="h-3 w-3" />
+                            <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MessageCircleIcon className="h-3 w-3" />
+                            <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                          </span>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
+                              aria-label="More options"
+                            >
+                              <MoreHorizontalIcon className="w-4 h-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <StackMenuSub blog={blog} />
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadMarkdownFile(blog.title, blog.content || '');
+                              }}
+                            >
+                              <DownloadIcon className="w-4 h-4" />
+                              Download markdown
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleBroadcast(blog, e)}
+                              disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                            >
+                              <SendIcon className="w-4 h-4" />
+                              {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewJson(blog.rawEvent);
+                              }}
+                              disabled={!blog.rawEvent}
+                            >
+                              <CodeIcon className="w-4 h-4" />
+                              View raw JSON
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                    <h3 className="text-sm font-medium text-foreground truncate">
-                      {blog.title || 'Untitled'}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
-                      {blog.summary}
-                    </p>
-                    {thumbnail && (
-                      <img
-                        src={thumbnail}
-                        alt=""
-                        className="max-h-32 rounded object-contain mt-2"
-                      />
-                    )}
-                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
-                      <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            onClick={(e) => e.stopPropagation()}
-                            className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
-                            aria-label="More options"
-                          >
-                            <MoreHorizontalIcon className="w-4 h-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <StackMenuSub blog={blog} />
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadMarkdownFile(blog.title, blog.content || '');
-                            }}
-                          >
-                            <DownloadIcon className="w-4 h-4" />
-                            Download markdown
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => handleBroadcast(blog, e)}
-                            disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                          >
-                            <SendIcon className="w-4 h-4" />
-                            {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewJson(blog.rawEvent);
-                            }}
-                            disabled={!blog.rawEvent}
-                          >
-                            <CodeIcon className="w-4 h-4" />
-                            View raw JSON
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <div className="shrink-0 w-20 aspect-[4/3] rounded overflow-hidden">
+                      {thumbnail ? (
+                        <img
+                          src={thumbnail}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div aria-hidden="true" className="h-full w-full" />
+                      )}
                     </div>
                   </div>
                 </div>

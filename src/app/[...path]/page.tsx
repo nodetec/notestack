@@ -36,9 +36,9 @@ import { useDraftAutoSave } from "@/lib/hooks/useDraftAutoSave";
 import { lookupProfile } from "@/lib/nostr/profiles";
 import { useProfile } from "@/lib/hooks/useProfiles";
 import { lookupNote } from "@/lib/nostr/notes";
-import { fetchBlogByAddress, fetchHighlights } from "@/lib/nostr/fetch";
+import { fetchBlogByAddress, fetchHighlights, fetchUserLikedEvent } from "@/lib/nostr/fetch";
 import { blogToNaddr, decodeNaddr } from "@/lib/nostr/naddr";
-import { broadcastEvent } from "@/lib/nostr/publish";
+import { broadcastEvent, publishReaction } from "@/lib/nostr/publish";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import type { Blog } from "@/lib/nostr/types";
 import { CommentsSection } from "@/components/comments";
@@ -62,6 +62,7 @@ import {
   ArrowLeftIcon,
   CodeIcon,
   DownloadIcon,
+  HeartIcon,
   MoreHorizontalIcon,
   PenLineIcon,
   PencilRulerIcon,
@@ -127,14 +128,20 @@ function HomeContent() {
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const [isArticleRevealReady, setIsArticleRevealReady] = useState(true);
+  const [isPublishingLike, setIsPublishingLike] = useState(false);
+  const [hasLikedSelectedBlog, setHasLikedSelectedBlog] = useState(false);
   const { data: session, status: sessionStatus } = useSession();
   const user = session?.user as UserWithKeys | undefined;
   const pubkey = user?.publicKey;
   const relays = useSettingsStore((state) => state.relays);
   const activeRelay = useSettingsStore((state) => state.activeRelay);
   const handleProfileLookup = useCallback(
-    (npub: string) => lookupProfile(npub, relays),
-    [relays],
+    (npub: string) => lookupProfile(npub),
+    [],
+  );
+  const handleNoteLookup = useCallback(
+    (nevent: string) => lookupNote(nevent, activeRelay),
+    [activeRelay],
   );
   const editorRef = useRef<NostrEditorHandle>(null);
   const markdownEditorRef = useRef<MarkdownEditorHandle>(null);
@@ -209,6 +216,11 @@ function HomeContent() {
   }, [selectedBlog]);
 
   useEffect(() => {
+    setIsPublishingLike(false);
+    setHasLikedSelectedBlog(false);
+  }, [selectedBlog?.id]);
+
+  useEffect(() => {
     const shouldDelayReveal =
       !!selectedBlog && !isLoadingBlog && !!scrollToHighlightId;
 
@@ -258,6 +270,27 @@ function HomeContent() {
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
+  const selectedBlogId = selectedBlog?.id ?? null;
+  const likeQueryKey = useMemo(
+    () =>
+      selectedBlogId && pubkey && activeRelay
+        ? ["article-liked", selectedBlogId, pubkey, activeRelay]
+        : null,
+    [selectedBlogId, pubkey, activeRelay],
+  );
+
+  const { data: hasExistingLike = false } = useQuery({
+    queryKey: likeQueryKey!,
+    queryFn: () =>
+      fetchUserLikedEvent({
+        eventId: selectedBlog!.id,
+        pubkey: pubkey!,
+        relay: activeRelay,
+      }),
+    enabled: !!likeQueryKey,
+    staleTime: 30000,
+  });
+
   // Fetch author profile when viewing a blog (only if not already embedded)
   // Uses shared cache populated by ExploreFeed/FollowingFeedView batch fetches
   const hasEmbeddedAuthor = !!(
@@ -265,7 +298,6 @@ function HomeContent() {
   );
   const { data: fetchedAuthorProfile } = useProfile(
     selectedBlog && !hasEmbeddedAuthor ? selectedBlog.pubkey : null,
-    [activeRelay, ...relays],
   );
 
   // Use embedded author info if available, otherwise use fetched profile
@@ -324,36 +356,16 @@ function HomeContent() {
         setCurrentDraftId(null);
         setIsLoadingBlog(true);
 
-        // Try relays in order: naddr hint, active relay, then all configured relays
-        const relaysToTry = [
-          ...naddrData.relays,
-          activeRelay,
-          ...relays.filter(
-            (r) => r !== activeRelay && !naddrData.relays.includes(r),
-          ),
-        ].filter(Boolean);
-
-        // Try each relay until we find the blog
-        const tryFetchFromRelays = async (
-          relayList: string[],
-        ): Promise<Blog | null> => {
-          for (const relay of relayList) {
-            const blog = await fetchBlogByAddress({
-              pubkey: naddrData.pubkey,
-              identifier: naddrData.identifier,
-              relay,
-            });
-            if (blog) return blog;
-          }
-          return null;
-        };
-
-        tryFetchFromRelays(relaysToTry).then((blog) => {
+        fetchBlogByAddress({
+          pubkey: naddrData.pubkey,
+          identifier: naddrData.identifier,
+          relay: activeRelay,
+        }).then((blog) => {
           setIsLoadingBlog(false);
           if (blog) {
             setSelectedBlog(blog);
           } else {
-            // Blog not found on any relay, redirect to new draft
+            // Blog not found on active relay, redirect to new draft
             const newId = createDraftIfAllowed();
             if (!newId) return;
             router.replace(`/draft/${newId}`);
@@ -390,7 +402,6 @@ function HomeContent() {
     getDraft,
     createDraftIfAllowed,
     router,
-    relays,
     activeRelay,
   ]);
 
@@ -666,6 +677,61 @@ function HomeContent() {
     setIsJsonOpen(true);
   };
 
+  const handleLike = useCallback(async () => {
+    if (!selectedBlog || isPublishingLike) return;
+
+    if (sessionStatus !== "authenticated" || !pubkey) {
+      router.push("/login");
+      return;
+    }
+
+    setIsPublishingLike(true);
+    try {
+      const results = await publishReaction({
+        target: {
+          eventId: selectedBlog.id,
+          pubkey: selectedBlog.pubkey,
+          kind: 30023,
+          address: `30023:${selectedBlog.pubkey}:${selectedBlog.dTag}`,
+          relayHint: activeRelay,
+        },
+        relays,
+        secretKey: user?.secretKey,
+      });
+      const successCount = results.filter((r) => r.success).length;
+
+      if (successCount > 0) {
+        setHasLikedSelectedBlog(true);
+        if (likeQueryKey) {
+          queryClient.setQueryData<boolean>(likeQueryKey, true);
+        }
+        queryClient.invalidateQueries({ queryKey: ["blogs"] });
+        toast.success("Article liked");
+      } else {
+        toast.error("Like failed", {
+          description: "Failed to publish to any relay",
+        });
+      }
+    } catch (error) {
+      toast.error("Like failed", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsPublishingLike(false);
+    }
+  }, [
+    activeRelay,
+    isPublishingLike,
+    pubkey,
+    queryClient,
+    likeQueryKey,
+    relays,
+    router,
+    selectedBlog,
+    sessionStatus,
+    user?.secretKey,
+  ]);
+
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-svh w-full flex-col bg-background">
@@ -795,6 +861,25 @@ function HomeContent() {
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  {isLoggedIn && selectedBlog && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleLike}
+                      disabled={isPublishingLike}
+                      title="Like this article"
+                      aria-label="Like this article"
+                    >
+                      <HeartIcon
+                        className={cn(
+                          "w-4 h-4 transition-colors",
+                          hasLikedSelectedBlog || hasExistingLike
+                            ? "text-red-500 fill-red-500"
+                            : "text-muted-foreground",
+                        )}
+                      />
+                    </Button>
+                  )}
                   {isLoggedIn && selectedBlog && <ZapButton blog={selectedBlog} />}
                   {selectedBlog && (
                     <DropdownMenu>
@@ -878,6 +963,14 @@ function HomeContent() {
                   )}
                   {isLoggedIn && isLoadingBlog && (
                     <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled
+                        className="opacity-50"
+                      >
+                        <HeartIcon className="w-4 h-4" />
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -969,7 +1062,7 @@ function HomeContent() {
                       initialMarkdown={editorMarkdown}
                       onChange={handleEditorChange}
                       onProfileLookup={handleProfileLookup}
-                      onNoteLookup={lookupNote}
+                      onNoteLookup={handleNoteLookup}
                       toolbarContainer={
                         selectedBlog ? null : floatingToolbarElement
                       }

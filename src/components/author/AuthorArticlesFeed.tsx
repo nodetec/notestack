@@ -10,6 +10,8 @@ import {
   SendIcon,
   CodeIcon,
   PencilIcon,
+  HeartIcon,
+  MessageCircleIcon,
 } from "lucide-react";
 import { nip19 } from "nostr-tools";
 import { useSession } from "next-auth/react";
@@ -17,6 +19,7 @@ import { fetchBlogs } from "@/lib/nostr/fetch";
 import { broadcastEvent } from "@/lib/nostr/publish";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import { useProfile } from "@/lib/hooks/useProfiles";
+import { useInteractionCounts } from "@/lib/hooks/useInteractionCounts";
 import { generateAvatar } from "@/lib/avatar";
 import { extractFirstImage } from "@/lib/utils/markdown";
 import { downloadMarkdownFile } from "@/lib/utils/download";
@@ -29,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import InteractionCountValue from "@/components/ui/InteractionCountValue";
 import StackMenuSub from "@/components/stacks/StackMenuSub";
 import type { Blog } from "@/lib/nostr/types";
 import { toast } from "sonner";
@@ -90,10 +94,6 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
     () => (pubkey ? nip19.npubEncode(pubkey) : null),
     [pubkey],
   );
-  const profileRelays = useMemo(
-    () => [...new Set([activeRelay, ...relays].filter(Boolean))],
-    [activeRelay, relays],
-  );
 
   useEffect(() => {
     setIsHydrated(true);
@@ -121,10 +121,11 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
   });
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
-  const { data: profile, isLoading: isLoadingProfile } = useProfile(
-    pubkey,
-    profileRelays,
-  );
+  const countEventIds = blogs
+    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+    .map((blog) => blog.id);
+  const { getCounts, isLoading: isInteractionCountLoading } = useInteractionCounts(countEventIds);
+  const { data: profile, isLoading: isLoadingProfile } = useProfile(pubkey);
 
   const { ref: loadMoreRef } = useInView({
     rootMargin: "200px",
@@ -253,6 +254,13 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
                 blog.content || blog.summary || "",
               );
               const naddr = blogToNaddr(blog, relays);
+              const interaction = getCounts(blog.id);
+              const likeCount = interaction?.likeCount ?? blog.likeCount;
+              const replyCount = interaction?.replyCount ?? blog.replyCount;
+              const isCountLoading =
+                isInteractionCountLoading(blog.id) &&
+                likeCount === undefined &&
+                replyCount === undefined;
 
               return (
                 <li key={blog.id} className="py-5">
@@ -328,18 +336,30 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
                       </p>
                       <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground/70">
                         <span>{readMinutes} min read</span>
+                        <span className="inline-flex items-center gap-3 whitespace-nowrap shrink-0">
+                          <span className="inline-flex items-center gap-1">
+                            <HeartIcon className="h-3 w-3" />
+                            <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MessageCircleIcon className="h-3 w-3" />
+                            <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                          </span>
+                        </span>
                       </div>
                     </div>
-                    {thumbnail && (
-                      <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden bg-muted">
-                        {/*eslint-disable-next-line @next/next/no-img-element*/}
+                    <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden">
+                      {thumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={thumbnail}
                           alt=""
                           className="h-full w-full object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div aria-hidden="true" className="h-full w-full" />
+                      )}
+                    </div>
                   </Link>
                 </li>
               );

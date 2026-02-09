@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { MoreHorizontalIcon, PenLineIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, Trash2Icon } from 'lucide-react';
+import { MoreHorizontalIcon, PenLineIcon, RefreshCwIcon, DownloadIcon, SendIcon, CodeIcon, Trash2Icon, HeartIcon, MessageCircleIcon } from 'lucide-react';
 import { fetchBlogs } from '@/lib/nostr/fetch';
 import { deleteArticle, broadcastEvent } from '@/lib/nostr/publish';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 import { useSettingsStore } from '@/lib/stores/settingsStore';
 import type { UserWithKeys } from '@/types/auth';
 import { useDraftStore } from '@/lib/stores/draftStore';
+import { useInteractionCounts } from '@/lib/hooks/useInteractionCounts';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import EventJsonDialog from '@/components/ui/EventJsonDialog';
+import InteractionCountValue from '@/components/ui/InteractionCountValue';
 import { downloadMarkdownFile } from '@/lib/utils/download';
 import { extractFirstImage } from '@/lib/utils/markdown';
 import StackMenuSub from '@/components/stacks/StackMenuSub';
@@ -77,6 +79,10 @@ export default function BlogListView({
   });
 
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
+  const countEventIds = blogs
+    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+    .map((blog) => blog.id);
+  const { getCounts, isLoading: isInteractionCountLoading } = useInteractionCounts(countEventIds);
   const isLoggedIn = isHydrated && !!pubkey;
 
   // Infinite scroll with intersection observer
@@ -192,6 +198,13 @@ export default function BlogListView({
             const hasDraftEdit = !!findDraftByLinkedBlog(blog.pubkey, blog.dTag);
             const thumbnail = blog.image || extractFirstImage(blog.content);
             const isSelected = blog.id === selectedBlogId;
+            const interaction = getCounts(blog.id);
+            const likeCount = interaction?.likeCount ?? blog.likeCount;
+            const replyCount = interaction?.replyCount ?? blog.replyCount;
+            const isCountLoading =
+              isInteractionCountLoading(blog.id) &&
+              likeCount === undefined &&
+              replyCount === undefined;
             return (
             <li key={blog.id} className="relative group p-2">
               <div
@@ -206,79 +219,95 @@ export default function BlogListView({
                 }}
                 className={`w-full text-left p-2 rounded-md transition-colors cursor-default ${isSelected ? 'bg-sidebar-accent' : ''}`}
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-foreground truncate">
-                      {blog.title}
-                    </h3>
-                    {hasDraftEdit && (
-                      <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 dark:bg-primary/20 text-primary rounded" title="Has unpublished edits">
-                        <PenLineIcon className="w-3 h-3" />
-                        Editing
-                      </span>
-                    )}
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-medium text-foreground truncate">
+                        {blog.title}
+                      </h3>
+                      {hasDraftEdit && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 dark:bg-primary/20 text-primary rounded" title="Has unpublished edits">
+                          <PenLineIcon className="w-3 h-3" />
+                          Editing
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+                      {blog.summary}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
+                        <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <HeartIcon className="h-3 w-3" />
+                          <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <MessageCircleIcon className="h-3 w-3" />
+                          <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                        </span>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
+                            aria-label="More options"
+                          >
+                            <MoreHorizontalIcon className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <StackMenuSub blog={blog} />
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadMarkdownFile(blog.title, blog.content || '');
+                            }}
+                          >
+                            <DownloadIcon className="w-4 h-4" />
+                            Download markdown
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => handleBroadcast(blog, e)}
+                            disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
+                          >
+                            <SendIcon className="w-4 h-4" />
+                            {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewJson(blog.rawEvent);
+                            }}
+                            disabled={!blog.rawEvent}
+                          >
+                            <CodeIcon className="w-4 h-4" />
+                            View raw JSON
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => handleDelete(blog, e)}
+                            disabled={deletingBlogId === blog.id}
+                            className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                          >
+                            <Trash2Icon className="w-4 h-4" />
+                            {deletingBlogId === blog.id ? 'Deleting...' : 'Delete'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
-                    {blog.summary}
-                  </p>
-                  {thumbnail && (
-                    <img
-                      src={thumbnail}
-                      alt=""
-                      className="max-h-32 rounded object-contain mt-2"
-                    />
-                  )}
-                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/70">
-                    <span>{formatDate(blog.publishedAt || blog.createdAt)}</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1 rounded hover:bg-sidebar-accent/60 hover:ring-1 hover:ring-sidebar-ring/40 text-muted-foreground"
-                          aria-label="More options"
-                        >
-                          <MoreHorizontalIcon className="w-4 h-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <StackMenuSub blog={blog} />
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            downloadMarkdownFile(blog.title, blog.content || '');
-                          }}
-                        >
-                          <DownloadIcon className="w-4 h-4" />
-                          Download markdown
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => handleBroadcast(blog, e)}
-                          disabled={broadcastingBlogId === blog.id || !blog.rawEvent}
-                        >
-                          <SendIcon className="w-4 h-4" />
-                          {broadcastingBlogId === blog.id ? 'Broadcasting...' : 'Broadcast'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewJson(blog.rawEvent);
-                          }}
-                          disabled={!blog.rawEvent}
-                        >
-                          <CodeIcon className="w-4 h-4" />
-                          View raw JSON
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => handleDelete(blog, e)}
-                          disabled={deletingBlogId === blog.id}
-                          className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
-                        >
-                          <Trash2Icon className="w-4 h-4" />
-                          {deletingBlogId === blog.id ? 'Deleting...' : 'Delete'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <div className="shrink-0 w-20 aspect-[4/3] rounded overflow-hidden">
+                    {thumbnail ? (
+                      <img
+                        src={thumbnail}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div aria-hidden="true" className="h-full w-full" />
+                    )}
                   </div>
                 </div>
               </div>

@@ -43,6 +43,8 @@ export interface Blog {
   content: string;
   tags: string[];
   rawEvent?: NostrEvent; // Store full signed event for broadcasting
+  likeCount?: number;
+  replyCount?: number;
   // Author profile info (optional, populated when selected from a panel)
   authorName?: string;
   authorPicture?: string;
