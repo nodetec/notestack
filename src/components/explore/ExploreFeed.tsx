@@ -142,7 +142,7 @@ export default function ExploreFeed() {
     queryKey: ["global-feed", activeRelay, activeTag || ""],
     queryFn: ({ pageParam }) =>
       fetchBlogs({
-        limit: 20,
+        limit: 5,
         until: pageParam,
         relay: activeRelay,
         tag: activeTag || undefined,
@@ -178,7 +178,7 @@ export default function ExploreFeed() {
     queryFn: ({ pageParam }) =>
       fetchFollowingBlogs({
         authors: contacts || [],
-        limit: 20,
+        limit: 5,
         until: pageParam,
         relay: activeRelay,
         tag: activeTag || undefined,

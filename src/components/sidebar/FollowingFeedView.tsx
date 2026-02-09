@@ -93,7 +93,7 @@ export default function FollowingFeedView({
     queryKey: ['following-feed', activeRelay, contacts],
     queryFn: ({ pageParam }) => fetchFollowingBlogs({
       authors: contacts || [],
-      limit: 20,
+      limit: 5,
       until: pageParam,
       relay: activeRelay,
     }),

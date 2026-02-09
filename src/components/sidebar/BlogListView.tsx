@@ -72,7 +72,7 @@ export default function BlogListView({
     isRefetching,
   } = useInfiniteQuery({
     queryKey: ['blogs', pubkey, activeRelay],
-    queryFn: ({ pageParam }) => fetchBlogs({ limit: 10, until: pageParam, pubkey: pubkey ?? undefined, relay: activeRelay }),
+    queryFn: ({ pageParam }) => fetchBlogs({ limit: 5, until: pageParam, pubkey: pubkey ?? undefined, relay: activeRelay }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: isHydrated && !!pubkey && !!activeRelay,

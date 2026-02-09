@@ -110,7 +110,7 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
     queryKey: ["author-page-feed", activeRelay, pubkey],
     queryFn: ({ pageParam }) =>
       fetchBlogs({
-        limit: 20,
+        limit: 5,
         until: pageParam,
         relay: activeRelay,
         pubkey: pubkey!,

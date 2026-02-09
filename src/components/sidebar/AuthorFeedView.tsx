@@ -108,7 +108,7 @@ export default function AuthorFeedView({
     isRefetching,
   } = useInfiniteQuery({
     queryKey: ['author-feed', activeRelay, effectivePubkey],
-    queryFn: ({ pageParam }) => fetchBlogs({ limit: 20, until: pageParam, relay: activeRelay, pubkey: effectivePubkey! }),
+    queryFn: ({ pageParam }) => fetchBlogs({ limit: 5, until: pageParam, relay: activeRelay, pubkey: effectivePubkey! }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: isHydrated && !!activeRelay && !!effectivePubkey,
