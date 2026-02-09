@@ -4,11 +4,7 @@ import type { NostrProfile } from '@/components/editor';
 import type { NostrEvent } from './types';
 
 const DEFAULT_PROFILE_RELAYS = [
-  'wss://purplepag.es',
   'wss://relay.damus.io',
-  'wss://antiprimal.net',
-  'wss://nos.lol',
-  // 'wss://relay.primal.net',
 ];
 
 export interface Profile {
@@ -108,7 +104,7 @@ function normalizePubkey(pubkey: string): string | null {
 
 function normalizeRelays(relay?: string | string[]): string[] {
   void relay;
-  // Profile reads are pinned to Purplepages regardless of caller preferences.
+  // Profile reads are pinned to Damus regardless of caller preferences.
   return DEFAULT_PROFILE_RELAYS;
 }
 
@@ -227,33 +223,28 @@ export async function fetchProfiles(
 
   const result = new Map<string, Profile>();
   const latestByPubkey = new Map<string, number>();
-  const relays = normalizeRelays(relay);
-  const relayResults = await Promise.all(
-    relays.map((relayUrl) => fetchProfileEvents(uniquePubkeys, relayUrl))
-  );
+  const events = await fetchProfileEvents(uniquePubkeys, relay);
 
-  for (const events of relayResults) {
-    for (const event of events) {
-      const previousTimestamp = latestByPubkey.get(event.pubkey);
-      if (previousTimestamp !== undefined && previousTimestamp >= event.createdAt) {
-        continue;
-      }
+  for (const event of events) {
+    const previousTimestamp = latestByPubkey.get(event.pubkey);
+    if (previousTimestamp !== undefined && previousTimestamp >= event.createdAt) {
+      continue;
+    }
 
-      try {
-        const content = JSON.parse(event.content);
-        const inputs = hexToInputs.get(event.pubkey) ?? [event.pubkey];
-        for (const input of inputs) {
-          result.set(input, {
-            pubkey: event.pubkey,
-            name: content.name || content.display_name,
-            picture: content.picture,
-            nip05: content.nip05,
-          });
-        }
-        latestByPubkey.set(event.pubkey, event.createdAt);
-      } catch {
-        // Skip invalid profiles
+    try {
+      const content = JSON.parse(event.content);
+      const inputs = hexToInputs.get(event.pubkey) ?? [event.pubkey];
+      for (const input of inputs) {
+        result.set(input, {
+          pubkey: event.pubkey,
+          name: content.name || content.display_name,
+          picture: content.picture,
+          nip05: content.nip05,
+        });
       }
+      latestByPubkey.set(event.pubkey, event.createdAt);
+    } catch {
+      // Skip invalid profiles
     }
   }
 
