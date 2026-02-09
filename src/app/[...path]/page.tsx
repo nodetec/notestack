@@ -296,7 +296,7 @@ function HomeContent() {
   const hasEmbeddedAuthor = !!(
     selectedBlog?.authorName || selectedBlog?.authorPicture
   );
-  const { data: fetchedAuthorProfile } = useProfile(
+  const { data: fetchedAuthorProfile, isPending: isAuthorProfilePending } = useProfile(
     selectedBlog && !hasEmbeddedAuthor ? selectedBlog.pubkey : null,
   );
 
@@ -304,6 +304,11 @@ function HomeContent() {
   const authorProfile = hasEmbeddedAuthor
     ? { name: selectedBlog?.authorName, picture: selectedBlog?.authorPicture }
     : fetchedAuthorProfile;
+  const shouldShowAuthorProfileSkeleton =
+    !!selectedBlog &&
+    !hasEmbeddedAuthor &&
+    isAuthorProfilePending &&
+    fetchedAuthorProfile === undefined;
 
   // Handle highlight deletion - update cache optimistically
   const handleHighlightDeleted = useCallback(
@@ -852,11 +857,18 @@ function HomeContent() {
                     </div>
                   ) : (
                     selectedBlog && (
-                      <AuthorDropdown
-                        authorPubkey={selectedBlog.pubkey}
-                        authorName={authorProfile?.name}
-                        authorPicture={authorProfile?.picture}
-                      />
+                      shouldShowAuthorProfileSkeleton ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-muted animate-pulse shrink-0" />
+                          <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                        </div>
+                      ) : (
+                        <AuthorDropdown
+                          authorPubkey={selectedBlog.pubkey}
+                          authorName={authorProfile?.name}
+                          authorPicture={authorProfile?.picture}
+                        />
+                      )
                     )
                   )}
                 </div>
