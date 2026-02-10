@@ -191,28 +191,6 @@ export async function fetchInteractionCounts(eventIds: string[]): Promise<Map<st
   });
 }
 
-async function withInteractionCounts(blogs: Blog[]): Promise<Blog[]> {
-  if (blogs.length === 0) return blogs;
-
-  try {
-    const counts = await fetchInteractionCounts(blogs.map((blog) => blog.id));
-    return blogs.map((blog) => {
-      const interaction = counts.get(blog.id) ?? { likeCount: 0, replyCount: 0 };
-      return {
-        ...blog,
-        likeCount: interaction.likeCount,
-        replyCount: interaction.replyCount,
-      };
-    });
-  } catch {
-    return blogs.map((blog) => ({
-      ...blog,
-      likeCount: 0,
-      replyCount: 0,
-    }));
-  }
-}
-
 function eventToHighlight(event: NostrEvent): Highlight | null {
   // Parse the 'a' tag to get source info
   const aTag = event.tags.find((t) => t[0] === 'a');
@@ -288,10 +266,7 @@ export async function fetchBlogByAddress({
             clearTimeout(timeoutId);
             ws.send(JSON.stringify(['CLOSE', subId]));
             ws.close();
-            const baseBlog = eventToBlog(event);
-            void withInteractionCounts([baseBlog]).then(([blog]) => {
-              resolve(blog ?? baseBlog);
-            });
+            resolve(eventToBlog(event));
           }
         } else if (data[0] === 'EOSE' && data[1] === subId) {
           if (!resolved) {
