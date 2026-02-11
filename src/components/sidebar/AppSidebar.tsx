@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FileEditIcon, ServerIcon, PlusIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, UserIcon } from 'lucide-react';
+import { FileEditIcon, ServerIcon, PlusIcon, HouseIcon, HighlighterIcon, LayersIcon, HashIcon, ChevronDownIcon, XIcon, UserIcon, SearchIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { nip19 } from 'nostr-tools';
 import { toast } from 'sonner';
@@ -143,6 +143,7 @@ export default function AppSidebar() {
   const isDraftsRoute = pathname === '/drafts';
   const isHighlightsRoute = pathname === '/highlights';
   const isStacksRoute = pathname === '/stacks';
+  const isSearchRoute = pathname === '/search';
   const isRelaysRoute = pathname === '/relays';
 
   return (
@@ -164,6 +165,22 @@ export default function AppSidebar() {
                   >
                     <HouseIcon />
                     <span>Home</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Search"
+                  isActive={isSearchRoute}
+                  asChild
+                >
+                  <Link
+                    href="/search"
+                    onClick={() => setOpenMobile(false)}
+                    className="flex items-center gap-2"
+                  >
+                    <SearchIcon />
+                    <span>Search</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
