@@ -500,3 +500,37 @@ async function publishToRelay(event: NostrEvent, relay: string): Promise<Publish
     };
   });
 }
+
+export async function publishPinnedArticles({
+  pinnedArticles,
+  relays,
+  secretKey,
+}: {
+  pinnedArticles: Array<{
+    kind: number;
+    pubkey: string;
+    identifier: string;
+    relay?: string;
+  }>;
+  relays: string[];
+  secretKey?: string;
+}): Promise<PublishResult[]> {
+  const createdAt = Math.floor(Date.now() / 1000);
+  const eventTags: string[][] = pinnedArticles
+    .filter((item) => item.kind === 30023)
+    .map((item) => {
+      const aValue = `${item.kind}:${item.pubkey}:${item.identifier}`;
+      return item.relay ? ['a', aValue, item.relay] : ['a', aValue];
+    });
+
+  const unsignedEvent = {
+    kind: 10001,
+    created_at: createdAt,
+    tags: eventTags,
+    content: '',
+  };
+
+  const signedEvent = await signEvent({ event: unsignedEvent, secretKey });
+
+  return Promise.all(relays.map((relay) => publishToRelay(signedEvent, relay)));
+}
