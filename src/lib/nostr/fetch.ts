@@ -1,4 +1,4 @@
-import { NostrEvent, Blog, eventToBlog, Highlight, StackItem } from './types';
+import { NostrEvent, Blog, eventToBlog, Highlight, StackItem, PinnedArticles, eventToPinnedArticles } from './types';
 
 interface FetchBlogsOptions {
   limit?: number;
@@ -890,6 +890,68 @@ export async function fetchHighlights({
     ws.onerror = () => {
       clearTimeout(timeoutId);
       resolve([]);
+    };
+  });
+}
+
+export async function fetchPinnedArticles({
+  pubkey,
+  relay,
+}: {
+  pubkey: string;
+  relay: string;
+}): Promise<PinnedArticles | null> {
+  return new Promise((resolve) => {
+    const ws = new WebSocket(relay);
+    const subId = `pinned-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    let timeoutId: NodeJS.Timeout;
+    let latestEvent: NostrEvent | null = null;
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify([
+          'REQ',
+          subId,
+          {
+            kinds: [10001],
+            authors: [pubkey],
+            limit: 1,
+          },
+        ]),
+      );
+
+      timeoutId = setTimeout(() => {
+        ws.send(JSON.stringify(['CLOSE', subId]));
+        ws.close();
+        resolve(latestEvent ? eventToPinnedArticles(latestEvent) : null);
+      }, 10000);
+    };
+
+    ws.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data);
+
+        if (data[0] === 'EVENT' && data[1] === subId) {
+          const event = data[2] as NostrEvent;
+          if (event.kind === 10001) {
+            if (!latestEvent || event.created_at > latestEvent.created_at) {
+              latestEvent = event;
+            }
+          }
+        } else if (data[0] === 'EOSE' && data[1] === subId) {
+          clearTimeout(timeoutId);
+          ws.send(JSON.stringify(['CLOSE', subId]));
+          ws.close();
+          resolve(latestEvent ? eventToPinnedArticles(latestEvent) : null);
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    ws.onerror = () => {
+      clearTimeout(timeoutId);
+      resolve(null);
     };
   });
 }
