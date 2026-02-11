@@ -148,6 +148,43 @@ export function eventToStack(event: NostrEvent): Stack {
   };
 }
 
+export interface PinnedArticles {
+  pubkey: string;
+  createdAt: number;
+  pinnedArticles: StackItem[];
+  rawEvent?: NostrEvent;
+}
+
+export function eventToPinnedArticles(event: NostrEvent): PinnedArticles | null {
+  if (event.kind !== 10001) return null;
+
+  const pinnedArticles: StackItem[] = event.tags
+    .filter((t) => t[0] === 'a')
+    .reduce<StackItem[]>((acc, t) => {
+      const parts = t[1]?.split(':');
+      if (!parts || parts.length < 3) return acc;
+      const [kindStr, pubkey, identifier] = parts;
+      const kind = parseInt(kindStr, 10);
+      if (isNaN(kind) || !pubkey || !identifier) return acc;
+      if (kind === 30023) {
+        acc.push({
+          kind,
+          pubkey,
+          identifier,
+          relay: t[2],
+        });
+      }
+      return acc;
+    }, []);
+
+  return {
+    pubkey: event.pubkey,
+    createdAt: event.created_at,
+    pinnedArticles,
+    rawEvent: event,
+  };
+}
+
 // NIP-22 Comment (kind 1111)
 export interface Comment {
   id: string;
