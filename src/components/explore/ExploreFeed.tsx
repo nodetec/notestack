@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import EventJsonDialog from "@/components/ui/EventJsonDialog";
 import InteractionCountValue from "@/components/ui/InteractionCountValue";
+import PageHeader from "@/components/layout/PageHeader";
 import { extractFirstImage } from "@/lib/utils/markdown";
 import { downloadMarkdownFile } from "@/lib/utils/download";
 import { generateAvatar } from "@/lib/avatar";
@@ -290,11 +291,10 @@ export default function ExploreFeed() {
   };
 
   return (
-    <div className="flex flex-col min-h-0 flex-1">
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mx-auto w-full max-w-2xl">
-          <div className="mb-5 border-b border-border/70 pt-2">
-            <div className="flex items-center justify-between gap-3">
+    <div className="flex h-full min-h-0 w-full flex-col bg-background px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-2xl min-h-0 flex-1 flex-col pt-6">
+        <PageHeader>
+          <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-5 text-sm">
                 <button
                   onClick={() => setFeedModeInUrl("latest")}
@@ -337,8 +337,10 @@ export default function ExploreFeed() {
                   <RefreshCwIcon className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
                 </button>
               </div>
-            </div>
           </div>
+        </PageHeader>
+
+        <div className="min-h-0 flex-1 overflow-y-auto pb-6">
 
           {isFollowingView && !isLoggedIn && (
             <div className="p-4 text-center text-muted-foreground text-sm">

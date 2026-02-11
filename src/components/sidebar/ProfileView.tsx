@@ -142,7 +142,7 @@ export default function ProfileView({
   return (
     <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/70 pt-2 pb-2">
+      <div className="sticky top-0 z-20 lg:top-[var(--app-header-height)] flex items-center justify-between border-b border-border/70 bg-background/95 pt-2 pb-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <h2 className="text-sm font-medium text-foreground">
           Profile
         </h2>

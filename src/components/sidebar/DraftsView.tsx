@@ -127,7 +127,7 @@ export default function DraftsView({
     <div className="flex h-full min-h-0 w-full flex-col bg-background px-4 sm:px-6 lg:px-8">
     <div className="mx-auto flex w-full max-w-2xl flex-col pt-6">
       {/* Header */}
-      <div className="mb-5 border-b border-border/70 pt-2">
+      <div className="sticky top-0 z-20 lg:top-[var(--app-header-height)] mb-5 border-b border-border/70 bg-background/95 pt-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="flex items-center justify-between pb-2">
           <h2 className="text-sm font-medium text-foreground">
             Drafts
