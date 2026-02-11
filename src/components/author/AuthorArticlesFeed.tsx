@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import {
   MoreHorizontalIcon,
@@ -12,11 +12,12 @@ import {
   PencilIcon,
   HeartIcon,
   MessageCircleIcon,
+  PinIcon,
 } from "lucide-react";
 import { nip19 } from "nostr-tools";
 import { useSession } from "next-auth/react";
-import { fetchBlogs } from "@/lib/nostr/fetch";
-import { broadcastEvent } from "@/lib/nostr/publish";
+import { fetchBlogs, fetchPinnedArticles, fetchBlogByAddress } from "@/lib/nostr/fetch";
+import { broadcastEvent, publishPinnedArticles } from "@/lib/nostr/publish";
 import { useSettingsStore } from "@/lib/stores/settingsStore";
 import { useProfile } from "@/lib/hooks/useProfiles";
 import { useInteractionCounts } from "@/lib/hooks/useInteractionCounts";
@@ -80,6 +81,7 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
   const [broadcastingBlogId, setBroadcastingBlogId] = useState<string | null>(
     null,
   );
+  const [isPinning, setIsPinning] = useState(false);
   const [isJsonOpen, setIsJsonOpen] = useState(false);
   const [jsonEvent, setJsonEvent] = useState<unknown | null>(null);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -120,10 +122,47 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
     enabled: isHydrated && !!activeRelay && !!pubkey,
   });
 
+  const { data: pinnedData, refetch: refetchPinnedData } = useQuery({
+    queryKey: ["pinned-articles", activeRelay, pubkey],
+    queryFn: () =>
+      fetchPinnedArticles({
+        pubkey: pubkey!,
+        relay: activeRelay,
+      }),
+    enabled: isHydrated && !!activeRelay && !!pubkey,
+  });
+
+  const firstPinnedItem = pinnedData?.pinnedArticles?.[0];
+  const { data: pinnedBlog } = useQuery({
+    queryKey: [
+      "pinned-blog",
+      activeRelay,
+      firstPinnedItem?.pubkey,
+      firstPinnedItem?.identifier,
+    ],
+    queryFn: () =>
+      fetchBlogByAddress({
+        pubkey: firstPinnedItem!.pubkey,
+        identifier: firstPinnedItem!.identifier,
+        relay: firstPinnedItem?.relay || activeRelay,
+      }),
+    enabled:
+      isHydrated &&
+      !!activeRelay &&
+      !!firstPinnedItem?.pubkey &&
+      !!firstPinnedItem?.identifier,
+  });
+
   const blogs = data?.pages.flatMap((page) => page.blogs) ?? [];
-  const countEventIds = blogs
-    .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
-    .map((blog) => blog.id);
+  const filteredBlogs = pinnedBlog
+    ? blogs.filter((blog) => blog.id !== pinnedBlog.id)
+    : blogs;
+  const countEventIds = [
+    ...(pinnedBlog ? [pinnedBlog.id] : []),
+    ...filteredBlogs
+      .filter((blog) => blog.likeCount === undefined || blog.replyCount === undefined)
+      .map((blog) => blog.id),
+  ];
   const { getCounts, isLoading: isInteractionCountLoading } = useInteractionCounts(countEventIds);
   const { data: profile, isLoading: isLoadingProfile } = useProfile(pubkey);
 
@@ -171,6 +210,88 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
     if (!event) return;
     setJsonEvent(event);
     setIsJsonOpen(true);
+  };
+
+  const handlePinArticle = async (blog: Blog) => {
+    if (isPinning) return;
+    
+    if (!isOwnProfile) {
+      toast.error("You can only pin articles on your own profile");
+      return;
+    }
+
+    setIsPinning(true);
+    try {
+      const pinnedArticles = [
+        {
+          kind: 30023,
+          pubkey: blog.pubkey,
+          identifier: blog.dTag,
+          relay: activeRelay,
+        },
+      ];
+
+      const results = await publishPinnedArticles({
+        pinnedArticles,
+        relays,
+        secretKey: viewer?.secretKey,
+      });
+
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        toast.success("Article pinned!", {
+          description: `Pinned to ${successCount} relay${successCount !== 1 ? "s" : ""}`,
+        });
+        refetchPinnedData();
+      } else {
+        toast.error("Failed to pin article", {
+          description: "Failed to pin to any relay",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to pin article:", err);
+      toast.error("Failed to pin article", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setIsPinning(false);
+    }
+  };
+
+  const handleUnpinArticle = async () => {
+    if (isPinning || !isOwnProfile) return;
+
+    setIsPinning(true);
+    try {
+      const results = await publishPinnedArticles({
+        pinnedArticles: [],
+        relays,
+        secretKey: viewer?.secretKey,
+      });
+
+      const successfulRelays = results.filter((r) => r.success);
+      const successCount = successfulRelays.length;
+
+      if (successCount > 0) {
+        toast.success("Article unpinned!", {
+          description: `Updated ${successCount} relay${successCount !== 1 ? "s" : ""}`,
+        });
+        refetchPinnedData();
+      } else {
+        toast.error("Failed to unpin article", {
+          description: "Failed to update any relay",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to unpin article:", err);
+      toast.error("Failed to unpin article", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setIsPinning(false);
+    }
   };
 
   return (
@@ -241,14 +362,155 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
             </div>
           )}
 
-          {pubkey && !isLoading && !isError && blogs.length === 0 && (
+          {pubkey && !isLoading && !isError && blogs.length === 0 && !pinnedBlog && (
             <div className="p-4 text-center text-muted-foreground text-sm">
               No articles found
             </div>
           )}
 
+          {pinnedBlog && (
+            <div className="mb-6 pb-6 border-b border-border/70">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-3">
+                <PinIcon className="w-3.5 h-3.5" />
+                <span>Pinned article</span>
+              </div>
+              {(() => {
+                const thumbnail = pinnedBlog.image || extractFirstImage(pinnedBlog.content);
+                const readMinutes = estimateReadTime(
+                  pinnedBlog.content || pinnedBlog.summary || "",
+                );
+                const naddr = blogToNaddr(pinnedBlog, relays);
+                const interaction = getCounts(pinnedBlog.id);
+                const likeCount = interaction?.likeCount ?? pinnedBlog.likeCount;
+                const replyCount = interaction?.replyCount ?? pinnedBlog.replyCount;
+                const isCountLoading =
+                  isInteractionCountLoading(pinnedBlog.id) &&
+                  likeCount === undefined &&
+                  replyCount === undefined;
+
+                return (
+                  <div className="py-3">
+                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground/70">
+                        {formatDate(pinnedBlog.publishedAt || pinnedBlog.createdAt)}
+                      </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            className="p-1 rounded hover:bg-muted hover:ring-1 hover:ring-border text-muted-foreground shrink-0"
+                            aria-label="More options"
+                          >
+                            <MoreHorizontalIcon className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <StackMenuSub blog={pinnedBlog} />
+                          <DropdownMenuSeparator />
+                          {isOwnProfile && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleUnpinArticle();
+                                }}
+                                disabled={isPinning}
+                              >
+                                <PinIcon className="w-4 h-4" />
+                                {isPinning ? "Unpinning..." : "Unpin article"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              downloadMarkdownFile(pinnedBlog.title, pinnedBlog.content || "");
+                            }}
+                          >
+                            <DownloadIcon className="w-4 h-4" />
+                            Download markdown
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleBroadcast(pinnedBlog, e);
+                            }}
+                            disabled={
+                              broadcastingBlogId === pinnedBlog.id || !pinnedBlog.rawEvent
+                            }
+                          >
+                            <SendIcon className="w-4 h-4" />
+                            {broadcastingBlogId === pinnedBlog.id
+                              ? "Broadcasting..."
+                              : "Broadcast"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleViewJson(pinnedBlog.rawEvent);
+                            }}
+                            disabled={!pinnedBlog.rawEvent}
+                          >
+                            <CodeIcon className="w-4 h-4" />
+                            View raw JSON
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <Link
+                      href={`/${naddr}`}
+                      className="group mt-2 flex items-start gap-4 text-left"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-lg sm:text-xl font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-foreground">
+                          {pinnedBlog.title || "Untitled"}
+                        </h2>
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          {pinnedBlog.summary}
+                        </p>
+                        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground/70">
+                          <span>{readMinutes} min read</span>
+                          <span className="inline-flex items-center gap-3 whitespace-nowrap shrink-0">
+                            <span className="inline-flex items-center gap-1">
+                              <HeartIcon className="h-3 w-3" />
+                              <InteractionCountValue value={likeCount} loading={isCountLoading} />
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <MessageCircleIcon className="h-3 w-3" />
+                              <InteractionCountValue value={replyCount} loading={isCountLoading} />
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 w-24 sm:w-28 aspect-[4/3] rounded-md overflow-hidden">
+                        {thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={thumbnail}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div aria-hidden="true" className="h-full w-full" />
+                        )}
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
           <ul className="divide-y divide-border/60">
-            {blogs.map((blog) => {
+            {filteredBlogs.map((blog) => {
               const thumbnail = blog.image || extractFirstImage(blog.content);
               const readMinutes = estimateReadTime(
                 blog.content || blog.summary || "",
@@ -284,6 +546,36 @@ export default function AuthorArticlesFeed({ npub }: AuthorArticlesFeedProps) {
                       <DropdownMenuContent align="end">
                         <StackMenuSub blog={blog} />
                         <DropdownMenuSeparator />
+                        {isOwnProfile && (
+                          <>
+                            {pinnedBlog?.id === blog.id ? (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleUnpinArticle();
+                                }}
+                                disabled={isPinning}
+                              >
+                                <PinIcon className="w-4 h-4" />
+                                {isPinning ? "Unpinning..." : "Unpin article"}
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handlePinArticle(blog);
+                                }}
+                                disabled={isPinning}
+                              >
+                                <PinIcon className="w-4 h-4" />
+                                {isPinning ? "Pinning..." : "Pin article"}
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                          </>
+                        )}
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.preventDefault();
