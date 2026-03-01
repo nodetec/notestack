@@ -37,7 +37,6 @@ import theme from './themes/default';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import ScrollCenterCurrentLinePlugin from './plugins/ScrollCenterCurrentLinePlugin';
 import ListBackspacePlugin from './plugins/ListBackspacePlugin';
-import CodeBlockShortcutPlugin from './plugins/CodeBlockShortcutPlugin';
 import InitialContentPlugin from './plugins/InitialContentPlugin';
 import ImagePastePlugin from './plugins/ImagePastePlugin';
 import LinkPastePlugin from './plugins/LinkPastePlugin';
@@ -269,7 +268,6 @@ function EditorInner({
       {initialMarkdown && <InitialContentPlugin markdown={initialMarkdown} />}
       <ScrollCenterCurrentLinePlugin />
       <ListBackspacePlugin />
-      <CodeBlockShortcutPlugin />
       <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
       <TableActionMenuPlugin />
       <TableCellResizerPlugin />

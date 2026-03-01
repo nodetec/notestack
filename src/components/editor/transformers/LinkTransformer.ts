@@ -27,7 +27,15 @@ export const LINK: TextMatchTransformer = {
   trigger: ')',
   replace: (textNode, match) => {
     const [, displayText, url] = match;
-    const linkNode = $createLinkNode(url, getLinkAttributes(url));
+    const parent = textNode.getParent();
+    if (parent && $isLinkNode(parent)) {
+      return;
+    }
+    const normalizedUrl = url.trim();
+    if (normalizedUrl.length === 0) {
+      return;
+    }
+    const linkNode = $createLinkNode(normalizedUrl, getLinkAttributes(normalizedUrl));
     linkNode.append($createTextNode(displayText));
     textNode.replace(linkNode);
   },
