@@ -23,6 +23,7 @@ import { LinkNode } from '@lexical/link';
 import { ALL_TRANSFORMERS } from '../NostrEditor';
 import { ImageNode } from '../nodes/ImageNode';
 import { YouTubeNode } from '../nodes/YouTubeNode';
+import { VideoNode } from '../nodes/VideoNode';
 
 // Patterns that strongly indicate markdown content
 const MARKDOWN_PATTERNS = [
@@ -122,6 +123,7 @@ function createMarkdownParser() {
       ImageNode,
       LinkNode,
       YouTubeNode,
+      VideoNode,
       ParagraphNode,
       TextNode,
     ],

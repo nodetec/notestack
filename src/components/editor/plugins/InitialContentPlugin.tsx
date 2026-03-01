@@ -15,6 +15,8 @@ import { NOSTR_TRANSFORMERS } from '../transformers/NostrTransformers';
 import { TABLE } from '../transformers/TableTransformer';
 import { HORIZONTAL_RULE } from '../transformers/HorizontalRuleTransformer';
 import { YOUTUBE_TRANSFORMER } from '../transformers/YouTubeTransformer';
+import { AUDIO_TRANSFORMER } from '../transformers/AudioTransformer';
+import { VIDEO_TRANSFORMER } from '../transformers/VideoTransformer';
 
 // YOUTUBE_TRANSFORMER, TABLE and IMAGE must come first for proper matching
 // We exclude TEXT_MATCH_TRANSFORMERS (which contains the default LINK) and use our custom transformers instead
@@ -23,6 +25,8 @@ const ALL_TRANSFORMERS = [
   TABLE,
   HORIZONTAL_RULE,
   IMAGE,
+  AUDIO_TRANSFORMER,
+  VIDEO_TRANSFORMER,
   LINK,
   ...NOSTR_TRANSFORMERS,
   ...ELEMENT_TRANSFORMERS,

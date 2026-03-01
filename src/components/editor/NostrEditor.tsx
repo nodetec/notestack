@@ -39,11 +39,13 @@ import ScrollCenterCurrentLinePlugin from './plugins/ScrollCenterCurrentLinePlug
 import ListBackspacePlugin from './plugins/ListBackspacePlugin';
 import InitialContentPlugin from './plugins/InitialContentPlugin';
 import ImagePastePlugin from './plugins/ImagePastePlugin';
+import VideoPastePlugin from './plugins/VideoPastePlugin';
 import LinkPastePlugin from './plugins/LinkPastePlugin';
 import NostrPastePlugin from './plugins/NostrPastePlugin';
 import MarkdownPastePlugin from './plugins/MarkdownPastePlugin';
 import { ImageNode } from './nodes/ImageNode';
 import { AudioNode } from './nodes/AudioNode';
+import { VideoNode } from './nodes/VideoNode';
 import { LinkNode } from '@lexical/link';
 import { NpubNode } from './nodes/NpubNode';
 import { NprofileNode } from './nodes/NprofileNode';
@@ -58,6 +60,7 @@ import { TABLE, setTableTransformers } from './transformers/TableTransformer';
 import { HORIZONTAL_RULE } from './transformers/HorizontalRuleTransformer';
 import { YOUTUBE_TRANSFORMER } from './transformers/YouTubeTransformer';
 import { AUDIO_TRANSFORMER } from './transformers/AudioTransformer';
+import { VIDEO_TRANSFORMER } from './transformers/VideoTransformer';
 import { CODE_BLOCK } from './transformers/CodeTransformer';
 import TableActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
@@ -116,6 +119,7 @@ export const ALL_TRANSFORMERS = [
   HORIZONTAL_RULE,
   IMAGE,
   AUDIO_TRANSFORMER,
+  VIDEO_TRANSFORMER,
   LINK,
   ...NOSTR_TRANSFORMERS,
   ...ELEMENT_TRANSFORMERS,
@@ -262,6 +266,7 @@ function EditorInner({
         />
       )}
       <ImagePastePlugin />
+      <VideoPastePlugin />
       <LinkPastePlugin />
       <NostrPastePlugin />
       <MarkdownPastePlugin />
@@ -324,6 +329,7 @@ const NostrEditor = forwardRef<NostrEditorHandle, NostrEditorProps>(function Nos
           NaddrNode,
           YouTubeNode,
           AudioNode,
+          VideoNode,
           CollapseIndicatorNode,
         ],
         onError: (error: Error) => console.error('Lexical error:', error),
